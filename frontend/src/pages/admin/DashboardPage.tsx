@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
-import { healthApi, type HealthResponse } from '../../api/client'
 import { dashboardApi } from '../../api/dashboard'
 import type { DashboardStats } from '../../types/dashboard'
 import {
@@ -9,8 +8,6 @@ import {
   Users,
   Calendar,
   UserPlus,
-  CheckCircle2,
-  AlertTriangle,
   RefreshCw,
   DollarSign,
   TrendingUp,
@@ -22,22 +19,9 @@ import {
 
 export const DashboardPage: React.FC = () => {
   const { user } = useAuth()
-  const [health, setHealth] = useState<HealthResponse | null>(null)
-  const [healthStatus, setHealthStatus] = useState<'loading' | 'success' | 'error'>('loading')
   const [stats, setStats] = useState<DashboardStats | null>(null)
   const [statsLoading, setStatsLoading] = useState<boolean>(true)
   const [statsError, setStatsError] = useState<string | null>(null)
-
-  const fetchHealth = async () => {
-    setHealthStatus('loading')
-    try {
-      const data = await healthApi.check()
-      setHealth(data)
-      setHealthStatus('success')
-    } catch {
-      setHealthStatus('error')
-    }
-  }
 
   const fetchStats = async () => {
     setStatsLoading(true)
@@ -54,7 +38,6 @@ export const DashboardPage: React.FC = () => {
   }
 
   useEffect(() => {
-    fetchHealth()
     fetchStats()
   }, [])
 
@@ -97,21 +80,15 @@ export const DashboardPage: React.FC = () => {
             alignItems: 'center',
             gap: '0.5rem',
             padding: '0.5rem 1rem',
-            backgroundColor: healthStatus === 'success' ? '#f0fdf4' : healthStatus === 'loading' ? '#f8fafc' : '#fef2f2',
-            border: `1px solid ${healthStatus === 'success' ? '#bbf7d0' : healthStatus === 'loading' ? '#e2e8f0' : '#fecaca'}`,
+            backgroundColor: '#f8fafc',
+            border: '1px solid #e2e8f0',
             borderRadius: '8px',
             fontSize: '0.85rem',
-            color: healthStatus === 'success' ? '#166534' : healthStatus === 'loading' ? '#64748b' : '#991b1b'
+            color: '#475569',
+            fontWeight: 500
           }}>
-            {healthStatus === 'success' ? <CheckCircle2 size={16} /> : <AlertTriangle size={16} />}
-            <span>Backend: {healthStatus === 'success' ? 'Hoạt động tốt' : healthStatus === 'loading' ? 'Đang kiểm tra...' : 'Mất kết nối'}</span>
-            <button
-              onClick={fetchHealth}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', display: 'flex', padding: 0 }}
-              title="Kiểm tra lại"
-            >
-              <RefreshCw size={14} />
-            </button>
+            <Calendar size={16} color="#315e91" />
+            <span>Năm học 2026 - 2027</span>
           </div>
           <button
             onClick={fetchStats}
@@ -562,7 +539,7 @@ export const DashboardPage: React.FC = () => {
             </div>
           </div>
 
-          {/* System Spec Card */}
+          {/* Center Info Card */}
           <div style={{
             backgroundColor: '#ffffff',
             borderRadius: '12px',
@@ -571,14 +548,13 @@ export const DashboardPage: React.FC = () => {
             padding: '1.25rem'
           }}>
             <h3 style={{ fontSize: '1rem', fontWeight: 700, color: '#142B4A', marginTop: 0, marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-              <ShieldCheck size={18} color="#16a34a" /> Thông số kỹ thuật
+              <ShieldCheck size={18} color="#315E91" /> Trung tâm Đào tạo CH Academy
             </h3>
-            <div style={{ fontSize: '0.8rem', color: '#64748b', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-              <div><strong>Hệ điều hành:</strong> Windows 11 Localhost</div>
-              <div><strong>Backend:</strong> {health?.service || 'CH Academy Backend'} ({health?.version || '0.0.1'})</div>
-              <div><strong>Database:</strong> PostgreSQL 16 ({healthStatus === 'success' ? 'UP' : 'Checking'})</div>
-              <div><strong>Múi giờ:</strong> Asia/Ho_Chi_Minh (GMT+7)</div>
-              <div><strong>Tiền tệ:</strong> Việt Nam Đồng (VND)</div>
+            <div style={{ fontSize: '0.85rem', color: '#64748b', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              <div><strong style={{ color: '#1e293b' }}>Niên khóa:</strong> 2026 - 2027</div>
+              <div><strong style={{ color: '#1e293b' }}>Giờ hoạt động:</strong> 08:00 - 21:30 (Thứ 2 - CN)</div>
+              <div><strong style={{ color: '#1e293b' }}>Hotline học vụ:</strong> 0988 123 456</div>
+              <div><strong style={{ color: '#1e293b' }}>Cơ sở:</strong> Cơ sở đào tạo chuẩn quốc tế</div>
             </div>
           </div>
         </div>

@@ -56,55 +56,26 @@ describe('App Component', () => {
     expect(screen.getByRole('heading', { name: 'Quản lý Học phí' })).not.toBeNull()
   })
 
-  it('hiển thị trạng thái UP khi backend trả lời thành công', async () => {
-    const mockResponse = {
-      status: 'UP',
-      service: 'CH Academy Backend',
-      version: '0.0.1-SNAPSHOT',
-      timestamp: new Date().toISOString(),
-      message: 'Hệ thống đang hoạt động bình thường',
-    }
-    vi.mocked(healthApi.check).mockResolvedValue(mockResponse)
-
+  it('hiển thị form đăng ký tư vấn tuyển sinh', () => {
     render(<App />)
 
-    // Chờ status element hiển thị nội dung "UP"
-    const statusEl = screen.getByRole('status')
-    await waitFor(() => {
-      expect(statusEl.textContent).toContain('Hoạt động bình thường')
-    })
+    expect(screen.getByRole('heading', { name: /Đăng ký Nhận Tư vấn & Lộ trình Học/i })).not.toBeNull()
+    expect(screen.getByPlaceholderText(/Nguyễn Văn A/i)).not.toBeNull()
+    expect(screen.getByPlaceholderText(/0987654321/i)).not.toBeNull()
+    expect(screen.getByRole('button', { name: /Gửi đăng ký tư vấn ngay/i })).not.toBeNull()
   })
 
-  it('hiển thị thông báo lỗi khi backend không kết nối được', async () => {
-    vi.mocked(healthApi.check).mockRejectedValue(
-      new Error('API Error 503: Service Unavailable')
-    )
-
+  it('hiển thị danh mục câu hỏi thường gặp FAQ', () => {
     render(<App />)
 
-    // Alert phải xuất hiện khi có lỗi
-    const alert = await screen.findByRole('alert')
-    expect(alert).not.toBeNull()
-    expect(alert.textContent).toContain('API Error 503')
+    expect(screen.getByRole('heading', { name: /Giải đáp Thắc mắc của Quý Phụ huynh & Học viên/i })).not.toBeNull()
+    expect(screen.getByText(/CH Academy nhận đào tạo những đối tượng học viên nào\?/i)).not.toBeNull()
   })
 
-  it('gọi lại health API khi click nút "Kiểm tra lại"', async () => {
-    const user = userEvent.setup()
-    vi.mocked(healthApi.check).mockRejectedValue(new Error('Connection failed'))
-
+  it('hiển thị footer với thông tin bản quyền và liên hệ', () => {
     render(<App />)
 
-    // Chờ lỗi xuất hiện từ lần gọi đầu
-    await screen.findByRole('alert')
-
-    // Verify API đã được gọi 1 lần
-    expect(healthApi.check).toHaveBeenCalledTimes(1)
-
-    // Click nút kiểm tra lại
-    const btn = screen.getByRole('button', { name: /kiểm tra/i })
-    await user.click(btn)
-
-    // Verify API được gọi lần 2
-    expect(healthApi.check).toHaveBeenCalledTimes(2)
+    expect(screen.getByText(/Nền tảng vận hành giáo dục chuyên nghiệp/i)).not.toBeNull()
+    expect(screen.getByText(/contact@chacademy.edu.vn/i)).not.toBeNull()
   })
 })

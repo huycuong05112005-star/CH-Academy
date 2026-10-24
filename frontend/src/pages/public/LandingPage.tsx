@@ -1,9 +1,8 @@
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { PublicNavbar } from '../../components/public/PublicNavbar'
 import { PublicFooter } from '../../components/public/PublicFooter'
 import { publicApi } from '../../api/public'
-import { healthApi, type HealthResponse } from '../../api/client'
 import type { Course } from '../../types/course'
 import {
   BookOpen,
@@ -15,22 +14,12 @@ import {
   Sparkles,
   ArrowRight,
   ShieldCheck,
-  Clock,
-  RefreshCw,
-  AlertTriangle
+  Clock
 } from 'lucide-react'
-
-// ----- Health Status Type -----
-type HealthStatus = 'idle' | 'loading' | 'success' | 'error'
 
 export const LandingPage: React.FC = () => {
   const [featuredCourses, setFeaturedCourses] = useState<Course[]>([])
   const [loadingCourses, setLoadingCourses] = useState<boolean>(true)
-
-  // Health check state
-  const [healthStatus, setHealthStatus] = useState<HealthStatus>('idle')
-  const [healthData, setHealthData] = useState<HealthResponse | null>(null)
-  const [healthError, setHealthError] = useState<string | null>(null)
 
   // Form state
   const [fullName, setFullName] = useState('')
@@ -45,23 +34,6 @@ export const LandingPage: React.FC = () => {
 
   // FAQ state
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0)
-
-  const checkHealth = useCallback(async () => {
-    setHealthStatus('loading')
-    setHealthError(null)
-    try {
-      const result = await healthApi.check()
-      setHealthData(result)
-      setHealthStatus('success')
-    } catch (err: unknown) {
-      setHealthError(err instanceof Error ? err.message : 'Không thể kết nối đến backend')
-      setHealthStatus('error')
-    }
-  }, [])
-
-  useEffect(() => {
-    checkHealth()
-  }, [checkHealth])
 
   useEffect(() => {
     const fetchFeatured = async () => {
@@ -118,12 +90,7 @@ export const LandingPage: React.FC = () => {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price || 0)
   }
 
-  const statusLabel = {
-    idle: 'Đang kiểm tra...',
-    loading: 'Đang kết nối đến backend...',
-    success: 'Hoạt động bình thường',
-    error: 'Không thể kết nối đến backend',
-  }[healthStatus]
+
 
   const faqs = [
     {
@@ -702,63 +669,7 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* System Health Section */}
-      <section style={{ backgroundColor: '#ffffff', padding: '3.5rem 1.5rem', borderTop: '1px solid #e2e8f0', borderBottom: '1px solid #e2e8f0' }}>
-        <div style={{ maxWidth: '850px', margin: '0 auto', textAlign: 'center' }}>
-          <h2 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#142B4A', margin: '0 0 0.5rem 0' }}>
-            Trạng thái Hệ thống
-          </h2>
-          <p style={{ color: '#64748b', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
-            Kết nối đến backend Spring Boot tại <code>{import.meta.env.VITE_API_BASE_URL || 'http://localhost:8088/api/v1'}</code>
-          </p>
 
-          <div style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '0.75rem',
-            padding: '0.75rem 1.5rem',
-            borderRadius: '10px',
-            backgroundColor: healthStatus === 'success' ? '#f0fdf4' : healthStatus === 'loading' ? '#f8fafc' : '#fef2f2',
-            border: `1px solid ${healthStatus === 'success' ? '#bbf7d0' : healthStatus === 'loading' ? '#e2e8f0' : '#fecaca'}`,
-            color: healthStatus === 'success' ? '#166534' : healthStatus === 'loading' ? '#64748b' : '#991b1b',
-            fontWeight: 600
-          }}>
-            <span role="status" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-              {healthStatus === 'success' ? <CheckCircle size={18} /> : <AlertTriangle size={18} />}
-              {statusLabel}
-            </span>
-            <button
-              onClick={checkHealth}
-              disabled={healthStatus === 'loading'}
-              style={{
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                color: 'inherit',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.25rem',
-                fontSize: '0.85rem'
-              }}
-              aria-label="Kiểm tra lại trạng thái backend"
-            >
-              <RefreshCw size={14} /> Kiểm tra lại
-            </button>
-          </div>
-
-          {healthStatus === 'success' && healthData && (
-            <div style={{ marginTop: '0.75rem', fontSize: '0.8rem', color: '#64748b' }}>
-              {healthData.service} v{healthData.version}
-            </div>
-          )}
-
-          {healthStatus === 'error' && healthError && (
-            <div role="alert" style={{ marginTop: '1rem', padding: '0.75rem', backgroundColor: '#fef2f2', color: '#991b1b', borderRadius: '8px', fontSize: '0.85rem' }}>
-              ⚠️ {healthError}
-            </div>
-          )}
-        </div>
-      </section>
 
       {/* FAQ Accordion Section */}
       <section style={{ backgroundColor: '#f8fafc', padding: '4.5rem 1.5rem' }}>

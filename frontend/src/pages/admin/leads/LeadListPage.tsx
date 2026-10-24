@@ -5,6 +5,7 @@ import type { Lead, CreateLeadRequest, AddActivityRequest, ConvertLeadRequest } 
 import type { Course } from '../../../types/course'
 import {
   UserPlus,
+  Users,
   Plus,
   Search,
   AlertCircle,
@@ -258,21 +259,77 @@ export const LeadListPage: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-[#142B4A]">Tuyển sinh & Khách hàng tiềm năng</h1>
-          <p className="text-sm text-gray-500 mt-1">
-            Quản lý phễu tư vấn, theo dõi lịch sử chăm sóc và chuyển đổi khách hàng tiềm năng thành học viên chính thức
-          </p>
+      {/* Breadcrumb & Page Header */}
+      <div>
+        <div className="flex items-center gap-1.5 text-xs text-gray-500 mb-1.5 font-medium">
+          <span>Quản trị</span>
+          <span>/</span>
+          <span className="text-[#142B4A]">Tuyển sinh & Khách hàng tiềm năng</span>
         </div>
-        <button
-          onClick={() => setIsCreateModalOpen(true)}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-[#142B4A] text-white text-sm font-medium rounded-lg hover:bg-[#1a3860] transition-colors shadow-sm"
-        >
-          <Plus className="w-4 h-4" />
-          Thêm khách hàng tiềm năng
-        </button>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-[#142B4A]">Tuyển sinh & Khách hàng tiềm năng</h1>
+            <p className="text-sm text-gray-500 mt-1">
+              Quản lý phễu tư vấn, theo dõi lịch sử chăm sóc và chuyển đổi khách hàng tiềm năng thành học viên chính thức
+            </p>
+          </div>
+          <button
+            onClick={() => setIsCreateModalOpen(true)}
+            className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#142B4A] text-white text-sm font-semibold rounded-lg hover:bg-[#1a3860] transition-colors shadow-sm cursor-pointer"
+          >
+            <Plus className="w-4 h-4" />
+            Thêm khách hàng tiềm năng
+          </button>
+        </div>
+      </div>
+
+      {/* KPI Overview Strip */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-xs flex items-center gap-3">
+          <div className="w-10 h-10 rounded-lg bg-blue-50 text-blue-700 flex items-center justify-center font-bold">
+            <Users className="w-5 h-5" />
+          </div>
+          <div>
+            <div className="text-xs text-gray-500 font-medium">Tổng hồ sơ</div>
+            <div className="text-xl font-bold text-gray-900">{totalElements}</div>
+          </div>
+        </div>
+
+        <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-xs flex items-center gap-3">
+          <div className="w-10 h-10 rounded-lg bg-sky-50 text-sky-700 flex items-center justify-center font-bold">
+            <UserPlus className="w-5 h-5" />
+          </div>
+          <div>
+            <div className="text-xs text-gray-500 font-medium">Hồ sơ mới</div>
+            <div className="text-xl font-bold text-gray-900">
+              {leads.filter((l) => l.status === 'NEW').length}
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-xs flex items-center gap-3">
+          <div className="w-10 h-10 rounded-lg bg-amber-50 text-amber-700 flex items-center justify-center font-bold">
+            <MessageSquare className="w-5 h-5" />
+          </div>
+          <div>
+            <div className="text-xs text-gray-500 font-medium">Đang tư vấn / Hẹn lịch</div>
+            <div className="text-xl font-bold text-gray-900">
+              {leads.filter((l) => l.status === 'CONSULTING' || l.status === 'APPOINTMENT' || l.status === 'CONTACTED').length}
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-xs flex items-center gap-3">
+          <div className="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center font-bold">
+            <UserCheck className="w-5 h-5" />
+          </div>
+          <div>
+            <div className="text-xs text-gray-500 font-medium">Đã chuyển đổi</div>
+            <div className="text-xl font-bold text-gray-900">
+              {leads.filter((l) => l.status === 'CONVERTED').length}
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Notifications */}

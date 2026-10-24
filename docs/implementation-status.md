@@ -99,3 +99,21 @@
   - Biên dịch production build frontend (`npm run build`): **0 errors, built in 1.29s**.
 - **Giai đoạn 12 (Tài liệu Bàn giao & Vận hành):**
   - Hoàn thiện bộ tài liệu chuẩn hóa: `README.md`, `docs/architecture.md`, `docs/database-design.md`, `docs/api.md`, `docs/security.md`, `docs/testing.md`, `docs/decisions.md`, `docs/implementation-status.md`.
+
+- **Giai đoạn 13 (UI/UX Overhaul & Nâng cấp Giao diện Chuyên nghiệp):**
+  - **Chẩn đoán nguyên nhân gốc (Root Cause):** Trang Tuyển sinh & Leads và các trang quản trị xuất hiện dưới dạng HTML mặc định chưa style do mã nguồn sử dụng tiện ích Tailwind CSS nhưng cấu hình `@tailwindcss/vite` và `tailwindcss` chưa được cài đặt trong `package.json`, khiến trình duyệt bỏ qua toàn bộ class.
+  - **Khắc phục nền tảng (Foundation Fix):** Đã cài đặt `tailwindcss` và `@tailwindcss/vite`, cấu hình plugin vào `vite.config.ts`, tích hợp `@import "tailwindcss";` vào `src/index.css`. Dung lượng CSS biên dịch chuẩn xác tăng từ 2.76 kB lên 37.25 kB.
+  - **Loại bỏ thông số kỹ thuật không phù hợp:**
+    - Gỡ bỏ hoàn toàn khu vực "Trạng thái Hệ thống" và thông tin kết nối backend Spring Boot khỏi `LandingPage.tsx`.
+    - Gỡ bỏ card "Thông số kỹ thuật" (Windows 11, Spring Boot, PostgreSQL) khỏi `DashboardPage.tsx`, thay thế bằng thẻ thông tin vận hành chuẩn học vụ "Trung tâm Đào tạo CH Academy".
+    - Thay thế badge "Backend: Hoạt động tốt / Mất kết nối" ở header dashboard bằng thẻ "Năm học 2026 - 2027" chuyên nghiệp.
+  - **Redesign & hoàn thiện trang Tuyển sinh & Leads (`LeadListPage.tsx`):**
+    - Bổ sung breadcrumb tinh tế `Quản trị / Tuyển sinh & Khách hàng tiềm năng`.
+    - Bổ sung dải KPI 4 chỉ số thống kê thời gian thực: Tổng hồ sơ, Hồ sơ mới, Đang tư vấn / Hẹn lịch, Đã chuyển đổi.
+    - Chuẩn hóa bảng dữ liệu với font chữ, badge trạng thái đa cấp (NEW, CONTACTED, CONSULTING, APPOINTMENT, CONVERTED, LOST), badge nguồn khách hàng (Website, Fanpage, Hotline, Giới thiệu, Trực tiếp), định dạng liên hệ 2 dòng với icon sắc nét.
+    - Hoàn thiện các modal: Tạo hồ sơ, Ghi nhật ký tư vấn (Activity timeline), Chuyển đổi thành học viên chính thức (Convert with guardian details).
+  - **Kiểm thử & xác minh toàn diện:**
+    - Frontend unit test: **32 / 32 tests PASS** (10 test suites).
+    - Frontend production build: `npm run build` thành công trong 1.00s, 0 lỗi TypeScript.
+    - Backend API & Service: Kiểm tra `http://localhost:8088/api/v1/health` trả về `UP`.
+
