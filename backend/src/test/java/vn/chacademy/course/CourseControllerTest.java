@@ -43,7 +43,6 @@ class CourseControllerTest {
     private CourseRepository courseRepository;
 
     private CourseCategory savedCategory;
-    private Course savedCourse;
 
     @BeforeEach
     void setUp() {
@@ -58,7 +57,7 @@ class CourseControllerTest {
                 .isActive(true)
                 .build());
 
-        savedCourse = courseRepository.save(Course.builder()
+        courseRepository.save(Course.builder()
                 .category(savedCategory)
                 .code("ENG-TEST-01")
                 .name("Khóa học Thử Nghiệm 01")

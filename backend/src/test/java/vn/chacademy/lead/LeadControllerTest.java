@@ -14,13 +14,10 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 import vn.chacademy.lead.dto.AddActivityRequest;
 import vn.chacademy.lead.dto.ConvertLeadRequest;
-import vn.chacademy.lead.dto.CreateLeadRequest;
 import vn.chacademy.lead.dto.PublicLeadRequest;
 import vn.chacademy.lead.entity.Lead;
 import vn.chacademy.lead.repository.LeadActivityRepository;
 import vn.chacademy.lead.repository.LeadRepository;
-import vn.chacademy.student.repository.StudentGuardianRepository;
-import vn.chacademy.student.repository.StudentRepository;
 
 import java.time.LocalDate;
 
@@ -45,12 +42,6 @@ class LeadControllerTest {
 
     @Autowired
     private LeadActivityRepository leadActivityRepository;
-
-    @Autowired
-    private StudentRepository studentRepository;
-
-    @Autowired
-    private StudentGuardianRepository studentGuardianRepository;
 
     private Lead savedLead;
 

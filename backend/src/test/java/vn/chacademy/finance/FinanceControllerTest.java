@@ -17,10 +17,8 @@ import vn.chacademy.finance.dto.ProcessRefundRequest;
 import vn.chacademy.finance.dto.RecordPaymentRequest;
 import vn.chacademy.finance.entity.Payment;
 import vn.chacademy.finance.entity.Receivable;
-import vn.chacademy.finance.repository.PaymentAllocationRepository;
 import vn.chacademy.finance.repository.PaymentRepository;
 import vn.chacademy.finance.repository.ReceivableRepository;
-import vn.chacademy.finance.repository.RefundRepository;
 import vn.chacademy.student.entity.Student;
 import vn.chacademy.student.repository.StudentRepository;
 
@@ -51,12 +49,6 @@ class FinanceControllerTest {
 
     @Autowired
     private PaymentRepository paymentRepository;
-
-    @Autowired
-    private PaymentAllocationRepository allocationRepository;
-
-    @Autowired
-    private RefundRepository refundRepository;
 
     private Student testStudent;
     private Receivable testReceivable;

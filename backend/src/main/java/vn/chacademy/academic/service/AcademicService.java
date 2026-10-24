@@ -16,7 +16,6 @@ import vn.chacademy.student.entity.Student;
 import vn.chacademy.student.repository.StudentRepository;
 
 import java.math.BigDecimal;
-import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -117,6 +116,11 @@ public class AcademicService {
             validateScheduleConflicts(request.getSchedules(), teacher != null ? teacher.getId() : null, null);
         }
 
+        String status = request.getStatus() != null ? request.getStatus().toUpperCase() : "PLANNING";
+        if (!VALID_CLASS_STATUSES.contains(status)) {
+            throw new BadRequestException("Trạng thái lớp học không hợp lệ: " + status);
+        }
+
         ClassEntity classEntity = ClassEntity.builder()
                 .code(cleanCode)
                 .name(request.getName().trim())
@@ -126,7 +130,7 @@ public class AcademicService {
                 .room(request.getRoom())
                 .startDate(request.getStartDate())
                 .endDate(request.getEndDate())
-                .status(request.getStatus() != null ? request.getStatus().toUpperCase() : "PLANNING")
+                .status(status)
                 .build();
 
         ClassEntity saved = classRepository.save(classEntity);

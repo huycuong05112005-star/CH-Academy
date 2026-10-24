@@ -47,7 +47,6 @@ class StudentControllerTest {
     @Autowired
     private StudentGuardianRepository studentGuardianRepository;
 
-    private Student savedStudent;
     private Guardian savedGuardian;
 
     @BeforeEach
@@ -63,7 +62,7 @@ class StudentControllerTest {
                 .email("phuhuynh@test.com")
                 .build());
 
-        savedStudent = studentRepository.save(Student.builder()
+        studentRepository.save(Student.builder()
                 .studentCode("HV-TEST-01")
                 .fullName("Học Viên Thử Nghiệm")
                 .dateOfBirth(LocalDate.of(2015, 6, 1))
