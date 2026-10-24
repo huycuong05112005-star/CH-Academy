@@ -1,0 +1,99 @@
+import React, { createContext, useContext, useEffect, useState } from 'react'
+import type { AuthContextType, LoginPayload, User } from '../types/auth'
+import { authApi } from '../api/auth'
+import { getAuthToken, setAuthToken } from '../api/client'
+
+const AuthContext = createContext<AuthContextType | undefined>(undefined)
+
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [user, setUser] = useState<User | null>(null)
+  const [token, setTokenState] = useState<string | null>(getAuthToken())
+  const [isLoading, setIsLoading] = useState<boolean>(true)
+
+  useEffect(() => {
+    const initAuth = async () => {
+      const storedToken = getAuthToken()
+      if (storedToken) {
+        try {
+          const res = await authApi.getMe()
+          if (res.success && res.data) {
+            setUser(res.data)
+            setTokenState(storedToken)
+          } else {
+            setAuthToken(null)
+            setTokenState(null)
+            setUser(null)
+          }
+        } catch {
+          setAuthToken(null)
+          setTokenState(null)
+          setUser(null)
+        }
+      }
+      setIsLoading(false)
+    }
+
+    initAuth()
+  }, [])
+
+  const login = async (payload: LoginPayload) => {
+    setIsLoading(true)
+    try {
+      const res = await authApi.login(payload)
+      if (res.success && res.data) {
+        setTokenState(res.data.accessToken)
+        setUser(res.data.user)
+      } else {
+        throw new Error(res.message || 'Đăng nhập không thành công')
+      }
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const logout = () => {
+    authApi.logout()
+    setAuthToken(null)
+    setTokenState(null)
+    setUser(null)
+  }
+
+  const hasRole = (role: string): boolean => {
+    if (!user || !user.roles) return false
+    return user.roles.includes(role) || user.roles.includes('SUPER_ADMIN')
+  }
+
+  const hasAnyRole = (roles: string[]): boolean => {
+    if (!user || !user.roles) return false
+    if (user.roles.includes('SUPER_ADMIN')) return true
+    return roles.some((r) => user.roles.includes(r))
+  }
+
+  const hasPermission = (permission: string): boolean => {
+    if (!user || !user.permissions) return false
+    if (user.roles?.includes('SUPER_ADMIN')) return true
+    return user.permissions.includes(permission)
+  }
+
+  const value: AuthContextType = {
+    user,
+    token,
+    isAuthenticated: !!user && !!token,
+    isLoading,
+    login,
+    logout,
+    hasRole,
+    hasAnyRole,
+    hasPermission,
+  }
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
+}
+
+export const useAuth = (): AuthContextType => {
+  const context = useContext(AuthContext)
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider')
+  }
+  return context
+}
