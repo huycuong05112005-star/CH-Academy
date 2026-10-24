@@ -2,6 +2,11 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
 import { ProtectedRoute } from './components/auth/ProtectedRoute'
 import { LandingPage } from './pages/public/LandingPage'
+import { CoursesPublicPage } from './pages/public/CoursesPublicPage'
+import { AboutPage } from './pages/public/AboutPage'
+import { ContactPage } from './pages/public/ContactPage'
+import { TermsPage } from './pages/public/TermsPage'
+import { PrivacyPage } from './pages/public/PrivacyPage'
 import { LoginPage } from './pages/auth/LoginPage'
 import { AdminLayout } from './layouts/AdminLayout'
 import { DashboardPage } from './pages/admin/DashboardPage'
@@ -20,6 +25,11 @@ export default function App() {
         <Routes>
           {/* Public Website */}
           <Route path="/" element={<LandingPage />} />
+          <Route path="/courses" element={<CoursesPublicPage />} />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/contact" element={<ContactPage />} />
+          <Route path="/terms" element={<TermsPage />} />
+          <Route path="/privacy" element={<PrivacyPage />} />
           <Route path="/login" element={<LoginPage />} />
 
           {/* Admin Portal (Protected) */}
