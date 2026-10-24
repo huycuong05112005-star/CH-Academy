@@ -112,8 +112,22 @@
     - Bổ sung dải KPI 4 chỉ số thống kê thời gian thực: Tổng hồ sơ, Hồ sơ mới, Đang tư vấn / Hẹn lịch, Đã chuyển đổi.
     - Chuẩn hóa bảng dữ liệu với font chữ, badge trạng thái đa cấp (NEW, CONTACTED, CONSULTING, APPOINTMENT, CONVERTED, LOST), badge nguồn khách hàng (Website, Fanpage, Hotline, Giới thiệu, Trực tiếp), định dạng liên hệ 2 dòng với icon sắc nét.
     - Hoàn thiện các modal: Tạo hồ sơ, Ghi nhật ký tư vấn (Activity timeline), Chuyển đổi thành học viên chính thức (Convert with guardian details).
-  - **Kiểm thử & xác minh toàn diện:**
-    - Frontend unit test: **32 / 32 tests PASS** (10 test suites).
-    - Frontend production build: `npm run build` thành công trong 1.00s, 0 lỗi TypeScript.
-    - Backend API & Service: Kiểm tra `http://localhost:8088/api/v1/health` trả về `UP`.
+- **Giai đoạn 14 (Redesign Lớp học & Lịch học, App Shell & Cải tổ Toàn diện Layout):**
+  - **Chẩn đoán lỗi bảng bị nén (Root Cause):** Khắc phục triệt để hiện tượng bảng lớp học bị ép dồn lên phía trên và để trống phần dưới màn hình:
+    - Bổ sung cấu trúc bố cục giới hạn `max-w-[1600px] w-full mx-auto` trong `AdminLayout.tsx` để bảng dữ liệu mở rộng cân đối, không bị kéo dãn bất hợp lý trên màn hình độ phân giải cao.
+    - Cải tiến cấu trúc Sidebar theo nhóm nghiệp vụ chuyên biệt: `ĐIỀU HÀNH`, `ĐÀO TẠO & HỌC VỤ`, `HỌC VIÊN & TUYỂN SINH`, `TÀI CHÍNH & HỆ THỐNG`.
+    - Chuẩn hóa header với hiển thị vai trò người dùng chuẩn hóa tiếng Việt (`Quản trị cấp cao`, `Quản trị viên`, `Cán bộ giáo vụ`, `Giảng viên`, `Kế toán viên`) và icon thông báo tinh tế.
+  - **Cải tổ toàn diện trang Lớp học & Lịch (`ClassListPage.tsx`):**
+    - **Header & Breadcrumb:** Bổ sung đường dẫn điều hướng `Quản trị / Danh mục Lớp & Lịch`, nút tạo lớp học mới nổi bật với phối màu Deep Navy `#142B4A`.
+    - **Dải KPI 4 chỉ số thống kê thực:** Tổng số lớp, Đang giảng dạy, Tuyển sinh / Sắp mở, Tổng học viên đang học (tính toán chính xác từ dữ liệu API thực, không dùng số liệu giả).
+    - **Bộ chuyển đổi chế độ xem thông minh (Segmented View Switcher):**
+      - *Chế độ Danh sách:* Bảng quản lý đầy đủ các cột (Mã lớp, Tên lớp & Khóa học, Giáo viên & Phòng học, Lịch học định kỳ, Sĩ số & Tiến độ trực quan có thanh phần trăm, Trạng thái, Thao tác: Chi tiết, Ghi danh).
+      - *Chế độ Thời khóa biểu tuần (Weekly Timetable Matrix):* Ma trận trực quan 7 ngày trong tuần (Thứ Hai đến Chủ Nhật), phân bổ các ca học theo giờ (`startTime - endTime`), hiển thị phòng học, giáo viên phụ trách và sĩ số thời gian thực.
+    - **Modal Chi tiết Lớp học (`Class Detail Drawer`):** Hiển thị toàn diện thông tin khóa học, giáo viên, phòng học, lịch học định kỳ trong tuần và danh sách học viên đã ghi danh kèm học phí thực thu.
+  - **Kiểm thử & Biên dịch hệ thống:**
+    - Frontend Unit Tests: **32 / 32 tests PASS** (10 test suites).
+    - Frontend Production Build: `npm run build` thành công trong 468ms, 0 lỗi TypeScript, CSS bundle 39.04 kB.
+    - Backend JUnit Tests: **33 / 33 tests PASS** (0 failures, 0 errors, build success in 25.8s).
+    - Hệ thống vận hành đồng bộ: Frontend port 5173 và Backend port 8088 đều phản hồi HTTP 200 OK.
+
 

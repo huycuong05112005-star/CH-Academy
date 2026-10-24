@@ -288,23 +288,107 @@ export const ClassListPage: React.FC = () => {
     }
   }
 
+  // View Mode: LIST or TIMETABLE
+  const [viewMode, setViewMode] = useState<'LIST' | 'TIMETABLE'>('LIST')
+  const [detailClass, setDetailClass] = useState<ClassItem | null>(null)
+
+  // Calculate real metrics from loaded data
+  const countInProgress = classes.filter((c) => c.status === 'IN_PROGRESS').length
+  const countEnrollment = classes.filter((c) => c.status === 'OPEN_FOR_ENROLLMENT' || c.status === 'PLANNING').length
+  const totalEnrolledStudents = classes.reduce((sum, c) => sum + (c.enrolledCount || 0), 0)
+
+  // Timetable helper: group schedules by day of week (1: T2, ..., 7: CN)
+  const daysOfWeek = [
+    { day: 1, name: 'Thứ Hai', short: 'T2' },
+    { day: 2, name: 'Thứ Ba', short: 'T3' },
+    { day: 3, name: 'Thứ Tư', short: 'T4' },
+    { day: 4, name: 'Thứ Năm', short: 'T5' },
+    { day: 5, name: 'Thứ Sáu', short: 'T6' },
+    { day: 6, name: 'Thứ Bảy', short: 'T7' },
+    { day: 7, name: 'Chủ Nhật', short: 'CN' }
+  ]
+
+  const getSchedulesForDay = (day: number) => {
+    const list: { classItem: ClassItem; schedule: any }[] = []
+    classes.forEach((c) => {
+      if (c.schedules) {
+        c.schedules.forEach((s) => {
+          if (s.dayOfWeek === day) {
+            list.push({ classItem: c, schedule: s })
+          }
+        })
+      }
+    })
+    return list.sort((a, b) => a.schedule.startTime.localeCompare(b.schedule.startTime))
+  }
+
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-[#142B4A]">Lớp học & Lịch học</h1>
-          <p className="text-sm text-gray-500 mt-1">
-            Quản lý các đợt mở lớp, phân công giáo viên giảng dạy, xếp lịch học và quản lý ghi danh
-          </p>
+      {/* Breadcrumb & Page Header */}
+      <div>
+        <div className="flex items-center gap-1.5 text-xs text-gray-500 mb-1.5 font-medium">
+          <span>Quản trị</span>
+          <span>/</span>
+          <span className="text-[#142B4A]">Lớp học</span>
         </div>
-        <button
-          onClick={() => setIsCreateModalOpen(true)}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-[#142B4A] text-white text-sm font-medium rounded-lg hover:bg-[#1a3860] transition-colors shadow-sm"
-        >
-          <Plus className="w-4 h-4" />
-          Tạo lớp học mới
-        </button>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-[#142B4A]">Lớp học & Lịch học</h1>
+            <p className="text-sm text-gray-500 mt-1">
+              Quản lý các đợt mở lớp, phân công giáo viên giảng dạy, xếp lịch học và quản lý ghi danh
+            </p>
+          </div>
+          <button
+            onClick={() => setIsCreateModalOpen(true)}
+            className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#142B4A] text-white text-sm font-semibold rounded-lg hover:bg-[#1a3860] transition-colors shadow-sm cursor-pointer"
+          >
+            <Plus className="w-4 h-4" />
+            Tạo lớp học mới
+          </button>
+        </div>
+      </div>
+
+      {/* KPI Overview Strip */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-xs flex items-center gap-3">
+          <div className="w-10 h-10 rounded-lg bg-blue-50 text-blue-700 flex items-center justify-center font-bold">
+            <Calendar className="w-5 h-5" />
+          </div>
+          <div>
+            <div className="text-xs text-gray-500 font-medium">Tổng số lớp</div>
+            <div className="text-xl font-bold text-gray-900">{totalElements}</div>
+          </div>
+        </div>
+
+        <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-xs flex items-center gap-3">
+          <div className="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center font-bold">
+            <GraduationCap className="w-5 h-5" />
+          </div>
+          <div>
+            <div className="text-xs text-gray-500 font-medium">Đang giảng dạy</div>
+            <div className="text-xl font-bold text-gray-900">{countInProgress}</div>
+          </div>
+        </div>
+
+        <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-xs flex items-center gap-3">
+          <div className="w-10 h-10 rounded-lg bg-amber-50 text-amber-700 flex items-center justify-center font-bold">
+            <Clock className="w-5 h-5" />
+          </div>
+          <div>
+            <div className="text-xs text-gray-500 font-medium">Tuyển sinh / Sắp mở</div>
+            <div className="text-xl font-bold text-gray-900">{countEnrollment}</div>
+          </div>
+        </div>
+
+        <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-xs flex items-center gap-3">
+          <div className="w-10 h-10 rounded-lg bg-purple-50 text-purple-700 flex items-center justify-center font-bold">
+            <Users className="w-5 h-5" />
+          </div>
+          <div>
+            <div className="text-xs text-gray-500 font-medium">Tổng học viên đang học</div>
+            <div className="text-xl font-bold text-gray-900">{totalEnrolledStudents}</div>
+          </div>
+        </div>
       </div>
 
       {/* Notifications */}
@@ -332,8 +416,41 @@ export const ClassListPage: React.FC = () => {
         </div>
       )}
 
-      {/* Search & Filters */}
-      <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
+      {/* Toolbar & View Mode Switcher */}
+      <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-3 border-b border-gray-100">
+          {/* Segmented View Switcher */}
+          <div className="inline-flex p-1 bg-slate-100 rounded-lg text-xs font-semibold">
+            <button
+              type="button"
+              onClick={() => setViewMode('LIST')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md transition-all ${viewMode === 'LIST'
+                  ? 'bg-white text-[#142B4A] shadow-xs'
+                  : 'text-gray-600 hover:text-gray-900'
+                }`}
+            >
+              <Users className="w-3.5 h-3.5" />
+              <span>Danh sách lớp ({totalElements})</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewMode('TIMETABLE')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md transition-all ${viewMode === 'TIMETABLE'
+                  ? 'bg-white text-[#142B4A] shadow-xs'
+                  : 'text-gray-600 hover:text-gray-900'
+                }`}
+            >
+              <Calendar className="w-3.5 h-3.5" />
+              <span>Thời khóa biểu tuần</span>
+            </button>
+          </div>
+
+          <div className="text-xs text-gray-500 font-medium">
+            Hiển thị <strong>{classes.length}</strong> trên <strong>{totalElements}</strong> lớp
+          </div>
+        </div>
+
+        {/* Filter Form */}
         <form onSubmit={handleSearchSubmit} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="relative">
             <Search className="w-4 h-4 absolute left-3 top-3 text-gray-400" />
@@ -385,7 +502,7 @@ export const ClassListPage: React.FC = () => {
           <div className="flex items-center gap-2">
             <button
               type="submit"
-              className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors flex items-center justify-center gap-2"
+              className="flex-1 px-4 py-2 bg-[#142B4A] text-white text-sm font-semibold rounded-lg hover:bg-[#1a3860] transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-xs"
             >
               <Search className="w-4 h-4" />
               Lọc
@@ -399,7 +516,7 @@ export const ClassListPage: React.FC = () => {
                 setPage(0)
               }}
               title="Đặt lại bộ lọc"
-              className="p-2 border border-gray-300 text-gray-600 rounded-lg hover:bg-gray-50 transition-colors"
+              className="p-2 border border-gray-300 text-gray-600 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
             >
               <RefreshCw className="w-4 h-4" />
             </button>
@@ -407,147 +524,355 @@ export const ClassListPage: React.FC = () => {
         </form>
       </div>
 
-      {/* Classes Table */}
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-        {loading ? (
-          <div className="p-8 text-center text-gray-500">
-            <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2 text-[#142B4A]" />
-            Đang tải danh sách lớp học...
-          </div>
-        ) : classes.length === 0 ? (
-          <div className="p-12 text-center">
-            <Calendar className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-            <h3 className="text-base font-semibold text-gray-700 mb-1">Chưa có lớp học nào</h3>
-            <p className="text-sm text-gray-500 mb-4">
-              Không tìm thấy lớp học phù hợp với bộ lọc hiện tại. Bạn có thể tạo lớp mới ngay bây giờ.
-            </p>
-            <button
-              onClick={() => setIsCreateModalOpen(true)}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-[#142B4A] text-white text-sm font-medium rounded-lg hover:bg-[#1a3860] transition-colors"
-            >
-              <Plus className="w-4 h-4" />
-              Tạo lớp học mới
-            </button>
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse text-sm">
-              <thead>
-                <tr className="bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  <th className="py-3 px-4">Mã lớp</th>
-                  <th className="py-3 px-4">Tên lớp học & Khóa học</th>
-                  <th className="py-3 px-4">Giáo viên & Phòng</th>
-                  <th className="py-3 px-4">Lịch học định kỳ</th>
-                  <th className="py-3 px-4">Sĩ số</th>
-                  <th className="py-3 px-4">Trạng thái</th>
-                  <th className="py-3 px-4 text-right">Thao tác</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {classes.map((cls) => {
-                  const percent = Math.min(100, Math.round((cls.enrolledCount / cls.maxCapacity) * 100))
-                  return (
-                    <tr key={cls.id} className="hover:bg-gray-50/80 transition-colors">
-                      <td className="py-3 px-4 font-mono font-medium text-xs text-[#142B4A]">
-                        {cls.code}
-                      </td>
-                      <td className="py-3 px-4">
-                        <div className="font-semibold text-gray-900">{cls.name}</div>
-                        <div className="text-xs text-gray-500 flex items-center gap-1 mt-0.5">
-                          <Tag className="w-3 h-3 text-gray-400" />
-                          <span>{cls.courseName || cls.courseCode}</span>
-                        </div>
-                      </td>
-                      <td className="py-3 px-4">
-                        <div className="flex items-center gap-1.5 text-gray-800 text-xs font-medium">
-                          <GraduationCap className="w-3.5 h-3.5 text-gray-400" />
-                          <span>{cls.primaryTeacherName || 'Chưa phân công'}</span>
-                        </div>
-                        {cls.room && (
-                          <div className="flex items-center gap-1.5 text-gray-500 text-xs mt-0.5">
-                            <DoorOpen className="w-3.5 h-3.5 text-gray-400" />
-                            <span>{cls.room}</span>
-                          </div>
-                        )}
-                      </td>
-                      <td className="py-3 px-4">
-                        {!cls.schedules || cls.schedules.length === 0 ? (
-                          <span className="text-xs text-gray-400 italic">Chưa xếp lịch</span>
-                        ) : (
-                          <div className="flex flex-wrap gap-1">
-                            {cls.schedules.map((s) => (
-                              <span
-                                key={s.id}
-                                className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs bg-slate-100 text-slate-700 border border-slate-200"
-                              >
-                                <Clock className="w-3 h-3 text-slate-400" />
-                                {getDayName(s.dayOfWeek)} ({s.startTime}-{s.endTime})
-                              </span>
-                            ))}
-                          </div>
-                        )}
-                      </td>
-                      <td className="py-3 px-4">
-                        <div className="flex items-center justify-between text-xs font-medium text-gray-700 mb-1">
-                          <span>{cls.enrolledCount}/{cls.maxCapacity}</span>
-                          <span className="text-gray-400">{percent}%</span>
-                        </div>
-                        <div className="w-24 bg-gray-200 rounded-full h-1.5 overflow-hidden">
-                          <div
-                            className={`h-1.5 rounded-full ${percent >= 100 ? 'bg-red-500' : percent >= 75 ? 'bg-amber-500' : 'bg-[#142B4A]'}`}
-                            style={{ width: `${percent}%` }}
-                          />
-                        </div>
-                      </td>
-                      <td className="py-3 px-4">
-                        {getStatusBadge(cls.status)}
-                      </td>
-                      <td className="py-3 px-4 text-right">
-                        <button
-                          onClick={() => handleOpenEnrollModal(cls)}
-                          title="Quản lý học viên & ghi danh"
-                          className="inline-flex items-center gap-1 px-3 py-1.5 bg-[#142B4A]/10 text-[#142B4A] hover:bg-[#142B4A]/20 rounded-lg text-xs font-semibold transition-colors"
-                        >
-                          <Users className="w-3.5 h-3.5" />
-                          <span>Học viên ({cls.enrolledCount})</span>
-                        </button>
-                      </td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
-
-        {/* Pagination Footer */}
-        {!loading && classes.length > 0 && (
-          <div className="p-4 border-t border-gray-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-xs text-gray-500">
+      {/* View 1: WEEKLY TIMETABLE MATRIX */}
+      {viewMode === 'TIMETABLE' && (
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5 space-y-4">
+          <div className="flex items-center justify-between pb-3 border-b border-gray-100">
             <div>
-              Hiển thị <strong>{classes.length}</strong> trên tổng số <strong>{totalElements}</strong> lớp học
+              <h2 className="text-base font-bold text-[#142B4A] flex items-center gap-2">
+                <Calendar className="w-5 h-5 text-[#315E91]" />
+                Lịch Học Các Lớp Trong Tuần
+              </h2>
+              <p className="text-xs text-gray-500 mt-0.5">
+                Xem ma trận phân bổ ca học, phòng học và giáo viên giảng dạy từ Thứ Hai đến Chủ Nhật
+              </p>
             </div>
-            <div className="flex items-center gap-2">
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-7 gap-3">
+            {daysOfWeek.map((d) => {
+              const daySlots = getSchedulesForDay(d.day)
+              return (
+                <div key={d.day} className="bg-slate-50/70 rounded-xl border border-slate-200 overflow-hidden flex flex-col min-h-[280px]">
+                  <div className="p-2.5 bg-slate-100 border-b border-slate-200 text-center">
+                    <span className="font-bold text-xs text-[#142B4A] block">{d.name}</span>
+                    <span className="text-[10px] text-gray-500 font-medium">({daySlots.length} ca học)</span>
+                  </div>
+
+                  <div className="p-2 flex-1 space-y-2 overflow-y-auto">
+                    {daySlots.length === 0 ? (
+                      <div className="text-center py-8 text-gray-400 text-xs italic">
+                        Không có ca học
+                      </div>
+                    ) : (
+                      daySlots.map(({ classItem, schedule }, sIdx) => (
+                        <div
+                          key={sIdx}
+                          onClick={() => setDetailClass(classItem)}
+                          className="p-2.5 bg-white rounded-lg border border-slate-200 shadow-xs hover:border-[#142B4A] hover:shadow-sm transition-all cursor-pointer text-left"
+                        >
+                          <div className="flex items-center justify-between gap-1 mb-1">
+                            <span className="text-[11px] font-bold text-[#142B4A] flex items-center gap-1">
+                              <Clock className="w-3 h-3 text-[#315E91]" />
+                              {schedule.startTime} - {schedule.endTime}
+                            </span>
+                            <span className="text-[10px] font-mono font-semibold text-gray-500">
+                              {classItem.code}
+                            </span>
+                          </div>
+
+                          <div className="font-semibold text-xs text-gray-900 line-clamp-1 mb-1">
+                            {classItem.name}
+                          </div>
+
+                          <div className="text-[11px] text-gray-600 flex items-center gap-1 mb-0.5">
+                            <GraduationCap className="w-3 h-3 text-gray-400 flex-shrink-0" />
+                            <span className="truncate">{classItem.primaryTeacherName || 'Chưa phân công'}</span>
+                          </div>
+
+                          {schedule.room && (
+                            <div className="text-[10px] text-gray-500 flex items-center gap-1">
+                              <DoorOpen className="w-3 h-3 text-gray-400 flex-shrink-0" />
+                              <span className="truncate">{schedule.room}</span>
+                            </div>
+                          )}
+
+                          <div className="mt-1.5 pt-1.5 border-t border-slate-100 flex items-center justify-between text-[10px]">
+                            <span className="text-gray-500">Sĩ số:</span>
+                            <span className="font-semibold text-gray-800">
+                              {classItem.enrolledCount}/{classItem.maxCapacity}
+                            </span>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* View 2: CLASSES DATA TABLE */}
+      {viewMode === 'LIST' && (
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+          {loading ? (
+            <div className="p-12 text-center text-gray-500">
+              <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2 text-[#142B4A]" />
+              Đang tải danh sách lớp học...
+            </div>
+          ) : classes.length === 0 ? (
+            <div className="p-12 text-center">
+              <Calendar className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+              <h3 className="text-base font-semibold text-gray-700 mb-1">Chưa có lớp học nào</h3>
+              <p className="text-sm text-gray-500 mb-4">
+                Không tìm thấy lớp học phù hợp với bộ lọc hiện tại. Bạn có thể tạo lớp mới ngay bây giờ.
+              </p>
               <button
-                onClick={() => setPage((p) => Math.max(0, p - 1))}
-                disabled={page === 0}
-                className="p-1.5 border border-gray-300 rounded disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50"
+                onClick={() => setIsCreateModalOpen(true)}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-[#142B4A] text-white text-sm font-medium rounded-lg hover:bg-[#1a3860] transition-colors"
               >
-                <ChevronLeft className="w-4 h-4" />
+                <Plus className="w-4 h-4" />
+                Tạo lớp học mới
               </button>
-              <span>
-                Trang {page + 1} / {totalPages}
-              </span>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse text-sm">
+                <thead>
+                  <tr className="bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                    <th className="py-3 px-4">Mã lớp</th>
+                    <th className="py-3 px-4">Tên lớp học & Khóa học</th>
+                    <th className="py-3 px-4">Giáo viên & Phòng</th>
+                    <th className="py-3 px-4">Lịch học định kỳ</th>
+                    <th className="py-3 px-4">Sĩ số & Tiến độ</th>
+                    <th className="py-3 px-4">Trạng thái</th>
+                    <th className="py-3 px-4 text-right">Thao tác</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {classes.map((cls) => {
+                    const percent = Math.min(100, Math.round((cls.enrolledCount / cls.maxCapacity) * 100))
+                    return (
+                      <tr key={cls.id} className="hover:bg-gray-50/80 transition-colors">
+                        <td className="py-3.5 px-4 font-mono font-semibold text-xs text-[#142B4A]">
+                          <span className="px-2 py-1 bg-slate-100 rounded border border-slate-200">
+                            {cls.code}
+                          </span>
+                        </td>
+                        <td className="py-3.5 px-4">
+                          <div className="font-bold text-gray-900 hover:text-[#142B4A] cursor-pointer" onClick={() => setDetailClass(cls)}>
+                            {cls.name}
+                          </div>
+                          <div className="text-xs text-gray-500 flex items-center gap-1 mt-0.5">
+                            <Tag className="w-3 h-3 text-[#315E91]" />
+                            <span className="font-medium text-slate-700">{cls.courseName || cls.courseCode}</span>
+                          </div>
+                        </td>
+                        <td className="py-3.5 px-4">
+                          <div className="flex items-center gap-1.5 text-gray-800 text-xs font-semibold">
+                            <GraduationCap className="w-3.5 h-3.5 text-[#315E91]" />
+                            <span>{cls.primaryTeacherName || 'Chưa phân công'}</span>
+                          </div>
+                          {cls.room && (
+                            <div className="flex items-center gap-1.5 text-gray-500 text-xs mt-0.5">
+                              <DoorOpen className="w-3.5 h-3.5 text-gray-400" />
+                              <span>{cls.room}</span>
+                            </div>
+                          )}
+                        </td>
+                        <td className="py-3.5 px-4">
+                          {!cls.schedules || cls.schedules.length === 0 ? (
+                            <span className="text-xs text-gray-400 italic">Chưa xếp lịch</span>
+                          ) : (
+                            <div className="flex flex-wrap gap-1">
+                              {cls.schedules.map((s) => (
+                                <span
+                                  key={s.id}
+                                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs bg-slate-100 text-slate-700 border border-slate-200 font-medium"
+                                >
+                                  <Clock className="w-3 h-3 text-slate-400" />
+                                  {getDayName(s.dayOfWeek)} ({s.startTime}-{s.endTime})
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                        </td>
+                        <td className="py-3.5 px-4">
+                          <div className="flex items-center justify-between text-xs font-semibold text-gray-700 mb-1">
+                            <span>{cls.enrolledCount}/{cls.maxCapacity} học viên</span>
+                            <span className="text-gray-500">{percent}%</span>
+                          </div>
+                          <div className="w-28 bg-gray-200 rounded-full h-2 overflow-hidden">
+                            <div
+                              className={`h-2 rounded-full transition-all duration-300 ${percent >= 100
+                                  ? 'bg-rose-500'
+                                  : percent >= 75
+                                    ? 'bg-amber-500'
+                                    : 'bg-[#142B4A]'
+                                }`}
+                              style={{ width: `${percent}%` }}
+                            />
+                          </div>
+                        </td>
+                        <td className="py-3.5 px-4">
+                          {getStatusBadge(cls.status)}
+                        </td>
+                        <td className="py-3.5 px-4 text-right">
+                          <div className="inline-flex items-center gap-1.5">
+                            <button
+                              onClick={() => setDetailClass(cls)}
+                              title="Xem chi tiết lớp học"
+                              className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-slate-100 text-slate-700 hover:bg-slate-200 rounded-lg text-xs font-semibold transition-colors cursor-pointer"
+                            >
+                              <span>Chi tiết</span>
+                            </button>
+                            <button
+                              onClick={() => handleOpenEnrollModal(cls)}
+                              title="Quản lý học viên & ghi danh"
+                              className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-[#142B4A] text-white hover:bg-[#1a3860] rounded-lg text-xs font-semibold transition-colors cursor-pointer shadow-xs"
+                            >
+                              <Users className="w-3.5 h-3.5" />
+                              <span>Ghi danh ({cls.enrolledCount})</span>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {/* Pagination Footer */}
+          {!loading && classes.length > 0 && (
+            <div className="p-4 border-t border-gray-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-xs text-gray-500">
+              <div>
+                Hiển thị <strong>{classes.length}</strong> trên tổng số <strong>{totalElements}</strong> lớp học
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setPage((p) => Math.max(0, p - 1))}
+                  disabled={page === 0}
+                  className="p-1.5 border border-gray-300 rounded disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50 cursor-pointer"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+                <span>
+                  Trang {page + 1} / {totalPages}
+                </span>
+                <button
+                  onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+                  disabled={page >= totalPages - 1}
+                  className="p-1.5 border border-gray-300 rounded disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50 cursor-pointer"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* MODAL: CLASS DETAIL DRAWER */}
+      {detailClass && (
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4 animate-fade-in">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between bg-slate-50">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-lg bg-[#142B4A] text-white flex items-center justify-center font-bold">
+                  <Calendar className="w-5 h-5" />
+                </div>
+                <div>
+                  <h2 className="text-base font-bold text-[#142B4A]">{detailClass.name}</h2>
+                  <p className="text-xs text-gray-500 font-mono">Mã lớp: {detailClass.code}</p>
+                </div>
+              </div>
               <button
-                onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
-                disabled={page >= totalPages - 1}
-                className="p-1.5 border border-gray-300 rounded disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50"
+                onClick={() => setDetailClass(null)}
+                className="text-gray-400 hover:text-gray-600 p-1 rounded-lg hover:bg-gray-100 cursor-pointer"
               >
-                <ChevronRight className="w-4 h-4" />
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-6 overflow-y-auto space-y-5">
+              {/* Status and Key Info Grid */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4 bg-slate-50 rounded-xl border border-slate-200 text-xs">
+                <div>
+                  <span className="text-gray-500 block mb-0.5">Khóa học</span>
+                  <span className="font-bold text-gray-900">{detailClass.courseName || detailClass.courseCode}</span>
+                </div>
+                <div>
+                  <span className="text-gray-500 block mb-0.5">Giáo viên</span>
+                  <span className="font-bold text-gray-900">{detailClass.primaryTeacherName || 'Chưa phân công'}</span>
+                </div>
+                <div>
+                  <span className="text-gray-500 block mb-0.5">Phòng học</span>
+                  <span className="font-bold text-gray-900">{detailClass.room || 'Chưa xếp phòng'}</span>
+                </div>
+                <div>
+                  <span className="text-gray-500 block mb-0.5">Trạng thái</span>
+                  <div>{getStatusBadge(detailClass.status)}</div>
+                </div>
+              </div>
+
+              {/* Date and Capacity */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                <div className="p-3 border border-gray-200 rounded-lg">
+                  <span className="text-gray-500 block mb-1">Ngày bắt đầu</span>
+                  <span className="font-semibold text-gray-800">{detailClass.startDate || 'Chưa thiết lập'}</span>
+                </div>
+                <div className="p-3 border border-gray-200 rounded-lg">
+                  <span className="text-gray-500 block mb-1">Ngày kết thúc</span>
+                  <span className="font-semibold text-gray-800">{detailClass.endDate || 'Chưa kết thúc'}</span>
+                </div>
+                <div className="p-3 border border-gray-200 rounded-lg">
+                  <span className="text-gray-500 block mb-1">Sĩ số lớp</span>
+                  <span className="font-bold text-[#142B4A]">
+                    {detailClass.enrolledCount} / {detailClass.maxCapacity} học viên
+                  </span>
+                </div>
+              </div>
+
+              {/* Recurring Schedules */}
+              <div>
+                <h3 className="text-xs font-bold text-gray-700 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                  <Clock className="w-4 h-4 text-[#315E91]" />
+                  Lịch học hàng tuần
+                </h3>
+                {!detailClass.schedules || detailClass.schedules.length === 0 ? (
+                  <p className="text-xs text-gray-400 italic">Chưa xếp lịch học cụ thể.</p>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {detailClass.schedules.map((s) => (
+                      <div key={s.id} className="p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-xs flex items-center justify-between">
+                        <span className="font-bold text-[#142B4A]">{getDayName(s.dayOfWeek)}</span>
+                        <span className="text-gray-700 font-semibold">{s.startTime} - {s.endTime}</span>
+                        {s.room && <span className="text-gray-500 text-[11px]">({s.room})</span>}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="px-6 py-3 border-t border-gray-200 bg-gray-50 flex items-center justify-between">
+              <button
+                type="button"
+                onClick={() => {
+                  const target = detailClass
+                  setDetailClass(null)
+                  handleOpenEnrollModal(target)
+                }}
+                className="px-4 py-2 bg-[#142B4A] text-white text-xs font-semibold rounded-lg hover:bg-[#1a3860] flex items-center gap-1.5 cursor-pointer"
+              >
+                <Users className="w-4 h-4" />
+                Quản lý ghi danh học viên ({detailClass.enrolledCount})
+              </button>
+              <button
+                type="button"
+                onClick={() => setDetailClass(null)}
+                className="px-4 py-2 border border-gray-300 rounded-lg text-xs text-gray-700 hover:bg-gray-100 cursor-pointer"
+              >
+                Đóng
               </button>
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* MODAL: CREATE CLASS */}
       {isCreateModalOpen && (

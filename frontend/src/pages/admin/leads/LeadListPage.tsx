@@ -264,7 +264,7 @@ export const LeadListPage: React.FC = () => {
         <div className="flex items-center gap-1.5 text-xs text-gray-500 mb-1.5 font-medium">
           <span>Quản trị</span>
           <span>/</span>
-          <span className="text-[#142B4A]">Tuyển sinh & Khách hàng tiềm năng</span>
+          <span className="text-[#142B4A]">Danh sách Leads</span>
         </div>
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
