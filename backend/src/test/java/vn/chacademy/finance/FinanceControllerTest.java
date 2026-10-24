@@ -79,7 +79,7 @@ class FinanceControllerTest {
                 .title("Học phí khóa học Test")
                 .totalAmount(new BigDecimal("5000000.00"))
                 .paidAmount(BigDecimal.ZERO)
-                .status("PENDING")
+                .status("UNPAID")
                 .dueDate(LocalDate.now().plusDays(10))
                 .build());
     }
@@ -102,7 +102,7 @@ class FinanceControllerTest {
     void testSearchReceivables() throws Exception {
         mockMvc.perform(get("/api/v1/finance/receivables")
                         .param("keyword", "Test")
-                        .param("status", "PENDING"))
+                        .param("status", "UNPAID"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success", is(true)))
                 .andExpect(jsonPath("$.data.content", not(empty())))
@@ -128,7 +128,7 @@ class FinanceControllerTest {
                 .andExpect(jsonPath("$.success", is(true)))
                 .andExpect(jsonPath("$.data.code", startsWith("REC")))
                 .andExpect(jsonPath("$.data.totalAmount", is(650000.0)))
-                .andExpect(jsonPath("$.data.status", is("PENDING")));
+                .andExpect(jsonPath("$.data.status", is("UNPAID")));
     }
 
     @Test

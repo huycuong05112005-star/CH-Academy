@@ -77,9 +77,8 @@ public class FinanceService {
                 .title(request.getTitle())
                 .totalAmount(request.getTotalAmount())
                 .paidAmount(BigDecimal.ZERO)
-                .status("PENDING")
+                .status("UNPAID")
                 .dueDate(request.getDueDate() != null ? request.getDueDate() : LocalDate.now().plusDays(15))
-                .note(request.getNote())
                 .build();
 
         Receivable saved = receivableRepository.save(receivable);
@@ -119,7 +118,7 @@ public class FinanceService {
                 .paymentMethod(request.getPaymentMethod().toUpperCase())
                 .paymentDate(request.getPaymentDate() != null ? request.getPaymentDate() : LocalDate.now())
                 .referenceNumber(request.getReferenceNumber())
-                .note(request.getNote())
+                .notes(request.getNote())
                 .createdBy(staff)
                 .build();
 
@@ -157,9 +156,9 @@ public class FinanceService {
                     .build();
             allocations.add(allocationRepository.save(allocation));
         } else {
-            // FIFO allocation to student's pending / partially paid receivables
+            // FIFO allocation to student's unpaid / partially paid receivables
             List<Receivable> unpaidReceivables = receivableRepository.findByStudentIdAndStatusInOrderByIdAsc(
-                    student.getId(), List.of("PENDING", "PARTIALLY_PAID")
+                    student.getId(), List.of("UNPAID", "PARTIALLY_PAID")
             );
 
             for (Receivable rec : unpaidReceivables) {
@@ -240,7 +239,7 @@ public class FinanceService {
 
             rec.setPaidAmount(rec.getPaidAmount().subtract(deduction).max(BigDecimal.ZERO));
             if (rec.getPaidAmount().compareTo(BigDecimal.ZERO) == 0) {
-                rec.setStatus("PENDING");
+                rec.setStatus("UNPAID");
             } else if (rec.getPaidAmount().compareTo(rec.getTotalAmount()) < 0) {
                 rec.setStatus("PARTIALLY_PAID");
             }
@@ -281,7 +280,7 @@ public class FinanceService {
                 .studentCode(r.getStudent().getStudentCode())
                 .studentFullName(r.getStudent().getFullName())
                 .enrollmentId(r.getEnrollment() != null ? r.getEnrollment().getId() : null)
-                .className(r.getEnrollment() != null && r.getEnrollment().getClassEntity() != null ? r.getEnrollment().getClassEntity().getClassName() : null)
+                .className(r.getEnrollment() != null && r.getEnrollment().getClassEntity() != null ? r.getEnrollment().getClassEntity().getName() : null)
                 .title(r.getTitle())
                 .totalAmount(r.getTotalAmount())
                 .paidAmount(r.getPaidAmount())
@@ -315,7 +314,7 @@ public class FinanceService {
                 .paymentMethod(p.getPaymentMethod())
                 .paymentDate(p.getPaymentDate())
                 .referenceNumber(p.getReferenceNumber())
-                .note(p.getNote())
+                .note(p.getNotes())
                 .createdByName(p.getCreatedBy() != null ? p.getCreatedBy().getFullName() : null)
                 .createdAt(p.getCreatedAt())
                 .allocations(allocDtos)

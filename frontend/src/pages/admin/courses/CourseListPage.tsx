@@ -5,7 +5,6 @@ import {
   BookOpen,
   Plus,
   Search,
-  Filter,
   Edit2,
   Eye,
   EyeOff,
@@ -15,8 +14,7 @@ import {
   RefreshCw,
   ChevronLeft,
   ChevronRight,
-  Clock,
-  Users
+  Clock
 } from 'lucide-react'
 
 export const CourseListPage: React.FC = () => {
@@ -429,9 +427,9 @@ export const CourseListPage: React.FC = () => {
                     </td>
                     <td className="py-3.5 px-4 text-center">
                       {course.isPublic ? (
-                        <Eye className="w-4 h-4 text-emerald-600 mx-auto" title="Công khai trên website" />
+                        <span title="Công khai trên website" className="inline-block"><Eye className="w-4 h-4 text-emerald-600 mx-auto" /></span>
                       ) : (
-                        <EyeOff className="w-4 h-4 text-slate-400 mx-auto" title="Ẩn khỏi website" />
+                        <span title="Ẩn khỏi website" className="inline-block"><EyeOff className="w-4 h-4 text-slate-400 mx-auto" /></span>
                       )}
                     </td>
                     <td className="py-3.5 px-4 text-right">
