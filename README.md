@@ -109,8 +109,8 @@ cd backend
 
 > **Lần đầu chạy:** Maven Wrapper tự tải Maven (~8MB) và các dependencies (~50MB). Cần kết nối Internet.
 
-Backend sẵn sàng tại: `http://localhost:8080`  
-Health endpoint: `http://localhost:8080/api/v1/health`
+Backend sẵn sàng tại: `http://localhost:8088`  
+Health endpoint: `http://localhost:8088/api/v1/health`
 
 ### Bước 5: Chạy Frontend React
 
@@ -152,8 +152,8 @@ npm run test:watch   # Chạy ở chế độ watch (auto-rerun)
 | URL | Mô tả |
 |-----|-------|
 | `http://localhost:5173` | Frontend React |
-| `http://localhost:8080/api/v1/health` | Backend Health Check |
-| `http://localhost:8080/api/v1/actuator/health` | Spring Actuator Health |
+| `http://localhost:8088/api/v1/health` | Backend Health Check |
+| `http://localhost:8088/api/v1/actuator/health` | Spring Actuator Health |
 | `localhost:5432` | PostgreSQL Database |
 
 ---
@@ -179,7 +179,7 @@ Browser (port 5173)
 Frontend React + Vite
     │ API calls (VITE_API_BASE_URL)
     ▼
-Backend Spring Boot (port 8080)
+Backend Spring Boot (port 8088)
     │ JPA/Hibernate
     ▼
 PostgreSQL (port 5432)  ←── Docker Container
@@ -200,13 +200,13 @@ Migrations V1, V2, ...
 | `POSTGRES_USER` | Username DB | `ch_academy_user` |
 | `POSTGRES_PASSWORD` | Mật khẩu DB | *(cần đặt)* |
 | `POSTGRES_PORT` | Cổng PostgreSQL | `5432` |
-| `BACKEND_PORT` | Cổng backend | `8080` |
+| `BACKEND_PORT` | Cổng backend | `8088` |
 
 ### `frontend/.env`
 
 | Biến | Mô tả | Mặc định |
 |------|-------|---------|
-| `VITE_API_BASE_URL` | URL gốc API backend | `http://localhost:8080/api/v1` |
+| `VITE_API_BASE_URL` | URL gốc API backend | `http://localhost:8088/api/v1` |
 
 ---
 

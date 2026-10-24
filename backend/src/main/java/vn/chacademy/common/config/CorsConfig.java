@@ -24,33 +24,28 @@ public class CorsConfig {
     private String allowedOriginsStr;
 
     @Bean
-    public CorsFilter corsFilter() {
+    public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
 
-        // Tách chuỗi origins thành danh sách
         List<String> origins = Arrays.asList(allowedOriginsStr.split(","));
         config.setAllowedOrigins(origins);
-
-        // Cho phép các HTTP method thông dụng
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-
-        // Cho phép tất cả header phổ biến
         config.setAllowedHeaders(Arrays.asList(
                 "Authorization",
                 "Content-Type",
                 "X-Requested-With",
                 "Accept"
         ));
-
-        // Cho phép gửi cookie/credentials (cần cho JWT sau này)
         config.setAllowCredentials(true);
-
-        // Cache kết quả preflight trong 1 giờ
         config.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/api/**", config);
+        source.registerCorsConfiguration("/**", config);
+        return source;
+    }
 
-        return new CorsFilter(source);
+    @Bean
+    public CorsFilter corsFilter() {
+        return new CorsFilter(corsConfigurationSource());
     }
 }

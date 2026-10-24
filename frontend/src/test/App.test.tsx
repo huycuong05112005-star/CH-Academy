@@ -8,7 +8,9 @@ vi.mock('../api/client', () => ({
   healthApi: {
     check: vi.fn(),
   },
-  API_BASE_URL: 'http://localhost:8080/api/v1',
+  API_BASE_URL: 'http://localhost:8088/api/v1',
+  getAuthToken: vi.fn(() => null),
+  setAuthToken: vi.fn(),
 }))
 
 import { healthApi } from '../api/client'
@@ -49,8 +51,8 @@ describe('App Component', () => {
     render(<App />)
 
     // Các heading H3 của feature cards
-    expect(screen.getByRole('heading', { name: 'Quản lý Học viên' })).not.toBeNull()
-    expect(screen.getByRole('heading', { name: 'Lịch học & Lớp học' })).not.toBeNull()
+    expect(screen.getByRole('heading', { name: 'Quản lý Khóa học' })).not.toBeNull()
+    expect(screen.getByRole('heading', { name: 'Hồ sơ Học sinh' })).not.toBeNull()
     expect(screen.getByRole('heading', { name: 'Quản lý Học phí' })).not.toBeNull()
   })
 
