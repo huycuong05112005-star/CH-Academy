@@ -4,6 +4,7 @@ import { PublicNavbar } from '../../components/public/PublicNavbar'
 import { PublicFooter } from '../../components/public/PublicFooter'
 import { publicApi } from '../../api/public'
 import type { Course } from '../../types/course'
+import { useSettings } from '../../context/SettingsContext'
 import {
   BookOpen,
   Users,
@@ -18,6 +19,7 @@ import {
 } from 'lucide-react'
 
 export const LandingPage: React.FC = () => {
+  const { settings } = useSettings()
   const [featuredCourses, setFeaturedCourses] = useState<Course[]>([])
   const [loadingCourses, setLoadingCourses] = useState<boolean>(true)
 
@@ -107,7 +109,7 @@ export const LandingPage: React.FC = () => {
     },
     {
       q: 'Chính sách hoàn phí hoặc bảo lưu khóa học được quy định ra sao?',
-      a: 'CH Academy có quy định rõ ràng về quyền lợi bảo lưu và điều chỉnh lịch học. Mọi yêu cầu được ghi nhận vào hệ thống quản lý và xử lý minh bạch theo đúng quy chuẩn trung tâm.'
+      a: `${settings.shortName} có quy định rõ ràng về quyền lợi bảo lưu và điều chỉnh lịch học. Mọi yêu cầu được ghi nhận vào hệ thống quản lý và xử lý minh bạch theo đúng quy chuẩn trung tâm.`
     }
   ]
 
@@ -129,7 +131,7 @@ export const LandingPage: React.FC = () => {
             </div>
 
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight leading-tight text-white animate-slide-up">
-              Kiến tạo Tri thức — Vững bước Tương lai cùng <span className="text-[#38BDF8]">CH Academy</span>
+              Kiến tạo Tri thức — Vững bước Tương lai cùng <span className="text-[#38BDF8]">{settings.shortName}</span>
             </h1>
 
             <p className="text-base sm:text-lg text-slate-300 leading-relaxed max-w-2xl animate-slide-up stagger-1">
@@ -172,7 +174,7 @@ export const LandingPage: React.FC = () => {
           <div className="lg:col-span-5 bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-5 animate-slide-up stagger-2">
             <h3 className="text-lg font-bold text-white flex items-center gap-2.5 pb-2 border-b border-white/10">
               <ShieldCheck size={22} className="text-[#38BDF8]" />
-              <span>Vì sao chọn CH Academy?</span>
+              <span>Vì sao chọn {settings.shortName}?</span>
             </h3>
             <ul className="space-y-4 text-sm text-slate-200">
               <li className="flex items-start gap-3">

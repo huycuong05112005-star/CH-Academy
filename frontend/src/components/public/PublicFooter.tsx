@@ -1,8 +1,11 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 import { GraduationCap, Mail, Phone, MapPin, Clock } from 'lucide-react'
+import { useSettings } from '../../context/SettingsContext'
 
 export const PublicFooter: React.FC = () => {
+  const { settings } = useSettings()
+
   return (
     <footer className="bg-[#0B1526] text-slate-300 pt-14 pb-8 border-t border-slate-800 transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
@@ -13,8 +16,8 @@ export const PublicFooter: React.FC = () => {
               <div className="w-10 h-10 rounded-xl bg-white text-[#0F243E] flex items-center justify-center shadow-sm">
                 <GraduationCap size={22} />
               </div>
-              <div className="text-xl font-extrabold text-white tracking-tight">
-                CH ACADEMY
+              <div className="text-xl font-extrabold text-white tracking-tight uppercase">
+                {settings.shortName}
               </div>
             </div>
             <p className="text-sm text-slate-400 leading-relaxed mb-4">
@@ -59,15 +62,15 @@ export const PublicFooter: React.FC = () => {
             <div className="space-y-3 text-sm text-slate-400">
               <div className="flex items-start gap-2.5">
                 <MapPin size={18} className="text-[#38BDF8] shrink-0 mt-0.5" />
-                <span>Trụ sở chính: Tòa nhà CH Academy, Hà Nội</span>
+                <span>Trụ sở chính: {settings.address}</span>
               </div>
               <div className="flex items-center gap-2.5">
                 <Phone size={18} className="text-[#38BDF8] shrink-0" />
-                <span>Hotline: 0987 654 321</span>
+                <span>Hotline: {settings.hotline}</span>
               </div>
               <div className="flex items-center gap-2.5">
                 <Mail size={18} className="text-[#38BDF8] shrink-0" />
-                <span>Email: contact@chacademy.edu.vn</span>
+                <span>Email: {settings.email}</span>
               </div>
               <div className="flex items-center gap-2.5">
                 <Clock size={18} className="text-[#38BDF8] shrink-0" />
@@ -80,7 +83,7 @@ export const PublicFooter: React.FC = () => {
         {/* Bottom Bar */}
         <div className="border-t border-slate-800/80 pt-6 flex flex-col sm:flex-row justify-between items-center gap-3 text-xs text-slate-500">
           <div>
-            © {new Date().getFullYear()} CH Academy. Tất cả quyền được bảo lưu. Múi giờ hệ thống: Asia/Ho_Chi_Minh.
+            © {new Date().getFullYear()} {settings.shortName}. Tất cả quyền được bảo lưu. Múi giờ hệ thống: {settings.timezone || 'Asia/Ho_Chi_Minh'}.
           </div>
           <div>
             Nền tảng vận hành giáo dục chuyên nghiệp

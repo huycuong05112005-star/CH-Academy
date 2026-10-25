@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { useSettings } from '../context/SettingsContext'
 import { ThemeSwitcher } from '../components/ui/ThemeSwitcher'
 import {
   LayoutDashboard,
@@ -39,6 +40,7 @@ export const AdminLayout: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [notifOpen, setNotifOpen] = useState(false)
   const { user, logout } = useAuth()
+  const { settings } = useSettings()
   const navigate = useNavigate()
   const location = useLocation()
 
@@ -114,7 +116,7 @@ export const AdminLayout: React.FC = () => {
           </div>
           {(!collapsed || mobileMenuOpen) && (
             <div className="whitespace-nowrap">
-              <div className="font-extrabold text-lg tracking-tight text-white">CH Academy</div>
+              <div className="font-extrabold text-lg tracking-tight text-white">{settings.shortName}</div>
               <div className="text-[10px] text-slate-400 font-semibold tracking-wider uppercase">Trung tâm Đào tạo</div>
             </div>
           )}

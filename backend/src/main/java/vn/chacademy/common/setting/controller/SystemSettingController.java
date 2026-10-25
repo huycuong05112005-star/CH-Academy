@@ -17,7 +17,7 @@ public class SystemSettingController {
     private final SystemSettingService systemSettingService;
 
     @GetMapping("/admin/settings")
-    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'CENTER_ADMIN')")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'CENTER_ADMIN', 'ACADEMIC_STAFF', 'ADMISSIONS_STAFF', 'ACCOUNTANT')")
     public ResponseEntity<ApiResponse<SystemSettingsDto>> getSettings() {
         SystemSettingsDto settings = systemSettingService.getSettings();
         return ResponseEntity.ok(ApiResponse.success("Lấy cấu hình hệ thống thành công", settings));
@@ -32,7 +32,7 @@ public class SystemSettingController {
 
     @GetMapping("/public/settings")
     public ResponseEntity<ApiResponse<SystemSettingsDto>> getPublicSettings() {
-        SystemSettingsDto settings = systemSettingService.getSettings();
+        SystemSettingsDto settings = systemSettingService.getPublicSettings();
         return ResponseEntity.ok(ApiResponse.success(settings));
     }
 }

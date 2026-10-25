@@ -16,10 +16,12 @@ import {
   RefreshCw
 } from 'lucide-react'
 import { useTheme, type Theme } from '../../../context/ThemeContext'
+import { useSettings } from '../../../context/SettingsContext'
 import { settingsApi, type SystemSettings } from '../../../api/settings'
 
 export const SettingsPage: React.FC = () => {
   const { theme, setTheme, resolvedTheme } = useTheme()
+  const { settings: globalSettings, updateSettings: saveGlobalSettings } = useSettings()
   const [successMsg, setSuccessMsg] = useState<string | null>(null)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
@@ -47,6 +49,25 @@ export const SettingsPage: React.FC = () => {
       try {
         setLoading(true)
         setErrorMsg(null)
+        // First populate from global settings if available
+        if (globalSettings) {
+          if (globalSettings.centerName) setCenterName(globalSettings.centerName)
+          if (globalSettings.shortName) setShortName(globalSettings.shortName)
+          if (globalSettings.hotline) setHotline(globalSettings.hotline)
+          if (globalSettings.email) setEmail(globalSettings.email)
+          if (globalSettings.address) setAddress(globalSettings.address)
+          if (globalSettings.website !== undefined) setWebsite(globalSettings.website || '')
+          if (globalSettings.notifyNewLead !== undefined) setNotifyNewLead(Boolean(globalSettings.notifyNewLead))
+          if (globalSettings.notifyTuitionDue !== undefined) setNotifyTuitionDue(Boolean(globalSettings.notifyTuitionDue))
+          if (globalSettings.notifyAbsence !== undefined) setNotifyAbsence(Boolean(globalSettings.notifyAbsence))
+          setSystemDiag({
+            appVersion: globalSettings.appVersion,
+            dbVersion: globalSettings.dbVersion,
+            activeProfile: globalSettings.activeProfile,
+            timezone: globalSettings.timezone
+          })
+        }
+
         const res = await settingsApi.getSettings()
         if (isMounted && res.data) {
           const d = res.data
@@ -66,9 +87,10 @@ export const SettingsPage: React.FC = () => {
             timezone: d.timezone
           })
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         if (isMounted) {
-          console.warn('Could not fetch settings from backend API, using cached/default settings:', err.message)
+          const msg = err instanceof Error ? err.message : String(err)
+          console.warn('Could not fetch settings from backend API, using cached/default settings:', msg)
         }
       } finally {
         if (isMounted) setLoading(false)
@@ -76,7 +98,7 @@ export const SettingsPage: React.FC = () => {
     }
     loadSettings()
     return () => { isMounted = false }
-  }, [])
+  }, [globalSettings])
 
   const handleSave = async (e?: React.FormEvent) => {
     if (e) e.preventDefault()
@@ -95,24 +117,24 @@ export const SettingsPage: React.FC = () => {
         notifyTuitionDue,
         notifyAbsence
       }
-      const res = await settingsApi.updateSettings(payload)
-      if (res.data) {
-        const d = res.data
-        setCenterName(d.centerName)
-        setShortName(d.shortName)
-        setHotline(d.hotline)
-        setEmail(d.email)
-        setAddress(d.address)
-        setWebsite(d.website || '')
-        setNotifyNewLead(Boolean(d.notifyNewLead))
-        setNotifyTuitionDue(Boolean(d.notifyTuitionDue))
-        setNotifyAbsence(Boolean(d.notifyAbsence))
+      const updated = await saveGlobalSettings(payload)
+      if (updated) {
+        setCenterName(updated.centerName)
+        setShortName(updated.shortName)
+        setHotline(updated.hotline)
+        setEmail(updated.email)
+        setAddress(updated.address)
+        setWebsite(updated.website || '')
+        if (updated.notifyNewLead !== undefined) setNotifyNewLead(Boolean(updated.notifyNewLead))
+        if (updated.notifyTuitionDue !== undefined) setNotifyTuitionDue(Boolean(updated.notifyTuitionDue))
+        if (updated.notifyAbsence !== undefined) setNotifyAbsence(Boolean(updated.notifyAbsence))
       }
-      setSuccessMsg(res.message || 'Đã lưu cấu hình hệ thống thành công!')
+      setSuccessMsg('Đã lưu cấu hình hệ thống thành công!')
       setTimeout(() => setSuccessMsg(null), 4000)
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to save settings:', err)
-      setErrorMsg(err.message || 'Lỗi khi lưu cấu hình. Vui lòng kiểm tra lại quyền truy cập hoặc kết nối mạng.')
+      const msg = err instanceof Error ? err.message : 'Lỗi khi lưu cấu hình. Vui lòng kiểm tra lại quyền truy cập hoặc kết nối mạng.'
+      setErrorMsg(msg)
     } finally {
       setSaving(false)
     }

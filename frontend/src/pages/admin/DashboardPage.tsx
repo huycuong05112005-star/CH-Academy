@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
+import { useSettings } from '../../context/SettingsContext'
 import { dashboardApi } from '../../api/dashboard'
 import type { DashboardStats } from '../../types/dashboard'
 import {
@@ -24,6 +25,7 @@ import { exportToCsv } from '../../utils/exportCsv'
 
 export const DashboardPage: React.FC = () => {
   const { user } = useAuth()
+  const { settings } = useSettings()
   const [stats, setStats] = useState<DashboardStats | null>(null)
   const [statsLoading, setStatsLoading] = useState<boolean>(true)
   const [statsError, setStatsError] = useState<string | null>(null)
@@ -112,7 +114,7 @@ export const DashboardPage: React.FC = () => {
             Xin chào, {user?.fullName || 'Quản trị viên'}! 👋
           </h1>
           <p className="text-slate-500 dark:text-[#A6B4C8] text-sm mt-1">
-            Chào mừng bạn đến với trung tâm điều hành giáo dục CH Academy.
+            Chào mừng bạn đến với trung tâm điều hành giáo dục {settings.shortName}.
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -374,13 +376,17 @@ export const DashboardPage: React.FC = () => {
           <div className="bg-white dark:bg-[#151F31] rounded-2xl border border-slate-200/80 dark:border-[#2A3A50] shadow-xs p-5">
             <h3 className="text-sm font-bold text-[#142B4A] dark:text-[#E8EEF7] flex items-center gap-2 mb-3">
               <ShieldCheck className="w-4 h-4 text-[#142B4A] dark:text-[#38BDF8]" />
-              <span>Trung tâm Đào tạo CH Academy</span>
+              <span>{settings.centerName}</span>
             </h3>
             <div className="text-xs text-slate-600 dark:text-[#A6B4C8] space-y-2">
-              <div><strong className="text-slate-800 dark:text-[#E8EEF7]">Niên khóa:</strong> 2026 - 2027</div>
+              <div><strong className="text-slate-800 dark:text-[#E8EEF7]">Tên thương hiệu:</strong> {settings.shortName}</div>
               <div><strong className="text-slate-800 dark:text-[#E8EEF7]">Giờ hoạt động:</strong> 08:00 - 21:30 (Thứ 2 - CN)</div>
-              <div><strong className="text-slate-800 dark:text-[#E8EEF7]">Hotline học vụ:</strong> 0988 123 456</div>
-              <div><strong className="text-slate-800 dark:text-[#E8EEF7]">Cơ sở:</strong> Cơ sở đào tạo chuẩn quốc tế</div>
+              <div><strong className="text-slate-800 dark:text-[#E8EEF7]">Hotline học vụ:</strong> {settings.hotline}</div>
+              <div><strong className="text-slate-800 dark:text-[#E8EEF7]">Email tiếp nhận:</strong> {settings.email}</div>
+              <div><strong className="text-slate-800 dark:text-[#E8EEF7]">Trụ sở:</strong> {settings.address}</div>
+              {settings.website && (
+                <div><strong className="text-slate-800 dark:text-[#E8EEF7]">Website:</strong> <a href={settings.website} target="_blank" rel="noreferrer" className="text-sky-600 dark:text-sky-400 hover:underline">{settings.website}</a></div>
+              )}
             </div>
           </div>
         </div>

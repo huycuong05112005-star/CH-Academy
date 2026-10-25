@@ -2,9 +2,11 @@ import React, { useState } from 'react'
 import { PublicNavbar } from '../../components/public/PublicNavbar'
 import { PublicFooter } from '../../components/public/PublicFooter'
 import { publicApi } from '../../api/public'
-import { MapPin, Phone, Mail, Clock, Send, CheckCircle } from 'lucide-react'
+import { MapPin, Phone, Mail, Clock, Send, CheckCircle, Globe } from 'lucide-react'
+import { useSettings } from '../../context/SettingsContext'
 
 export const ContactPage: React.FC = () => {
+  const { settings } = useSettings()
   const [fullName, setFullName] = useState('')
   const [phone, setPhone] = useState('')
   const [email, setEmail] = useState('')
@@ -80,7 +82,7 @@ export const ContactPage: React.FC = () => {
                   <div>
                     <strong className="block text-[#0F172A] dark:text-white">Địa chỉ trung tâm:</strong>
                     <div className="text-slate-500 dark:text-[#94A3B8] text-xs mt-0.5">
-                      Khu vực điều hành CH Academy (Cập nhật bởi Ban Quản lý)
+                      {settings.address}
                     </div>
                   </div>
                 </div>
@@ -91,7 +93,7 @@ export const ContactPage: React.FC = () => {
                   </div>
                   <div>
                     <strong className="block text-[#0F172A] dark:text-white">Hotline Tuyển sinh & Hỗ trợ:</strong>
-                    <div className="text-slate-500 dark:text-[#94A3B8] text-xs mt-0.5">0987 654 321 (08:00 - 21:00)</div>
+                    <div className="text-slate-500 dark:text-[#94A3B8] text-xs mt-0.5">{settings.hotline} (08:00 - 21:00)</div>
                   </div>
                 </div>
 
@@ -101,9 +103,25 @@ export const ContactPage: React.FC = () => {
                   </div>
                   <div>
                     <strong className="block text-[#0F172A] dark:text-white">Hòm thư điện tử:</strong>
-                    <div className="text-slate-500 dark:text-[#94A3B8] text-xs mt-0.5">contact@chacademy.edu.vn</div>
+                    <div className="text-slate-500 dark:text-[#94A3B8] text-xs mt-0.5">{settings.email}</div>
                   </div>
                 </div>
+
+                {settings.website && (
+                  <div className="flex gap-3.5">
+                    <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-[#2563EB] dark:text-[#38BDF8] flex items-center justify-center shrink-0">
+                      <Globe size={20} />
+                    </div>
+                    <div>
+                      <strong className="block text-[#0F172A] dark:text-white">Website chính thức:</strong>
+                      <div className="text-slate-500 dark:text-[#94A3B8] text-xs mt-0.5">
+                        <a href={settings.website} target="_blank" rel="noreferrer" className="text-blue-600 dark:text-sky-400 hover:underline">
+                          {settings.website}
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 <div className="flex gap-3.5">
                   <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-[#2563EB] dark:text-[#38BDF8] flex items-center justify-center shrink-0">

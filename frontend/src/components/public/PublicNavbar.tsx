@@ -2,9 +2,11 @@ import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { GraduationCap, LogIn, Menu, X } from 'lucide-react'
 import { ThemeSwitcher } from '../ui/ThemeSwitcher'
+import { useSettings } from '../../context/SettingsContext'
 
 export const PublicNavbar: React.FC = () => {
   const [mobileOpen, setMobileOpen] = useState(false)
+  const { settings } = useSettings()
 
   return (
     <header
@@ -16,15 +18,15 @@ export const PublicNavbar: React.FC = () => {
         {/* Logo */}
         <Link
           to="/"
-          aria-label="CH Academy - Trang chủ"
+          aria-label={`${settings.shortName} - Trang chủ`}
           className="flex items-center gap-3 no-underline group"
         >
           <div className="w-10 h-10 rounded-xl bg-[#0F243E] dark:bg-[#38BDF8] text-white dark:text-[#0B1220] flex items-center justify-center shadow-xs transition-transform group-hover:scale-105">
             <GraduationCap className="w-6 h-6" />
           </div>
           <div>
-            <div className="text-lg font-extrabold text-[#0F243E] dark:text-[#F8FAFC] leading-tight tracking-tight">
-              CH ACADEMY
+            <div className="text-lg font-extrabold text-[#0F243E] dark:text-[#F8FAFC] leading-tight tracking-tight uppercase">
+              {settings.shortName}
             </div>
             <div className="text-[10px] text-slate-500 dark:text-[#94A3B8] font-semibold tracking-wider uppercase">
               Hệ Thống Đào Tạo Chuẩn Hóa

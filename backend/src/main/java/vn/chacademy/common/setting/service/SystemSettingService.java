@@ -61,6 +61,25 @@ public class SystemSettingService {
                 .build();
     }
 
+    @Transactional(readOnly = true)
+    public SystemSettingsDto getPublicSettings() {
+        return SystemSettingsDto.builder()
+                .centerName(getSettingValue("center.name", "Học viện Anh ngữ & Năng khiếu CH Academy"))
+                .shortName(getSettingValue("center.short_name", "CH Academy"))
+                .hotline(getSettingValue("center.hotline", "0988 123 456"))
+                .email(getSettingValue("center.email", "tuyensinh@chacademy.edu.vn"))
+                .address(getSettingValue("center.address", "Tầng 3, Tòa nhà Tri Thức, Số 123 Phố Huế, Q. Hai Bà Trưng, Hà Nội"))
+                .website(getSettingValue("center.website", "https://chacademy.edu.vn"))
+                .notifyNewLead(null)
+                .notifyTuitionDue(null)
+                .notifyAbsence(null)
+                .appVersion(null)
+                .dbVersion(null)
+                .activeProfile(null)
+                .timezone("Asia/Ho_Chi_Minh (UTC+7)")
+                .build();
+    }
+
     @Transactional
     public SystemSettingsDto updateSettings(SystemSettingsDto dto) {
         saveOrUpdateSetting("center.name", dto.getCenterName(), "Tên đầy đủ của trung tâm");

@@ -3,8 +3,11 @@ import { Link } from 'react-router-dom'
 import { PublicNavbar } from '../../components/public/PublicNavbar'
 import { PublicFooter } from '../../components/public/PublicFooter'
 import { Target, Eye, Award, CheckCircle, ArrowRight } from 'lucide-react'
+import { useSettings } from '../../context/SettingsContext'
 
 export const AboutPage: React.FC = () => {
+  const { settings } = useSettings()
+
   return (
     <div className="bg-[var(--bg-app)] min-h-screen flex flex-col text-[var(--text-main)] transition-colors duration-200">
       <PublicNavbar />
@@ -13,7 +16,7 @@ export const AboutPage: React.FC = () => {
       <section className="bg-gradient-to-br from-[#0F243E] via-[#142B4A] to-[#1E3A63] text-white py-16 px-4 sm:px-6 text-center">
         <div className="max-w-3xl mx-auto space-y-4">
           <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
-            Về CH Academy
+            Về {settings.shortName}
           </h1>
           <p className="text-slate-300 text-base sm:text-lg leading-relaxed">
             Hệ sinh thái giáo dục hiện đại, chuẩn mực và lấy người học làm trung tâm. Chúng tôi đồng hành cùng sự phát triển của học viên ở mọi giai đoạn.
@@ -56,7 +59,7 @@ export const AboutPage: React.FC = () => {
               Giá trị Cốt lõi
             </h2>
             <p className="text-sm text-slate-600 dark:text-[#94A3B8] leading-relaxed">
-              Chính trực — Tận tâm — Chất lượng — Minh bạch. Mỗi học viên tại CH Academy đều được theo dõi và hỗ trợ theo năng lực cá nhân để phát huy tối đa tiềm năng.
+              Chính trực — Tận tâm — Chất lượng — Minh bạch. Mỗi học viên tại {settings.shortName} đều được theo dõi và hỗ trợ theo năng lực cá nhân để phát huy tối đa tiềm năng.
             </p>
           </div>
         </div>
