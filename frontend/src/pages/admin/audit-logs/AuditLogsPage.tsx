@@ -144,15 +144,15 @@ export const AuditLogsPage: React.FC = () => {
 
       {/* Logs Table */}
       <div className="bg-white dark:bg-[#1E293B] rounded-xl shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
-            <thead className="bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-700/60 text-slate-600 dark:text-slate-300 font-semibold">
+        <div className="overflow-x-auto rounded-xl">
+          <table className="w-full text-left text-sm min-w-[880px]">
+            <thead className="bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-700/60 text-slate-600 dark:text-slate-300 font-semibold text-xs uppercase tracking-wider">
               <tr>
-                <th className="py-3 px-4">Thời gian</th>
-                <th className="py-3 px-4">Người thực hiện</th>
-                <th className="py-3 px-4">Hành động</th>
-                <th className="py-3 px-4">Tài nguyên</th>
-                <th className="py-3 px-4">Nội dung chi tiết</th>
+                <th className="py-3 px-4 w-[160px] whitespace-nowrap">Thời gian</th>
+                <th className="py-3 px-4 w-[170px] whitespace-nowrap">Người thực hiện</th>
+                <th className="py-3 px-4 w-[140px] whitespace-nowrap">Hành động</th>
+                <th className="py-3 px-4 w-[140px] whitespace-nowrap">Tài nguyên</th>
+                <th className="py-3 px-4 min-w-[270px]">Nội dung chi tiết</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">

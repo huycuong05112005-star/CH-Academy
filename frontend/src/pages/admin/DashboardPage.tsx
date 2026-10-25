@@ -258,47 +258,51 @@ export const DashboardPage: React.FC = () => {
                 <span>{statsError}</span>
               </div>
             ) : stats?.upcomingSessions && stats.upcomingSessions.length > 0 ? (
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse text-table">
+              <div className="overflow-x-auto rounded-xl">
+                <table className="w-full text-left border-collapse text-table min-w-[840px]">
                   <thead>
                     <tr className="bg-slate-50/80 dark:bg-[#1C293D] border-b border-slate-200 dark:border-[#2A3A50] text-xs font-semibold text-slate-500 dark:text-[#A6B4C8] uppercase tracking-wider">
-                      <th className="py-3 px-3">Ngày</th>
-                      <th className="py-3 px-3">Giờ</th>
-                      <th className="py-3 px-3">Lớp học</th>
-                      <th className="py-3 px-3">Giáo viên</th>
-                      <th className="py-3 px-3">Phòng</th>
-                      <th className="py-3 px-3 text-center">Trạng thái</th>
-                      <th className="py-3 px-3 text-right">Thao tác</th>
+                      <th className="py-3 px-3.5 w-[115px] whitespace-nowrap">Ngày</th>
+                      <th className="py-3 px-3.5 w-[120px] whitespace-nowrap">Giờ</th>
+                      <th className="py-3 px-3.5 min-w-[220px]">Lớp học</th>
+                      <th className="py-3 px-3.5 min-w-[150px] whitespace-nowrap">Giáo viên</th>
+                      <th className="py-3 px-3.5 min-w-[130px] whitespace-nowrap">Phòng</th>
+                      <th className="py-3 px-3.5 w-[115px] text-center whitespace-nowrap">Trạng thái</th>
+                      <th className="py-3 px-3.5 w-[110px] text-right whitespace-nowrap">Thao tác</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 dark:divide-[#2A3A50]/60">
                     {stats.upcomingSessions.map((session) => (
                       <tr key={session.id} className="hover:bg-slate-50/60 dark:hover:bg-[#1C293D]/40 transition">
-                        <td className="py-3 px-3 font-semibold text-slate-800 dark:text-[#E8EEF7] text-xs whitespace-nowrap">
+                        <td className="py-3 px-3.5 font-semibold text-slate-800 dark:text-[#E8EEF7] text-xs whitespace-nowrap">
                           {formatDate(session.sessionDate)}
                         </td>
-                        <td className="py-3 px-3 text-xs text-slate-600 dark:text-[#A6B4C8] whitespace-nowrap">
+                        <td className="py-3 px-3.5 text-xs text-slate-600 dark:text-[#A6B4C8] whitespace-nowrap font-mono">
                           {formatTime(session.startTime)} - {formatTime(session.endTime)}
                         </td>
-                        <td className="py-3 px-3">
-                          <div className="font-bold text-[#142B4A] dark:text-[#38BDF8] text-xs">{session.className}</div>
-                          <div className="text-[11px] font-mono text-slate-500 dark:text-[#A6B4C8]">{session.classCode}</div>
+                        <td className="py-3 px-3.5">
+                          <div className="font-bold text-[#142B4A] dark:text-[#38BDF8] text-xs leading-snug break-words">
+                            {session.className}
+                          </div>
+                          <div className="text-[11px] font-mono text-slate-500 dark:text-[#A6B4C8] mt-0.5">
+                            {session.classCode}
+                          </div>
                         </td>
-                        <td className="py-3 px-3 text-xs text-slate-700 dark:text-[#E8EEF7] whitespace-nowrap">
+                        <td className="py-3 px-3.5 text-xs text-slate-700 dark:text-[#E8EEF7] whitespace-nowrap font-medium">
                           {session.teacherName}
                         </td>
-                        <td className="py-3 px-3 text-xs text-slate-600 dark:text-[#A6B4C8] whitespace-nowrap">
+                        <td className="py-3 px-3.5 text-xs text-slate-600 dark:text-[#A6B4C8] whitespace-nowrap">
                           {session.room || 'Chưa xếp'}
                         </td>
-                        <td className="py-3 px-3 text-center whitespace-nowrap">
+                        <td className="py-3 px-3.5 text-center whitespace-nowrap">
                           {getSessionStatusBadge(session.status)}
                         </td>
-                        <td className="py-3 px-3 text-right whitespace-nowrap">
+                        <td className="py-3 px-3.5 text-right whitespace-nowrap">
                           <Link
                             to={`/admin/attendance`}
-                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold text-[#142B4A] dark:text-[#38BDF8] bg-slate-100 hover:bg-slate-200 dark:bg-[#1C293D] dark:hover:bg-[#2A3A50] transition"
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-[#142B4A] dark:text-[#38BDF8] bg-slate-100 hover:bg-slate-200 dark:bg-[#1C293D] dark:hover:bg-[#2A3A50] transition shadow-2xs"
                           >
-                            Điểm danh
+                            <span>Điểm danh</span>
                           </Link>
                         </td>
                       </tr>

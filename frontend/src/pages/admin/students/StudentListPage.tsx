@@ -695,17 +695,17 @@ export const StudentListPage: React.FC = () => {
         />
       ) : (
         <div className="bg-white dark:bg-[#151F31] rounded-2xl border border-slate-200/80 dark:border-[#2A3A50] shadow-xs overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse text-table">
+          <div className="overflow-x-auto rounded-2xl">
+            <table className="w-full text-left border-collapse text-table min-w-[1100px]">
               <thead>
                 <tr className="bg-slate-50/80 dark:bg-[#1C293D] border-b border-slate-200 dark:border-[#2A3A50] text-xs font-semibold text-slate-500 dark:text-[#A6B4C8] uppercase tracking-wider">
-                  <th className="py-3.5 px-4">Học viên</th>
-                  <th className="py-3.5 px-4">Khóa học & Học phí</th>
-                  <th className="py-3.5 px-4">Tài khoản Web</th>
-                  <th className="py-3.5 px-4">Liên hệ</th>
-                  <th className="py-3.5 px-4">Người giám hộ</th>
-                  <th className="py-3.5 px-4">Trạng thái</th>
-                  <th className="py-3.5 px-4 text-right">Thao tác</th>
+                  <th className="py-3.5 px-4 min-w-[220px]">Học viên</th>
+                  <th className="py-3.5 px-4 min-w-[230px]">Khóa học & Học phí</th>
+                  <th className="py-3.5 px-4 w-[150px] whitespace-nowrap">Tài khoản Web</th>
+                  <th className="py-3.5 px-4 w-[160px] whitespace-nowrap">Liên hệ</th>
+                  <th className="py-3.5 px-4 w-[170px] whitespace-nowrap">Người giám hộ</th>
+                  <th className="py-3.5 px-4 w-[120px] text-center whitespace-nowrap">Trạng thái</th>
+                  <th className="py-3.5 px-4 w-[130px] text-right whitespace-nowrap">Thao tác</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-[#2A3A50]/60">

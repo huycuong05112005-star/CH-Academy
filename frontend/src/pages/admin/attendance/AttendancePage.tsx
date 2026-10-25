@@ -393,15 +393,15 @@ export const AttendancePage: React.FC = () => {
               </div>
             </div>
 
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse text-table">
+            <div className="overflow-x-auto rounded-2xl">
+              <table className="w-full text-left border-collapse text-table min-w-[820px]">
                 <thead>
                   <tr className="bg-slate-50/80 dark:bg-[#1C293D] border-b border-slate-200 dark:border-[#2A3A50] text-xs font-semibold text-slate-500 dark:text-[#A6B4C8] uppercase tracking-wider">
-                    <th className="py-3.5 px-4 w-12 text-center">STT</th>
-                    <th className="py-3.5 px-4">Mã HV</th>
-                    <th className="py-3.5 px-4">Họ và tên học viên</th>
-                    <th className="py-3.5 px-4 text-center">Trạng thái điểm danh</th>
-                    <th className="py-3.5 px-4">Ghi chú buổi học</th>
+                    <th className="py-3.5 px-4 w-14 text-center whitespace-nowrap">STT</th>
+                    <th className="py-3.5 px-4 w-[110px] whitespace-nowrap">Mã HV</th>
+                    <th className="py-3.5 px-4 min-w-[200px]">Họ và tên học viên</th>
+                    <th className="py-3.5 px-4 w-[300px] text-center whitespace-nowrap">Trạng thái điểm danh</th>
+                    <th className="py-3.5 px-4 min-w-[200px]">Ghi chú buổi học</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-[#2A3A50]/60">

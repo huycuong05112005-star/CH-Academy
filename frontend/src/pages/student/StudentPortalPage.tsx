@@ -769,15 +769,15 @@ export const StudentPortalPage: React.FC = () => {
                   Chưa có giao dịch thanh toán nào được ghi nhận.
                 </div>
               ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left border-collapse text-xs">
+                <div className="overflow-x-auto rounded-xl">
+                  <table className="w-full text-left border-collapse text-xs min-w-[750px]">
                     <thead>
-                      <tr className="bg-slate-50/80 dark:bg-[#1C293D]/60 text-slate-600 dark:text-[#A6B4C8] border-b border-slate-200 dark:border-[#2A3A50]">
-                        <th className="py-3 px-4 font-bold">Mã phiếu</th>
-                        <th className="py-3 px-4 font-bold">Ngày thanh toán</th>
-                        <th className="py-3 px-4 font-bold">Phương thức</th>
-                        <th className="py-3 px-4 font-bold">Số tiền</th>
-                        <th className="py-3 px-4 font-bold">Mã tham chiếu</th>
+                      <tr className="bg-slate-50/80 dark:bg-[#1C293D]/60 text-slate-600 dark:text-[#A6B4C8] border-b border-slate-200 dark:border-[#2A3A50] font-semibold uppercase tracking-wider">
+                        <th className="py-3 px-4 w-[130px] whitespace-nowrap font-bold">Mã phiếu</th>
+                        <th className="py-3 px-4 w-[130px] whitespace-nowrap font-bold">Ngày thanh toán</th>
+                        <th className="py-3 px-4 w-[140px] whitespace-nowrap font-bold">Phương thức</th>
+                        <th className="py-3 px-4 w-[140px] whitespace-nowrap font-bold text-right">Số tiền</th>
+                        <th className="py-3 px-4 min-w-[150px] font-bold">Mã tham chiếu</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100 dark:divide-[#2A3A50]/60">

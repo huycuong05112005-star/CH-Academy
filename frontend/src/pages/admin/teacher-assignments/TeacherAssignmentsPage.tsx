@@ -447,17 +447,17 @@ export const TeacherAssignmentsPage: React.FC = () => {
 
           {/* Teachers Table */}
           <div className="bg-white dark:bg-[#151F31] rounded-2xl shadow-xs border border-slate-200/80 dark:border-[#2A3A50] overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm">
-                <thead className="bg-slate-50 dark:bg-[#0E1726]/60 border-b border-slate-200 dark:border-[#2A3A50] text-slate-600 dark:text-[#A6B4C8] font-semibold">
+            <div className="overflow-x-auto rounded-2xl">
+              <table className="w-full text-left text-sm min-w-[1050px]">
+                <thead className="bg-slate-50 dark:bg-[#0E1726]/60 border-b border-slate-200 dark:border-[#2A3A50] text-slate-600 dark:text-[#A6B4C8] font-semibold text-xs uppercase tracking-wider">
                   <tr>
-                    <th className="py-3 px-4">Giảng viên</th>
-                    <th className="py-3 px-4">Thông tin liên hệ</th>
-                    <th className="py-3 px-4">Chuyên môn / Lĩnh vực</th>
-                    <th className="py-3 px-4">Tài khoản Portal</th>
-                    <th className="py-3 px-4">Mật khẩu khởi tạo</th>
-                    <th className="py-3 px-4">Trạng thái</th>
-                    <th className="py-3 px-4 text-right">Thao tác</th>
+                    <th className="py-3 px-4 min-w-[180px]">Giảng viên</th>
+                    <th className="py-3 px-4 w-[180px] whitespace-nowrap">Thông tin liên hệ</th>
+                    <th className="py-3 px-4 min-w-[200px]">Chuyên môn / Lĩnh vực</th>
+                    <th className="py-3 px-4 w-[140px] whitespace-nowrap">Tài khoản Portal</th>
+                    <th className="py-3 px-4 w-[170px] whitespace-nowrap">Mật khẩu khởi tạo</th>
+                    <th className="py-3 px-4 w-[120px] text-center whitespace-nowrap">Trạng thái</th>
+                    <th className="py-3 px-4 w-[110px] text-right whitespace-nowrap">Thao tác</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-[#2A3A50]">
@@ -584,17 +584,17 @@ export const TeacherAssignmentsPage: React.FC = () => {
           </div>
 
           <div className="bg-white dark:bg-[#151F31] rounded-2xl shadow-xs border border-slate-200/80 dark:border-[#2A3A50] overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm">
-                <thead className="bg-slate-50 dark:bg-[#0E1726]/60 border-b border-slate-200 dark:border-[#2A3A50] text-slate-600 dark:text-[#A6B4C8] font-semibold">
+            <div className="overflow-x-auto rounded-2xl">
+              <table className="w-full text-left text-sm min-w-[1000px]">
+                <thead className="bg-slate-50 dark:bg-[#0E1726]/60 border-b border-slate-200 dark:border-[#2A3A50] text-slate-600 dark:text-[#A6B4C8] font-semibold text-xs uppercase tracking-wider">
                   <tr>
-                    <th className="py-3 px-4">Lớp học</th>
-                    <th className="py-3 px-4">Giảng viên phụ trách</th>
-                    <th className="py-3 px-4">Vai trò</th>
-                    <th className="py-3 px-4">Ngày bắt đầu</th>
-                    <th className="py-3 px-4">Trạng thái</th>
-                    <th className="py-3 px-4">Ghi chú & Người phân công</th>
-                    <th className="py-3 px-4 text-right">Thao tác</th>
+                    <th className="py-3 px-4 min-w-[200px]">Lớp học</th>
+                    <th className="py-3 px-4 min-w-[180px]">Giảng viên phụ trách</th>
+                    <th className="py-3 px-4 w-[130px] whitespace-nowrap">Vai trò</th>
+                    <th className="py-3 px-4 w-[120px] whitespace-nowrap">Ngày bắt đầu</th>
+                    <th className="py-3 px-4 w-[120px] text-center whitespace-nowrap">Trạng thái</th>
+                    <th className="py-3 px-4 min-w-[180px]">Ghi chú & Người phân công</th>
+                    <th className="py-3 px-4 w-[110px] text-right whitespace-nowrap">Thao tác</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-[#2A3A50]">

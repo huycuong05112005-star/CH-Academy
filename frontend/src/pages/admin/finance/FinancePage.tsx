@@ -438,19 +438,19 @@ export function FinancePage() {
                 icon={FileText}
               />
             ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse text-table">
+              <div className="overflow-x-auto rounded-2xl">
+                <table className="w-full text-left border-collapse text-table min-w-[1050px]">
                   <thead>
                     <tr className="bg-slate-50/80 dark:bg-[#1C293D] border-b border-slate-200 dark:border-[#2A3A50] text-xs font-semibold text-slate-500 dark:text-[#A6B4C8] uppercase tracking-wider">
-                      <th className="py-3.5 px-4">Mã</th>
-                      <th className="py-3.5 px-4">Học viên</th>
-                      <th className="py-3.5 px-4">Khoản thu</th>
-                      <th className="py-3.5 px-4 text-right">Tổng tiền</th>
-                      <th className="py-3.5 px-4 text-right">Đã nộp</th>
-                      <th className="py-3.5 px-4 text-right">Còn nợ</th>
-                      <th className="py-3.5 px-4">Hạn nộp</th>
-                      <th className="py-3.5 px-4 text-center">Trạng thái</th>
-                      <th className="py-3.5 px-4 text-right">Hành động</th>
+                      <th className="py-3.5 px-4 w-[110px] whitespace-nowrap">Mã</th>
+                      <th className="py-3.5 px-4 min-w-[180px]">Học viên</th>
+                      <th className="py-3.5 px-4 min-w-[190px]">Khoản thu</th>
+                      <th className="py-3.5 px-4 w-[130px] text-right whitespace-nowrap">Tổng tiền</th>
+                      <th className="py-3.5 px-4 w-[130px] text-right whitespace-nowrap">Đã nộp</th>
+                      <th className="py-3.5 px-4 w-[130px] text-right whitespace-nowrap">Còn nợ</th>
+                      <th className="py-3.5 px-4 w-[110px] whitespace-nowrap">Hạn nộp</th>
+                      <th className="py-3.5 px-4 w-[130px] text-center whitespace-nowrap">Trạng thái</th>
+                      <th className="py-3.5 px-4 w-[110px] text-right whitespace-nowrap">Hành động</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 dark:divide-[#2A3A50]/60">
@@ -562,17 +562,17 @@ export function FinancePage() {
                 icon={Receipt}
               />
             ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse text-table">
+              <div className="overflow-x-auto rounded-2xl">
+                <table className="w-full text-left border-collapse text-table min-w-[950px]">
                   <thead>
                     <tr className="bg-slate-50/80 dark:bg-[#1C293D] border-b border-slate-200 dark:border-[#2A3A50] text-xs font-semibold text-slate-500 dark:text-[#A6B4C8] uppercase tracking-wider">
-                      <th className="py-3.5 px-4">Mã GD</th>
-                      <th className="py-3.5 px-4">Học viên</th>
-                      <th className="py-3.5 px-4 text-right">Số tiền</th>
-                      <th className="py-3.5 px-4">Phương thức</th>
-                      <th className="py-3.5 px-4">Ngày nộp</th>
-                      <th className="py-3.5 px-4">Mã tham chiếu</th>
-                      <th className="py-3.5 px-4">Người thu</th>
+                      <th className="py-3.5 px-4 w-[110px] whitespace-nowrap">Mã GD</th>
+                      <th className="py-3.5 px-4 min-w-[180px]">Học viên</th>
+                      <th className="py-3.5 px-4 w-[140px] text-right whitespace-nowrap">Số tiền</th>
+                      <th className="py-3.5 px-4 w-[130px] whitespace-nowrap">Phương thức</th>
+                      <th className="py-3.5 px-4 w-[120px] whitespace-nowrap">Ngày nộp</th>
+                      <th className="py-3.5 px-4 w-[140px] whitespace-nowrap">Mã tham chiếu</th>
+                      <th className="py-3.5 px-4 w-[130px] whitespace-nowrap">Người thu</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 dark:divide-[#2A3A50]/60">

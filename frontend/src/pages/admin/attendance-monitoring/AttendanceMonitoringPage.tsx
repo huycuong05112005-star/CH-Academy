@@ -180,17 +180,17 @@ export const AttendanceMonitoringPage: React.FC = () => {
 
       {/* Sessions Table */}
       <div className="bg-white dark:bg-[#1E293B] rounded-xl shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
-            <thead className="bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-700/60 text-slate-600 dark:text-slate-300 font-semibold">
+        <div className="overflow-x-auto rounded-xl">
+          <table className="w-full text-left text-sm min-w-[1000px]">
+            <thead className="bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-700/60 text-slate-600 dark:text-slate-300 font-semibold text-xs uppercase tracking-wider">
               <tr>
-                <th className="py-3 px-4">Ngày học & Giờ</th>
-                <th className="py-3 px-4">Lớp học</th>
-                <th className="py-3 px-4">Giáo viên</th>
-                <th className="py-3 px-4">Chủ đề buổi học</th>
-                <th className="py-3 px-4">Trạng thái điểm danh</th>
-                <th className="py-3 px-4">Thống kê chuyên cần</th>
-                <th className="py-3 px-4 text-right">Chi tiết</th>
+                <th className="py-3 px-4 w-[150px] whitespace-nowrap">Ngày học & Giờ</th>
+                <th className="py-3 px-4 min-w-[180px]">Lớp học</th>
+                <th className="py-3 px-4 w-[160px] whitespace-nowrap">Giáo viên</th>
+                <th className="py-3 px-4 min-w-[200px]">Chủ đề buổi học</th>
+                <th className="py-3 px-4 w-[160px] whitespace-nowrap">Trạng thái điểm danh</th>
+                <th className="py-3 px-4 w-[180px] whitespace-nowrap">Thống kê chuyên cần</th>
+                <th className="py-3 px-4 w-[100px] text-right whitespace-nowrap">Chi tiết</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">

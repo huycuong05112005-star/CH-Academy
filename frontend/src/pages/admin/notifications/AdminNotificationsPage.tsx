@@ -395,16 +395,16 @@ export const AdminNotificationsPage: React.FC = () => {
               Chưa có tài liệu nào được giảng viên tải lên.
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse text-xs">
+            <div className="overflow-x-auto rounded-xl">
+              <table className="w-full text-left border-collapse text-xs min-w-[850px]">
                 <thead>
-                  <tr className="bg-slate-50/80 dark:bg-[#1C293D]/60 text-slate-600 dark:text-[#A6B4C8] border-b border-slate-200 dark:border-[#2A3A50]">
-                    <th className="py-3 px-4 font-bold">Giảng viên tải lên</th>
-                    <th className="py-3 px-4 font-bold">Buổi học / Chủ đề</th>
-                    <th className="py-3 px-4 font-bold">Tiêu đề tài liệu</th>
-                    <th className="py-3 px-4 font-bold">Loại</th>
-                    <th className="py-3 px-4 font-bold">Thời gian tải</th>
-                    <th className="py-3 px-4 font-bold text-right">Xem trước</th>
+                  <tr className="bg-slate-50/80 dark:bg-[#1C293D]/60 text-slate-600 dark:text-[#A6B4C8] border-b border-slate-200 dark:border-[#2A3A50] font-semibold uppercase tracking-wider">
+                    <th className="py-3 px-4 w-[160px] whitespace-nowrap font-bold">Giảng viên tải lên</th>
+                    <th className="py-3 px-4 min-w-[180px] font-bold">Buổi học / Chủ đề</th>
+                    <th className="py-3 px-4 min-w-[220px] font-bold">Tiêu đề tài liệu</th>
+                    <th className="py-3 px-4 w-[110px] whitespace-nowrap font-bold">Loại</th>
+                    <th className="py-3 px-4 w-[140px] whitespace-nowrap font-bold">Thời gian tải</th>
+                    <th className="py-3 px-4 w-[110px] whitespace-nowrap font-bold text-right">Xem trước</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-[#2A3A50]/60">

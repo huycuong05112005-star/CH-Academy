@@ -275,6 +275,20 @@ body {
   color: var(--text-main);
 }
 
+table {
+  text-rendering: optimizeLegibility;
+}
+
+th {
+  word-break: normal;
+  overflow-wrap: normal;
+}
+
+td {
+  word-break: normal;
+  overflow-wrap: break-word;
+}
+
 .text-label {
   font-size: 0.84375rem; /* 13.5px */
   font-weight: 500;

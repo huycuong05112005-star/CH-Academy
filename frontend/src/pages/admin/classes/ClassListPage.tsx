@@ -677,59 +677,59 @@ export const ClassListPage: React.FC = () => {
               </button>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse text-sm">
+            <div className="overflow-x-auto rounded-2xl">
+              <table className="w-full text-left border-collapse text-sm min-w-[1050px]">
                 <thead>
-                  <tr className="bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                    <th className="py-3 px-4">Mã lớp</th>
-                    <th className="py-3 px-4">Tên lớp học & Khóa học</th>
-                    <th className="py-3 px-4">Giáo viên & Phòng</th>
-                    <th className="py-3 px-4">Lịch học định kỳ</th>
-                    <th className="py-3 px-4">Sĩ số & Tiến độ</th>
-                    <th className="py-3 px-4">Trạng thái</th>
-                    <th className="py-3 px-4 text-right">Thao tác</th>
+                  <tr className="bg-slate-50/80 dark:bg-[#1C293D] border-b border-slate-200 dark:border-[#2A3A50] text-xs font-semibold text-slate-500 dark:text-[#A6B4C8] uppercase tracking-wider">
+                    <th className="py-3.5 px-4 w-[110px] whitespace-nowrap">Mã lớp</th>
+                    <th className="py-3.5 px-4 min-w-[240px]">Tên lớp học & Khóa học</th>
+                    <th className="py-3.5 px-4 min-w-[170px]">Giáo viên & Phòng</th>
+                    <th className="py-3.5 px-4 min-w-[220px]">Lịch học định kỳ</th>
+                    <th className="py-3.5 px-4 w-[150px] whitespace-nowrap">Sĩ số & Tiến độ</th>
+                    <th className="py-3.5 px-4 w-[130px] text-center whitespace-nowrap">Trạng thái</th>
+                    <th className="py-3.5 px-4 w-[140px] text-right whitespace-nowrap">Thao tác</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100">
+                <tbody className="divide-y divide-slate-100 dark:divide-[#2A3A50]/60">
                   {classes.map((cls) => {
                     const percent = Math.min(100, Math.round((cls.enrolledCount / cls.maxCapacity) * 100))
                     return (
-                      <tr key={cls.id} className="hover:bg-gray-50/80 transition-colors">
-                        <td className="py-3.5 px-4 font-mono font-semibold text-xs text-[#142B4A]">
-                          <span className="px-2 py-1 bg-slate-100 rounded border border-slate-200">
+                      <tr key={cls.id} className="hover:bg-slate-50/60 dark:hover:bg-[#1C293D]/40 transition-colors">
+                        <td className="py-3.5 px-4 font-mono font-semibold text-xs text-[#142B4A] dark:text-[#38BDF8] whitespace-nowrap">
+                          <span className="px-2 py-1 bg-slate-100 dark:bg-[#1C293D] rounded border border-slate-200 dark:border-[#2A3A50]">
                             {cls.code}
                           </span>
                         </td>
                         <td className="py-3.5 px-4">
-                          <div className="font-bold text-gray-900 hover:text-[#142B4A] cursor-pointer" onClick={() => setDetailClass(cls)}>
+                          <div className="font-bold text-gray-900 dark:text-[#E8EEF7] hover:text-[#142B4A] dark:hover:text-[#38BDF8] cursor-pointer" onClick={() => setDetailClass(cls)}>
                             {cls.name}
                           </div>
-                          <div className="text-xs text-gray-500 flex items-center gap-1 mt-0.5">
-                            <Tag className="w-3 h-3 text-[#315E91]" />
-                            <span className="font-medium text-slate-700">{cls.courseName || cls.courseCode}</span>
+                          <div className="text-xs text-slate-500 dark:text-[#A6B4C8] flex items-center gap-1 mt-0.5">
+                            <Tag className="w-3 h-3 text-[#315E91] dark:text-[#38BDF8]" />
+                            <span className="font-medium text-slate-700 dark:text-[#E8EEF7]">{cls.courseName || cls.courseCode}</span>
                           </div>
                         </td>
                         <td className="py-3.5 px-4">
-                          <div className="flex items-center gap-1.5 text-gray-800 text-xs font-semibold">
-                            <GraduationCap className="w-3.5 h-3.5 text-[#315E91]" />
+                          <div className="flex items-center gap-1.5 text-gray-800 dark:text-[#E8EEF7] text-xs font-semibold">
+                            <GraduationCap className="w-3.5 h-3.5 text-[#315E91] dark:text-[#38BDF8]" />
                             <span>{cls.primaryTeacherName || 'Chưa phân công'}</span>
                           </div>
                           {cls.room && (
-                            <div className="flex items-center gap-1.5 text-gray-500 text-xs mt-0.5">
-                              <DoorOpen className="w-3.5 h-3.5 text-gray-400" />
+                            <div className="flex items-center gap-1.5 text-slate-500 dark:text-[#A6B4C8] text-xs mt-0.5">
+                              <DoorOpen className="w-3.5 h-3.5 text-slate-400" />
                               <span>{cls.room}</span>
                             </div>
                           )}
                         </td>
                         <td className="py-3.5 px-4">
                           {!cls.schedules || cls.schedules.length === 0 ? (
-                            <span className="text-xs text-gray-400 italic">Chưa xếp lịch</span>
+                            <span className="text-xs text-slate-400 italic">Chưa xếp lịch</span>
                           ) : (
                             <div className="flex flex-wrap gap-1">
                               {cls.schedules.map((s) => (
                                 <span
                                   key={s.id}
-                                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs bg-slate-100 text-slate-700 border border-slate-200 font-medium"
+                                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs bg-slate-100 dark:bg-[#1C293D] text-slate-700 dark:text-[#E8EEF7] border border-slate-200 dark:border-[#2A3A50] font-medium"
                                 >
                                   <Clock className="w-3 h-3 text-slate-400" />
                                   {getDayName(s.dayOfWeek)} ({s.startTime}-{s.endTime})
@@ -739,23 +739,23 @@ export const ClassListPage: React.FC = () => {
                           )}
                         </td>
                         <td className="py-3.5 px-4">
-                          <div className="flex items-center justify-between text-xs font-semibold text-gray-700 mb-1">
+                          <div className="flex items-center justify-between text-xs font-semibold text-slate-700 dark:text-[#E8EEF7] mb-1">
                             <span>{cls.enrolledCount}/{cls.maxCapacity} học viên</span>
-                            <span className="text-gray-500">{percent}%</span>
+                            <span className="text-slate-500 dark:text-[#A6B4C8]">{percent}%</span>
                           </div>
-                          <div className="w-28 bg-gray-200 rounded-full h-2 overflow-hidden">
+                          <div className="w-28 bg-slate-200 dark:bg-slate-700 rounded-full h-2 overflow-hidden">
                             <div
                               className={`h-2 rounded-full transition-all duration-300 ${percent >= 100
                                   ? 'bg-rose-500'
                                   : percent >= 75
                                     ? 'bg-amber-500'
-                                    : 'bg-[#142B4A]'
+                                    : 'bg-[#142B4A] dark:bg-[#38BDF8]'
                                 }`}
                               style={{ width: `${percent}%` }}
                             />
                           </div>
                         </td>
-                        <td className="py-3.5 px-4">
+                        <td className="py-3.5 px-4 text-center">
                           {getStatusBadge(cls.status)}
                         </td>
                         <td className="py-3.5 px-4 text-right">
@@ -1272,34 +1272,34 @@ export const ClassListPage: React.FC = () => {
                 {enrolledStudents.length === 0 ? (
                   <p className="text-xs text-gray-400 italic">Chưa có học viên nào được ghi danh vào lớp học này.</p>
                 ) : (
-                  <div className="border border-gray-200 rounded-lg overflow-hidden">
-                    <table className="w-full text-left text-xs border-collapse">
+                  <div className="border border-slate-200 dark:border-[#2A3A50] rounded-xl overflow-hidden overflow-x-auto">
+                    <table className="w-full text-left text-xs border-collapse min-w-[500px]">
                       <thead>
-                        <tr className="bg-gray-50 border-b border-gray-200 text-gray-500 font-semibold">
-                          <th className="py-2.5 px-3">Mã HV</th>
-                          <th className="py-2.5 px-3">Họ và tên</th>
-                          <th className="py-2.5 px-3">Ngày ghi danh</th>
-                          <th className="py-2.5 px-3 text-right">Học phí thực</th>
-                          <th className="py-2.5 px-3 text-center">Trạng thái</th>
+                        <tr className="bg-slate-50 dark:bg-[#1C293D] border-b border-slate-200 dark:border-[#2A3A50] text-slate-500 dark:text-[#A6B4C8] font-semibold">
+                          <th className="py-2.5 px-3 w-[90px] whitespace-nowrap">Mã HV</th>
+                          <th className="py-2.5 px-3 min-w-[140px]">Họ và tên</th>
+                          <th className="py-2.5 px-3 w-[110px] whitespace-nowrap">Ngày ghi danh</th>
+                          <th className="py-2.5 px-3 w-[120px] text-right whitespace-nowrap">Học phí thực</th>
+                          <th className="py-2.5 px-3 w-[100px] text-center whitespace-nowrap">Trạng thái</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-gray-100">
+                      <tbody className="divide-y divide-slate-100 dark:divide-[#2A3A50]/60">
                         {enrolledStudents.map((enr) => (
-                          <tr key={enr.id} className="hover:bg-gray-50">
-                            <td className="py-2.5 px-3 font-mono font-medium text-[#142B4A]">
+                          <tr key={enr.id} className="hover:bg-slate-50/60 dark:hover:bg-[#1C293D]/40">
+                            <td className="py-2.5 px-3 font-mono font-medium text-[#142B4A] dark:text-[#38BDF8]">
                               {enr.studentCode}
                             </td>
-                            <td className="py-2.5 px-3 font-semibold text-gray-900">
+                            <td className="py-2.5 px-3 font-semibold text-slate-900 dark:text-[#E8EEF7]">
                               {enr.studentFullName}
                             </td>
-                            <td className="py-2.5 px-3 text-gray-600">
+                            <td className="py-2.5 px-3 text-slate-600 dark:text-[#A6B4C8] whitespace-nowrap font-mono">
                               {enr.enrollmentDate}
                             </td>
-                            <td className="py-2.5 px-3 text-right font-medium text-gray-800">
+                            <td className="py-2.5 px-3 text-right font-medium text-slate-800 dark:text-[#E8EEF7] whitespace-nowrap">
                               {enr.finalFee ? Number(enr.finalFee).toLocaleString('vi-VN') + ' đ' : '0 đ'}
                             </td>
-                            <td className="py-2.5 px-3 text-center">
-                              <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-green-100 text-green-800">
+                            <td className="py-2.5 px-3 text-center whitespace-nowrap">
+                              <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300">
                                 {enr.status === 'ENROLLED' ? 'Đang học' : enr.status}
                               </span>
                             </td>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
   Settings,
   Building2,
@@ -11,14 +11,19 @@ import {
   Moon,
   Monitor,
   ShieldCheck,
-  Server
+  Server,
+  AlertCircle,
+  RefreshCw
 } from 'lucide-react'
 import { useTheme, type Theme } from '../../../context/ThemeContext'
+import { settingsApi, type SystemSettings } from '../../../api/settings'
 
 export const SettingsPage: React.FC = () => {
   const { theme, setTheme, resolvedTheme } = useTheme()
   const [successMsg, setSuccessMsg] = useState<string | null>(null)
+  const [errorMsg, setErrorMsg] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
+  const [loading, setLoading] = useState(true)
 
   // Center Info State
   const [centerName, setCenterName] = useState('Học viện Anh ngữ & Năng khiếu CH Academy')
@@ -33,14 +38,84 @@ export const SettingsPage: React.FC = () => {
   const [notifyTuitionDue, setNotifyTuitionDue] = useState(true)
   const [notifyAbsence, setNotifyAbsence] = useState(false)
 
-  const handleSave = (e: React.FormEvent) => {
-    e.preventDefault()
+  // Technical Diagnostics
+  const [systemDiag, setSystemDiag] = useState<Partial<SystemSettings>>({})
+
+  useEffect(() => {
+    let isMounted = true
+    const loadSettings = async () => {
+      try {
+        setLoading(true)
+        setErrorMsg(null)
+        const res = await settingsApi.getSettings()
+        if (isMounted && res.data) {
+          const d = res.data
+          if (d.centerName) setCenterName(d.centerName)
+          if (d.shortName) setShortName(d.shortName)
+          if (d.hotline) setHotline(d.hotline)
+          if (d.email) setEmail(d.email)
+          if (d.address) setAddress(d.address)
+          if (d.website !== undefined) setWebsite(d.website || '')
+          if (d.notifyNewLead !== undefined) setNotifyNewLead(Boolean(d.notifyNewLead))
+          if (d.notifyTuitionDue !== undefined) setNotifyTuitionDue(Boolean(d.notifyTuitionDue))
+          if (d.notifyAbsence !== undefined) setNotifyAbsence(Boolean(d.notifyAbsence))
+          setSystemDiag({
+            appVersion: d.appVersion,
+            dbVersion: d.dbVersion,
+            activeProfile: d.activeProfile,
+            timezone: d.timezone
+          })
+        }
+      } catch (err: any) {
+        if (isMounted) {
+          console.warn('Could not fetch settings from backend API, using cached/default settings:', err.message)
+        }
+      } finally {
+        if (isMounted) setLoading(false)
+      }
+    }
+    loadSettings()
+    return () => { isMounted = false }
+  }, [])
+
+  const handleSave = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault()
     setSaving(true)
-    setTimeout(() => {
-      setSaving(false)
-      setSuccessMsg('Đã lưu cấu hình hệ thống thành công!')
+    setErrorMsg(null)
+    setSuccessMsg(null)
+    try {
+      const payload: SystemSettings = {
+        centerName: centerName.trim(),
+        shortName: shortName.trim(),
+        hotline: hotline.trim(),
+        email: email.trim(),
+        address: address.trim(),
+        website: website.trim(),
+        notifyNewLead,
+        notifyTuitionDue,
+        notifyAbsence
+      }
+      const res = await settingsApi.updateSettings(payload)
+      if (res.data) {
+        const d = res.data
+        setCenterName(d.centerName)
+        setShortName(d.shortName)
+        setHotline(d.hotline)
+        setEmail(d.email)
+        setAddress(d.address)
+        setWebsite(d.website || '')
+        setNotifyNewLead(Boolean(d.notifyNewLead))
+        setNotifyTuitionDue(Boolean(d.notifyTuitionDue))
+        setNotifyAbsence(Boolean(d.notifyAbsence))
+      }
+      setSuccessMsg(res.message || 'Đã lưu cấu hình hệ thống thành công!')
       setTimeout(() => setSuccessMsg(null), 4000)
-    }, 400)
+    } catch (err: any) {
+      console.error('Failed to save settings:', err)
+      setErrorMsg(err.message || 'Lỗi khi lưu cấu hình. Vui lòng kiểm tra lại quyền truy cập hoặc kết nối mạng.')
+    } finally {
+      setSaving(false)
+    }
   }
 
   const themeOptions: { value: Theme; label: string; desc: string; icon: React.ComponentType<{ size?: number; className?: string }> }[] = [
@@ -69,11 +144,11 @@ export const SettingsPage: React.FC = () => {
         </div>
 
         <button
-          onClick={handleSave}
-          disabled={saving}
-          className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-[#142B4A] dark:bg-[#38BDF8] hover:bg-[#1D4168] dark:hover:bg-[#0284C7] text-white dark:text-[#0B1220] rounded-xl text-sm font-semibold shadow-sm transition-all"
+          onClick={() => handleSave()}
+          disabled={saving || loading}
+          className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-[#142B4A] dark:bg-[#38BDF8] hover:bg-[#1D4168] dark:hover:bg-[#0284C7] text-white dark:text-[#0B1220] rounded-xl text-sm font-semibold shadow-sm transition-all disabled:opacity-50"
         >
-          <Save size={16} />
+          {saving ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Save size={16} />}
           <span>{saving ? 'Đang lưu...' : 'Lưu thay đổi'}</span>
         </button>
       </div>
@@ -83,6 +158,14 @@ export const SettingsPage: React.FC = () => {
         <div className="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 flex items-center gap-3 text-sm shadow-xs animate-in fade-in">
           <CheckCircle2 size={18} className="text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
           <span>{successMsg}</span>
+        </div>
+      )}
+
+      {/* Error Notification */}
+      {errorMsg && (
+        <div className="p-4 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-300 flex items-center gap-3 text-sm shadow-xs animate-in fade-in">
+          <AlertCircle size={18} className="text-rose-600 dark:text-rose-400 flex-shrink-0" />
+          <span>{errorMsg}</span>
         </div>
       )}
 
@@ -305,20 +388,20 @@ export const SettingsPage: React.FC = () => {
               <div className="flex items-center justify-between py-2 border-b border-slate-100 dark:border-[#2A3A50]/60">
                 <span className="text-slate-500 dark:text-[#A6B4C8]">Hệ thống Backend</span>
                 <span className="font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                  Spring Boot 3.5 (Hoạt động)
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                  Spring Boot 3.5 (v{systemDiag.appVersion || '1.0.0'})
                 </span>
               </div>
               <div className="flex items-center justify-between py-2 border-b border-slate-100 dark:border-[#2A3A50]/60">
                 <span className="text-slate-500 dark:text-[#A6B4C8]">Cơ sở dữ liệu</span>
                 <span className="font-semibold text-slate-700 dark:text-[#E8EEF7] flex items-center gap-1.5">
                   <Database size={13} className="text-sky-500" />
-                  PostgreSQL 16 (Port 5432)
+                  {systemDiag.dbVersion || 'PostgreSQL 16 (Port 5432)'}
                 </span>
               </div>
               <div className="flex items-center justify-between py-2 border-b border-slate-100 dark:border-[#2A3A50]/60">
                 <span className="text-slate-500 dark:text-[#A6B4C8]">Flyway Migration</span>
-                <span className="font-semibold text-slate-700 dark:text-[#E8EEF7]">V1__initial_schema</span>
+                <span className="font-semibold text-slate-700 dark:text-[#E8EEF7]">V12 (Mới nhất)</span>
               </div>
               <div className="flex items-center justify-between py-2 border-b border-slate-100 dark:border-[#2A3A50]/60">
                 <span className="text-slate-500 dark:text-[#A6B4C8]">Bảo mật & Xác thực</span>
@@ -329,7 +412,7 @@ export const SettingsPage: React.FC = () => {
               </div>
               <div className="flex items-center justify-between py-2">
                 <span className="text-slate-500 dark:text-[#A6B4C8]">Múi giờ vận hành</span>
-                <span className="font-semibold text-slate-700 dark:text-[#E8EEF7]">Asia/Ho_Chi_Minh (UTC+7)</span>
+                <span className="font-semibold text-slate-700 dark:text-[#E8EEF7]">{systemDiag.timezone || 'Asia/Ho_Chi_Minh (UTC+7)'}</span>
               </div>
             </div>
           </div>

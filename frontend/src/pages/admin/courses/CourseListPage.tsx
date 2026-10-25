@@ -421,18 +421,18 @@ export const CourseListPage: React.FC = () => {
         />
       ) : (
         <div className="bg-white dark:bg-[#151F31] rounded-2xl border border-slate-200/80 dark:border-[#2A3A50] shadow-xs overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse text-table">
+          <div className="overflow-x-auto rounded-2xl">
+            <table className="w-full text-left border-collapse text-table min-w-[960px]">
               <thead>
                 <tr className="bg-slate-50/80 dark:bg-[#1C293D] border-b border-slate-200 dark:border-[#2A3A50] text-xs font-semibold text-slate-500 dark:text-[#A6B4C8] uppercase tracking-wider">
-                  <th className="py-3.5 px-4">Mã</th>
-                  <th className="py-3.5 px-4">Tên khóa học & Danh mục</th>
-                  <th className="py-3.5 px-4">Đối tượng</th>
-                  <th className="py-3.5 px-4">Thời lượng</th>
-                  <th className="py-3.5 px-4 text-right">Học phí niêm yết</th>
-                  <th className="py-3.5 px-4 text-center">Trạng thái</th>
-                  <th className="py-3.5 px-4 text-center">Hiển thị</th>
-                  <th className="py-3.5 px-4 text-right">Thao tác</th>
+                  <th className="py-3.5 px-4 w-[110px] whitespace-nowrap">Mã</th>
+                  <th className="py-3.5 px-4 min-w-[240px]">Tên khóa học & Danh mục</th>
+                  <th className="py-3.5 px-4 w-[150px] whitespace-nowrap">Đối tượng</th>
+                  <th className="py-3.5 px-4 w-[110px] whitespace-nowrap">Thời lượng</th>
+                  <th className="py-3.5 px-4 w-[140px] text-right whitespace-nowrap">Học phí niêm yết</th>
+                  <th className="py-3.5 px-4 w-[125px] text-center whitespace-nowrap">Trạng thái</th>
+                  <th className="py-3.5 px-4 w-[90px] text-center whitespace-nowrap">Hiển thị</th>
+                  <th className="py-3.5 px-4 w-[110px] text-right whitespace-nowrap">Thao tác</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-[#2A3A50]/60">

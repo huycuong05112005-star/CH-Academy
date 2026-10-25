@@ -509,60 +509,60 @@ export const LeadListPage: React.FC = () => {
             </button>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse text-sm">
+          <div className="overflow-x-auto rounded-2xl">
+            <table className="w-full text-left border-collapse text-sm min-w-[980px]">
               <thead>
-                <tr className="bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  <th className="py-3 px-4">Mã KH</th>
-                  <th className="py-3 px-4">Họ và tên</th>
-                  <th className="py-3 px-4">Liên hệ</th>
-                  <th className="py-3 px-4">Nguồn</th>
-                  <th className="py-3 px-4">Khóa quan tâm</th>
-                  <th className="py-3 px-4">Trạng thái</th>
-                  <th className="py-3 px-4 text-right">Thao tác</th>
+                <tr className="bg-slate-50/80 dark:bg-[#1C293D] border-b border-slate-200 dark:border-[#2A3A50] text-xs font-semibold text-slate-500 dark:text-[#A6B4C8] uppercase tracking-wider">
+                  <th className="py-3 px-4 w-[110px] whitespace-nowrap">Mã KH</th>
+                  <th className="py-3 px-4 min-w-[190px]">Họ và tên</th>
+                  <th className="py-3 px-4 w-[170px] whitespace-nowrap">Liên hệ</th>
+                  <th className="py-3 px-4 w-[130px] whitespace-nowrap">Nguồn</th>
+                  <th className="py-3 px-4 min-w-[180px]">Khóa quan tâm</th>
+                  <th className="py-3 px-4 w-[210px] whitespace-nowrap">Trạng thái</th>
+                  <th className="py-3 px-4 w-[120px] text-right whitespace-nowrap">Thao tác</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100">
+              <tbody className="divide-y divide-slate-100 dark:divide-[#2A3A50]/60">
                 {leads.map((lead) => (
-                  <tr key={lead.id} className="hover:bg-gray-50/80 transition-colors">
-                    <td className="py-3 px-4 font-mono font-medium text-xs text-[#142B4A]">
+                  <tr key={lead.id} className="hover:bg-slate-50/60 dark:hover:bg-[#1C293D]/40 transition-colors">
+                    <td className="py-3 px-4 font-mono font-medium text-xs text-[#142B4A] dark:text-[#38BDF8] whitespace-nowrap">
                       {lead.leadCode}
                     </td>
                     <td className="py-3 px-4">
-                      <div className="font-medium text-gray-900">{lead.fullName}</div>
+                      <div className="font-medium text-slate-900 dark:text-[#E8EEF7]">{lead.fullName}</div>
                       {lead.convertedStudentCode && (
-                        <div className="text-xs text-green-700 font-medium flex items-center gap-1 mt-0.5">
+                        <div className="text-xs text-emerald-600 dark:text-emerald-400 font-medium flex items-center gap-1 mt-0.5">
                           <UserCheck className="w-3.5 h-3.5" />
                           <span>Học viên: {lead.convertedStudentCode}</span>
                         </div>
                       )}
                     </td>
-                    <td className="py-3 px-4">
-                      <div className="flex items-center gap-1.5 text-gray-700">
-                        <Phone className="w-3.5 h-3.5 text-gray-400" />
+                    <td className="py-3 px-4 whitespace-nowrap">
+                      <div className="flex items-center gap-1.5 text-slate-700 dark:text-[#E8EEF7] text-xs font-mono">
+                        <Phone className="w-3.5 h-3.5 text-slate-400" />
                         <span>{lead.phone}</span>
                       </div>
                       {lead.email && (
-                        <div className="flex items-center gap-1.5 text-gray-500 text-xs mt-0.5">
-                          <Mail className="w-3.5 h-3.5 text-gray-400" />
-                          <span>{lead.email}</span>
+                        <div className="flex items-center gap-1.5 text-slate-500 dark:text-[#A6B4C8] text-xs mt-0.5">
+                          <Mail className="w-3.5 h-3.5 text-slate-400" />
+                          <span className="truncate max-w-[150px]">{lead.email}</span>
                         </div>
                       )}
                     </td>
-                    <td className="py-3 px-4">
+                    <td className="py-3 px-4 whitespace-nowrap">
                       {getSourceBadge(lead.source)}
                     </td>
-                    <td className="py-3 px-4 text-gray-700 font-medium">
-                      {lead.targetCourseName || <span className="text-gray-400 font-normal">Chưa chọn</span>}
+                    <td className="py-3 px-4 text-slate-700 dark:text-[#E8EEF7] font-medium text-xs">
+                      {lead.targetCourseName || <span className="text-slate-400 font-normal italic">Chưa chọn</span>}
                     </td>
-                    <td className="py-3 px-4">
+                    <td className="py-3 px-4 whitespace-nowrap">
                       <div className="flex items-center gap-2">
                         {getStatusBadge(lead.status)}
                         {lead.status !== 'CONVERTED' && (
                           <select
                             value={lead.status}
                             onChange={(e) => handleQuickStatusChange(lead.id, e.target.value)}
-                            className="text-xs border border-gray-200 rounded px-1.5 py-0.5 bg-white text-gray-700"
+                            className="text-xs border border-slate-200 dark:border-[#2A3A50] rounded px-1.5 py-0.5 bg-white dark:bg-[#1C293D] text-slate-700 dark:text-[#E8EEF7]"
                             title="Thay đổi nhanh trạng thái"
                           >
                             <option value="NEW">Mới</option>
