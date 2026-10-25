@@ -6,7 +6,9 @@ import type {
   AttendanceRecordItem,
   BulkAttendancePayload,
   CreateMaterialPayload,
-  SessionMaterial
+  SessionMaterial,
+  TeacherAdminItem,
+  CreateTeacherPayload
 } from '../types/teacher'
 import type { NotificationItem } from '../types/notification'
 
@@ -61,5 +63,17 @@ export const teacherApi = {
     }),
 
   getUnmarkedSessions: () =>
-    apiFetch<ApiResponse<TeacherSessionItem[]>>('/teacher/portal/sessions/unmarked')
+    apiFetch<ApiResponse<TeacherSessionItem[]>>('/teacher/portal/sessions/unmarked'),
+
+  getAllTeachers: () =>
+    apiFetch<ApiResponse<TeacherAdminItem[]>>('/teachers'),
+
+  getActiveTeachers: () =>
+    apiFetch<ApiResponse<TeacherAdminItem[]>>('/teachers/active'),
+
+  createTeacher: (payload: CreateTeacherPayload) =>
+    apiFetch<ApiResponse<TeacherAdminItem>>('/teachers', {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    })
 }

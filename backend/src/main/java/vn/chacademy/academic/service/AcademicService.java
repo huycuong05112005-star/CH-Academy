@@ -32,12 +32,22 @@ public class AcademicService {
     private final TeacherRepository teacherRepository;
     private final CourseRepository courseRepository;
     private final StudentRepository studentRepository;
+    private final vn.chacademy.identity.repository.UserRepository userRepository;
+    private final vn.chacademy.identity.repository.RoleRepository roleRepository;
+    private final org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
 
     private static final Set<String> VALID_CLASS_STATUSES = Set.of("PLANNING", "OPEN_FOR_ENROLLMENT", "IN_PROGRESS", "COMPLETED", "CANCELLED");
 
     // ==========================================
     // TEACHERS
     // ==========================================
+
+    @Transactional(readOnly = true)
+    public List<TeacherDto> getAllTeachers() {
+        return teacherRepository.findAll().stream()
+                .map(TeacherDto::fromEntity)
+                .toList();
+    }
 
     @Transactional(readOnly = true)
     public List<TeacherDto> getActiveTeachers() {
@@ -53,10 +63,44 @@ public class AcademicService {
             throw new BadRequestException("Mã giáo viên '" + cleanCode + "' đã tồn tại trên hệ thống");
         }
 
+        vn.chacademy.identity.entity.User teacherUser = null;
+        String rawEmail = request.getEmail() != null && !request.getEmail().isBlank() ? request.getEmail().trim().toLowerCase() : null;
+        
+        if (rawEmail != null) {
+            if (userRepository.existsByEmail(rawEmail)) {
+                teacherUser = userRepository.findByEmail(rawEmail).orElse(null);
+            } else {
+                String username = "gv." + cleanCode.toLowerCase().replace(" ", "");
+                if (userRepository.existsByUsername(username)) {
+                    username = rawEmail.split("@")[0];
+                }
+
+                vn.chacademy.identity.entity.Role teacherRole = roleRepository.findById("TEACHER").orElse(null);
+                java.util.Set<vn.chacademy.identity.entity.Role> roles = new java.util.HashSet<>();
+                if (teacherRole != null) {
+                    roles.add(teacherRole);
+                }
+
+                String defaultPassword = "Teacher@123456";
+                vn.chacademy.identity.entity.User newUser = new vn.chacademy.identity.entity.User();
+                newUser.setUsername(username);
+                newUser.setEmail(rawEmail);
+                newUser.setFullName(request.getFullName().trim());
+                newUser.setPhone(request.getPhone() != null ? request.getPhone().trim() : null);
+                newUser.setPasswordHash(passwordEncoder.encode(defaultPassword));
+                newUser.setRawPassword(defaultPassword);
+                newUser.setStatus("ACTIVE");
+                newUser.setRoles(roles);
+
+                teacherUser = userRepository.save(newUser);
+            }
+        }
+
         Teacher teacher = Teacher.builder()
                 .teacherCode(cleanCode)
+                .user(teacherUser)
                 .fullName(request.getFullName().trim())
-                .email(request.getEmail() != null && !request.getEmail().isBlank() ? request.getEmail().trim() : null)
+                .email(rawEmail)
                 .phone(request.getPhone() != null && !request.getPhone().isBlank() ? request.getPhone().trim() : null)
                 .specialization(request.getSpecialization())
                 .bio(request.getBio())

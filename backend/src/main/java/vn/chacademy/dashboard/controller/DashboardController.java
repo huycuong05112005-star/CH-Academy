@@ -11,7 +11,7 @@ import vn.chacademy.dashboard.dto.DashboardStatsDto;
 import vn.chacademy.dashboard.service.DashboardService;
 
 @RestController
-@RequestMapping("/api/v1/dashboard")
+@RequestMapping({"/api/v1/dashboard", "/api/v1/admin/dashboard"})
 @RequiredArgsConstructor
 public class DashboardController {
 

@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import { attendanceMonitoringApi, type MonitoringSessionItem } from '../../../api/attendanceMonitoring'
-import { CheckCircle2, AlertTriangle, Calendar, RefreshCw, Clock, Users, MapPin, Eye } from 'lucide-react'
+import { CheckCircle2, AlertTriangle, Calendar, RefreshCw, Clock, Users, MapPin, Eye, Download } from 'lucide-react'
 import type { AttendanceRecord } from '../../../types/attendance'
+import { exportToCsv } from '../../../utils/exportCsv'
 
 export const AttendanceMonitoringPage: React.FC = () => {
   const [sessions, setSessions] = useState<MonitoringSessionItem[]>([])
@@ -45,6 +46,47 @@ export const AttendanceMonitoringPage: React.FC = () => {
   const unmarkedCount = sessions.filter((s) => !s.isMarked).length
   const markedCount = sessions.filter((s) => s.isMarked).length
 
+  const handleExportMonitoring = () => {
+    const headers = [
+      'Lớp học',
+      'Mã lớp',
+      'Ngày học',
+      'Thời gian',
+      'Phòng',
+      'Chủ đề',
+      'Giảng viên',
+      'Trạng thái điểm danh',
+      'Sĩ số',
+      'Có mặt',
+      'Đi muộn',
+      'Vắng không phép',
+      'Nghỉ có phép',
+      'Tỷ lệ chuyên cần'
+    ]
+
+    const rows = sessions.map(s => {
+      const rate = s.totalEnrolled > 0 ? Math.round(((s.presentCount + s.lateCount) / s.totalEnrolled) * 100) : 0
+      return [
+        s.className,
+        s.classCode,
+        s.sessionDate,
+        `${s.startTime} - ${s.endTime}`,
+        s.room || 'Chưa xếp phòng',
+        s.topic || '',
+        s.teacherName || 'Chưa phân công',
+        s.isMarked ? 'Đã điểm danh' : 'Chưa điểm danh',
+        s.totalEnrolled,
+        s.presentCount,
+        s.lateCount,
+        s.absentCount,
+        s.excusedCount,
+        `${rate}%`
+      ]
+    })
+
+    exportToCsv('Bao_cao_giam_sat_diem_danh', headers, rows)
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -59,14 +101,23 @@ export const AttendanceMonitoringPage: React.FC = () => {
           </p>
         </div>
 
-        <button
-          onClick={fetchSessions}
-          disabled={loading}
-          className="inline-flex items-center gap-2 px-3.5 py-2 text-sm font-medium rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-50 shadow-sm transition"
-        >
-          <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-          Làm mới
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={fetchSessions}
+            disabled={loading}
+            className="inline-flex items-center gap-2 px-3.5 py-2 text-sm font-medium rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-50 shadow-sm transition"
+          >
+            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+            Làm mới
+          </button>
+          <button
+            onClick={handleExportMonitoring}
+            className="inline-flex items-center gap-2 px-3.5 py-2 text-sm font-semibold rounded-lg border border-emerald-300 dark:border-emerald-700/60 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-950/50 shadow-xs transition"
+          >
+            <Download className="w-4 h-4" />
+            Xuất báo cáo (CSV)
+          </button>
+        </div>
       </div>
 
       {/* Metric Cards */}

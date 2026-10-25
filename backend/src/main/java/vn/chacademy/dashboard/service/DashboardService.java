@@ -41,11 +41,7 @@ public class DashboardService {
         long activeStudents = studentRepository.countActiveStudents();
 
         long totalCourses = courseRepository.count();
-        long activeClasses = classRepository.countByStatus("IN_PROGRESS");
-        if (activeClasses == 0) {
-            // Also include PLANNING or OPEN for enrollment
-            activeClasses = classRepository.countByStatus("OPEN");
-        }
+        long activeClasses = classRepository.countByStatusIn(List.of("IN_PROGRESS", "OPEN_FOR_ENROLLMENT", "OPEN"));
 
         long totalLeads = leadRepository.count();
         long convertedLeads = leadRepository.countByStatus("CONVERTED");
@@ -70,11 +66,15 @@ public class DashboardService {
         }
 
         LocalDate today = LocalDate.now(VIETNAM_ZONE);
-        LocalDate nextWeek = today.plusDays(7);
-        List<ClassSession> sessions = classSessionRepository.findSessionsInDateRange(null, null, today, nextWeek);
+        LocalDate nextPeriod = today.plusDays(14);
+        List<ClassSession> sessions = classSessionRepository.findSessionsInDateRange(null, null, today, nextPeriod);
+        if (sessions.isEmpty()) {
+            // Bao gồm cả các buổi học gần nhất trong 7 ngày qua nếu chưa có buổi mới
+            sessions = classSessionRepository.findSessionsInDateRange(null, null, today.minusDays(7), nextPeriod);
+        }
 
         List<UpcomingSessionDto> upcomingDtos = sessions.stream()
-                .limit(10)
+                .limit(15)
                 .map(this::toUpcomingSessionDto)
                 .collect(Collectors.toList());
 

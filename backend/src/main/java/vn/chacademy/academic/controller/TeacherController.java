@@ -20,6 +20,13 @@ public class TeacherController {
 
     private final AcademicService academicService;
 
+    @GetMapping
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'CENTER_ADMIN', 'ACADEMIC_STAFF', 'ADMIN')")
+    public ResponseEntity<ApiResponse<List<TeacherDto>>> getAllTeachers() {
+        List<TeacherDto> list = academicService.getAllTeachers();
+        return ResponseEntity.ok(ApiResponse.success(list));
+    }
+
     @GetMapping("/active")
     public ResponseEntity<ApiResponse<List<TeacherDto>>> getActiveTeachers() {
         List<TeacherDto> list = academicService.getActiveTeachers();
@@ -27,10 +34,10 @@ public class TeacherController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'CENTER_ADMIN')")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'CENTER_ADMIN', 'ACADEMIC_STAFF', 'ADMIN')")
     public ResponseEntity<ApiResponse<TeacherDto>> createTeacher(@Valid @RequestBody CreateTeacherRequest request) {
         TeacherDto created = academicService.createTeacher(request);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.success("Tạo thông tin giáo viên thành công", created));
+                .body(ApiResponse.success("Tạo thông tin giáo viên và tài khoản thành công", created));
     }
 }

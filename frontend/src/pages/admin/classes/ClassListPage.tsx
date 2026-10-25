@@ -20,8 +20,10 @@ import {
   Clock,
   DoorOpen,
   UserCheck,
-  Tag
+  Tag,
+  Download
 } from 'lucide-react'
+import { exportToCsv } from '../../../utils/exportCsv'
 
 export const ClassListPage: React.FC = () => {
   const [classes, setClasses] = useState<ClassItem[]>([])
@@ -322,6 +324,44 @@ export const ClassListPage: React.FC = () => {
     return list.sort((a, b) => a.schedule.startTime.localeCompare(b.schedule.startTime))
   }
 
+  const handleExportClasses = () => {
+    const headers = [
+      'Mã lớp',
+      'Tên lớp học',
+      'Khóa học',
+      'Giảng viên chính',
+      'Phòng học',
+      'Ngày khai giảng',
+      'Ngày kết thúc',
+      'Sĩ số tối đa',
+      'Đã ghi danh',
+      'Trạng thái'
+    ]
+
+    const statusMap: Record<string, string> = {
+      PLANNING: 'Lên kế hoạch',
+      OPEN_FOR_ENROLLMENT: 'Đang mở đăng ký',
+      IN_PROGRESS: 'Đang giảng dạy',
+      COMPLETED: 'Đã hoàn thành',
+      CANCELLED: 'Đã hủy'
+    }
+
+    const rows = classes.map(c => [
+      c.code,
+      c.name,
+      c.courseName || '',
+      c.primaryTeacherName || 'Chưa phân công',
+      c.room || '',
+      c.startDate || '',
+      c.endDate || '',
+      c.maxCapacity,
+      c.enrolledCount || 0,
+      statusMap[c.status] || c.status
+    ])
+
+    exportToCsv('Danh_sach_lop_hoc', headers, rows)
+  }
+
   return (
     <div className="space-y-6">
       {/* Breadcrumb & Page Header */}
@@ -338,13 +378,22 @@ export const ClassListPage: React.FC = () => {
               Quản lý các đợt mở lớp, phân công giáo viên giảng dạy, xếp lịch học và quản lý ghi danh
             </p>
           </div>
-          <button
-            onClick={() => setIsCreateModalOpen(true)}
-            className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#142B4A] text-white text-sm font-semibold rounded-lg hover:bg-[#1a3860] transition-colors shadow-sm cursor-pointer"
-          >
-            <Plus className="w-4 h-4" />
-            Tạo lớp học mới
-          </button>
+          <div className="flex items-center gap-2.5">
+            <button
+              onClick={handleExportClasses}
+              className="inline-flex items-center gap-2 px-3.5 py-2.5 border border-emerald-300 dark:border-emerald-700/60 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-950/50 text-sm font-semibold rounded-lg transition-colors shadow-xs cursor-pointer"
+            >
+              <Download className="w-4 h-4" />
+              Xuất file Excel (CSV)
+            </button>
+            <button
+              onClick={() => setIsCreateModalOpen(true)}
+              className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#142B4A] text-white text-sm font-semibold rounded-lg hover:bg-[#1a3860] transition-colors shadow-sm cursor-pointer"
+            >
+              <Plus className="w-4 h-4" />
+              Tạo lớp học mới
+            </button>
+          </div>
         </div>
       </div>
 

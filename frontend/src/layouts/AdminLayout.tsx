@@ -65,7 +65,7 @@ export const AdminLayout: React.FC = () => {
       items: [
         { label: 'Khóa học', path: '/admin/courses', icon: BookOpen },
         { label: 'Lớp học & Lịch', path: '/admin/classes', icon: Calendar },
-        { label: 'Phân công GV', path: '/admin/teacher-assignments', icon: UserCheck },
+        { label: 'Giảng viên & Phân công', path: '/admin/teacher-assignments', icon: UserCheck },
         { label: 'Điểm danh lớp', path: '/admin/attendance', icon: UserCheck },
         { label: 'Giám sát Điểm danh', path: '/admin/attendance-monitoring', icon: CheckCircle2 },
         { label: 'Thông báo & GV', path: '/admin/notifications', icon: Bell },

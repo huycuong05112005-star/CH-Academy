@@ -53,9 +53,11 @@ export async function apiFetch<T>(endpoint: string, options?: RequestInit): Prom
   const url = `${API_BASE_URL}${endpoint}`
   const token = getAuthToken()
 
+  const isFormData = typeof FormData !== 'undefined' && options?.body instanceof FormData
+
   const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
     Accept: 'application/json',
+    ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
     ...(options?.headers as Record<string, string>),
   }
 
@@ -93,17 +95,17 @@ export const apiClient = {
   post: <T>(endpoint: string, body?: unknown) =>
     apiFetch<ApiResponse<T>>(endpoint, {
       method: 'POST',
-      body: body ? JSON.stringify(body) : undefined,
+      body: (typeof FormData !== 'undefined' && body instanceof FormData) ? body : (body ? JSON.stringify(body) : undefined),
     }),
   put: <T>(endpoint: string, body?: unknown) =>
     apiFetch<ApiResponse<T>>(endpoint, {
       method: 'PUT',
-      body: body ? JSON.stringify(body) : undefined,
+      body: (typeof FormData !== 'undefined' && body instanceof FormData) ? body : (body ? JSON.stringify(body) : undefined),
     }),
   patch: <T>(endpoint: string, body?: unknown) =>
     apiFetch<ApiResponse<T>>(endpoint, {
       method: 'PATCH',
-      body: body ? JSON.stringify(body) : undefined,
+      body: (typeof FormData !== 'undefined' && body instanceof FormData) ? body : (body ? JSON.stringify(body) : undefined),
     }),
   delete: <T>(endpoint: string) => apiFetch<ApiResponse<T>>(endpoint, { method: 'DELETE' }),
 }

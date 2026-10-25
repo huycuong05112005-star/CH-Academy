@@ -15,8 +15,10 @@ import {
   Users,
   Clock,
   Calendar,
-  AlertTriangle
+  AlertTriangle,
+  Download
 } from 'lucide-react'
+import { exportToCsv } from '../../../utils/exportCsv'
 
 export const AttendancePage: React.FC = () => {
   const [classes, setClasses] = useState<ClassItem[]>([])
@@ -183,7 +185,53 @@ export const AttendancePage: React.FC = () => {
     else if (st === 'EXCUSED') excused++
   })
 
-  const rate = total > 0 ? Math.round(((present + late) / total) * 100) : 0
+    const rate = total > 0 ? Math.round(((present + late) / total) * 100) : 0
+
+  const handleExportAttendance = () => {
+    const curClass = classes.find(c => c.id === selectedClassId)
+    const curSession = sessions.find(s => s.id === selectedSessionId)
+
+    const headers = [
+      'Lớp học',
+      'Mã lớp',
+      'Ngày học',
+      'Chủ đề',
+      'Thời gian',
+      'Phòng',
+      'Mã học viên',
+      'Họ và tên',
+      'Trạng thái điểm danh',
+      'Ghi chú'
+    ]
+
+    const statusTextMap: Record<string, string> = {
+      PRESENT: 'Có mặt',
+      LATE: 'Đi muộn',
+      EXCUSED: 'Nghỉ có phép',
+      ABSENT: 'Vắng không phép'
+    }
+
+    const rows = enrolledStudents.map(enr => {
+      const rec = attendanceMap[enr.studentId]
+      const st = rec?.status || 'PRESENT'
+      return [
+        curClass?.name || '',
+        curClass?.code || '',
+        curSession?.sessionDate || '',
+        curSession?.topic || '',
+        curSession ? `${curSession.startTime} - ${curSession.endTime}` : '',
+        curSession?.room || '',
+        enr.studentCode,
+        enr.studentFullName,
+        statusTextMap[st] || st,
+        rec?.note || ''
+      ]
+    })
+
+    const classCode = curClass?.code ? `_${curClass.code}` : ''
+    const dateStr = curSession?.sessionDate ? `_${curSession.sessionDate}` : ''
+    exportToCsv(`Diem_danh${classCode}${dateStr}`, headers, rows)
+  }
 
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
@@ -204,16 +252,28 @@ export const AttendancePage: React.FC = () => {
           </p>
         </div>
 
-        {selectedSessionId > 0 && enrolledStudents.length > 0 && (
-          <button
-            onClick={handleSaveAttendance}
-            disabled={saving}
-            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-[#142B4A] dark:bg-[#38BDF8] hover:bg-[#1D4168] dark:hover:bg-[#0284C7] text-white dark:text-[#0B1220] rounded-xl text-sm font-semibold shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-[#3977B8] disabled:opacity-50"
-          >
-            <Save size={16} />
-            <span>{saving ? 'Đang lưu...' : 'Lưu kết quả điểm danh'}</span>
-          </button>
-        )}
+        <div className="flex items-center gap-2">
+          {selectedSessionId > 0 && enrolledStudents.length > 0 && (
+            <button
+              onClick={handleExportAttendance}
+              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-emerald-300 dark:border-emerald-700/60 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-950/50 text-sm font-semibold shadow-xs transition-all"
+            >
+              <Download size={16} />
+              <span>Xuất điểm danh (CSV)</span>
+            </button>
+          )}
+
+          {selectedSessionId > 0 && enrolledStudents.length > 0 && (
+            <button
+              onClick={handleSaveAttendance}
+              disabled={saving}
+              className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-[#142B4A] dark:bg-[#38BDF8] hover:bg-[#1D4168] dark:hover:bg-[#0284C7] text-white dark:text-[#0B1220] rounded-xl text-sm font-semibold shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-[#3977B8] disabled:opacity-50"
+            >
+              <Save size={16} />
+              <span>{saving ? 'Đang lưu...' : 'Lưu kết quả điểm danh'}</span>
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Notifications */}

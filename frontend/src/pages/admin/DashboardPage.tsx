@@ -15,10 +15,12 @@ import {
   ArrowRight,
   ShieldCheck,
   CreditCard,
-  AlertCircle
+  AlertCircle,
+  Download
 } from 'lucide-react'
 import { StatCard } from '../../components/ui/StatCard'
 import { Badge } from '../../components/ui/Badge'
+import { exportToCsv } from '../../utils/exportCsv'
 
 export const DashboardPage: React.FC = () => {
   const { user } = useAuth()
@@ -48,10 +50,52 @@ export const DashboardPage: React.FC = () => {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount || 0)
   }
 
-  const formatDate = (dateStr: string) => {
+  const formatDate = (dateStr?: string) => {
     if (!dateStr) return '-'
-    const [y, m, d] = dateStr.split('-')
-    return `${d}/${m}/${y}`
+    try {
+      const clean = dateStr.includes('T') ? dateStr.split('T')[0] : dateStr
+      const parts = clean.split('-')
+      if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`
+      return dateStr
+    } catch {
+      return dateStr || '-'
+    }
+  }
+
+  const formatTime = (timeStr?: string) => {
+    if (!timeStr) return '--:--'
+    return timeStr.substring(0, 5)
+  }
+
+  const handleExportSchedule = () => {
+    if (!stats?.upcomingSessions || stats.upcomingSessions.length === 0) return
+    const headers = ['STT', 'Ngày học', 'Giờ học', 'Mã lớp', 'Tên lớp học', 'Giáo viên', 'Phòng học', 'Trạng thái']
+    const rows = stats.upcomingSessions.map((s, idx) => [
+      idx + 1,
+      formatDate(s.sessionDate),
+      `${formatTime(s.startTime)} - ${formatTime(s.endTime)}`,
+      s.classCode || '',
+      s.className || '',
+      s.teacherName || '',
+      s.room || 'Chưa xếp',
+      s.status === 'SCHEDULED' ? 'Đã lên lịch' : s.status === 'COMPLETED' ? 'Đã hoàn thành' : s.status
+    ])
+    exportToCsv('Lich_hoc_sap_dien_ra_CH_Academy', headers, rows)
+  }
+
+  const getSessionStatusBadge = (status: string) => {
+    switch (status) {
+      case 'SCHEDULED':
+        return <Badge variant="primary">Đã lên lịch</Badge>
+      case 'COMPLETED':
+        return <Badge variant="success">Đã hoàn thành</Badge>
+      case 'IN_PROGRESS':
+        return <Badge variant="warning">Đang diễn ra</Badge>
+      case 'CANCELLED':
+        return <Badge variant="danger">Đã hủy</Badge>
+      default:
+        return <Badge variant="neutral">{status}</Badge>
+    }
   }
 
   return (
@@ -176,20 +220,32 @@ export const DashboardPage: React.FC = () => {
         {/* Left 2 Cols: Upcoming Sessions */}
         <div className="lg:col-span-2 bg-white dark:bg-[#151F31] rounded-2xl border border-slate-200/80 dark:border-[#2A3A50] shadow-xs p-6 flex flex-col justify-between">
           <div>
-            <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-[#2A3A50] mb-4">
+            <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-[#2A3A50] mb-4 gap-2 flex-wrap">
               <div className="flex items-center gap-2">
                 <Clock className="w-5 h-5 text-[#142B4A] dark:text-[#38BDF8]" />
                 <h2 className="text-base font-bold text-[#142B4A] dark:text-[#E8EEF7]">
                   Lịch học sắp diễn ra
                 </h2>
               </div>
-              <Link
-                to="/admin/attendance"
-                className="text-xs font-semibold text-[#142B4A] dark:text-[#38BDF8] hover:underline flex items-center gap-1"
-              >
-                <span>Xem điểm danh</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </Link>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleExportSchedule}
+                  disabled={!stats?.upcomingSessions || stats.upcomingSessions.length === 0}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-[#2A3A50] bg-white dark:bg-[#151F31] hover:bg-slate-50 dark:hover:bg-[#1C293D] text-xs font-semibold text-slate-700 dark:text-[#E8EEF7] shadow-xs transition disabled:opacity-40"
+                  title="Xuất file CSV mở trên Excel"
+                >
+                  <Download className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                  <span>Xuất lịch học</span>
+                </button>
+                <Link
+                  to="/admin/attendance"
+                  className="text-xs font-semibold text-[#142B4A] dark:text-[#38BDF8] hover:underline flex items-center gap-1 px-2.5 py-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-[#1C293D] transition"
+                >
+                  <span>Xem điểm danh</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </Link>
+              </div>
             </div>
 
             {statsLoading ? (
@@ -212,31 +268,38 @@ export const DashboardPage: React.FC = () => {
                       <th className="py-3 px-3">Giáo viên</th>
                       <th className="py-3 px-3">Phòng</th>
                       <th className="py-3 px-3 text-center">Trạng thái</th>
+                      <th className="py-3 px-3 text-right">Thao tác</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 dark:divide-[#2A3A50]/60">
                     {stats.upcomingSessions.map((session) => (
                       <tr key={session.id} className="hover:bg-slate-50/60 dark:hover:bg-[#1C293D]/40 transition">
-                        <td className="py-3 px-3 font-semibold text-slate-800 dark:text-[#E8EEF7] text-xs">
+                        <td className="py-3 px-3 font-semibold text-slate-800 dark:text-[#E8EEF7] text-xs whitespace-nowrap">
                           {formatDate(session.sessionDate)}
                         </td>
-                        <td className="py-3 px-3 text-xs text-slate-600 dark:text-[#A6B4C8]">
-                          {session.startTime?.substring(0, 5)} - {session.endTime?.substring(0, 5)}
+                        <td className="py-3 px-3 text-xs text-slate-600 dark:text-[#A6B4C8] whitespace-nowrap">
+                          {formatTime(session.startTime)} - {formatTime(session.endTime)}
                         </td>
                         <td className="py-3 px-3">
                           <div className="font-bold text-[#142B4A] dark:text-[#38BDF8] text-xs">{session.className}</div>
                           <div className="text-[11px] font-mono text-slate-500 dark:text-[#A6B4C8]">{session.classCode}</div>
                         </td>
-                        <td className="py-3 px-3 text-xs text-slate-700 dark:text-[#E8EEF7]">
+                        <td className="py-3 px-3 text-xs text-slate-700 dark:text-[#E8EEF7] whitespace-nowrap">
                           {session.teacherName}
                         </td>
-                        <td className="py-3 px-3 text-xs text-slate-600 dark:text-[#A6B4C8]">
+                        <td className="py-3 px-3 text-xs text-slate-600 dark:text-[#A6B4C8] whitespace-nowrap">
                           {session.room || 'Chưa xếp'}
                         </td>
-                        <td className="py-3 px-3 text-center">
-                          <Badge variant={session.status === 'SCHEDULED' ? 'primary' : 'success'}>
-                            {session.status === 'SCHEDULED' ? 'Đã lên lịch' : session.status}
-                          </Badge>
+                        <td className="py-3 px-3 text-center whitespace-nowrap">
+                          {getSessionStatusBadge(session.status)}
+                        </td>
+                        <td className="py-3 px-3 text-right whitespace-nowrap">
+                          <Link
+                            to={`/admin/attendance`}
+                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold text-[#142B4A] dark:text-[#38BDF8] bg-slate-100 hover:bg-slate-200 dark:bg-[#1C293D] dark:hover:bg-[#2A3A50] transition"
+                          >
+                            Điểm danh
+                          </Link>
                         </td>
                       </tr>
                     ))}

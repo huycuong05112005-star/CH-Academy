@@ -33,8 +33,10 @@ import {
   Send,
   BookOpen,
   Copy,
-  Check
+  Check,
+  Download
 } from 'lucide-react'
+import { exportToCsv } from '../../../utils/exportCsv'
 
 export const StudentListPage: React.FC = () => {
   const [students, setStudents] = useState<Student[]>([])
@@ -103,6 +105,36 @@ export const StudentListPage: React.FC = () => {
     setTimeout(() => {
       setCopiedAccountMap(prev => ({ ...prev, [student.id]: false }))
     }, 2000)
+  }
+
+  const handleExportStudents = () => {
+    const headers = [
+      'Mã học viên',
+      'Họ và tên',
+      'Email',
+      'Số điện thoại',
+      'Ngày sinh',
+      'Giới tính',
+      'Đối tượng',
+      'Trạng thái',
+      'Tên đăng nhập',
+      'Mật khẩu khởi tạo',
+      'Ngày tạo'
+    ]
+    const rows = students.map(s => [
+      s.studentCode,
+      s.fullName,
+      s.email || 'Chưa có',
+      s.phone || 'Chưa có',
+      s.dateOfBirth || '',
+      s.gender === 'MALE' ? 'Nam' : s.gender === 'FEMALE' ? 'Nữ' : 'Khác',
+      s.targetType === 'KID' ? 'Trẻ em / Thiếu nhi' : 'Người lớn',
+      s.status === 'ACTIVE' ? 'Đang học' : s.status === 'GRADUATED' ? 'Đã tốt nghiệp' : s.status === 'DROPPED' ? 'Đã nghỉ' : 'Tạm dừng',
+      s.username || 'Chưa cấp',
+      s.rawPassword || 'Chưa cấp',
+      s.createdAt ? s.createdAt.substring(0, 10) : ''
+    ])
+    exportToCsv('Danh_sach_hoc_vien', headers, rows)
   }
 
   // Form state
@@ -506,13 +538,22 @@ export const StudentListPage: React.FC = () => {
           </p>
         </div>
 
-        <button
-          onClick={openCreateModal}
-          className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-[#142B4A] dark:bg-[#38BDF8] hover:bg-[#1D4168] dark:hover:bg-[#0284C7] text-white dark:text-[#0B1220] rounded-xl text-sm font-semibold shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-[#3977B8]"
-        >
-          <Plus size={16} />
-          <span>Thêm học viên mới</span>
-        </button>
+        <div className="flex items-center gap-2.5">
+          <button
+            onClick={handleExportStudents}
+            className="inline-flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl border border-emerald-300 dark:border-emerald-700/60 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-950/50 text-sm font-semibold shadow-xs transition-all"
+          >
+            <Download size={16} />
+            <span>Xuất file Excel (CSV)</span>
+          </button>
+          <button
+            onClick={openCreateModal}
+            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-[#142B4A] dark:bg-[#38BDF8] hover:bg-[#1D4168] dark:hover:bg-[#0284C7] text-white dark:text-[#0B1220] rounded-xl text-sm font-semibold shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-[#3977B8]"
+          >
+            <Plus size={16} />
+            <span>Thêm học viên mới</span>
+          </button>
+        </div>
       </div>
 
       {/* KPI Overview Strip */}

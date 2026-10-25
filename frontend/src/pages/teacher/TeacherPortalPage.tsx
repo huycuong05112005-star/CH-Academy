@@ -9,6 +9,8 @@ import type {
 } from '../../types/teacher'
 import type { NotificationItem } from '../../types/notification'
 import { ThemeSwitcher } from '../../components/ui/ThemeSwitcher'
+import { exportToCsv } from '../../utils/exportCsv'
+import { filesApi } from '../../api/files'
 import {
   GraduationCap,
   LogOut,
@@ -26,7 +28,9 @@ import {
   Sparkles,
   X,
   Send,
-  History
+  History,
+  Download,
+  FileText
 } from 'lucide-react'
 
 export const TeacherPortalPage: React.FC = () => {
@@ -60,8 +64,11 @@ export const TeacherPortalPage: React.FC = () => {
   const [savingAttendance, setSavingAttendance] = useState<boolean>(false)
   const [attendanceSuccess, setAttendanceSuccess] = useState<string | null>(null)
 
-  // Materials Modal
+  // Materials Modal & Local File Upload
   const [isMaterialModalOpen, setIsMaterialModalOpen] = useState<boolean>(false)
+  const [materialSourceType, setMaterialSourceType] = useState<'FILE' | 'URL'>('FILE')
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [uploadingFile, setUploadingFile] = useState<boolean>(false)
   const [materialTitle, setMaterialTitle] = useState<string>('')
   const [materialDesc, setMaterialDesc] = useState<string>('')
   const [materialType, setMaterialType] = useState<string>('DOCUMENT')
@@ -281,6 +288,74 @@ export const TeacherPortalPage: React.FC = () => {
     }
   }
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0]
+      setSelectedFile(file)
+      if (!materialTitle) {
+        const nameWithoutExt = file.name.substring(0, file.name.lastIndexOf('.')) || file.name
+        setMaterialTitle(nameWithoutExt)
+      }
+      const ext = file.name.substring(file.name.lastIndexOf('.') + 1).toLowerCase()
+      if (['ppt', 'pptx', 'pdf'].includes(ext)) {
+        setMaterialType('SLIDE')
+      } else if (['doc', 'docx', 'txt'].includes(ext)) {
+        setMaterialType('DOCUMENT')
+      } else if (['xls', 'xlsx', 'csv'].includes(ext)) {
+        setMaterialType('EXERCISE')
+      } else if (['mp4', 'avi', 'mov', 'mkv'].includes(ext)) {
+        setMaterialType('VIDEO')
+      }
+    }
+  }
+
+  const handleExportStudents = () => {
+    if (!currentClassDetail?.students || currentClassDetail.students.length === 0) {
+      alert('Lớp học chưa có học sinh để xuất file')
+      return
+    }
+    const headers = ['STT', 'Mã học viên', 'Họ và tên', 'Email', 'Số điện thoại', 'Ngày sinh', 'Giới tính', 'Lớp học', 'Trạng thái']
+    const rows = currentClassDetail.students.map((stu, idx) => [
+      idx + 1,
+      stu.studentCode || '',
+      stu.fullName || '',
+      stu.email || '',
+      stu.phone || '',
+      formatDate(stu.dateOfBirth),
+      stu.gender === 'FEMALE' ? 'Nữ' : 'Nam',
+      currentClassDetail.name,
+      stu.status === 'ENROLLED' ? 'Đang học' : stu.status
+    ])
+    exportToCsv(`Danh_sach_hoc_sinh_${currentClassDetail.code}`, headers, rows)
+  }
+
+  const handleExportAttendance = () => {
+    if (!currentClassDetail?.students || currentClassDetail.students.length === 0) {
+      alert('Chưa có danh sách học sinh để xuất điểm danh')
+      return
+    }
+    const curSession = currentClassDetail.sessions?.find((s) => s.id === selectedSessionId)
+    const sessionLabel = curSession ? `Buoi_${formatDate(curSession.sessionDate).replace(/\//g, '-')}` : 'Tat_ca'
+
+    const headers = ['STT', 'Mã học viên', 'Họ và tên', 'Lớp học', 'Buổi học', 'Ngày học', 'Trạng thái điểm danh', 'Ghi chú']
+    const rows = currentClassDetail.students.map((stu, idx) => {
+      const change = attendanceChanges[stu.studentId]
+      const status = change?.status || 'PRESENT'
+      const statusLabel = status === 'PRESENT' ? 'Có mặt' : status === 'LATE' ? 'Đi muộn' : status === 'EXCUSED' ? 'Có phép' : 'Vắng mặt'
+      return [
+        idx + 1,
+        stu.studentCode || '',
+        stu.fullName || '',
+        currentClassDetail.name,
+        curSession?.topic || 'Buổi học',
+        formatDate(curSession?.sessionDate),
+        statusLabel,
+        change?.note || ''
+      ]
+    })
+    exportToCsv(`Diem_danh_${currentClassDetail.code}_${sessionLabel}`, headers, rows)
+  }
+
   const handleUploadMaterial = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!selectedSessionId) {
@@ -288,18 +363,47 @@ export const TeacherPortalPage: React.FC = () => {
       return
     }
 
-    if (!materialTitle.trim() || !materialUrl.trim()) {
-      alert('Vui lòng nhập tiêu đề và liên kết tài liệu')
+    let finalFileUrl = materialUrl.trim()
+    let finalFileSize: string | undefined = undefined
+
+    if (materialSourceType === 'FILE') {
+      if (!selectedFile) {
+        alert('Vui lòng chọn file từ máy tính để tải lên')
+        return
+      }
+      setUploadingFile(true)
+      try {
+        const uploadResult = await filesApi.uploadFile(selectedFile)
+        finalFileUrl = uploadResult.fileUrl
+        finalFileSize = uploadResult.fileSize
+      } catch (err: unknown) {
+        const e = err as { message?: string }
+        alert(e.message || 'Lỗi khi tải file từ máy tính lên máy chủ')
+        setUploadingFile(false)
+        return
+      } finally {
+        setUploadingFile(false)
+      }
+    } else {
+      if (!materialUrl.trim()) {
+        alert('Vui lòng nhập liên kết tài liệu')
+        return
+      }
+    }
+
+    if (!materialTitle.trim()) {
+      alert('Vui lòng nhập tiêu đề tài liệu')
       return
     }
 
     setSubmittingMaterial(true)
     try {
+      const descWithMeta = finalFileSize ? `${materialDesc.trim()} (Dung lượng: ${finalFileSize})`.trim() : materialDesc.trim()
       const res = await teacherApi.uploadMaterial(selectedSessionId, {
         title: materialTitle.trim(),
-        description: materialDesc.trim(),
+        description: descWithMeta || undefined,
         materialType,
-        fileUrl: materialUrl.trim()
+        fileUrl: finalFileUrl
       })
 
       if (res.success) {
@@ -307,6 +411,7 @@ export const TeacherPortalPage: React.FC = () => {
         setMaterialTitle('')
         setMaterialDesc('')
         setMaterialUrl('')
+        setSelectedFile(null)
         // Reload class details to refresh materials
         if (selectedClassId) {
           loadClassDetail(selectedClassId)
@@ -671,10 +776,20 @@ export const TeacherPortalPage: React.FC = () => {
 
             {/* Students Table - ABSOLUTELY NO TUITION FEES */}
             <div className="bg-white dark:bg-[#151F31] rounded-3xl border border-slate-200/80 dark:border-[#2A3A50] shadow-sm overflow-hidden">
-              <div className="p-5 border-b border-slate-100 dark:border-[#2A3A50] flex items-center justify-between">
+              <div className="p-5 border-b border-slate-100 dark:border-[#2A3A50] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <h3 className="text-sm font-bold text-slate-900 dark:text-[#E8EEF7]">
                   Danh sách học sinh lớp {currentClassDetail?.name} ({currentClassDetail?.students?.length || 0} học viên)
                 </h3>
+                <button
+                  type="button"
+                  onClick={handleExportStudents}
+                  disabled={!currentClassDetail?.students || currentClassDetail.students.length === 0}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border border-slate-200 dark:border-[#2A3A50] bg-white dark:bg-[#1C293D] hover:bg-slate-50 dark:hover:bg-[#25354D] text-xs font-semibold text-slate-700 dark:text-[#E8EEF7] shadow-xs transition disabled:opacity-40"
+                  title="Xuất danh sách học sinh ra file CSV (Excel)"
+                >
+                  <Download className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                  <span>Xuất danh sách (CSV)</span>
+                </button>
               </div>
 
               {!currentClassDetail?.students || currentClassDetail.students.length === 0 ? (
@@ -790,14 +905,26 @@ export const TeacherPortalPage: React.FC = () => {
                     Chọn trạng thái tham gia và ghi chú nhận xét học tập cho từng học viên.
                   </p>
                 </div>
-                <button
-                  onClick={handleSaveAttendance}
-                  disabled={savingAttendance}
-                  className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md transition disabled:opacity-50 flex items-center gap-1.5"
-                >
-                  <Check size={14} />
-                  <span>{savingAttendance ? 'Đang lưu...' : 'Lưu điểm danh & Nhận xét'}</span>
-                </button>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <button
+                    type="button"
+                    onClick={handleExportAttendance}
+                    disabled={!currentClassDetail?.students || currentClassDetail.students.length === 0}
+                    className="px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#2A3A50] bg-white dark:bg-[#1C293D] hover:bg-slate-50 dark:hover:bg-[#25354D] text-xs font-semibold text-slate-700 dark:text-[#E8EEF7] shadow-xs transition flex items-center gap-1.5 disabled:opacity-40"
+                    title="Xuất bảng điểm danh ra file CSV (Excel)"
+                  >
+                    <Download size={14} className="text-emerald-600 dark:text-emerald-400" />
+                    <span>Xuất điểm danh (CSV)</span>
+                  </button>
+                  <button
+                    onClick={handleSaveAttendance}
+                    disabled={savingAttendance}
+                    className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md transition disabled:opacity-50 flex items-center gap-1.5"
+                  >
+                    <Check size={14} />
+                    <span>{savingAttendance ? 'Đang lưu...' : 'Lưu điểm danh & Nhận xét'}</span>
+                  </button>
+                </div>
               </div>
 
               {attendanceSuccess && (
@@ -1318,7 +1445,81 @@ export const TeacherPortalPage: React.FC = () => {
               Tài liệu sẽ hiển thị ngay cho học viên của buổi học này để tải về học tập.
             </p>
 
+            {/* Switch Source Type */}
+            <div className="flex p-1 bg-slate-100 dark:bg-[#1C293D] rounded-2xl mb-4">
+              <button
+                type="button"
+                onClick={() => setMaterialSourceType('FILE')}
+                className={`flex-1 py-2 text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 transition ${
+                  materialSourceType === 'FILE'
+                    ? 'bg-white dark:bg-[#151F31] text-indigo-600 dark:text-indigo-400 shadow-xs'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-800'
+                }`}
+              >
+                <Upload size={14} />
+                <span>Tải file từ máy tính</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setMaterialSourceType('URL')}
+                className={`flex-1 py-2 text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 transition ${
+                  materialSourceType === 'URL'
+                    ? 'bg-white dark:bg-[#151F31] text-indigo-600 dark:text-indigo-400 shadow-xs'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-800'
+                }`}
+              >
+                <ExternalLink size={14} />
+                <span>Nhập liên kết ngoài (URL)</span>
+              </button>
+            </div>
+
             <form onSubmit={handleUploadMaterial} className="space-y-4">
+              {materialSourceType === 'FILE' ? (
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-[#E8EEF7] mb-1">
+                    Chọn tệp từ máy tính *
+                  </label>
+                  <div className="border-2 border-dashed border-slate-300 dark:border-[#2A3A50] hover:border-indigo-500 dark:hover:border-indigo-400 rounded-2xl p-4 text-center cursor-pointer bg-slate-50/50 dark:bg-[#1C293D]/40 transition relative">
+                    <input
+                      type="file"
+                      id="teacher-material-file-upload"
+                      onChange={handleFileChange}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                      accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.zip,.rar,.png,.jpg,.jpeg,.mp4"
+                    />
+                    {selectedFile ? (
+                      <div className="flex items-center justify-center gap-3">
+                        <FileText className="w-8 h-8 text-indigo-600 dark:text-indigo-400 shrink-0" />
+                        <div className="text-left">
+                          <div className="text-xs font-bold text-slate-800 dark:text-[#E8EEF7] line-clamp-1">{selectedFile.name}</div>
+                          <div className="text-[11px] text-slate-500">{(selectedFile.size / 1024 / 1024).toFixed(2)} MB - Nhấn để đổi file khác</div>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="space-y-1">
+                        <Upload className="w-7 h-7 text-slate-400 mx-auto mb-1" />
+                        <div className="text-xs font-semibold text-slate-700 dark:text-[#E8EEF7]">Nhấn để chọn file hoặc kéo thả vào đây</div>
+                        <div className="text-[10px] text-slate-400">Hỗ trợ PDF, PowerPoint, Word, Excel, Video, Zip (tối đa 50MB)</div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-[#E8EEF7] mb-1">
+                    Đường dẫn liên kết (Google Drive / YouTube / OneDrive) *
+                  </label>
+                  <input
+                    type="url"
+                    required
+                    value={materialUrl}
+                    onChange={(e) => setMaterialUrl(e.target.value)}
+                    placeholder="https://drive.google.com/file/d/..."
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#2A3A50] bg-slate-50/50 dark:bg-[#1C293D] text-sm text-slate-800 dark:text-[#E8EEF7]"
+                  />
+                </div>
+              )}
+
               <div>
                 <label className="block text-xs font-semibold text-slate-700 dark:text-[#E8EEF7] mb-1">
                   Tiêu đề tài liệu *
@@ -1352,20 +1553,6 @@ export const TeacherPortalPage: React.FC = () => {
 
               <div>
                 <label className="block text-xs font-semibold text-slate-700 dark:text-[#E8EEF7] mb-1">
-                  Đường dẫn liên kết (File URL / Google Drive link) *
-                </label>
-                <input
-                  type="url"
-                  required
-                  value={materialUrl}
-                  onChange={(e) => setMaterialUrl(e.target.value)}
-                  placeholder="https://drive.google.com/file/d/..."
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#2A3A50] bg-slate-50/50 dark:bg-[#1C293D] text-sm text-slate-800 dark:text-[#E8EEF7]"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-[#E8EEF7] mb-1">
                   Mô tả / Hướng dẫn học sinh (tùy chọn)
                 </label>
                 <textarea
@@ -1387,10 +1574,10 @@ export const TeacherPortalPage: React.FC = () => {
                 </button>
                 <button
                   type="submit"
-                  disabled={submittingMaterial}
+                  disabled={submittingMaterial || uploadingFile}
                   className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md transition disabled:opacity-50"
                 >
-                  {submittingMaterial ? 'Đang tải lên...' : 'Đẩy tài liệu lên'}
+                  {uploadingFile ? 'Đang tải file lên máy chủ...' : submittingMaterial ? 'Đang lưu tài liệu...' : 'Đẩy tài liệu lên'}
                 </button>
               </div>
             </form>

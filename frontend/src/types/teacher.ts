@@ -90,3 +90,27 @@ export interface BulkAttendancePayload {
     note?: string
   }[]
 }
+
+export interface TeacherAdminItem {
+  id: number
+  userId?: number
+  username?: string
+  rawPassword?: string
+  teacherCode: string
+  fullName: string
+  email?: string
+  phone?: string
+  specialization?: string
+  bio?: string
+  status: string
+  createdAt?: string
+}
+
+export interface CreateTeacherPayload {
+  teacherCode: string
+  fullName: string
+  email?: string
+  phone?: string
+  specialization?: string
+  bio?: string
+}

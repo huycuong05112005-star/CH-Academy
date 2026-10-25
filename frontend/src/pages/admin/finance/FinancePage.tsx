@@ -11,8 +11,10 @@ import {
   Receipt,
   CheckCircle,
   X,
-  FileText
+  FileText,
+  Download
 } from 'lucide-react'
+import { exportToCsv } from '../../../utils/exportCsv'
 import { financeApi } from '../../../api/finance'
 import { studentsApi } from '../../../api/students'
 import type { Receivable, Payment, FinanceOverview } from '../../../types/finance'
@@ -218,6 +220,69 @@ export function FinancePage() {
     }
   }
 
+  const handleExportFinance = () => {
+    if (activeTab === 'receivables') {
+      const headers = [
+        'Mã khoản thu',
+        'Mã học viên',
+        'Họ và tên',
+        'Lớp học',
+        'Nội dung khoản thu',
+        'Tổng phải thu (VNĐ)',
+        'Đã nộp (VNĐ)',
+        'Còn thiếu (VNĐ)',
+        'Hạn nộp',
+        'Trạng thái'
+      ]
+      const statusMap: Record<string, string> = {
+        PENDING: 'Chưa thanh toán',
+        PARTIALLY_PAID: 'Thanh toán một phần',
+        PAID: 'Đã hoàn tất',
+        CANCELLED: 'Đã hủy'
+      }
+      const rows = receivables.map(r => [
+        r.code,
+        r.studentCode,
+        r.studentFullName,
+        r.className || '',
+        r.title,
+        r.totalAmount,
+        r.paidAmount,
+        r.remainingAmount,
+        r.dueDate || '',
+        statusMap[r.status] || r.status
+      ])
+      exportToCsv('Cong_no_khoan_thu', headers, rows)
+    } else {
+      const headers = [
+        'Mã phiếu thu',
+        'Mã học viên',
+        'Họ và tên',
+        'Số tiền (VNĐ)',
+        'Phương thức',
+        'Mã tham chiếu',
+        'Ngày thanh toán',
+        'Ghi chú'
+      ]
+      const methodMap: Record<string, string> = {
+        CASH: 'Tiền mặt',
+        BANK_TRANSFER: 'Chuyển khoản ngân hàng',
+        POS: 'Quẹt thẻ POS'
+      }
+      const rows = payments.map(p => [
+        p.paymentCode,
+        p.studentCode,
+        p.studentFullName,
+        p.amount,
+        methodMap[p.paymentMethod] || p.paymentMethod,
+        p.referenceNumber || '',
+        p.paymentDate || '',
+        p.note || ''
+      ])
+      exportToCsv('Lich_su_thanh_toan', headers, rows)
+    }
+  }
+
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
       {/* Toast */}
@@ -244,7 +309,14 @@ export function FinancePage() {
             Theo dõi khoản phải thu, ghi nhận thanh toán, quản lý công nợ và hoàn tiền minh bạch.
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5">
+          <button
+            onClick={handleExportFinance}
+            className="flex items-center gap-2 px-3.5 py-2.5 border border-emerald-300 dark:border-emerald-700/60 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-950/50 text-sm font-semibold rounded-xl shadow-xs transition"
+          >
+            <Download className="w-4 h-4" />
+            <span>Xuất file Excel (CSV)</span>
+          </button>
           <button
             onClick={() => {
               setRecStudentId('')

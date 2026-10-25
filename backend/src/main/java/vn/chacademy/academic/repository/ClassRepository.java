@@ -40,4 +40,6 @@ public interface ClassRepository extends JpaRepository<ClassEntity, Long> {
     java.util.List<ClassEntity> findByPrimaryTeacherIdOrderByStartDateDesc(Long teacherId);
 
     long countByStatus(String status);
+
+    long countByStatusIn(java.util.Collection<String> statuses);
 }
