@@ -112,121 +112,84 @@ export const LandingPage: React.FC = () => {
   ]
 
   return (
-    <div style={{ backgroundColor: '#f8fafc', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+    <div className="bg-[var(--bg-app)] min-h-screen flex flex-col text-[var(--text-main)] transition-colors duration-200">
       <PublicNavbar />
 
       {/* Hero Section */}
-      <section style={{
-        background: 'linear-gradient(135deg, #142B4A 0%, #1e3a63 100%)',
-        color: '#ffffff',
-        padding: '4.5rem 1.5rem',
-        position: 'relative',
-        overflow: 'hidden'
-      }}>
-        <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '3rem', alignItems: 'center' }}>
-          <div>
-            <div style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.4rem',
-              padding: '0.35rem 0.85rem',
-              borderRadius: '20px',
-              backgroundColor: 'rgba(255, 255, 255, 0.12)',
-              border: '1px solid rgba(255, 255, 255, 0.2)',
-              fontSize: '0.85rem',
-              fontWeight: 600,
-              color: '#38bdf8',
-              marginBottom: '1.25rem'
-            }}>
-              <Sparkles size={16} /> Tuyển sinh các khóa học chất lượng cao
+      <section className="bg-gradient-to-br from-[#0F243E] via-[#142B4A] to-[#1E3A63] text-white py-16 lg:py-24 px-4 sm:px-6 relative overflow-hidden">
+        {/* Subtle background decorative shapes */}
+        <div className="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 rounded-full bg-blue-500/10 blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-96 h-96 rounded-full bg-sky-400/10 blur-3xl pointer-events-none" />
+
+        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center relative z-10">
+          <div className="lg:col-span-7 space-y-6">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-xs font-semibold text-[#38BDF8] animate-fade-in">
+              <Sparkles size={15} />
+              <span>Tuyển sinh các khóa học chất lượng cao</span>
             </div>
 
-            <h1 style={{ fontSize: '2.5rem', fontWeight: 800, lineHeight: 1.25, margin: '0 0 1.25rem 0' }}>
-              Kiến tạo Tri thức — Vững bước Tương lai cùng <span style={{ color: '#38bdf8' }}>CH Academy</span>
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight leading-tight text-white animate-slide-up">
+              Kiến tạo Tri thức — Vững bước Tương lai cùng <span className="text-[#38BDF8]">CH Academy</span>
             </h1>
 
-            <p style={{ fontSize: '1.05rem', color: '#cbd5e1', lineHeight: 1.6, margin: '0 0 2rem 0' }}>
+            <p className="text-base sm:text-lg text-slate-300 leading-relaxed max-w-2xl animate-slide-up stagger-1">
               Môi trường học tập chuyên nghiệp với phương pháp giảng dạy hiện đại, đội ngũ giáo viên tận tâm và hệ thống quản trị đào tạo minh bạch, chuẩn hóa.
             </p>
 
-            <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+            <div className="flex flex-wrap items-center gap-3.5 pt-2 animate-slide-up stagger-2">
               <a
                 href="#tu-van"
-                style={{
-                  padding: '0.85rem 1.75rem',
-                  borderRadius: '8px',
-                  backgroundColor: '#38bdf8',
-                  color: '#0f172a',
-                  fontWeight: 700,
-                  fontSize: '0.95rem',
-                  textDecoration: 'none',
-                  boxShadow: '0 4px 6px rgba(0, 0, 0, 0.2)'
-                }}
+                className="px-6 py-3.5 rounded-xl bg-[#38BDF8] hover:bg-[#0284C7] text-[#0A0F1D] font-bold text-sm shadow-md hover-lift transition-all"
               >
                 Đăng ký tư vấn miễn phí
               </a>
               <Link
                 to="/courses"
-                style={{
-                  padding: '0.85rem 1.75rem',
-                  borderRadius: '8px',
-                  border: '1px solid rgba(255, 255, 255, 0.3)',
-                  backgroundColor: 'rgba(255, 255, 255, 0.08)',
-                  color: '#ffffff',
-                  fontWeight: 600,
-                  fontSize: '0.95rem',
-                  textDecoration: 'none'
-                }}
+                className="px-6 py-3.5 rounded-xl bg-white/10 hover:bg-white/15 border border-white/25 text-white font-semibold text-sm backdrop-blur-sm transition-all"
               >
                 Khám phá khóa học
               </Link>
             </div>
 
             {/* Quick trust metrics */}
-            <div style={{ display: 'flex', gap: '2rem', marginTop: '2.5rem', borderTop: '1px solid rgba(255,255,255,0.15)', paddingTop: '1.5rem' }}>
+            <div className="grid grid-cols-3 gap-4 pt-6 border-t border-white/15 animate-slide-up stagger-3">
               <div>
-                <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#38bdf8' }}>100%</div>
-                <div style={{ fontSize: '0.8rem', color: '#cbd5e1' }}>Giáo trình chuẩn hóa</div>
+                <div className="text-2xl sm:text-3xl font-extrabold text-[#38BDF8] tabular-nums">100%</div>
+                <div className="text-xs text-slate-300 mt-0.5">Giáo trình chuẩn hóa</div>
               </div>
               <div>
-                <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#38bdf8' }}>Đa dạng</div>
-                <div style={{ fontSize: '0.8rem', color: '#cbd5e1' }}>Trẻ em & Người lớn</div>
+                <div className="text-2xl sm:text-3xl font-extrabold text-[#38BDF8]">Đa dạng</div>
+                <div className="text-xs text-slate-300 mt-0.5">Trẻ em & Người lớn</div>
               </div>
               <div>
-                <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#38bdf8' }}>Minh bạch</div>
-                <div style={{ fontSize: '0.8rem', color: '#cbd5e1' }}>Theo dõi học tập 24/7</div>
+                <div className="text-2xl sm:text-3xl font-extrabold text-[#38BDF8]">Minh bạch</div>
+                <div className="text-xs text-slate-300 mt-0.5">Theo dõi học tập 24/7</div>
               </div>
             </div>
           </div>
 
-          {/* Hero right visual */}
-          <div style={{
-            backgroundColor: 'rgba(255, 255, 255, 0.05)',
-            border: '1px solid rgba(255, 255, 255, 0.15)',
-            borderRadius: '16px',
-            padding: '2rem',
-            backdropFilter: 'blur(8px)',
-            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.2)'
-          }}>
-            <h3 style={{ fontSize: '1.2rem', fontWeight: 700, margin: '0 0 1.25rem 0', color: '#ffffff', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <ShieldCheck size={20} color="#38bdf8" /> Vì sao chọn CH Academy?
+          {/* Hero right visual card */}
+          <div className="lg:col-span-5 bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-5 animate-slide-up stagger-2">
+            <h3 className="text-lg font-bold text-white flex items-center gap-2.5 pb-2 border-b border-white/10">
+              <ShieldCheck size={22} className="text-[#38BDF8]" />
+              <span>Vì sao chọn CH Academy?</span>
             </h3>
-            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '1rem', fontSize: '0.95rem', color: '#e2e8f0' }}>
-              <li style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
-                <CheckCircle size={18} color="#4ade80" style={{ flexShrink: 0, marginTop: '3px' }} />
-                <span><strong>Đội ngũ chuyên môn cao:</strong> Giáo viên giàu kinh nghiệm, phương pháp sư phạm tương tác cao.</span>
+            <ul className="space-y-4 text-sm text-slate-200">
+              <li className="flex items-start gap-3">
+                <CheckCircle size={18} className="text-emerald-400 shrink-0 mt-0.5" />
+                <span><strong className="text-white">Đội ngũ chuyên môn cao:</strong> Giáo viên giàu kinh nghiệm, phương pháp sư phạm tương tác cao.</span>
               </li>
-              <li style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
-                <CheckCircle size={18} color="#4ade80" style={{ flexShrink: 0, marginTop: '3px' }} />
-                <span><strong>Quy mô lớp học tinh gọn:</strong> Giới hạn sĩ số giúp giáo viên sâu sát đến từng học viên.</span>
+              <li className="flex items-start gap-3">
+                <CheckCircle size={18} className="text-emerald-400 shrink-0 mt-0.5" />
+                <span><strong className="text-white">Quy mô lớp học tinh gọn:</strong> Giới hạn sĩ số giúp giáo viên sâu sát đến từng học viên.</span>
               </li>
-              <li style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
-                <CheckCircle size={18} color="#4ade80" style={{ flexShrink: 0, marginTop: '3px' }} />
-                <span><strong>Sổ liên lạc điện tử:</strong> Điểm danh, chuyên cần và tiến độ cập nhật tức thời cho phụ huynh.</span>
+              <li className="flex items-start gap-3">
+                <CheckCircle size={18} className="text-emerald-400 shrink-0 mt-0.5" />
+                <span><strong className="text-white">Sổ liên lạc điện tử:</strong> Điểm danh, chuyên cần và tiến độ cập nhật tức thời cho phụ huynh.</span>
               </li>
-              <li style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
-                <CheckCircle size={18} color="#4ade80" style={{ flexShrink: 0, marginTop: '3px' }} />
-                <span><strong>Chính sách linh hoạt:</strong> Biểu phí rõ ràng, hỗ trợ xếp lịch học và học bù chu đáo.</span>
+              <li className="flex items-start gap-3">
+                <CheckCircle size={18} className="text-emerald-400 shrink-0 mt-0.5" />
+                <span><strong className="text-white">Chính sách linh hoạt:</strong> Biểu phí rõ ràng, hỗ trợ xếp lịch học và học bù chu đáo.</span>
               </li>
             </ul>
           </div>
@@ -234,47 +197,53 @@ export const LandingPage: React.FC = () => {
       </section>
 
       {/* Core Features Section */}
-      <section style={{ backgroundColor: '#ffffff', padding: '4.5rem 1.5rem', borderBottom: '1px solid #e2e8f0' }}>
-        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-          <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
-            <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#2563eb', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+      <section className="bg-white dark:bg-[#111C31] py-16 px-4 sm:px-6 border-b border-slate-200/80 dark:border-[#1E3152] transition-colors">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center max-w-2xl mx-auto mb-12">
+            <span className="text-xs font-bold text-[#2563EB] dark:text-[#38BDF8] uppercase tracking-wider">
               Năng lực vận hành
             </span>
-            <h2 style={{ fontSize: '2rem', fontWeight: 800, color: '#142B4A', margin: '0.5rem 0 0.75rem 0' }}>
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-[#0F172A] dark:text-[#F8FAFC] mt-2 mb-3">
               Mọi thứ bạn cần để vận hành trung tâm
             </h2>
-            <p style={{ color: '#64748b', fontSize: '1rem', maxWidth: '650px', margin: '0 auto' }}>
+            <p className="text-slate-600 dark:text-[#94A3B8] text-sm sm:text-base">
               Được thiết kế từ đầu để phục vụ cả chương trình cho trẻ em và người lớn
             </p>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.75rem' }}>
-            <div style={{ padding: '1.75rem', borderRadius: '12px', border: '1px solid #e2e8f0', backgroundColor: '#f8fafc' }}>
-              <div style={{ width: '44px', height: '44px', borderRadius: '10px', backgroundColor: '#eff6ff', color: '#2563eb', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem' }}>
-                <BookOpen size={22} />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="p-6 rounded-2xl border border-slate-200/80 dark:border-[#1E3152] bg-slate-50/60 dark:bg-[#152238] hover-lift transition-all">
+              <div className="w-12 h-12 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-[#2563EB] dark:text-[#38BDF8] flex items-center justify-center mb-4 shadow-xs">
+                <BookOpen size={24} />
               </div>
-              <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: '#142B4A', margin: '0 0 0.5rem 0' }}>Quản lý Khóa học</h3>
-              <p style={{ fontSize: '0.9rem', color: '#64748b', lineHeight: 1.6, margin: 0 }}>
+              <h3 className="text-lg font-bold text-[#0F172A] dark:text-[#F8FAFC] mb-2">
+                Quản lý Khóa học
+              </h3>
+              <p className="text-sm text-slate-600 dark:text-[#94A3B8] leading-relaxed">
                 Tổ chức chương trình học đa dạng cho cả trẻ em và người lớn với lộ trình rõ ràng, chuẩn hóa chuẩn đầu ra.
               </p>
             </div>
 
-            <div style={{ padding: '1.75rem', borderRadius: '12px', border: '1px solid #e2e8f0', backgroundColor: '#f8fafc' }}>
-              <div style={{ width: '44px', height: '44px', borderRadius: '10px', backgroundColor: '#fef3c7', color: '#d97706', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem' }}>
-                <Users size={22} />
+            <div className="p-6 rounded-2xl border border-slate-200/80 dark:border-[#1E3152] bg-slate-50/60 dark:bg-[#152238] hover-lift transition-all">
+              <div className="w-12 h-12 rounded-xl bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 flex items-center justify-center mb-4 shadow-xs">
+                <Users size={24} />
               </div>
-              <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: '#142B4A', margin: '0 0 0.5rem 0' }}>Hồ sơ Học sinh</h3>
-              <p style={{ fontSize: '0.9rem', color: '#64748b', lineHeight: 1.6, margin: 0 }}>
+              <h3 className="text-lg font-bold text-[#0F172A] dark:text-[#F8FAFC] mb-2">
+                Hồ sơ Học sinh
+              </h3>
+              <p className="text-sm text-slate-600 dark:text-[#94A3B8] leading-relaxed">
                 Theo dõi tiến độ, điểm danh, kết quả học tập và thông tin người giám hộ tập trung, bảo mật cao.
               </p>
             </div>
 
-            <div style={{ padding: '1.75rem', borderRadius: '12px', border: '1px solid #e2e8f0', backgroundColor: '#f8fafc' }}>
-              <div style={{ width: '44px', height: '44px', borderRadius: '10px', backgroundColor: '#f0fdf4', color: '#16a34a', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem' }}>
-                <CreditCard size={22} />
+            <div className="p-6 rounded-2xl border border-slate-200/80 dark:border-[#1E3152] bg-slate-50/60 dark:bg-[#152238] hover-lift transition-all">
+              <div className="w-12 h-12 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-4 shadow-xs">
+                <CreditCard size={24} />
               </div>
-              <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: '#142B4A', margin: '0 0 0.5rem 0' }}>Quản lý Học phí</h3>
-              <p style={{ fontSize: '0.9rem', color: '#64748b', lineHeight: 1.6, margin: 0 }}>
+              <h3 className="text-lg font-bold text-[#0F172A] dark:text-[#F8FAFC] mb-2">
+                Quản lý Học phí
+              </h3>
+              <p className="text-sm text-slate-600 dark:text-[#94A3B8] leading-relaxed">
                 Theo dõi thu học phí, ghi nhận thanh toán nhiều đợt, công nợ tự động và hoàn phí theo đúng quy định.
               </p>
             </div>
@@ -283,84 +252,66 @@ export const LandingPage: React.FC = () => {
       </section>
 
       {/* Featured Courses Section */}
-      <section style={{ padding: '4.5rem 1.5rem', maxWidth: '1200px', margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
-        <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
-          <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#2563eb', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+      <section className="py-16 px-4 sm:px-6 max-w-7xl mx-auto w-full box-border">
+        <div className="text-center max-w-2xl mx-auto mb-12">
+          <span className="text-xs font-bold text-[#2563EB] dark:text-[#38BDF8] uppercase tracking-wider">
             Chương trình tiêu biểu
           </span>
-          <h2 style={{ fontSize: '2rem', fontWeight: 800, color: '#142B4A', margin: '0.5rem 0 0.75rem 0' }}>
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-[#0F172A] dark:text-[#F8FAFC] mt-2 mb-3">
             Khóa học Nổi bật tại CH Academy
           </h2>
-          <p style={{ color: '#64748b', fontSize: '1rem', maxWidth: '650px', margin: '0 auto' }}>
+          <p className="text-slate-600 dark:text-[#94A3B8] text-sm sm:text-base">
             Các chương trình đào tạo được thiết kế bài bản, chú trọng tính thực tiễn và phát triển kỹ năng toàn diện cho học viên.
           </p>
         </div>
 
         {loadingCourses ? (
-          <div style={{ textAlign: 'center', padding: '3rem', color: '#64748b' }}>
+          <div className="text-center py-12 text-slate-500 dark:text-slate-400 animate-pulse">
             Đang tải danh sách khóa học...
           </div>
         ) : featuredCourses.length > 0 ? (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.75rem' }}>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {featuredCourses.map((c) => (
               <div
                 key={c.id}
-                style={{
-                  backgroundColor: '#ffffff',
-                  borderRadius: '12px',
-                  border: '1px solid #e2e8f0',
-                  boxShadow: '0 2px 4px rgba(0,0,0,0.04)',
-                  padding: '1.5rem',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'space-between'
-                }}
+                className="bg-white dark:bg-[#111C31] rounded-2xl border border-slate-200/80 dark:border-[#1E3152] shadow-xs p-6 flex flex-col justify-between hover-lift transition-all"
               >
                 <div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-                    <span style={{
-                      padding: '0.25rem 0.65rem',
-                      borderRadius: '6px',
-                      backgroundColor: c.targetAudience === 'KIDS' ? '#fef3c7' : c.targetAudience === 'ADULTS' ? '#e0e7ff' : '#f1f5f9',
-                      color: c.targetAudience === 'KIDS' ? '#92400e' : c.targetAudience === 'ADULTS' ? '#3730a3' : '#475569',
-                      fontSize: '0.75rem',
-                      fontWeight: 700
-                    }}>
+                  <div className="flex justify-between items-center mb-3">
+                    <span className={`px-2.5 py-1 rounded-md text-xs font-bold ${
+                      c.targetAudience === 'KIDS'
+                        ? 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800'
+                        : c.targetAudience === 'ADULTS'
+                        ? 'bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800'
+                        : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'
+                    }`}>
                       {c.targetAudience === 'KIDS' ? 'Trẻ em' : c.targetAudience === 'ADULTS' ? 'Người lớn' : 'Mọi lứa tuổi'}
                     </span>
-                    <span style={{ fontSize: '0.8rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                      <Clock size={14} /> {c.durationHours} giờ
+                    <span className="text-xs text-slate-500 dark:text-[#94A3B8] flex items-center gap-1">
+                      <Clock size={13} /> {c.durationHours} giờ
                     </span>
                   </div>
 
-                  <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: '#142B4A', margin: '0 0 0.5rem 0' }}>
+                  <h3 className="text-lg font-bold text-[#0F172A] dark:text-[#F8FAFC] mb-2 line-clamp-1">
                     {c.name}
                   </h3>
 
-                  <p style={{ fontSize: '0.875rem', color: '#64748b', lineHeight: 1.5, margin: '0 0 1rem 0' }}>
+                  <p className="text-sm text-slate-600 dark:text-[#94A3B8] leading-relaxed line-clamp-2 mb-4">
                     {c.description || 'Chương trình đào tạo chuyên sâu với lộ trình chuẩn mực.'}
                   </p>
                 </div>
 
-                <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div className="border-t border-slate-100 dark:border-[#1E3152] pt-4 flex justify-between items-center">
                   <div>
-                    <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Học phí niêm yết</div>
-                    <div style={{ fontSize: '1.15rem', fontWeight: 800, color: '#142B4A' }}>
+                    <div className="text-xs text-slate-400 dark:text-slate-500">Học phí niêm yết</div>
+                    <div className="text-lg font-extrabold text-[#0F243E] dark:text-[#38BDF8] tabular-nums">
                       {formatVND(c.defaultTuitionFee)}
                     </div>
                   </div>
                   <a
                     href="#tu-van"
                     onClick={() => setTargetCourseId(c.id)}
-                    style={{
-                      padding: '0.5rem 1rem',
-                      borderRadius: '6px',
-                      backgroundColor: '#142B4A',
-                      color: '#ffffff',
-                      fontSize: '0.85rem',
-                      fontWeight: 600,
-                      textDecoration: 'none'
-                    }}
+                    className="px-4 py-2 rounded-xl bg-[#0F243E] dark:bg-[#38BDF8] text-white dark:text-[#0B1220] hover:bg-[#173557] dark:hover:bg-[#0284C7] text-xs font-semibold shadow-xs transition-colors"
                   >
                     Đăng ký tư vấn
                   </a>
@@ -369,87 +320,73 @@ export const LandingPage: React.FC = () => {
             ))}
           </div>
         ) : (
-          <div style={{
-            textAlign: 'center',
-            padding: '2.5rem',
-            backgroundColor: '#ffffff',
-            borderRadius: '12px',
-            border: '1px solid #e2e8f0',
-            color: '#64748b'
-          }}>
-            <BookOpen size={36} style={{ margin: '0 auto 0.75rem auto', opacity: 0.5 }} />
-            <p style={{ margin: 0, fontWeight: 600 }}>Hiện trung tâm đang cập nhật danh mục khóa học mới</p>
-            <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.85rem' }}>Vui lòng đăng ký form tư vấn để nhận thông tin chi tiết</p>
+          <div className="text-center py-10 px-4 bg-white dark:bg-[#111C31] rounded-2xl border border-slate-200/80 dark:border-[#1E3152] text-slate-600 dark:text-slate-400 max-w-lg mx-auto">
+            <BookOpen size={36} className="mx-auto mb-3 opacity-40" />
+            <p className="font-semibold text-sm">Hiện trung tâm đang cập nhật danh mục khóa học mới</p>
+            <p className="text-xs text-slate-400 mt-1">Vui lòng đăng ký form tư vấn để nhận thông tin chi tiết</p>
           </div>
         )}
 
-        <div style={{ textAlign: 'center', marginTop: '2.5rem' }}>
+        <div className="text-center mt-10">
           <Link
             to="/courses"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.4rem',
-              color: '#142B4A',
-              fontWeight: 700,
-              fontSize: '1rem',
-              textDecoration: 'none'
-            }}
+            className="inline-flex items-center gap-2 text-[#0F243E] dark:text-[#38BDF8] font-bold text-sm hover:underline"
           >
-            Xem toàn bộ danh mục khóa học <ArrowRight size={18} />
+            <span>Xem toàn bộ danh mục khóa học</span>
+            <ArrowRight size={16} />
           </Link>
         </div>
       </section>
 
       {/* 4-Step Registration Process */}
-      <section style={{ backgroundColor: '#ffffff', padding: '4.5rem 1.5rem', borderTop: '1px solid #e2e8f0', borderBottom: '1px solid #e2e8f0' }}>
-        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-          <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
-            <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#2563eb', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+      <section className="bg-white dark:bg-[#111C31] py-16 px-4 sm:px-6 border-t border-b border-slate-200/80 dark:border-[#1E3152] transition-colors">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center max-w-2xl mx-auto mb-12">
+            <span className="text-xs font-bold text-[#2563EB] dark:text-[#38BDF8] uppercase tracking-wider">
               Quy trình nhập học
             </span>
-            <h2 style={{ fontSize: '2rem', fontWeight: 800, color: '#142B4A', margin: '0.5rem 0 0.75rem 0' }}>
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-[#0F172A] dark:text-[#F8FAFC] mt-2 mb-3">
               4 Bước Đơn giản để Bắt đầu Khóa học
             </h2>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.75rem' }}>
-            <div style={{ padding: '1.5rem', borderRadius: '12px', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0' }}>
-              <div style={{ width: '38px', height: '38px', borderRadius: '50%', backgroundColor: '#142B4A', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, marginBottom: '1rem' }}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="p-6 rounded-2xl bg-slate-50/60 dark:bg-[#152238] border border-slate-200/80 dark:border-[#1E3152] hover-lift transition-all">
+              <div className="w-10 h-10 rounded-full bg-[#0F243E] dark:bg-[#38BDF8] text-white dark:text-[#0B1220] flex items-center justify-center font-extrabold text-sm mb-4 shadow-xs">
                 1
               </div>
-              <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#142B4A', margin: '0 0 0.5rem 0' }}>Đăng ký tư vấn</h3>
-              <p style={{ fontSize: '0.875rem', color: '#64748b', lineHeight: 1.5, margin: 0 }}>
+              <h3 className="text-base font-bold text-[#0F172A] dark:text-[#F8FAFC] mb-2">Đăng ký tư vấn</h3>
+              <p className="text-sm text-slate-600 dark:text-[#94A3B8] leading-relaxed">
                 Điền thông tin và khóa học bạn quan tâm qua form đăng ký trên website.
               </p>
             </div>
 
-            <div style={{ padding: '1.5rem', borderRadius: '12px', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0' }}>
-              <div style={{ width: '38px', height: '38px', borderRadius: '50%', backgroundColor: '#142B4A', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, marginBottom: '1rem' }}>
+            <div className="p-6 rounded-2xl bg-slate-50/60 dark:bg-[#152238] border border-slate-200/80 dark:border-[#1E3152] hover-lift transition-all">
+              <div className="w-10 h-10 rounded-full bg-[#0F243E] dark:bg-[#38BDF8] text-white dark:text-[#0B1220] flex items-center justify-center font-extrabold text-sm mb-4 shadow-xs">
                 2
               </div>
-              <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#142B4A', margin: '0 0 0.5rem 0' }}>Tư vấn & Kiểm tra</h3>
-              <p style={{ fontSize: '0.875rem', color: '#64748b', lineHeight: 1.5, margin: 0 }}>
+              <h3 className="text-base font-bold text-[#0F172A] dark:text-[#F8FAFC] mb-2">Tư vấn & Kiểm tra</h3>
+              <p className="text-sm text-slate-600 dark:text-[#94A3B8] leading-relaxed">
                 Chuyên viên đào tạo liên hệ tư vấn chi tiết và sắp xếp lịch kiểm tra trình độ.
               </p>
             </div>
 
-            <div style={{ padding: '1.5rem', borderRadius: '12px', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0' }}>
-              <div style={{ width: '38px', height: '38px', borderRadius: '50%', backgroundColor: '#142B4A', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, marginBottom: '1rem' }}>
+            <div className="p-6 rounded-2xl bg-slate-50/60 dark:bg-[#152238] border border-slate-200/80 dark:border-[#1E3152] hover-lift transition-all">
+              <div className="w-10 h-10 rounded-full bg-[#0F243E] dark:bg-[#38BDF8] text-white dark:text-[#0B1220] flex items-center justify-center font-extrabold text-sm mb-4 shadow-xs">
                 3
               </div>
-              <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#142B4A', margin: '0 0 0.5rem 0' }}>Xếp lớp & Hoàn tất</h3>
-              <p style={{ fontSize: '0.875rem', color: '#64748b', lineHeight: 1.5, margin: 0 }}>
+              <h3 className="text-base font-bold text-[#0F172A] dark:text-[#F8FAFC] mb-2">Xếp lớp & Hoàn tất</h3>
+              <p className="text-sm text-slate-600 dark:text-[#94A3B8] leading-relaxed">
                 Chọn lịch học phù hợp, ghi nhận hồ sơ học viên và hoàn tất thủ tục học phí.
               </p>
             </div>
 
-            <div style={{ padding: '1.5rem', borderRadius: '12px', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0' }}>
-              <div style={{ width: '38px', height: '38px', borderRadius: '50%', backgroundColor: '#142B4A', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, marginBottom: '1rem' }}>
+            <div className="p-6 rounded-2xl bg-slate-50/60 dark:bg-[#152238] border border-slate-200/80 dark:border-[#1E3152] hover-lift transition-all">
+              <div className="w-10 h-10 rounded-full bg-[#0F243E] dark:bg-[#38BDF8] text-white dark:text-[#0B1220] flex items-center justify-center font-extrabold text-sm mb-4 shadow-xs">
                 4
               </div>
-              <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#142B4A', margin: '0 0 0.5rem 0' }}>Bắt đầu Khóa học</h3>
-              <p style={{ fontSize: '0.875rem', color: '#64748b', lineHeight: 1.5, margin: 0 }}>
+              <h3 className="text-base font-bold text-[#0F172A] dark:text-[#F8FAFC] mb-2">Bắt đầu Khóa học</h3>
+              <p className="text-sm text-slate-600 dark:text-[#94A3B8] leading-relaxed">
                 Tham gia lớp học cùng giảng viên, theo dõi tiến độ và nhận phản hồi định kỳ.
               </p>
             </div>
@@ -458,61 +395,41 @@ export const LandingPage: React.FC = () => {
       </section>
 
       {/* Consultation Form Section */}
-      <section id="tu-van" style={{ padding: '4.5rem 1.5rem', maxWidth: '900px', margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
-        <div style={{
-          backgroundColor: '#ffffff',
-          borderRadius: '16px',
-          border: '1px solid #e2e8f0',
-          boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.05)',
-          padding: '2.5rem',
-        }}>
-          <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-            <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#2563eb', textTransform: 'uppercase' }}>
+      <section id="tu-van" className="py-16 px-4 sm:px-6 max-w-4xl mx-auto w-full box-border">
+        <div className="bg-white dark:bg-[#111C31] rounded-3xl border border-slate-200/80 dark:border-[#1E3152] shadow-xl p-6 sm:p-10 transition-colors">
+          <div className="text-center mb-8">
+            <span className="text-xs font-bold text-[#2563EB] dark:text-[#38BDF8] uppercase tracking-wider">
               Liên hệ trực tiếp
             </span>
-            <h2 style={{ fontSize: '1.85rem', fontWeight: 800, color: '#142B4A', margin: '0.5rem 0 0.5rem 0' }}>
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-[#0F172A] dark:text-[#F8FAFC] mt-2 mb-2">
               Đăng ký Nhận Tư vấn & Lộ trình Học
             </h2>
-            <p style={{ color: '#64748b', fontSize: '0.95rem', margin: 0 }}>
+            <p className="text-slate-600 dark:text-[#94A3B8] text-sm">
               Để lại thông tin, đội ngũ tuyển sinh CH Academy sẽ liên hệ hỗ trợ bạn trong vòng 24 giờ.
             </p>
           </div>
 
           {submitSuccess ? (
-            <div style={{
-              padding: '2rem',
-              backgroundColor: '#f0fdf4',
-              border: '1px solid #bbf7d0',
-              borderRadius: '12px',
-              textAlign: 'center'
-            }}>
-              <CheckCircle size={48} color="#16a34a" style={{ margin: '0 auto 0.75rem auto' }} />
-              <h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#166534', margin: '0 0 0.5rem 0' }}>
+            <div className="p-8 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 rounded-2xl text-center">
+              <CheckCircle size={44} className="text-emerald-600 dark:text-emerald-400 mx-auto mb-3" />
+              <h3 className="text-xl font-bold text-emerald-800 dark:text-emerald-300 mb-2">
                 Đăng ký tư vấn thành công!
               </h3>
-              <p style={{ color: '#15803d', margin: '0 0 1.25rem 0' }}>
+              <p className="text-sm text-emerald-700 dark:text-emerald-400 mb-5 max-w-md mx-auto">
                 Cảm ơn bạn đã quan tâm đến chương trình đào tạo tại CH Academy. Chúng tôi sẽ sớm liên hệ theo số điện thoại bạn đã cung cấp.
               </p>
               <button
                 type="button"
                 onClick={() => setSubmitSuccess(false)}
-                style={{
-                  padding: '0.5rem 1.25rem',
-                  borderRadius: '6px',
-                  backgroundColor: '#166534',
-                  color: '#ffffff',
-                  border: 'none',
-                  cursor: 'pointer',
-                  fontWeight: 600
-                }}
+                className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm shadow-sm transition-colors"
               >
                 Gửi thêm yêu cầu
               </button>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+            <form onSubmit={handleSubmit} className="space-y-5">
               {formError && (
-                <div style={{ padding: '0.75rem 1rem', backgroundColor: '#fef2f2', border: '1px solid #fecaca', color: '#991b1b', borderRadius: '8px', fontSize: '0.875rem' }}>
+                <div className="p-3.5 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 rounded-xl text-sm font-medium">
                   {formError}
                 </div>
               )}
@@ -523,15 +440,15 @@ export const LandingPage: React.FC = () => {
                 name="websiteUrl"
                 value={websiteUrl}
                 onChange={(e) => setWebsiteUrl(e.target.value)}
-                style={{ display: 'none' }}
+                className="hidden"
                 tabIndex={-1}
                 autoComplete="off"
               />
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1.25rem' }}>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, color: '#334155', marginBottom: '0.4rem' }}>
-                    Họ và tên học viên / phụ huynh <span style={{ color: '#ef4444' }}>*</span>
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-[#E8EEF7] mb-1.5">
+                    Họ và tên học viên / phụ huynh <span className="text-rose-500">*</span>
                   </label>
                   <input
                     type="text"
@@ -539,20 +456,13 @@ export const LandingPage: React.FC = () => {
                     placeholder="Ví dụ: Nguyễn Văn An"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
-                    style={{
-                      width: '100%',
-                      padding: '0.65rem 0.85rem',
-                      borderRadius: '8px',
-                      border: '1px solid #cbd5e1',
-                      fontSize: '0.95rem',
-                      boxSizing: 'border-box'
-                    }}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#2A3A50] bg-slate-50/50 dark:bg-[#1C293D] text-sm text-[#0F172A] dark:text-[#F8FAFC] placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#2563EB] dark:focus:ring-[#38BDF8] transition"
                   />
                 </div>
 
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, color: '#334155', marginBottom: '0.4rem' }}>
-                    Số điện thoại liên hệ <span style={{ color: '#ef4444' }}>*</span>
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-[#E8EEF7] mb-1.5">
+                    Số điện thoại liên hệ <span className="text-rose-500">*</span>
                   </label>
                   <input
                     type="tel"
@@ -560,21 +470,14 @@ export const LandingPage: React.FC = () => {
                     placeholder="Ví dụ: 0987654321"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
-                    style={{
-                      width: '100%',
-                      padding: '0.65rem 0.85rem',
-                      borderRadius: '8px',
-                      border: '1px solid #cbd5e1',
-                      fontSize: '0.95rem',
-                      boxSizing: 'border-box'
-                    }}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#2A3A50] bg-slate-50/50 dark:bg-[#1C293D] text-sm text-[#0F172A] dark:text-[#F8FAFC] placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#2563EB] dark:focus:ring-[#38BDF8] transition"
                   />
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1.25rem' }}>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, color: '#334155', marginBottom: '0.4rem' }}>
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-[#E8EEF7] mb-1.5">
                     Địa chỉ Email (tùy chọn)
                   </label>
                   <input
@@ -582,33 +485,18 @@ export const LandingPage: React.FC = () => {
                     placeholder="example@gmail.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    style={{
-                      width: '100%',
-                      padding: '0.65rem 0.85rem',
-                      borderRadius: '8px',
-                      border: '1px solid #cbd5e1',
-                      fontSize: '0.95rem',
-                      boxSizing: 'border-box'
-                    }}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#2A3A50] bg-slate-50/50 dark:bg-[#1C293D] text-sm text-[#0F172A] dark:text-[#F8FAFC] placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#2563EB] dark:focus:ring-[#38BDF8] transition"
                   />
                 </div>
 
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, color: '#334155', marginBottom: '0.4rem' }}>
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-[#E8EEF7] mb-1.5">
                     Khóa học quan tâm
                   </label>
                   <select
                     value={targetCourseId || ''}
                     onChange={(e) => setTargetCourseId(e.target.value ? Number(e.target.value) : undefined)}
-                    style={{
-                      width: '100%',
-                      padding: '0.65rem 0.85rem',
-                      borderRadius: '8px',
-                      border: '1px solid #cbd5e1',
-                      fontSize: '0.95rem',
-                      backgroundColor: '#ffffff',
-                      boxSizing: 'border-box'
-                    }}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#2A3A50] bg-slate-50/50 dark:bg-[#1C293D] text-sm text-[#0F172A] dark:text-[#F8FAFC] focus:outline-none focus:ring-2 focus:ring-[#2563EB] dark:focus:ring-[#38BDF8] transition"
                   >
                     <option value="">-- Chọn khóa học muốn tìm hiểu --</option>
                     {featuredCourses.map((c) => (
@@ -621,7 +509,7 @@ export const LandingPage: React.FC = () => {
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, color: '#334155', marginBottom: '0.4rem' }}>
+                <label className="block text-xs font-semibold text-slate-700 dark:text-[#E8EEF7] mb-1.5">
                   Nhu cầu tư vấn cụ thể / Ghi chú thêm
                 </label>
                 <textarea
@@ -629,98 +517,55 @@ export const LandingPage: React.FC = () => {
                   placeholder="Ghi rõ thời gian có thể học hoặc độ tuổi của học viên..."
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '0.65rem 0.85rem',
-                    borderRadius: '8px',
-                    border: '1px solid #cbd5e1',
-                    fontSize: '0.95rem',
-                    fontFamily: 'inherit',
-                    boxSizing: 'border-box'
-                  }}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#2A3A50] bg-slate-50/50 dark:bg-[#1C293D] text-sm text-[#0F172A] dark:text-[#F8FAFC] placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#2563EB] dark:focus:ring-[#38BDF8] transition"
                 />
               </div>
 
               <button
                 type="submit"
                 disabled={submitting}
-                style={{
-                  padding: '0.85rem 1.75rem',
-                  borderRadius: '8px',
-                  backgroundColor: '#142B4A',
-                  color: '#ffffff',
-                  fontWeight: 700,
-                  fontSize: '1rem',
-                  border: 'none',
-                  cursor: submitting ? 'not-allowed' : 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '0.5rem',
-                  opacity: submitting ? 0.7 : 1,
-                  boxShadow: '0 4px 6px rgba(20, 43, 74, 0.2)'
-                }}
+                className="w-full py-3.5 px-6 rounded-xl bg-[#0F243E] dark:bg-[#38BDF8] hover:bg-[#173557] dark:hover:bg-[#0284C7] text-white dark:text-[#0B1220] font-bold text-sm shadow-md transition-all flex items-center justify-center gap-2 disabled:opacity-50"
               >
                 <Send size={18} />
-                {submitting ? 'Đang gửi thông tin...' : 'Gửi đăng ký tư vấn ngay'}
+                <span>{submitting ? 'Đang gửi thông tin...' : 'Gửi đăng ký tư vấn ngay'}</span>
               </button>
             </form>
           )}
         </div>
       </section>
 
-
-
       {/* FAQ Accordion Section */}
-      <section style={{ backgroundColor: '#f8fafc', padding: '4.5rem 1.5rem' }}>
-        <div style={{ maxWidth: '850px', margin: '0 auto' }}>
-          <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-            <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#2563eb', textTransform: 'uppercase' }}>
+      <section className="bg-slate-50 dark:bg-[#0B1220] py-16 px-4 sm:px-6 transition-colors">
+        <div className="max-w-3xl mx-auto">
+          <div className="text-center mb-10">
+            <span className="text-xs font-bold text-[#2563EB] dark:text-[#38BDF8] uppercase tracking-wider">
               Hỏi đáp thường gặp
             </span>
-            <h2 style={{ fontSize: '1.85rem', fontWeight: 800, color: '#142B4A', margin: '0.5rem 0 0.5rem 0' }}>
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-[#0F172A] dark:text-[#F8FAFC] mt-2 mb-2">
               Giải đáp Thắc mắc của Quý Phụ huynh & Học viên
             </h2>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+          <div className="space-y-3">
             {faqs.map((faq, idx) => {
               const isOpen = openFaqIndex === idx
               return (
                 <div
                   key={idx}
-                  style={{
-                    border: '1px solid #e2e8f0',
-                    borderRadius: '10px',
-                    overflow: 'hidden',
-                    backgroundColor: isOpen ? '#ffffff' : '#ffffff'
-                  }}
+                  className="border border-slate-200/80 dark:border-[#1E3152] rounded-2xl overflow-hidden bg-white dark:bg-[#111C31] shadow-2xs transition-colors"
                 >
                   <button
                     onClick={() => setOpenFaqIndex(isOpen ? null : idx)}
-                    style={{
-                      width: '100%',
-                      padding: '1.15rem 1.25rem',
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      background: 'none',
-                      border: 'none',
-                      textAlign: 'left',
-                      cursor: 'pointer',
-                      fontSize: '1rem',
-                      fontWeight: 600,
-                      color: '#142B4A'
-                    }}
+                    className="w-full px-5 py-4 flex justify-between items-center text-left text-sm sm:text-base font-semibold text-[#0F172A] dark:text-[#F8FAFC] hover:bg-slate-50/50 dark:hover:bg-[#152238] transition-colors"
                   >
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-                      <HelpCircle size={18} color="#2563eb" />
-                      {faq.q}
+                    <span className="flex items-center gap-3 pr-2">
+                      <HelpCircle size={18} className="text-[#2563EB] dark:text-[#38BDF8] shrink-0" />
+                      <span>{faq.q}</span>
                     </span>
-                    <span style={{ fontSize: '1.25rem', color: '#64748b' }}>{isOpen ? '−' : '+'}</span>
+                    <span className="text-xl text-slate-400 shrink-0">{isOpen ? '−' : '+'}</span>
                   </button>
                   {isOpen && (
-                    <div style={{ padding: '0 1.25rem 1.25rem 2.75rem', fontSize: '0.9rem', color: '#475569', lineHeight: 1.6 }}>
+                    <div className="px-5 pb-5 pl-12 text-sm text-slate-600 dark:text-[#94A3B8] leading-relaxed border-t border-slate-100 dark:border-[#1E3152] pt-3">
                       {faq.a}
                     </div>
                   )}
@@ -736,3 +581,4 @@ export const LandingPage: React.FC = () => {
   )
 }
 export default LandingPage
+

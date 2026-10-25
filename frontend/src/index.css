@@ -1,5 +1,5 @@
-/* ----- Google Fonts: Inter & Be Vietnam Pro ----- */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&display=swap');
+/* ----- Google Fonts: Be Vietnam Pro & Inter ----- */
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,600&family=Inter:wght@300;400;500;600;700;800&display=swap');
 
 @import "tailwindcss";
 
@@ -7,38 +7,39 @@
 
 /* ===================================================
    CH Academy - Unified Design System
-   Brand: Navy & Gold Accent, Dual Light/Dark Theme
+   Brand: Navy & Cyan/Blue Accent, Dual Light/Dark Theme
    =================================================== */
 
 :root {
   /* Colors - Light Theme */
-  --bg-app: #F4F7FB;
+  --bg-app: #F8FAFC;
   --bg-surface: #FFFFFF;
   --bg-elevated: #FFFFFF;
-  --bg-sidebar: #142B4A;
-  --bg-sidebar-hover: #1D4168;
+  --bg-sidebar: #0F243E;
+  --bg-sidebar-hover: #173557;
 
-  --text-main: #17263C;
-  --text-secondary: #64748B;
+  --text-main: #0F172A;
+  --text-secondary: #475569;
   --text-muted: #94A3B8;
 
   --border-color: #E2E8F0;
   --border-subtle: #F1F5F9;
 
-  --primary-navy: #142B4A;
-  --primary-hover: #1D4168;
-  --accent-blue: #3977B8;
-  --accent-light: #EBF3FC;
+  --primary-navy: #0F243E;
+  --primary-hover: #173557;
+  --accent-blue: #2563EB;
+  --accent-cyan: #0EA5E9;
+  --accent-light: #EFF6FF;
 
-  --color-success: #16845B;
+  --color-success: #10B981;
   --color-success-bg: #ECFDF5;
   --color-success-border: #A7F3D0;
 
-  --color-warning: #A86612;
+  --color-warning: #F59E0B;
   --color-warning-bg: #FFFBEB;
   --color-warning-border: #FDE68A;
 
-  --color-danger: #C13D45;
+  --color-danger: #EF4444;
   --color-danger-bg: #FEF2F2;
   --color-danger-border: #FECACA;
 
@@ -46,10 +47,10 @@
   --color-info-bg: #F0F9FF;
   --color-info-border: #BAE6FD;
 
-  --focus-ring: rgba(57, 119, 184, 0.4);
+  --focus-ring: rgba(37, 99, 235, 0.35);
 
-  /* Typography */
-  --font-family: 'Inter', 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  /* Typography: Be Vietnam Pro first for supreme Vietnamese typography */
+  --font-family: 'Be Vietnam Pro', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 
   /* Spacing Scale */
   --space-1: 4px;
@@ -58,6 +59,7 @@
   --space-4: 16px;
   --space-5: 20px;
   --space-6: 24px;
+
   --space-8: 32px;
   --space-10: 40px;
 
@@ -276,6 +278,140 @@ body {
   color: var(--text-muted);
 }
 
+/* ----- Keyframe Animations & Micro-Interactions ----- */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes pulseSubtle {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.75;
+  }
+}
+
+/* Animation Utility Classes */
+.animate-fade-in {
+  animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-slide-down {
+  animation: slideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-shimmer {
+  background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.15) 50%, rgba(255,255,255,0) 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.8s infinite;
+}
+
+/* Stagger delays for cards and lists */
+.stagger-1 { animation-delay: 40ms; }
+.stagger-2 { animation-delay: 80ms; }
+.stagger-3 { animation-delay: 120ms; }
+.stagger-4 { animation-delay: 160ms; }
+.stagger-5 { animation-delay: 200ms; }
+
+/* Micro-interaction & Elevation */
+.hover-lift {
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.hover-lift:hover {
+  transform: translateY(-2.5px);
+  box-shadow: 0 12px 28px -6px rgba(15, 36, 62, 0.1), 0 8px 12px -6px rgba(15, 36, 62, 0.04);
+}
+.dark .hover-lift:hover {
+  transform: translateY(-2.5px);
+  box-shadow: 0 12px 28px -6px rgba(0, 0, 0, 0.5), 0 0 16px -2px rgba(56, 189, 248, 0.18);
+}
+
+.hover-glow {
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.hover-glow:hover {
+  border-color: rgba(37, 99, 235, 0.4);
+  box-shadow: 0 0 16px -2px rgba(37, 99, 235, 0.15);
+}
+.dark .hover-glow:hover {
+  border-color: rgba(56, 189, 248, 0.4);
+  box-shadow: 0 0 16px -2px rgba(56, 189, 248, 0.2);
+}
+
+/* Glassmorphism Panels */
+.card-glass {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+}
+.dark .card-glass {
+  background: rgba(21, 31, 49, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(42, 58, 80, 0.8);
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
 /* Respect user's motion preferences */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
@@ -301,3 +437,4 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--text-muted);
 }
+

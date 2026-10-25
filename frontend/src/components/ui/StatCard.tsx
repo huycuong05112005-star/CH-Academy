@@ -23,21 +23,21 @@ export const StatCard: React.FC<StatCardProps> = ({
   loading = false
 }) => {
   return (
-    <div className="bg-white dark:bg-[#151F31] p-5 rounded-2xl border border-slate-200/80 dark:border-[#2A3A50] shadow-xs transition-all hover:border-slate-300 dark:hover:border-[#38BDF8]/40">
+    <div className="bg-white dark:bg-[#151F31] p-5 rounded-2xl border border-slate-200/80 dark:border-[#2A3A50] shadow-xs hover-lift transition-all hover:border-[#2563EB]/40 dark:hover:border-[#38BDF8]/40 group">
       <div className="flex items-center justify-between gap-3">
         <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-[#A6B4C8]">
           {title}
         </span>
-        <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-[#1C293D] flex items-center justify-center text-[#142B4A] dark:text-[#38BDF8] flex-shrink-0">
+        <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-[#1C293D] group-hover:bg-blue-50 dark:group-hover:bg-[#38BDF8]/10 flex items-center justify-center text-[#142B4A] dark:text-[#38BDF8] group-hover:text-[#2563EB] transition-colors flex-shrink-0">
           <Icon size={20} />
         </div>
       </div>
 
-      <div className="mt-2 flex items-baseline gap-2">
+      <div className="mt-2.5 flex items-baseline gap-2">
         {loading ? (
-          <div className="h-8 w-24 bg-slate-200 dark:bg-slate-700 rounded-md animate-pulse" />
+          <div className="h-8 w-24 bg-slate-200 dark:bg-slate-700/60 rounded-md animate-pulse" />
         ) : (
-          <div className="text-2xl lg:text-3xl font-bold tracking-tight text-[#142B4A] dark:text-[#E8EEF7]">
+          <div className="text-2xl lg:text-3xl font-bold tracking-tight text-[#0F172A] dark:text-[#F8FAFC] tabular-nums">
             {value}
           </div>
         )}
@@ -49,7 +49,7 @@ export const StatCard: React.FC<StatCardProps> = ({
           {trend && (
             <span
               className={`font-semibold ${
-                trend.isPositive ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-600 dark:text-slate-300'
+                trend.isPositive ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'
               }`}
             >
               {trend.text}
@@ -60,4 +60,5 @@ export const StatCard: React.FC<StatCardProps> = ({
       )}
     </div>
   )
+
 }

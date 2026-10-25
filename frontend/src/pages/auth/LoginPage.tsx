@@ -157,25 +157,56 @@ export const LoginPage: React.FC = () => {
           </button>
         </form>
 
-        {/* Demo Tip */}
+        {/* Quick Fill Role Accounts */}
         <div className="mt-6 p-4 rounded-2xl bg-slate-50 dark:bg-[#1C293D]/60 border border-slate-200/60 dark:border-[#2A3A50] text-xs text-slate-500 dark:text-[#A6B4C8] space-y-2">
-          <div className="font-bold text-slate-700 dark:text-[#E8EEF7] text-center mb-1">
-            💡 Tài khoản đăng nhập các vai trò:
+          <div className="font-bold text-slate-700 dark:text-[#E8EEF7] text-center mb-1 flex items-center justify-center gap-1.5">
+            <span>💡 Nhấn nhanh để điền tài khoản mẫu:</span>
           </div>
-          <div className="flex items-center justify-between text-[11px] p-1.5 rounded-lg bg-white dark:bg-[#151F31] border border-slate-200/80 dark:border-[#2A3A50]">
-            <span className="font-semibold text-slate-700 dark:text-slate-200">👑 Quản trị:</span>
-            <code className="font-mono text-[#142B4A] dark:text-[#38BDF8]">admin / Admin@123456</code>
-          </div>
-          <div className="flex items-center justify-between text-[11px] p-1.5 rounded-lg bg-white dark:bg-[#151F31] border border-slate-200/80 dark:border-[#2A3A50]">
-            <span className="font-semibold text-indigo-700 dark:text-indigo-300">🎓 Giáo viên:</span>
-            <code className="font-mono text-indigo-600 dark:text-indigo-400">gv.hoangnam / Teacher@123456</code>
-          </div>
-          <div className="flex items-center justify-between text-[11px] p-1.5 rounded-lg bg-white dark:bg-[#151F31] border border-slate-200/80 dark:border-[#2A3A50]">
-            <span className="font-semibold text-emerald-700 dark:text-emerald-300">🎒 Học viên:</span>
-            <code className="font-mono text-emerald-600 dark:text-emerald-400">thuylinh.nguyen@gmail.com / Student@123456</code>
-          </div>
+          <button
+            type="button"
+            onClick={() => {
+              setUsername('admin')
+              setPassword('Admin@123456')
+            }}
+            className="w-full flex items-center justify-between text-[11px] p-2 rounded-xl bg-white dark:bg-[#151F31] border border-slate-200/80 dark:border-[#2A3A50] hover:border-[#2563EB] dark:hover:border-[#38BDF8] transition-all hover-lift text-left"
+          >
+            <span className="font-semibold text-slate-700 dark:text-slate-200 flex items-center gap-1.5">
+              <span>👑</span>
+              <span>Quản trị viên:</span>
+            </span>
+            <code className="font-mono text-[#0F243E] dark:text-[#38BDF8] font-bold">admin</code>
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setUsername('gv.hoangnam')
+              setPassword('Teacher@123456')
+            }}
+            className="w-full flex items-center justify-between text-[11px] p-2 rounded-xl bg-white dark:bg-[#151F31] border border-slate-200/80 dark:border-[#2A3A50] hover:border-indigo-500 dark:hover:border-indigo-400 transition-all hover-lift text-left"
+          >
+            <span className="font-semibold text-indigo-700 dark:text-indigo-300 flex items-center gap-1.5">
+              <span>🎓</span>
+              <span>Giảng viên:</span>
+            </span>
+            <code className="font-mono text-indigo-600 dark:text-indigo-400 font-bold">gv.hoangnam</code>
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setUsername('thuylinh.nguyen@gmail.com')
+              setPassword('Student@123456')
+            }}
+            className="w-full flex items-center justify-between text-[11px] p-2 rounded-xl bg-white dark:bg-[#151F31] border border-slate-200/80 dark:border-[#2A3A50] hover:border-emerald-500 dark:hover:border-emerald-400 transition-all hover-lift text-left"
+          >
+            <span className="font-semibold text-emerald-700 dark:text-emerald-300 flex items-center gap-1.5">
+              <span>🎒</span>
+              <span>Học viên:</span>
+            </span>
+            <code className="font-mono text-emerald-600 dark:text-emerald-400 font-bold truncate max-w-[170px]">thuylinh.nguyen</code>
+          </button>
         </div>
       </div>
     </div>
   )
 }
+

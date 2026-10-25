@@ -4,111 +4,81 @@ import { GraduationCap, Mail, Phone, MapPin, Clock } from 'lucide-react'
 
 export const PublicFooter: React.FC = () => {
   return (
-    <footer style={{
-      backgroundColor: '#0F1E33',
-      color: '#e2e8f0',
-      paddingTop: '3.5rem',
-      paddingBottom: '2rem',
-      borderTop: '3px solid #142B4A'
-    }}>
-      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 1.5rem' }}>
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
-          gap: '2.5rem',
-          marginBottom: '3rem'
-        }}>
+    <footer className="bg-[#0B1526] text-slate-300 pt-14 pb-8 border-t border-slate-800 transition-colors">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
           {/* Brand Col */}
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', marginBottom: '1rem' }}>
-              <div style={{
-                width: '38px',
-                height: '38px',
-                borderRadius: '8px',
-                backgroundColor: '#ffffff',
-                color: '#142B4A',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}>
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-xl bg-white text-[#0F243E] flex items-center justify-center shadow-sm">
                 <GraduationCap size={22} />
               </div>
-              <div style={{ fontSize: '1.2rem', fontWeight: 800, color: '#ffffff' }}>
+              <div className="text-xl font-extrabold text-white tracking-tight">
                 CH ACADEMY
               </div>
             </div>
-            <p style={{ fontSize: '0.875rem', color: '#94a3b8', lineHeight: 1.6, margin: '0 0 1rem 0' }}>
+            <p className="text-sm text-slate-400 leading-relaxed mb-4">
               Hệ thống trung tâm giáo dục đào tạo đa lĩnh vực dành cho trẻ em và người lớn. Cam kết chất lượng đào tạo thực tiễn và chuẩn hóa chuẩn đầu ra.
             </p>
-            <div style={{ fontSize: '0.8rem', color: '#cbd5e1' }}>
+            <div className="text-xs text-slate-500 font-medium">
               Phiên bản hệ thống: 0.0.1-SNAPSHOT
             </div>
           </div>
 
           {/* Quick Links */}
           <div>
-            <h4 style={{ fontSize: '1rem', fontWeight: 700, color: '#ffffff', marginBottom: '1rem' }}>
+            <h4 className="text-sm font-bold text-white uppercase tracking-wider mb-4">
               Khám phá
             </h4>
-            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.6rem', fontSize: '0.875rem' }}>
-              <li><Link to="/courses" style={{ color: '#cbd5e1', textDecoration: 'none' }}>Chương trình khóa học</Link></li>
-              <li><Link to="/about" style={{ color: '#cbd5e1', textDecoration: 'none' }}>Về chúng tôi & Tầm nhìn</Link></li>
-              <li><Link to="/contact" style={{ color: '#cbd5e1', textDecoration: 'none' }}>Liên hệ & Địa điểm</Link></li>
-              <li><Link to="/login" style={{ color: '#cbd5e1', textDecoration: 'none' }}>Cổng thông tin Quản trị</Link></li>
+            <ul className="space-y-2.5 text-sm">
+              <li><Link to="/courses" className="text-slate-400 hover:text-white transition-colors">Chương trình khóa học</Link></li>
+              <li><Link to="/about" className="text-slate-400 hover:text-white transition-colors">Về chúng tôi & Tầm nhìn</Link></li>
+              <li><Link to="/contact" className="text-slate-400 hover:text-white transition-colors">Liên hệ & Địa điểm</Link></li>
+              <li><Link to="/login" className="text-slate-400 hover:text-white transition-colors">Cổng thông tin Quản trị</Link></li>
             </ul>
           </div>
 
           {/* Legal / Policy */}
           <div>
-            <h4 style={{ fontSize: '1rem', fontWeight: 700, color: '#ffffff', marginBottom: '1rem' }}>
+            <h4 className="text-sm font-bold text-white uppercase tracking-wider mb-4">
               Quy định & Chính sách
             </h4>
-            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.6rem', fontSize: '0.875rem' }}>
-              <li><Link to="/terms" style={{ color: '#cbd5e1', textDecoration: 'none' }}>Điều khoản sử dụng dịch vụ</Link></li>
-              <li><Link to="/privacy" style={{ color: '#cbd5e1', textDecoration: 'none' }}>Chính sách bảo vệ quyền riêng tư</Link></li>
-              <li><span style={{ color: '#94a3b8' }}>Chính sách hoàn phí & bảo lưu</span></li>
-              <li><span style={{ color: '#94a3b8' }}>Quy chuẩn lớp học & điểm danh</span></li>
+            <ul className="space-y-2.5 text-sm">
+              <li><Link to="/terms" className="text-slate-400 hover:text-white transition-colors">Điều khoản sử dụng dịch vụ</Link></li>
+              <li><Link to="/privacy" className="text-slate-400 hover:text-white transition-colors">Chính sách bảo vệ quyền riêng tư</Link></li>
+              <li><span className="text-slate-500">Chính sách hoàn phí & bảo lưu</span></li>
+              <li><span className="text-slate-500">Quy chuẩn lớp học & điểm danh</span></li>
             </ul>
           </div>
 
           {/* Contact info */}
           <div>
-            <h4 style={{ fontSize: '1rem', fontWeight: 700, color: '#ffffff', marginBottom: '1rem' }}>
+            <h4 className="text-sm font-bold text-white uppercase tracking-wider mb-4">
               Thông tin liên hệ
             </h4>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', fontSize: '0.875rem', color: '#cbd5e1' }}>
-              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem' }}>
-                <MapPin size={18} color="#38bdf8" style={{ flexShrink: 0, marginTop: '2px' }} />
-                <span>Trụ sở trung tâm: Khu vực điều hành CH Academy (Cập nhật bởi Ban Quản lý)</span>
+            <div className="space-y-3 text-sm text-slate-400">
+              <div className="flex items-start gap-2.5">
+                <MapPin size={18} className="text-[#38BDF8] shrink-0 mt-0.5" />
+                <span>Trụ sở chính: Tòa nhà CH Academy, Hà Nội</span>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <Phone size={18} color="#38bdf8" style={{ flexShrink: 0 }} />
+              <div className="flex items-center gap-2.5">
+                <Phone size={18} className="text-[#38BDF8] shrink-0" />
                 <span>Hotline: 0987 654 321</span>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <Mail size={18} color="#38bdf8" style={{ flexShrink: 0 }} />
+              <div className="flex items-center gap-2.5">
+                <Mail size={18} className="text-[#38BDF8] shrink-0" />
                 <span>Email: contact@chacademy.edu.vn</span>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <Clock size={18} color="#38bdf8" style={{ flexShrink: 0 }} />
-                <span>Giờ làm việc: 08:00 - 21:00 (Thứ 2 - Chủ Nhật)</span>
+              <div className="flex items-center gap-2.5">
+                <Clock size={18} className="text-[#38BDF8] shrink-0" />
+                <span>Giờ làm việc: 08:00 - 21:00 (Hàng ngày)</span>
               </div>
             </div>
           </div>
         </div>
 
         {/* Bottom Bar */}
-        <div style={{
-          borderTop: '1px solid rgba(255,255,255,0.1)',
-          paddingTop: '1.5rem',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          flexWrap: 'wrap',
-          gap: '1rem',
-          fontSize: '0.8rem',
-          color: '#94a3b8'
-        }}>
+        <div className="border-t border-slate-800/80 pt-6 flex flex-col sm:flex-row justify-between items-center gap-3 text-xs text-slate-500">
           <div>
             © {new Date().getFullYear()} CH Academy. Tất cả quyền được bảo lưu. Múi giờ hệ thống: Asia/Ho_Chi_Minh.
           </div>
@@ -120,3 +90,5 @@ export const PublicFooter: React.FC = () => {
     </footer>
   )
 }
+export default PublicFooter
+
