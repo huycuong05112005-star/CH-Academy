@@ -387,78 +387,80 @@ export const StudentPortalPage: React.FC = () => {
         </div>
 
         {/* Navigation Tabs */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-2 border-b border-slate-200 dark:border-[#2A3A50]">
-          <button
-            onClick={() => setActiveTab('classes')}
-            className={`px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 whitespace-nowrap ${
-              activeTab === 'classes'
-                ? 'bg-[#142B4A] dark:bg-[#38BDF8] text-white dark:text-[#0B1220] shadow-md'
-                : 'text-slate-600 dark:text-[#A6B4C8] hover:bg-slate-100 dark:hover:bg-[#1C293D]'
-            }`}
-          >
-            <BookOpen className="w-4 h-4" />
-            <span>Khóa học & Bài giảng ({enrollments.length})</span>
-          </button>
+        <div className="bg-white/80 dark:bg-[#151F31]/80 backdrop-blur-sm p-1.5 rounded-2xl border border-slate-200/80 dark:border-[#2A3A50] shadow-xs">
+          <div className="flex items-center gap-1.5 overflow-x-auto scroll-smooth py-0.5 px-1">
+            <button
+              onClick={() => setActiveTab('classes')}
+              className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all flex items-center gap-2 shrink-0 ${
+                activeTab === 'classes'
+                  ? 'bg-[#142B4A] dark:bg-[#38BDF8] text-white dark:text-[#0B1220] shadow-sm font-bold'
+                  : 'text-slate-600 dark:text-[#A6B4C8] hover:bg-slate-100 dark:hover:bg-[#1C293D]'
+              }`}
+            >
+              <BookOpen className="w-4 h-4 shrink-0" />
+              <span>Khóa học ({enrollments.length})</span>
+            </button>
 
-          <button
-            onClick={() => setActiveTab('schedule')}
-            className={`px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 whitespace-nowrap ${
-              activeTab === 'schedule'
-                ? 'bg-[#142B4A] dark:bg-[#38BDF8] text-white dark:text-[#0B1220] shadow-md'
-                : 'text-slate-600 dark:text-[#A6B4C8] hover:bg-slate-100 dark:hover:bg-[#1C293D]'
-            }`}
-          >
-            <Clock className="w-4 h-4" />
-            <span>Lịch học ({schedules.length})</span>
-          </button>
+            <button
+              onClick={() => setActiveTab('schedule')}
+              className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all flex items-center gap-2 shrink-0 ${
+                activeTab === 'schedule'
+                  ? 'bg-[#142B4A] dark:bg-[#38BDF8] text-white dark:text-[#0B1220] shadow-sm font-bold'
+                  : 'text-slate-600 dark:text-[#A6B4C8] hover:bg-slate-100 dark:hover:bg-[#1C293D]'
+              }`}
+            >
+              <Clock className="w-4 h-4 shrink-0" />
+              <span>Lịch học ({schedules.length})</span>
+            </button>
 
-          <button
-            onClick={() => setActiveTab('attendance')}
-            className={`px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 whitespace-nowrap ${
-              activeTab === 'attendance'
-                ? 'bg-[#142B4A] dark:bg-[#38BDF8] text-white dark:text-[#0B1220] shadow-md'
-                : 'text-slate-600 dark:text-[#A6B4C8] hover:bg-slate-100 dark:hover:bg-[#1C293D]'
-            }`}
-          >
-            <UserCheck className="w-4 h-4" />
-            <span>Chuyên cần ({attendanceRate}%)</span>
-          </button>
+            <button
+              onClick={() => setActiveTab('attendance')}
+              className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all flex items-center gap-2 shrink-0 ${
+                activeTab === 'attendance'
+                  ? 'bg-[#142B4A] dark:bg-[#38BDF8] text-white dark:text-[#0B1220] shadow-sm font-bold'
+                  : 'text-slate-600 dark:text-[#A6B4C8] hover:bg-slate-100 dark:hover:bg-[#1C293D]'
+              }`}
+            >
+              <UserCheck className="w-4 h-4 shrink-0" />
+              <span>Chuyên cần ({attendanceRate}%)</span>
+            </button>
 
-          <button
-            onClick={() => setActiveTab('finance')}
-            className={`px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 whitespace-nowrap ${
-              activeTab === 'finance'
-                ? 'bg-[#142B4A] dark:bg-[#38BDF8] text-white dark:text-[#0B1220] shadow-md'
-                : 'text-slate-600 dark:text-[#A6B4C8] hover:bg-slate-100 dark:hover:bg-[#1C293D]'
-            }`}
-          >
-            <CreditCard className="w-4 h-4" />
-            <span>Học phí & Biên lai</span>
-          </button>
+            <button
+              onClick={() => setActiveTab('finance')}
+              className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all flex items-center gap-2 shrink-0 ${
+                activeTab === 'finance'
+                  ? 'bg-[#142B4A] dark:bg-[#38BDF8] text-white dark:text-[#0B1220] shadow-sm font-bold'
+                  : 'text-slate-600 dark:text-[#A6B4C8] hover:bg-slate-100 dark:hover:bg-[#1C293D]'
+              }`}
+            >
+              <CreditCard className="w-4 h-4 shrink-0" />
+              <span>Học phí</span>
+            </button>
 
-          <button
-            onClick={() => setActiveTab('notifications')}
-            className={`px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 whitespace-nowrap ${
-              activeTab === 'notifications'
-                ? 'bg-[#142B4A] dark:bg-[#38BDF8] text-white dark:text-[#0B1220] shadow-md'
-                : 'text-slate-600 dark:text-[#A6B4C8] hover:bg-slate-100 dark:hover:bg-[#1C293D]'
-            }`}
-          >
-            <Bell className="w-4 h-4" />
-            <span>Thông báo ({notifications.length})</span>
-          </button>
+            <button
+              onClick={() => setActiveTab('notifications')}
+              className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all flex items-center gap-2 shrink-0 ${
+                activeTab === 'notifications'
+                  ? 'bg-[#142B4A] dark:bg-[#38BDF8] text-white dark:text-[#0B1220] shadow-sm font-bold'
+                  : 'text-slate-600 dark:text-[#A6B4C8] hover:bg-slate-100 dark:hover:bg-[#1C293D]'
+              }`}
+            >
+              <Bell className="w-4 h-4 shrink-0" />
+              <span>Thông báo ({notifications.length})</span>
+            </button>
 
-          <button
-            onClick={() => setActiveTab('profile')}
-            className={`px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 whitespace-nowrap ${
-              activeTab === 'profile'
-                ? 'bg-[#142B4A] dark:bg-[#38BDF8] text-white dark:text-[#0B1220] shadow-md'
-                : 'text-slate-600 dark:text-[#A6B4C8] hover:bg-slate-100 dark:hover:bg-[#1C293D]'
-            }`}
-          >
-            <User className="w-4 h-4" />
-            <span>Hồ sơ & Đổi MK</span>
-          </button>
+            <button
+              onClick={() => setActiveTab('profile')}
+              className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all flex items-center gap-2 shrink-0 ${
+                activeTab === 'profile'
+                  ? 'bg-[#142B4A] dark:bg-[#38BDF8] text-white dark:text-[#0B1220] shadow-sm font-bold'
+                  : 'text-slate-600 dark:text-[#A6B4C8] hover:bg-slate-100 dark:hover:bg-[#1C293D]'
+              }`}
+            >
+              <User className="w-4 h-4 shrink-0" />
+              <span>Hồ sơ & Đổi MK</span>
+            </button>
+          </div>
         </div>
 
         {/* TAB 1: LỚP HỌC & BÀI GIẢNG / TÀI LIỆU */}
@@ -670,40 +672,40 @@ export const StudentPortalPage: React.FC = () => {
                 {notifications.map((n) => (
                   <div
                     key={n.id}
-                    className={`p-5 rounded-2xl border transition-all ${
+                    className={`hover-lift p-6 rounded-2xl border transition-all duration-200 ${
                       n.priority === 'URGENT'
-                        ? 'bg-rose-50/50 dark:bg-rose-950/20 border-rose-200 dark:border-rose-900'
+                        ? 'bg-rose-50/50 dark:bg-rose-950/20 border-rose-200 dark:border-rose-900 shadow-sm'
                         : n.priority === 'HIGH'
-                        ? 'bg-amber-50/50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-900'
-                        : 'bg-white dark:bg-[#151F31] border-slate-200/80 dark:border-[#2A3A50]'
+                        ? 'bg-amber-50/50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-900 shadow-sm'
+                        : 'bg-white dark:bg-[#151F31] border-slate-200/80 dark:border-[#2A3A50] shadow-xs hover:shadow-md'
                     }`}
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div>
-                        <div className="flex items-center gap-2 mb-1">
+                        <div className="flex items-center gap-2 mb-2">
                           {n.priority === 'URGENT' && (
-                            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-600 text-white">
+                            <span className="px-2.5 py-0.5 rounded-md text-[10px] font-bold tracking-wider uppercase bg-rose-600 text-white shadow-xs">
                               KHẨN CẤP
                             </span>
                           )}
                           {n.priority === 'HIGH' && (
-                            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500 text-white">
+                            <span className="px-2.5 py-0.5 rounded-md text-[10px] font-bold tracking-wider uppercase bg-amber-500 text-white shadow-xs">
                               QUAN TRỌNG
                             </span>
                           )}
                           {n.targetAudience === 'CLASS' && (
-                            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-800 dark:bg-blue-900/60 dark:text-blue-300">
+                            <span className="px-2.5 py-0.5 rounded-md text-[10px] font-bold tracking-wider uppercase bg-blue-100 text-blue-800 dark:bg-blue-900/60 dark:text-blue-300">
                               LỚP HỌC
                             </span>
                           )}
-                          <span className="text-[11px] font-mono text-slate-400">
+                          <span className="text-xs font-mono text-slate-400 dark:text-slate-500">
                             {formatDate(n.createdAt)}
                           </span>
                         </div>
-                        <h4 className="text-base font-bold text-slate-900 dark:text-[#E8EEF7]">
+                        <h4 className="text-base font-bold text-slate-900 dark:text-[#E8EEF7] tracking-tight leading-snug">
                           {n.title}
                         </h4>
-                        <p className="text-xs text-slate-600 dark:text-[#A6B4C8] mt-1.5 whitespace-pre-line leading-relaxed">
+                        <p className="text-sm text-slate-600 dark:text-[#A6B4C8] mt-2 whitespace-pre-line leading-relaxed">
                           {n.content}
                         </p>
                       </div>

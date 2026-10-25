@@ -157,33 +157,33 @@ export const AdminNotificationsPage: React.FC = () => {
         </div>
 
         {/* Tab Buttons */}
-        <div className="flex items-center gap-1.5 p-1 bg-slate-100 dark:bg-[#1C293D] rounded-2xl">
+        <div className="flex items-center gap-1.5 p-1.5 bg-slate-100/90 dark:bg-[#1C293D] rounded-2xl border border-slate-200/60 dark:border-[#2A3A50] shadow-xs">
           <button
             onClick={() => setActiveTab('send')}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition ${
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
               activeTab === 'send'
-                ? 'bg-white dark:bg-[#151F31] text-[#142B4A] dark:text-[#38BDF8] shadow-xs'
-                : 'text-slate-600 dark:text-[#A6B4C8] hover:text-slate-900'
+                ? 'bg-white dark:bg-[#151F31] text-[#142B4A] dark:text-[#38BDF8] shadow-sm'
+                : 'text-slate-600 dark:text-[#A6B4C8] hover:text-slate-900 dark:hover:text-white'
             }`}
           >
             Gửi thông báo
           </button>
           <button
             onClick={() => setActiveTab('history')}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition ${
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
               activeTab === 'history'
-                ? 'bg-white dark:bg-[#151F31] text-[#142B4A] dark:text-[#38BDF8] shadow-xs'
-                : 'text-slate-600 dark:text-[#A6B4C8] hover:text-slate-900'
+                ? 'bg-white dark:bg-[#151F31] text-[#142B4A] dark:text-[#38BDF8] shadow-sm'
+                : 'text-slate-600 dark:text-[#A6B4C8] hover:text-slate-900 dark:hover:text-white'
             }`}
           >
             Lịch sử ({notifications.length})
           </button>
           <button
             onClick={() => setActiveTab('teacher_activity')}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition ${
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
               activeTab === 'teacher_activity'
-                ? 'bg-white dark:bg-[#151F31] text-[#142B4A] dark:text-[#38BDF8] shadow-xs'
-                : 'text-slate-600 dark:text-[#A6B4C8] hover:text-slate-900'
+                ? 'bg-white dark:bg-[#151F31] text-[#142B4A] dark:text-[#38BDF8] shadow-sm'
+                : 'text-slate-600 dark:text-[#A6B4C8] hover:text-slate-900 dark:hover:text-white'
             }`}
           >
             Tài liệu GV đẩy ({teacherMaterials.length})
@@ -326,45 +326,50 @@ export const AdminNotificationsPage: React.FC = () => {
               {notifications.map((n) => (
                 <div
                   key={n.id}
-                  className="p-5 rounded-2xl bg-white dark:bg-[#151F31] border border-slate-200/80 dark:border-[#2A3A50] shadow-xs flex flex-col justify-between space-y-3"
+                  className="hover-lift p-6 rounded-2xl bg-white dark:bg-[#151F31] border border-slate-200/80 dark:border-[#2A3A50] shadow-sm flex flex-col justify-between space-y-4 group transition-all duration-200"
                 >
-                  <div className="space-y-2">
+                  <div className="space-y-3">
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-1.5">
-                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-800 dark:bg-blue-950/60 dark:text-blue-300">
-                          {n.targetAudience}
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="px-2.5 py-1 rounded-md text-[10px] font-bold tracking-wider uppercase bg-blue-50 text-blue-700 border border-blue-200/60 dark:bg-blue-950/60 dark:text-blue-300 dark:border-blue-900">
+                          {n.targetAudience === 'ALL' ? 'TẤT CẢ' : n.targetAudience === 'TEACHERS' ? 'GIẢNG VIÊN' : n.targetAudience === 'STUDENTS' ? 'HỌC VIÊN' : n.targetAudience}
                         </span>
                         {n.targetClassName && (
-                          <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-100 text-purple-800 dark:bg-purple-950/60 dark:text-purple-300">
+                          <span className="px-2.5 py-1 rounded-md text-[10px] font-bold tracking-wider uppercase bg-purple-50 text-purple-700 border border-purple-200/60 dark:bg-purple-950/60 dark:text-purple-300 dark:border-purple-900">
                             {n.targetClassName}
                           </span>
                         )}
                         {n.priority === 'HIGH' && (
-                          <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500 text-white">
+                          <span className="px-2.5 py-1 rounded-md text-[10px] font-bold tracking-wider uppercase bg-amber-50 text-amber-700 border border-amber-200/60 dark:bg-amber-950/60 dark:text-amber-300 dark:border-amber-900">
                             QUAN TRỌNG
+                          </span>
+                        )}
+                        {n.priority === 'URGENT' && (
+                          <span className="px-2.5 py-1 rounded-md text-[10px] font-bold tracking-wider uppercase bg-rose-50 text-rose-700 border border-rose-200/60 dark:bg-rose-950/60 dark:text-rose-300 dark:border-rose-900">
+                            KHẨN CẤP
                           </span>
                         )}
                       </div>
                       <button
                         onClick={() => handleDeleteNotification(n.id)}
-                        className="p-1 rounded-lg text-slate-400 hover:text-rose-600 transition"
+                        className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition"
                         title="Xóa thông báo"
                       >
-                        <Trash2 size={14} />
+                        <Trash2 size={15} />
                       </button>
                     </div>
 
-                    <h4 className="text-sm font-bold text-slate-900 dark:text-[#E8EEF7]">
+                    <h4 className="text-base font-bold text-slate-900 dark:text-[#E8EEF7] tracking-tight leading-snug">
                       {n.title}
                     </h4>
-                    <p className="text-xs text-slate-600 dark:text-[#A6B4C8] whitespace-pre-line leading-relaxed">
+                    <p className="text-sm text-slate-600 dark:text-[#A6B4C8] whitespace-pre-line leading-relaxed">
                       {n.content}
                     </p>
                   </div>
 
-                  <div className="pt-2 border-t border-slate-100 dark:border-[#2A3A50] flex items-center justify-between text-[11px] text-slate-400 font-mono">
-                    <span>Gửi bởi: {n.createdByName || 'Admin'}</span>
-                    <span>{formatDate(n.createdAt)}</span>
+                  <div className="pt-3 border-t border-slate-100 dark:border-[#2A3A50] flex items-center justify-between text-xs text-slate-500 dark:text-[#8899A6]">
+                    <span>Gửi bởi: <strong className="text-slate-700 dark:text-slate-300">{n.createdByName || 'Quản trị viên Hệ thống'}</strong></span>
+                    <span className="font-mono tabular-nums">{formatDate(n.createdAt)}</span>
                   </div>
                 </div>
               ))}
