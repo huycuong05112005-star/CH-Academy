@@ -25,7 +25,7 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
     @EntityGraph(attributePaths = {"student"})
     List<Enrollment> findByClassEntityIdOrderByCreatedAtDesc(Long classId);
 
-    @EntityGraph(attributePaths = {"classEntity", "classEntity.course"})
+    @EntityGraph(attributePaths = {"classEntity", "student", "classEntity.course"})
     List<Enrollment> findByStudentIdOrderByCreatedAtDesc(Long studentId);
 
     @EntityGraph(attributePaths = {"classEntity", "student", "classEntity.course"})

@@ -83,6 +83,30 @@ public class StudentController {
         return ResponseEntity.ok(ApiResponse.success("Cập nhật trạng thái học viên thành công", updated));
     }
 
+    @PostMapping("/{id}/provision-account")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'CENTER_ADMIN', 'ACADEMIC_STAFF', 'ADMISSIONS_STAFF')")
+    public ResponseEntity<ApiResponse<vn.chacademy.student.dto.AccountProvisionResponse>> provisionAccount(
+            @PathVariable Long id,
+            @RequestBody(required = false) Map<String, String> body) {
+        String customPassword = body != null ? body.get("password") : null;
+        vn.chacademy.student.dto.AccountProvisionResponse res = studentService.provisionAccount(id, customPassword);
+        return ResponseEntity.ok(ApiResponse.success(res.getMessage(), res));
+    }
+
+    @PostMapping("/{id}/enroll-and-pay")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'CENTER_ADMIN', 'ACADEMIC_STAFF', 'ADMISSIONS_STAFF', 'ACCOUNTANT')")
+    public ResponseEntity<ApiResponse<StudentDto>> enrollAndPay(
+            @PathVariable Long id,
+            @Valid @RequestBody vn.chacademy.student.dto.EnrollAndPayRequest request,
+            @org.springframework.security.core.annotation.AuthenticationPrincipal org.springframework.security.core.userdetails.UserDetails userDetails) {
+        Long staffId = null;
+        if (userDetails != null) {
+            staffId = studentService.getStaffIdByUsername(userDetails.getUsername());
+        }
+        StudentDto res = studentService.enrollAndPay(id, request, staffId);
+        return ResponseEntity.ok(ApiResponse.success("Ghi danh, sinh học phí & cập nhật tài khoản thành công", res));
+    }
+
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'CENTER_ADMIN')")
     public ResponseEntity<ApiResponse<Void>> deleteStudent(@PathVariable Long id) {

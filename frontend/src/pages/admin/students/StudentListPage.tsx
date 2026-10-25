@@ -1,6 +1,10 @@
 import React, { useEffect, useState, useCallback } from 'react'
 import { studentsApi } from '../../../api/students'
-import type { Student, Guardian, CreateStudentPayload, StudentStats } from '../../../types/student'
+import { classesApi } from '../../../api/classes'
+import { coursesApi } from '../../../api/courses'
+import type { Student, Guardian, CreateStudentPayload, StudentStats, AccountProvisionResponse } from '../../../types/student'
+import type { ClassItem } from '../../../types/class'
+import type { Course } from '../../../types/course'
 import { Badge } from '../../../components/ui/Badge'
 import { StatCard } from '../../../components/ui/StatCard'
 import { TableSkeleton } from '../../../components/ui/LoadingSkeleton'
@@ -22,13 +26,21 @@ import {
   UserCheck,
   Eye,
   Sparkles,
-  GraduationCap
+  GraduationCap,
+  CreditCard,
+  Key,
+  Send,
+  BookOpen,
+  Copy,
+  Check
 } from 'lucide-react'
 
 export const StudentListPage: React.FC = () => {
   const [students, setStudents] = useState<Student[]>([])
   const [stats, setStats] = useState<StudentStats | null>(null)
   const [guardians, setGuardians] = useState<Guardian[]>([])
+  const [classList, setClassList] = useState<ClassItem[]>([])
+  const [courses, setCourses] = useState<Course[]>([])
   const [loading, setLoading] = useState<boolean>(true)
   const [statsLoading, setStatsLoading] = useState<boolean>(true)
   const [error, setError] = useState<string | null>(null)
@@ -57,6 +69,26 @@ export const StudentListPage: React.FC = () => {
   const [selectedRelation, setSelectedRelation] = useState<string>('FATHER')
   const [isPrimaryContact, setIsPrimaryContact] = useState<boolean>(true)
 
+  // Enroll & Pay Modal
+  const [isEnrollModalOpen, setIsEnrollModalOpen] = useState<boolean>(false)
+  const [enrollStudent, setEnrollStudent] = useState<Student | null>(null)
+  const [selectedClassId, setSelectedClassId] = useState<number>(0)
+  const [tuitionFee, setTuitionFee] = useState<number>(0)
+  const [paidAmount, setPaidAmount] = useState<number>(0)
+  const [paymentMethod, setPaymentMethod] = useState<string>('BANK_TRANSFER')
+  const [referenceNumber, setReferenceNumber] = useState<string>('')
+  const [enrollNotes, setEnrollNotes] = useState<string>('')
+  const [provisionAccountOnEnroll, setProvisionAccountOnEnroll] = useState<boolean>(true)
+  const [enrollSubmitting, setEnrollSubmitting] = useState<boolean>(false)
+
+  // Quick Provision Modal
+  const [isProvisionModalOpen, setIsProvisionModalOpen] = useState<boolean>(false)
+  const [provisionStudent, setProvisionStudent] = useState<Student | null>(null)
+  const [customPassword, setCustomPassword] = useState<string>('')
+  const [provisionSubmitting, setProvisionSubmitting] = useState<boolean>(false)
+  const [provisionResult, setProvisionResult] = useState<AccountProvisionResponse | null>(null)
+  const [copiedPassword, setCopiedPassword] = useState<boolean>(false)
+
   // Form state
   const [formData, setFormData] = useState<CreateStudentPayload>({
     studentCode: '',
@@ -71,6 +103,11 @@ export const StudentListPage: React.FC = () => {
     internalNotes: ''
   })
 
+  // Format currency
+  const formatVND = (amount?: number) => {
+    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount || 0)
+  }
+
   // Load aggregate stats from real API
   const loadStats = useCallback(async () => {
     setStatsLoading(true)
@@ -80,25 +117,29 @@ export const StudentListPage: React.FC = () => {
         setStats(res.data)
       }
     } catch {
-      // Non-fatal, fallback to page elements
+      // Non-fatal, fallback
     } finally {
       setStatsLoading(false)
     }
   }, [])
 
-  // Load guardians list for linking
+  // Load auxiliary data
   useEffect(() => {
-    const loadGuardians = async () => {
+    const loadAuxData = async () => {
       try {
-        const res = await studentsApi.getAllGuardians()
-        if (res.success && res.data) {
-          setGuardians(res.data)
-        }
+        const guardianRes = await studentsApi.getAllGuardians().catch(() => null)
+        if (guardianRes && guardianRes.success && guardianRes.data) setGuardians(guardianRes.data)
+
+        const classRes = await classesApi.searchClasses({ size: 100 }).catch(() => null)
+        if (classRes && classRes.success && classRes.data) setClassList(classRes.data.content || [])
+
+        const courseRes = await coursesApi.searchCourses({ size: 100 }).catch(() => null)
+        if (courseRes && courseRes.success && courseRes.data) setCourses(courseRes.data.content || [])
       } catch {
         // Silently ignore
       }
     }
-    loadGuardians()
+    loadAuxData()
     loadStats()
   }, [loadStats])
 
@@ -263,6 +304,102 @@ export const StudentListPage: React.FC = () => {
     }
   }
 
+  // Open Enroll & Pay Modal
+  const openEnrollModal = (s: Student) => {
+    setEnrollStudent(s)
+    setSelectedClassId(0)
+    setTuitionFee(0)
+    setPaidAmount(0)
+    setPaymentMethod('BANK_TRANSFER')
+    setReferenceNumber('')
+    setEnrollNotes('')
+    setProvisionAccountOnEnroll(!s.hasUserAccount)
+    setIsEnrollModalOpen(true)
+  }
+
+  // On class selection in Enroll Modal
+  const handleSelectClass = (classIdStr: string) => {
+    const cid = Number(classIdStr)
+    setSelectedClassId(cid)
+    const selectedClass = classList.find((c) => c.id === cid)
+    if (selectedClass) {
+      const course = courses.find((cr) => cr.id === selectedClass.courseId)
+      const fee = course?.defaultTuitionFee || 0
+      setTuitionFee(fee)
+      setPaidAmount(fee) // Default to 100% full payment
+    } else {
+      setTuitionFee(0)
+      setPaidAmount(0)
+    }
+  }
+
+  // Submit Enroll & Pay
+  const handleEnrollSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!enrollStudent || !selectedClassId) {
+      alert('Vui lòng chọn lớp học muốn ghi danh!')
+      return
+    }
+
+    setEnrollSubmitting(true)
+    try {
+      const res = await studentsApi.enrollAndPay(enrollStudent.id, {
+        classId: selectedClassId,
+        paidAmount: Number(paidAmount),
+        paymentMethod,
+        referenceNumber: referenceNumber.trim() || undefined,
+        notes: enrollNotes.trim() || undefined,
+        provisionAccount: provisionAccountOnEnroll
+      })
+
+      if (res.success) {
+        setSuccessMsg(`Đã ghi danh lớp học và ghi nhận thanh toán cho học viên "${enrollStudent.fullName}"!`)
+        setIsEnrollModalOpen(false)
+        loadStudents()
+        loadStats()
+      } else {
+        alert(res.message || 'Ghi danh & thu học phí thất bại')
+      }
+    } catch (err: unknown) {
+      const e = err as { message?: string }
+      alert(e.message || 'Có lỗi xảy ra khi thực hiện ghi danh')
+    } finally {
+      setEnrollSubmitting(false)
+      setTimeout(() => setSuccessMsg(null), 5000)
+    }
+  }
+
+  // Open Provision Modal
+  const openProvisionModal = (s: Student) => {
+    setProvisionStudent(s)
+    setCustomPassword('')
+    setProvisionResult(null)
+    setCopiedPassword(false)
+    setIsProvisionModalOpen(true)
+  }
+
+  // Submit Provision
+  const handleProvisionSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!provisionStudent) return
+
+    setProvisionSubmitting(true)
+    try {
+      const res = await studentsApi.provisionAccount(provisionStudent.id, customPassword.trim() || undefined)
+      if (res.success && res.data) {
+        setProvisionResult(res.data)
+        loadStudents()
+      } else {
+        alert(res.message || 'Cấp tài khoản thất bại')
+      }
+    } catch (err: unknown) {
+      const e = err as { message?: string }
+      alert(e.message || 'Lỗi cấp tài khoản')
+    } finally {
+      setProvisionSubmitting(false)
+    }
+  }
+
   const renderStatusBadge = (status: string) => {
     switch (status) {
       case 'ACTIVE':
@@ -276,6 +413,36 @@ export const StudentListPage: React.FC = () => {
       default:
         return <Badge variant="neutral">{status}</Badge>
     }
+  }
+
+  const renderTuitionBadge = (s: Student) => {
+    if (!s.totalTuition || s.totalTuition === 0) {
+      return (
+        <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-400 dark:text-slate-500">
+          Chưa ghi danh
+        </span>
+      )
+    }
+    const status = s.tuitionStatus
+    if (status === 'PAID') {
+      return (
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300">
+          <CheckCircle2 className="w-3 h-3" /> Đã hoàn thành
+        </span>
+      )
+    }
+    if (status === 'PARTIALLY_PAID') {
+      return (
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300">
+          Còn thiếu {formatVND(s.remainingTuition)}
+        </span>
+      )
+    }
+    return (
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300">
+        Chưa nộp học phí
+      </span>
+    )
   }
 
   const renderTargetTypeBadge = (type: string) => {
@@ -319,7 +486,7 @@ export const StudentListPage: React.FC = () => {
             Quản lý Học viên & Người giám hộ
           </h1>
           <p className="text-sm text-slate-600 dark:text-[#A6B4C8] mt-1">
-            Theo dõi hồ sơ người học, đối chiếu lứa tuổi và liên kết thông tin phụ huynh/người giám hộ.
+            Tự động quản lý khóa học, theo dõi học phí nộp/còn thiếu và cấp phát tài khoản học viên gửi Email.
           </p>
         </div>
 
@@ -332,7 +499,7 @@ export const StudentListPage: React.FC = () => {
         </button>
       </div>
 
-      {/* KPI Overview Strip (Real Database Metrics) */}
+      {/* KPI Overview Strip */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
           title="Tổng hồ sơ"
@@ -368,50 +535,43 @@ export const StudentListPage: React.FC = () => {
 
       {/* Alerts */}
       {successMsg && (
-        <div className="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 flex items-center justify-between text-sm shadow-xs animate-in fade-in">
-          <div className="flex items-center gap-2.5">
-            <CheckCircle2 size={18} className="text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
-            <span>{successMsg}</span>
-          </div>
-          <button onClick={() => setSuccessMsg(null)} className="text-emerald-600 hover:text-emerald-800 dark:hover:text-emerald-200">
-            <X size={16} />
-          </button>
+        <div
+          role="status"
+          className="flex items-center gap-3 p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-200 text-sm shadow-xs animate-in fade-in"
+        >
+          <CheckCircle2 className="w-5 h-5 flex-shrink-0 text-emerald-600 dark:text-emerald-400" />
+          <span className="font-semibold">{successMsg}</span>
         </div>
       )}
 
       {error && (
-        <div className="p-4 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-300 flex items-center justify-between text-sm shadow-xs animate-in fade-in">
-          <div className="flex items-center gap-2.5">
-            <AlertCircle size={18} className="text-rose-600 dark:text-rose-400 flex-shrink-0" />
-            <span>{error}</span>
-          </div>
-          <button
-            onClick={() => loadStudents()}
-            className="px-3 py-1 bg-white dark:bg-[#1C293D] border border-rose-300 dark:border-rose-800 text-rose-700 dark:text-rose-300 rounded-lg text-xs font-semibold hover:bg-rose-50"
-          >
-            Thử lại
-          </button>
+        <div
+          role="alert"
+          className="flex items-center gap-3 p-4 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-200 text-sm shadow-xs animate-in fade-in"
+        >
+          <AlertCircle className="w-5 h-5 flex-shrink-0 text-rose-600 dark:text-rose-400" />
+          <span className="font-medium">{error}</span>
         </div>
       )}
 
-      {/* Search & Filters Toolbar */}
-      <div className="bg-white dark:bg-[#151F31] p-4 rounded-2xl border border-slate-200/80 dark:border-[#2A3A50] shadow-xs flex flex-col md:flex-row gap-3 items-stretch md:items-center">
+      {/* Filter and Search Bar */}
+      <div className="p-4 rounded-2xl bg-white dark:bg-[#151F31] border border-slate-200/80 dark:border-[#2A3A50] shadow-xs flex flex-wrap items-center gap-3">
         {/* Search Input */}
-        <div className="relative flex-1">
-          <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+        <div className="relative flex-1 min-w-[240px]">
+          <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
           <input
             type="text"
-            placeholder="Tìm theo mã học viên, họ tên hoặc số điện thoại..."
             value={keyword}
             onChange={(e) => {
               setKeyword(e.target.value)
               setPage(0)
             }}
-            className="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-200 dark:border-[#2A3A50] bg-slate-50/50 dark:bg-[#1C293D] text-sm text-[#142B4A] dark:text-[#E8EEF7] placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#142B4A] dark:focus:ring-[#38BDF8] transition-colors"
+            placeholder="Tìm theo mã học viên, họ tên, SĐT hoặc email..."
+            className="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-200 dark:border-[#2A3A50] bg-slate-50/50 dark:bg-[#1C293D] text-sm text-[#142B4A] dark:text-[#E8EEF7] placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#142B4A] dark:focus:ring-[#38BDF8]"
           />
         </div>
 
-        {/* Age Group Filter */}
+        {/* Target Type Filter */}
         <select
           value={selectedTargetType}
           onChange={(e) => {
@@ -420,9 +580,9 @@ export const StudentListPage: React.FC = () => {
           }}
           className="px-3 py-2 rounded-xl border border-slate-200 dark:border-[#2A3A50] bg-white dark:bg-[#1C293D] text-sm text-[#142B4A] dark:text-[#E8EEF7] focus:outline-none focus:ring-2 focus:ring-[#142B4A] dark:focus:ring-[#38BDF8]"
         >
-          <option value="">Tất cả lứa tuổi</option>
-          <option value="KID">Trẻ em (KID)</option>
+          <option value="">Tất cả đối tượng</option>
           <option value="ADULT">Người lớn (ADULT)</option>
+          <option value="KID">Trẻ em (KID)</option>
         </select>
 
         {/* Status Filter */}
@@ -478,14 +638,14 @@ export const StudentListPage: React.FC = () => {
         />
       ) : (
         <div className="bg-white dark:bg-[#151F31] rounded-2xl border border-slate-200/80 dark:border-[#2A3A50] shadow-xs overflow-hidden">
-          {/* Desktop Table View */}
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse text-table">
               <thead>
                 <tr className="bg-slate-50/80 dark:bg-[#1C293D] border-b border-slate-200 dark:border-[#2A3A50] text-xs font-semibold text-slate-500 dark:text-[#A6B4C8] uppercase tracking-wider">
                   <th className="py-3.5 px-4">Học viên</th>
-                  <th className="py-3.5 px-4">Độ tuổi & Giới tính</th>
-                  <th className="py-3.5 px-4">Thông tin Liên hệ</th>
+                  <th className="py-3.5 px-4">Khóa học & Học phí</th>
+                  <th className="py-3.5 px-4">Tài khoản Web</th>
+                  <th className="py-3.5 px-4">Liên hệ</th>
                   <th className="py-3.5 px-4">Người giám hộ</th>
                   <th className="py-3.5 px-4">Trạng thái</th>
                   <th className="py-3.5 px-4 text-right">Thao tác</th>
@@ -509,25 +669,79 @@ export const StudentListPage: React.FC = () => {
                             <div className="font-bold text-[#142B4A] dark:text-[#E8EEF7] leading-tight">
                               {student.fullName}
                             </div>
-                            <div className="text-xs text-slate-500 dark:text-[#A6B4C8] font-mono mt-0.5">
-                              {student.studentCode}
+                            <div className="text-xs text-slate-500 dark:text-[#A6B4C8] font-mono mt-0.5 flex items-center gap-1.5">
+                              <span>{student.studentCode}</span>
+                              <span>•</span>
+                              {renderTargetTypeBadge(student.targetType)}
                             </div>
                           </div>
                         </div>
                       </td>
 
-                      {/* TargetType & Gender */}
+                      {/* Course & Tuition */}
                       <td className="py-3.5 px-4">
                         <div className="space-y-1">
-                          {renderTargetTypeBadge(student.targetType)}
-                          <div className="text-xs text-slate-500 dark:text-[#A6B4C8]">
-                            {student.dateOfBirth ? (
-                              <span>{student.dateOfBirth} • {getGenderLabel(student.gender)}</span>
-                            ) : (
-                              <span>{getGenderLabel(student.gender)}</span>
-                            )}
-                          </div>
+                          {student.enrolledCourseName ? (
+                            <div>
+                              <div className="text-xs font-bold text-[#142B4A] dark:text-[#38BDF8] flex items-center gap-1">
+                                <BookOpen size={12} className="flex-shrink-0" />
+                                <span className="truncate max-w-[190px]">{student.enrolledCourseName}</span>
+                              </div>
+                              <div className="text-[11px] text-slate-500 font-mono">
+                                Lớp: {student.enrolledClassName || '—'}
+                              </div>
+                              <div className="mt-1 flex items-center gap-2">
+                                {renderTuitionBadge(student)}
+                              </div>
+                              <div className="text-[10px] text-slate-500 mt-0.5">
+                                Đã nộp: <strong className="text-emerald-600">{formatVND(student.paidTuition)}</strong> / {formatVND(student.totalTuition)}
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="space-y-1">
+                              <span className="text-xs text-slate-400 italic block">Chưa ghi danh</span>
+                              <button
+                                onClick={() => openEnrollModal(student)}
+                                className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#142B4A] dark:text-[#38BDF8] hover:underline"
+                              >
+                                <Plus size={11} />
+                                <span>Ghi danh & Đóng học phí</span>
+                              </button>
+                            </div>
+                          )}
                         </div>
+                      </td>
+
+                      {/* Account Portal Status */}
+                      <td className="py-3.5 px-4">
+                        {student.hasUserAccount ? (
+                          <div className="space-y-1">
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300">
+                              <CheckCircle2 size={11} /> Đã cấp TK
+                            </span>
+                            <div className="text-xs font-mono text-slate-600 dark:text-[#A6B4C8]">
+                              @{student.username}
+                            </div>
+                            <button
+                              onClick={() => openProvisionModal(student)}
+                              className="text-[10px] text-slate-400 hover:text-blue-600 flex items-center gap-0.5 underline"
+                            >
+                              <Key size={10} /> Đổi MK / Gửi lại mail
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="space-y-1">
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400">
+                              Chưa cấp
+                            </span>
+                            <button
+                              onClick={() => openProvisionModal(student)}
+                              className="block text-[11px] font-semibold text-sky-600 dark:text-sky-400 hover:underline"
+                            >
+                              Cấp TK & Gửi mail
+                            </button>
+                          </div>
+                        )}
                       </td>
 
                       {/* Contact Phone & Email */}
@@ -547,7 +761,7 @@ export const StudentListPage: React.FC = () => {
                           {student.email && (
                             <a
                               href={`mailto:${student.email}`}
-                              className="flex items-center gap-1.5 text-slate-500 dark:text-[#A6B4C8] hover:text-[#3977B8] dark:hover:text-[#38BDF8] truncate max-w-[180px]"
+                              className="flex items-center gap-1.5 text-slate-500 dark:text-[#A6B4C8] hover:text-[#3977B8] dark:hover:text-[#38BDF8] truncate max-w-[170px]"
                             >
                               <Mail size={13} className="text-slate-400 flex-shrink-0" />
                               <span className="truncate">{student.email}</span>
@@ -590,6 +804,20 @@ export const StudentListPage: React.FC = () => {
                             title="Xem chi tiết hồ sơ"
                           >
                             <Eye size={16} />
+                          </button>
+                          <button
+                            onClick={() => openEnrollModal(student)}
+                            className="p-1.5 rounded-lg text-slate-500 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-slate-100 dark:hover:bg-[#1C293D] transition-colors"
+                            title="Ghi danh & Thu học phí"
+                          >
+                            <CreditCard size={16} />
+                          </button>
+                          <button
+                            onClick={() => openProvisionModal(student)}
+                            className="p-1.5 rounded-lg text-slate-500 dark:text-slate-400 hover:text-sky-600 dark:hover:text-sky-400 hover:bg-slate-100 dark:hover:bg-[#1C293D] transition-colors"
+                            title="Cấp tài khoản & Gửi Mail"
+                          >
+                            <Key size={16} />
                           </button>
                           <button
                             onClick={() => openEditModal(student)}
@@ -641,7 +869,7 @@ export const StudentListPage: React.FC = () => {
         </div>
       )}
 
-      {/* Student Detail Modal / Drawer */}
+      {/* Student Detail Modal */}
       {detailStudent && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150">
           <div className="bg-white dark:bg-[#151F31] rounded-2xl border border-slate-200 dark:border-[#2A3A50] max-w-lg w-full p-6 shadow-2xl relative">
@@ -662,44 +890,67 @@ export const StudentListPage: React.FC = () => {
               </div>
             </div>
 
-            <div className="space-y-3.5 text-xs border-t border-b border-slate-100 dark:border-[#2A3A50] py-4">
-              <div className="flex justify-between py-1 border-b border-slate-50 dark:border-[#2A3A50]/40">
-                <span className="text-slate-500 dark:text-[#A6B4C8]">Trạng thái hồ sơ:</span>
+            {/* Automation Summary Card */}
+            <div className="p-4 rounded-xl bg-slate-50 dark:bg-[#1C293D] border border-slate-200 dark:border-[#2A3A50] space-y-2 text-xs mb-4">
+              <div className="font-bold text-[#142B4A] dark:text-[#38BDF8] uppercase tracking-wider text-[11px]">
+                Khóa học & Học phí
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500">Khóa & Lớp:</span>
+                <span className="font-semibold">{detailStudent.enrolledCourseName ? `${detailStudent.enrolledCourseName} (${detailStudent.enrolledClassName})` : 'Chưa ghi danh'}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500">Tổng học phí:</span>
+                <span className="font-bold">{formatVND(detailStudent.totalTuition)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500">Đã thanh toán:</span>
+                <span className="font-bold text-emerald-600">{formatVND(detailStudent.paidTuition)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500">Còn thiếu:</span>
+                <span className={`font-bold ${(detailStudent.remainingTuition || 0) > 0 ? 'text-rose-600' : 'text-emerald-600'}`}>
+                  {formatVND(detailStudent.remainingTuition)}
+                </span>
+              </div>
+              <div className="flex justify-between pt-1 border-t border-slate-200 dark:border-[#2A3A50]">
+                <span className="text-slate-500">Tài khoản Web:</span>
+                <span className="font-mono text-cyan-600 dark:text-cyan-400 font-semibold">
+                  {detailStudent.hasUserAccount ? `@${detailStudent.username}` : 'Chưa cấp'}
+                </span>
+              </div>
+            </div>
+
+            <div className="space-y-2.5 text-xs border-t border-b border-slate-100 dark:border-[#2A3A50] py-3">
+              <div className="flex justify-between">
+                <span className="text-slate-500 dark:text-[#A6B4C8]">Trạng thái:</span>
                 <span>{renderStatusBadge(detailStudent.status)}</span>
               </div>
-              <div className="flex justify-between py-1 border-b border-slate-50 dark:border-[#2A3A50]/40">
-                <span className="text-slate-500 dark:text-[#A6B4C8]">Nhóm đối tượng:</span>
+              <div className="flex justify-between">
+                <span className="text-slate-500 dark:text-[#A6B4C8]">Đối tượng:</span>
                 <span>{renderTargetTypeBadge(detailStudent.targetType)}</span>
               </div>
-              <div className="flex justify-between py-1 border-b border-slate-50 dark:border-[#2A3A50]/40">
+              <div className="flex justify-between">
                 <span className="text-slate-500 dark:text-[#A6B4C8]">Giới tính & Ngày sinh:</span>
                 <span className="font-semibold text-slate-800 dark:text-[#E8EEF7]">
                   {getGenderLabel(detailStudent.gender)} • {detailStudent.dateOfBirth || 'Chưa cập nhật'}
                 </span>
               </div>
-              <div className="flex justify-between py-1 border-b border-slate-50 dark:border-[#2A3A50]/40">
+              <div className="flex justify-between">
                 <span className="text-slate-500 dark:text-[#A6B4C8]">Số điện thoại:</span>
                 <span className="font-semibold text-slate-800 dark:text-[#E8EEF7]">{detailStudent.phone || 'Chưa cập nhật'}</span>
               </div>
-              <div className="flex justify-between py-1 border-b border-slate-50 dark:border-[#2A3A50]/40">
+              <div className="flex justify-between">
                 <span className="text-slate-500 dark:text-[#A6B4C8]">Hòm thư Email:</span>
                 <span className="font-semibold text-slate-800 dark:text-[#E8EEF7]">{detailStudent.email || 'Chưa cập nhật'}</span>
               </div>
-              <div className="flex justify-between py-1 border-b border-slate-50 dark:border-[#2A3A50]/40">
-                <span className="text-slate-500 dark:text-[#A6B4C8]">Địa chỉ liên hệ:</span>
+              <div className="flex justify-between">
+                <span className="text-slate-500 dark:text-[#A6B4C8]">Địa chỉ:</span>
                 <span className="font-semibold text-slate-800 dark:text-[#E8EEF7] text-right max-w-[260px]">{detailStudent.address || 'Chưa cập nhật'}</span>
               </div>
-              {detailStudent.internalNotes && (
-                <div className="py-1">
-                  <span className="text-slate-500 dark:text-[#A6B4C8] block mb-1">Ghi chú nội bộ:</span>
-                  <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-[#1C293D] text-slate-700 dark:text-[#E8EEF7]">
-                    {detailStudent.internalNotes}
-                  </div>
-                </div>
-              )}
             </div>
 
-            <div className="mt-5 flex justify-end">
+            <div className="mt-5 flex justify-end gap-2">
               <button
                 onClick={() => setDetailStudent(null)}
                 className="px-4 py-2 rounded-xl border border-slate-200 dark:border-[#2A3A50] text-sm font-semibold text-slate-700 dark:text-[#E8EEF7] hover:bg-slate-100 dark:hover:bg-[#1C293D]"
@@ -707,6 +958,293 @@ export const StudentListPage: React.FC = () => {
                 Đóng
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: ENROLL & PAY (Automatic Tuition & Account) */}
+      {isEnrollModalOpen && enrollStudent && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150 overflow-y-auto">
+          <div className="bg-white dark:bg-[#151F31] rounded-3xl border border-slate-200 dark:border-[#2A3A50] max-w-xl w-full p-6 shadow-2xl relative my-8">
+            <button
+              onClick={() => setIsEnrollModalOpen(false)}
+              className="absolute top-4 right-4 p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-[#1C293D]"
+            >
+              <X size={18} />
+            </button>
+
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-400 flex items-center justify-center">
+                <CreditCard size={20} />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-[#142B4A] dark:text-[#E8EEF7]">
+                  Ghi danh Lớp học & Thu học phí
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-[#A6B4C8]">
+                  Học viên: <strong className="text-[#142B4A] dark:text-[#E8EEF7]">{enrollStudent.fullName}</strong> ({enrollStudent.studentCode})
+                </p>
+              </div>
+            </div>
+
+            <form onSubmit={handleEnrollSubmit} className="space-y-4">
+              {/* Select Class */}
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 dark:text-[#E8EEF7] mb-1">
+                  Chọn Lớp học ghi danh <span className="text-rose-500">*</span>
+                </label>
+                <select
+                  required
+                  value={selectedClassId}
+                  onChange={(e) => handleSelectClass(e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-[#2A3A50] bg-white dark:bg-[#1C293D] text-sm text-[#142B4A] dark:text-[#E8EEF7] focus:ring-2 focus:ring-[#142B4A]"
+                >
+                  <option value="0">-- Chọn lớp học --</option>
+                  {classList.map((cl) => {
+                    const course = courses.find((c) => c.id === cl.courseId)
+                    return (
+                      <option key={cl.id} value={cl.id}>
+                        {cl.name} ({cl.code}) — {course?.name || 'Khóa học'} {course?.defaultTuitionFee ? `[${formatVND(course.defaultTuitionFee)}]` : ''}
+                      </option>
+                    )
+                  })}
+                </select>
+              </div>
+
+              {/* Tuition Auto Calculation Display */}
+              {tuitionFee > 0 && (
+                <div className="p-3.5 rounded-2xl bg-blue-50/70 dark:bg-blue-950/40 border border-blue-200/80 dark:border-blue-900 grid grid-cols-2 gap-3 text-xs">
+                  <div>
+                    <span className="text-slate-500 block">Học phí niêm yết:</span>
+                    <span className="text-base font-black text-[#142B4A] dark:text-[#38BDF8]">
+                      {formatVND(tuitionFee)}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-slate-500 block">Số tiền còn thiếu dự kiến:</span>
+                    <span className={`text-base font-black ${tuitionFee - paidAmount > 0 ? 'text-amber-600' : 'text-emerald-600'}`}>
+                      {formatVND(Math.max(0, tuitionFee - paidAmount))}
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {/* Payment Amount */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-[#E8EEF7] mb-1">
+                    Số tiền thanh toán ngay (VND)
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="50000"
+                    value={paidAmount}
+                    onChange={(e) => setPaidAmount(Number(e.target.value))}
+                    className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-[#2A3A50] bg-white dark:bg-[#1C293D] text-sm font-bold text-emerald-600 dark:text-emerald-400"
+                  />
+                  <span className="text-[10px] text-slate-400 mt-1 block">
+                    Gợi ý: Điền đủ học phí nếu đã đóng 100%, hoặc điền tiền cọc.
+                  </span>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-[#E8EEF7] mb-1">
+                    Hình thức thanh toán
+                  </label>
+                  <select
+                    value={paymentMethod}
+                    onChange={(e) => setPaymentMethod(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-[#2A3A50] bg-white dark:bg-[#1C293D] text-sm text-[#142B4A] dark:text-[#E8EEF7]"
+                  >
+                    <option value="BANK_TRANSFER">Chuyển khoản Ngân hàng (BANK_TRANSFER)</option>
+                    <option value="CASH">Tiền mặt (CASH)</option>
+                    <option value="POS">Quẹt thẻ POS</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Reference number & Note */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-[#E8EEF7] mb-1">
+                    Mã GD ngân hàng / Số biên lai
+                  </label>
+                  <input
+                    type="text"
+                    value={referenceNumber}
+                    onChange={(e) => setReferenceNumber(e.target.value)}
+                    placeholder="VD: MB-93821038"
+                    className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-[#2A3A50] bg-white dark:bg-[#1C293D] text-sm text-[#142B4A] dark:text-[#E8EEF7] font-mono"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-[#E8EEF7] mb-1">
+                    Ghi chú phiếu thu
+                  </label>
+                  <input
+                    type="text"
+                    value={enrollNotes}
+                    onChange={(e) => setEnrollNotes(e.target.value)}
+                    placeholder="Ghi chú thêm nếu có..."
+                    className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-[#2A3A50] bg-white dark:bg-[#1C293D] text-sm text-[#142B4A] dark:text-[#E8EEF7]"
+                  />
+                </div>
+              </div>
+
+              {/* Automatic Provision Checkbox */}
+              <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-[#1C293D] border border-slate-200 dark:border-[#2A3A50] flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <div className="text-xs font-bold text-slate-800 dark:text-[#E8EEF7] flex items-center gap-1.5">
+                    <Key size={14} className="text-sky-500" />
+                    <span>Tự động cấp tài khoản & Gửi email xác nhận</span>
+                  </div>
+                  <p className="text-[11px] text-slate-500 dark:text-[#A6B4C8]">
+                    Hệ thống sẽ gửi tài khoản và mật khẩu đăng nhập vào hòm thư: <strong>{enrollStudent.email || 'Chưa có email'}</strong>
+                  </p>
+                </div>
+                <input
+                  type="checkbox"
+                  checked={provisionAccountOnEnroll}
+                  onChange={(e) => setProvisionAccountOnEnroll(e.target.checked)}
+                  className="w-4 h-4 rounded text-[#142B4A] focus:ring-[#142B4A]"
+                />
+              </div>
+
+              <div className="pt-3 border-t border-slate-100 dark:border-[#2A3A50] flex items-center justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => setIsEnrollModalOpen(false)}
+                  className="px-4 py-2 rounded-xl border border-slate-200 dark:border-[#2A3A50] text-sm font-semibold text-slate-700 dark:text-[#E8EEF7] hover:bg-slate-100 dark:hover:bg-[#1C293D]"
+                >
+                  Hủy bỏ
+                </button>
+                <button
+                  type="submit"
+                  disabled={enrollSubmitting}
+                  className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold shadow-sm transition-all disabled:opacity-50"
+                >
+                  {enrollSubmitting ? 'Đang ghi nhận...' : 'Xác nhận Ghi danh & Thu tiền'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: PROVISION ACCOUNT & SEND EMAIL */}
+      {isProvisionModalOpen && provisionStudent && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="bg-white dark:bg-[#151F31] rounded-3xl border border-slate-200 dark:border-[#2A3A50] max-w-md w-full p-6 shadow-2xl relative">
+            <button
+              onClick={() => setIsProvisionModalOpen(false)}
+              className="absolute top-4 right-4 p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-[#1C293D]"
+            >
+              <X size={18} />
+            </button>
+
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-950/60 dark:text-[#38BDF8] flex items-center justify-center">
+                <Key size={20} />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-[#142B4A] dark:text-[#E8EEF7]">
+                  Cấp tài khoản & Gửi Email
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-[#A6B4C8]">
+                  Học viên: <strong className="text-slate-800 dark:text-white">{provisionStudent.fullName}</strong>
+                </p>
+              </div>
+            </div>
+
+            {provisionResult ? (
+              <div className="space-y-4 animate-in fade-in">
+                <div className="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800 text-xs space-y-2">
+                  <div className="font-bold text-emerald-800 dark:text-emerald-300 text-sm flex items-center gap-1.5">
+                    <CheckCircle2 size={16} /> Cấp tài khoản thành công!
+                  </div>
+                  <div className="flex justify-between items-center pt-2 border-t border-emerald-200/60">
+                    <span className="text-slate-600">Tên đăng nhập:</span>
+                    <strong className="font-mono text-emerald-900 dark:text-emerald-200 text-sm">
+                      {provisionResult.username}
+                    </strong>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-600">Mật khẩu:</span>
+                    <div className="flex items-center gap-1">
+                      <strong className="font-mono text-emerald-900 dark:text-emerald-200 text-sm">
+                        {provisionResult.plainPassword}
+                      </strong>
+                      <button
+                        onClick={() => {
+                          navigator.clipboard.writeText(provisionResult.plainPassword || '')
+                          setCopiedPassword(true)
+                          setTimeout(() => setCopiedPassword(false), 2000)
+                        }}
+                        className="p-1 text-slate-500 hover:text-emerald-700"
+                        title="Copy mật khẩu"
+                      >
+                        {copiedPassword ? <Check size={14} className="text-emerald-600" /> : <Copy size={14} />}
+                      </button>
+                    </div>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-600">Trạng thái gửi Email:</span>
+                    <span className="font-semibold text-emerald-700 dark:text-emerald-300">
+                      {provisionResult.emailSent ? 'Đã gửi email thành công' : 'Đã ghi nhận (Không gửi mail)'}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex justify-end">
+                  <button
+                    onClick={() => setIsProvisionModalOpen(false)}
+                    className="px-4 py-2 bg-[#142B4A] dark:bg-[#38BDF8] text-white dark:text-[#0B1220] rounded-xl text-xs font-semibold"
+                  >
+                    Đóng
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <form onSubmit={handleProvisionSubmit} className="space-y-4">
+                <div className="p-3 rounded-xl bg-slate-50 dark:bg-[#1C293D] text-xs text-slate-600 dark:text-[#A6B4C8] space-y-1">
+                  <div>Email nhận tài khoản: <strong>{provisionStudent.email || '(Chưa có email - vui lòng bổ sung email)'}</strong></div>
+                  <div>Quyền hệ thống: <strong className="text-blue-600 font-mono">ROLE_STUDENT</strong></div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-[#E8EEF7] mb-1">
+                    Mật khẩu tùy chỉnh (Để trống để tự tạo mật khẩu ngẫu nhiên)
+                  </label>
+                  <input
+                    type="text"
+                    value={customPassword}
+                    onChange={(e) => setCustomPassword(e.target.value)}
+                    placeholder="VD: Cha@2026 hoặc bỏ trống"
+                    className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-[#2A3A50] bg-white dark:bg-[#1C293D] text-sm text-[#142B4A] dark:text-[#E8EEF7]"
+                  />
+                </div>
+
+                <div className="pt-3 border-t border-slate-100 dark:border-[#2A3A50] flex items-center justify-end gap-2.5">
+                  <button
+                    type="button"
+                    onClick={() => setIsProvisionModalOpen(false)}
+                    className="px-4 py-2 rounded-xl border border-slate-200 dark:border-[#2A3A50] text-xs font-semibold text-slate-700 dark:text-[#E8EEF7]"
+                  >
+                    Hủy
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={provisionSubmitting}
+                    className="px-4 py-2 rounded-xl bg-[#142B4A] dark:bg-[#38BDF8] text-white dark:text-[#0B1220] text-xs font-semibold shadow-xs flex items-center gap-1.5"
+                  >
+                    <Send size={13} />
+                    <span>{provisionSubmitting ? 'Đang cấp...' : 'Cấp tài khoản & Gửi'}</span>
+                  </button>
+                </div>
+              </form>
+            )}
           </div>
         </div>
       )}
@@ -733,21 +1271,20 @@ export const StudentListPage: React.FC = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 dark:text-[#E8EEF7] mb-1">
-                    Mã học viên *
+                    Mã học viên <span className="text-rose-500">*</span>
                   </label>
                   <input
                     type="text"
                     required
-                    disabled={!!editingStudent}
                     value={formData.studentCode}
                     onChange={(e) => setFormData({ ...formData, studentCode: e.target.value })}
                     placeholder="VD: HV20240001"
-                    className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-[#2A3A50] bg-white dark:bg-[#1C293D] text-sm text-[#142B4A] dark:text-[#E8EEF7] disabled:opacity-50"
+                    className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-[#2A3A50] bg-white dark:bg-[#1C293D] text-sm text-[#142B4A] dark:text-[#E8EEF7] font-mono"
                   />
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 dark:text-[#E8EEF7] mb-1">
-                    Họ và tên *
+                    Họ và tên <span className="text-rose-500">*</span>
                   </label>
                   <input
                     type="text"
@@ -763,11 +1300,11 @@ export const StudentListPage: React.FC = () => {
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 dark:text-[#E8EEF7] mb-1">
-                    Nhóm đối tượng *
+                    Nhóm đối tượng
                   </label>
                   <select
                     value={formData.targetType}
-                    onChange={(e) => setFormData({ ...formData, targetType: e.target.value as 'KID' | 'ADULT' })}
+                    onChange={(e) => setFormData({ ...formData, targetType: e.target.value })}
                     className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-[#2A3A50] bg-white dark:bg-[#1C293D] text-sm text-[#142B4A] dark:text-[#E8EEF7]"
                   >
                     <option value="ADULT">Người lớn (ADULT)</option>
@@ -776,11 +1313,11 @@ export const StudentListPage: React.FC = () => {
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 dark:text-[#E8EEF7] mb-1">
-                    Giới tính *
+                    Giới tính
                   </label>
                   <select
                     value={formData.gender}
-                    onChange={(e) => setFormData({ ...formData, gender: e.target.value as 'MALE' | 'FEMALE' | 'OTHER' })}
+                    onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
                     className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-[#2A3A50] bg-white dark:bg-[#1C293D] text-sm text-[#142B4A] dark:text-[#E8EEF7]"
                   >
                     <option value="MALE">Nam</option>
@@ -810,19 +1347,19 @@ export const StudentListPage: React.FC = () => {
                     type="tel"
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    placeholder="VD: 0988123456"
+                    placeholder="VD: 0987654321"
                     className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-[#2A3A50] bg-white dark:bg-[#1C293D] text-sm text-[#142B4A] dark:text-[#E8EEF7]"
                   />
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 dark:text-[#E8EEF7] mb-1">
-                    Hòm thư Email
+                    Hòm thư Email (để gửi thông tin tài khoản)
                   </label>
                   <input
                     type="email"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    placeholder="VD: hocvien@chacademy.edu.vn"
+                    placeholder="VD: student@example.com"
                     className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-[#2A3A50] bg-white dark:bg-[#1C293D] text-sm text-[#142B4A] dark:text-[#E8EEF7]"
                   />
                 </div>
@@ -836,17 +1373,17 @@ export const StudentListPage: React.FC = () => {
                   type="text"
                   value={formData.address}
                   onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                  placeholder="VD: 123 Phố Huế, Hai Bà Trưng, Hà Nội"
+                  placeholder="VD: 123 Đường Cầu Giấy, Hà Nội"
                   className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-[#2A3A50] bg-white dark:bg-[#1C293D] text-sm text-[#142B4A] dark:text-[#E8EEF7]"
                 />
               </div>
 
-              {/* Guardian Selection for KID */}
+              {/* Kid Guardian Linking */}
               {formData.targetType === 'KID' && (
-                <div className="p-4 rounded-xl border border-indigo-100 dark:border-indigo-900/60 bg-indigo-50/50 dark:bg-indigo-950/20 space-y-3">
-                  <div className="text-xs font-bold text-indigo-900 dark:text-indigo-300 flex items-center gap-2">
-                    <Shield size={15} />
-                    <span>Liên kết Người giám hộ (Phụ huynh)</span>
+                <div className="p-4 rounded-xl bg-purple-50/60 dark:bg-purple-950/20 border border-purple-200 dark:border-purple-800 space-y-3">
+                  <div className="flex items-center gap-2 text-xs font-bold text-purple-900 dark:text-purple-300">
+                    <Shield size={14} />
+                    <span>Liên kết Phụ huynh / Người giám hộ</span>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
@@ -975,3 +1512,4 @@ export const StudentListPage: React.FC = () => {
     </div>
   )
 }
+export default StudentListPage

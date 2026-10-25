@@ -33,6 +33,33 @@ export interface Student {
   createdAt: string
   updatedAt: string
   guardians?: StudentGuardianLink[]
+
+  // Automated course, tuition & account metadata
+  hasUserAccount?: boolean
+  username?: string
+  enrolledCourseName?: string
+  enrolledClassName?: string
+  totalTuition?: number
+  paidTuition?: number
+  remainingTuition?: number
+  tuitionStatus?: 'PAID' | 'PARTIALLY_PAID' | 'UNPAID' | 'NO_ENROLLMENT'
+}
+
+export interface AccountProvisionResponse {
+  userId: number
+  username: string
+  plainPassword?: string
+  emailSent: boolean
+  message: string
+}
+
+export interface EnrollAndPayPayload {
+  classId: number
+  paidAmount?: number
+  paymentMethod?: string
+  referenceNumber?: string
+  notes?: string
+  provisionAccount?: boolean
 }
 
 export interface CreateStudentPayload {
@@ -71,5 +98,47 @@ export interface StudentStats {
   enrolledStudents: number
   kidStudents: number
   adultStudents: number
+}
+
+export interface StudentPortalSummary {
+  student: Student
+  enrollments: {
+    id: number
+    classId: number
+    className: string
+    courseName?: string
+    enrollmentDate: string
+    appliedTuitionFee: number
+    status: string
+  }[]
+  receivables: {
+    id: number
+    code: string
+    title: string
+    className?: string
+    totalAmount: number
+    paidAmount: number
+    remainingAmount: number
+    status: string
+    dueDate?: string
+    createdAt: string
+  }[]
+  payments: {
+    id: number
+    paymentCode: string
+    amount: number
+    paymentMethod: string
+    paymentDate: string
+    referenceNumber?: string
+    note?: string
+    createdAt: string
+  }[]
+  totalTuition: number
+  paidTuition: number
+  remainingTuition: number
+  tuitionStatus: 'PAID' | 'PARTIALLY_PAID' | 'UNPAID' | 'NO_ENROLLMENT' | string
+  totalSessions: number
+  presentSessions: number
+  attendanceRate: number
 }
 

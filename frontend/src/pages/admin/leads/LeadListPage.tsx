@@ -1,8 +1,10 @@
 import React, { useEffect, useState, useCallback } from 'react'
 import { leadsApi } from '../../../api/leads'
 import { coursesApi } from '../../../api/courses'
+import { classesApi } from '../../../api/classes'
 import type { Lead, CreateLeadRequest, AddActivityRequest, ConvertLeadRequest } from '../../../types/lead'
 import type { Course } from '../../../types/course'
+import type { ClassItem } from '../../../types/class'
 import {
   UserPlus,
   Users,
@@ -18,12 +20,15 @@ import {
   Mail,
   UserCheck,
   MessageSquare,
-  BookOpen
+  BookOpen,
+  CreditCard,
+  Key
 } from 'lucide-react'
 
 export const LeadListPage: React.FC = () => {
   const [leads, setLeads] = useState<Lead[]>([])
   const [courses, setCourses] = useState<Course[]>([])
+  const [classList, setClassList] = useState<ClassItem[]>([])
   const [loading, setLoading] = useState<boolean>(true)
   const [error, setError] = useState<string | null>(null)
   const [successMsg, setSuccessMsg] = useState<string | null>(null)
@@ -70,22 +75,33 @@ export const LeadListPage: React.FC = () => {
     address: '',
     guardianFullName: '',
     guardianPhone: '',
-    guardianRelationship: 'FATHER'
+    guardianRelationship: 'FATHER',
+    classId: undefined,
+    paidAmount: 0,
+    paymentMethod: 'BANK_TRANSFER',
+    referenceNumber: '',
+    provisionAccount: true
   })
 
-  // Load Courses for dropdown
+  // Load Courses and Classes
   useEffect(() => {
-    const loadCourses = async () => {
+    const loadCoursesAndClasses = async () => {
       try {
-        const res = await coursesApi.searchCourses({ page: 0, size: 100 })
-        if (res.success && res.data) {
-          setCourses(res.data.content || [])
+        const [courseRes, classRes] = await Promise.all([
+          coursesApi.searchCourses({ page: 0, size: 100 }),
+          classesApi.searchClasses({ size: 100 })
+        ])
+        if (courseRes.success && courseRes.data) {
+          setCourses(courseRes.data.content || [])
+        }
+        if (classRes.success && classRes.data) {
+          setClassList(classRes.data.content || [])
         }
       } catch {
         // Silently ignore
       }
     }
-    loadCourses()
+    loadCoursesAndClasses()
   }, [])
 
   // Load Leads list
@@ -183,6 +199,42 @@ export const LeadListPage: React.FC = () => {
     } finally {
       setFormSubmitting(false)
     }
+  }
+
+  // Open Convert Modal with preselected class and fee
+  const openConvertModal = (lead: Lead) => {
+    setActiveLeadForConvert(lead)
+    const matchedClass = classList.find((c) => lead.targetCourseId && c.courseId === lead.targetCourseId)
+    const course = courses.find((c) => c.id === (matchedClass ? matchedClass.courseId : lead.targetCourseId))
+    const fee = course?.defaultTuitionFee || 0
+
+    setConvertForm({
+      studentType: 'ADULT',
+      dob: '',
+      gender: 'MALE',
+      address: '',
+      guardianFullName: '',
+      guardianPhone: lead.phone,
+      guardianRelationship: 'FATHER',
+      classId: matchedClass?.id,
+      paidAmount: fee,
+      paymentMethod: 'BANK_TRANSFER',
+      referenceNumber: '',
+      provisionAccount: true
+    })
+    setIsConvertModalOpen(true)
+  }
+
+  const handleConvertClassChange = (cidStr: string) => {
+    const cid = Number(cidStr) || undefined
+    const cl = classList.find((c) => c.id === cid)
+    const course = courses.find((c) => c.id === cl?.courseId)
+    const fee = course?.defaultTuitionFee || 0
+    setConvertForm((prev) => ({
+      ...prev,
+      classId: cid,
+      paidAmount: fee
+    }))
   }
 
   // Convert Lead to Student
@@ -550,19 +602,7 @@ export const LeadListPage: React.FC = () => {
                         </button>
                         {lead.status !== 'CONVERTED' && (
                           <button
-                            onClick={() => {
-                              setActiveLeadForConvert(lead)
-                              setConvertForm({
-                                studentType: 'ADULT',
-                                dob: '',
-                                gender: 'MALE',
-                                address: '',
-                                guardianFullName: '',
-                                guardianPhone: lead.phone,
-                                guardianRelationship: 'FATHER'
-                              })
-                              setIsConvertModalOpen(true)
-                            }}
+                            onClick={() => openConvertModal(lead)}
                             title="Chuyển đổi thành Học viên"
                             className="inline-flex items-center gap-1 px-2.5 py-1 bg-green-50 text-green-700 hover:bg-green-100 rounded text-xs font-semibold transition-colors border border-green-200"
                           >
@@ -890,6 +930,97 @@ export const LeadListPage: React.FC = () => {
                   </div>
                 </div>
               )}
+
+              {/* Automatic Enrollment & Tuition Automation */}
+              <div className="p-4 rounded-xl bg-blue-50/80 border border-blue-200 space-y-3">
+                <div className="flex items-center gap-2 text-xs font-bold text-[#142B4A] uppercase tracking-wider">
+                  <CreditCard className="w-4 h-4 text-blue-600" />
+                  <span>Xác nhận đóng học phí & Cấp tài khoản tự động</span>
+                </div>
+                <p className="text-xs text-slate-600">
+                  Khi khách hàng đã thanh toán, hãy chọn lớp học để hệ thống tự động ghi danh, sinh học phí, biên lai thu tiền và gửi tài khoản qua Email: <strong>{activeLeadForConvert?.email || '(Chưa có email)'}</strong>
+                </p>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    Chọn Lớp học ghi danh
+                  </label>
+                  <select
+                    value={convertForm.classId || ''}
+                    onChange={(e) => handleConvertClassChange(e.target.value)}
+                    className="w-full px-3 py-2 border border-blue-300 rounded-lg text-sm bg-white"
+                  >
+                    <option value="">-- Chưa xếp lớp (Chỉ tạo hồ sơ học viên) --</option>
+                    {classList.map((cl) => {
+                      const course = courses.find((c) => c.id === cl.courseId)
+                      return (
+                        <option key={cl.id} value={cl.id}>
+                          {cl.name} ({cl.code}) — {course?.name} {course?.defaultTuitionFee ? `[${new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(course.defaultTuitionFee)}]` : ''}
+                        </option>
+                      )
+                    })}
+                  </select>
+                </div>
+
+                {convertForm.classId && (
+                  <div className="space-y-3 pt-2 border-t border-blue-200">
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-700 mb-1">
+                          Số tiền khách đã chuyển (VND)
+                        </label>
+                        <input
+                          type="number"
+                          step="50000"
+                          value={convertForm.paidAmount || 0}
+                          onChange={(e) => setConvertForm({ ...convertForm, paidAmount: Number(e.target.value) })}
+                          className="w-full px-3 py-1.5 border border-blue-300 rounded-lg text-sm font-bold text-emerald-600 bg-white"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-700 mb-1">
+                          Hình thức thanh toán
+                        </label>
+                        <select
+                          value={convertForm.paymentMethod || 'BANK_TRANSFER'}
+                          onChange={(e) => setConvertForm({ ...convertForm, paymentMethod: e.target.value })}
+                          className="w-full px-3 py-1.5 border border-blue-300 rounded-lg text-sm bg-white"
+                        >
+                          <option value="BANK_TRANSFER">Chuyển khoản Ngân hàng</option>
+                          <option value="CASH">Tiền mặt</option>
+                          <option value="POS">Quẹt thẻ POS</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">
+                        Mã tham chiếu ngân hàng (nếu có)
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="VD: MB-84729103"
+                        value={convertForm.referenceNumber || ''}
+                        onChange={(e) => setConvertForm({ ...convertForm, referenceNumber: e.target.value })}
+                        className="w-full px-3 py-1.5 border border-blue-300 rounded-lg text-sm font-mono bg-white"
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between p-2.5 rounded-lg bg-white border border-blue-200">
+                      <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                        <Key className="w-3.5 h-3.5 text-blue-600" />
+                        Tự động cấp tài khoản & gửi Email cho học viên:
+                      </span>
+                      <input
+                        type="checkbox"
+                        checked={convertForm.provisionAccount ?? true}
+                        onChange={(e) => setConvertForm({ ...convertForm, provisionAccount: e.target.checked })}
+                        className="w-4 h-4 text-[#142B4A] rounded"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
 
               <div className="pt-4 border-t border-gray-200 flex items-center justify-end gap-3">
                 <button

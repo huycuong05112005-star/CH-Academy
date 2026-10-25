@@ -6,7 +6,8 @@ import type {
   CreateStudentPayload,
   UpdateStudentPayload,
   StudentFilterParams,
-  StudentStats
+  StudentStats,
+  StudentPortalSummary
 } from '../types/student'
 
 export const studentsApi = {
@@ -47,6 +48,18 @@ export const studentsApi = {
 
   deleteStudent: async (id: number): Promise<ApiResponse<void>> => {
     return apiClient.delete<void>(`/students/${id}`)
+  },
+
+  provisionAccount: async (id: number, password?: string): Promise<ApiResponse<import('../types/student').AccountProvisionResponse>> => {
+    return apiClient.post(`/students/${id}/provision-account`, password ? { password } : {})
+  },
+
+  enrollAndPay: async (id: number, payload: import('../types/student').EnrollAndPayPayload): Promise<ApiResponse<Student>> => {
+    return apiClient.post<Student>(`/students/${id}/enroll-and-pay`, payload)
+  },
+
+  getMyPortal: async (): Promise<ApiResponse<StudentPortalSummary>> => {
+    return apiClient.get<StudentPortalSummary>('/student/portal/me')
   },
 
   // Guardians

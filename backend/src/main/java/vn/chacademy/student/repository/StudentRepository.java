@@ -22,7 +22,9 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
 
     boolean existsByPhone(String phone);
 
-    @EntityGraph(attributePaths = {"studentGuardians", "studentGuardians.guardian"})
+    Optional<Student> findByUserId(Long userId);
+
+    @EntityGraph(attributePaths = {"studentGuardians", "studentGuardians.guardian", "user"})
     @Query("SELECT s FROM Student s WHERE " +
            "(cast(:keyword as string) IS NULL OR LOWER(s.fullName) LIKE LOWER(CONCAT('%', cast(:keyword as string), '%')) " +
            "OR LOWER(s.studentCode) LIKE LOWER(CONCAT('%', cast(:keyword as string), '%')) " +

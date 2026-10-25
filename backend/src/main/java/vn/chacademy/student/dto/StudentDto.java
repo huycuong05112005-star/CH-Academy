@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import vn.chacademy.student.entity.Student;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -33,6 +34,16 @@ public class StudentDto {
     @Builder.Default
     private List<StudentGuardianDto> guardians = new ArrayList<>();
 
+    // Automated Finance & Account Enrichment
+    private Boolean hasUserAccount;
+    private String username;
+    private String enrolledCourseName;
+    private String enrolledClassName;
+    private BigDecimal totalTuition;
+    private BigDecimal paidTuition;
+    private BigDecimal remainingTuition;
+    private String tuitionStatus;
+
     public static StudentDto fromEntity(Student s) {
         if (s == null) return null;
         List<StudentGuardianDto> guardianDtos = new ArrayList<>();
@@ -41,6 +52,9 @@ public class StudentDto {
                     .map(StudentGuardianDto::fromEntity)
                     .collect(Collectors.toList());
         }
+
+        boolean hasAccount = s.getUser() != null;
+        String userLogin = hasAccount ? s.getUser().getUsername() : null;
 
         return StudentDto.builder()
                 .id(s.getId())
@@ -57,6 +71,12 @@ public class StudentDto {
                 .createdAt(s.getCreatedAt())
                 .updatedAt(s.getUpdatedAt())
                 .guardians(guardianDtos)
+                .hasUserAccount(hasAccount)
+                .username(userLogin)
+                .totalTuition(BigDecimal.ZERO)
+                .paidTuition(BigDecimal.ZERO)
+                .remainingTuition(BigDecimal.ZERO)
+                .tuitionStatus("NO_ENROLLMENT")
                 .build();
     }
 }

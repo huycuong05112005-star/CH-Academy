@@ -19,6 +19,7 @@ import { ClassListPage } from './pages/admin/classes/ClassListPage'
 import { AttendancePage } from './pages/admin/attendance/AttendancePage'
 import { FinancePage } from './pages/admin/finance/FinancePage'
 import { SettingsPage } from './pages/admin/settings/SettingsPage'
+import { StudentPortalPage } from './pages/student/StudentPortalPage'
 
 export default function App() {
   return (
@@ -34,6 +35,16 @@ export default function App() {
             <Route path="/terms" element={<TermsPage />} />
             <Route path="/privacy" element={<PrivacyPage />} />
             <Route path="/login" element={<LoginPage />} />
+
+            {/* Student Portal (Protected) */}
+            <Route
+              path="/student/portal"
+              element={
+                <ProtectedRoute>
+                  <StudentPortalPage />
+                </ProtectedRoute>
+              }
+            />
 
             {/* Admin Portal (Protected) */}
             <Route

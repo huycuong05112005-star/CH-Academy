@@ -40,6 +40,7 @@ public class LeadService {
     private final StudentRepository studentRepository;
     private final GuardianRepository guardianRepository;
     private final StudentGuardianRepository studentGuardianRepository;
+    private final vn.chacademy.student.service.StudentService studentService;
 
     private static final Set<String> VALID_STATUSES = Set.of("NEW", "CONTACTED", "CONSULTING", "APPOINTMENT", "CONVERTED", "LOST");
     private static final Set<String> VALID_SOURCES = Set.of("WEBSITE", "FACEBOOK", "REFERRAL", "WALK_IN", "HOTLINE", "OTHER");
@@ -280,7 +281,18 @@ public class LeadService {
                 .activityTime(Instant.now())
                 .build();
         leadActivityRepository.save(activity);
-        updatedLead.getActivities().add(activity);
+        // Optional automated enrollment, tuition & account provisioning
+        if (request.getClassId() != null) {
+            vn.chacademy.student.dto.EnrollAndPayRequest enrollReq = vn.chacademy.student.dto.EnrollAndPayRequest.builder()
+                    .classId(request.getClassId())
+                    .paidAmount(request.getPaidAmount())
+                    .paymentMethod(request.getPaymentMethod() != null ? request.getPaymentMethod() : "BANK_TRANSFER")
+                    .referenceNumber(request.getReferenceNumber())
+                    .notes("Ghi danh tự động khi chốt Lead mã " + lead.getLeadCode())
+                    .provisionAccount(Boolean.TRUE.equals(request.getProvisionAccount()))
+                    .build();
+            studentService.enrollAndPay(savedStudent.getId(), enrollReq, currentUserId);
+        }
 
         return LeadDto.fromEntity(updatedLead);
     }

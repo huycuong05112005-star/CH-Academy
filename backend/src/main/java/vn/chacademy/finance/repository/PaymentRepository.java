@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 import vn.chacademy.finance.entity.Payment;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -36,4 +37,6 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
 
     @Query("SELECT coalesce(sum(p.amount), 0) FROM Payment p")
     BigDecimal sumTotalPayments();
+
+    List<Payment> findByStudentIdOrderByCreatedAtDesc(Long studentId);
 }

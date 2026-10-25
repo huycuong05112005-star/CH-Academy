@@ -64,4 +64,11 @@ export interface ConvertLeadRequest {
   guardianPhone?: string;
   guardianEmail?: string;
   guardianRelationship?: string;
+
+  // Automated enrollment & tuition fields
+  classId?: number;
+  paidAmount?: number;
+  paymentMethod?: string;
+  referenceNumber?: string;
+  provisionAccount?: boolean;
 }

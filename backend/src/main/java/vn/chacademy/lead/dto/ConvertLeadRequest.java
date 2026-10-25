@@ -31,4 +31,13 @@ public class ConvertLeadRequest {
     private String guardianPhone;
     private String guardianEmail;
     private String guardianRelationship; // FATHER, MOTHER, OTHER
+
+    // Automated enrollment & tuition fields
+    private Long classId;
+    private java.math.BigDecimal paidAmount;
+    @Builder.Default
+    private String paymentMethod = "BANK_TRANSFER";
+    private String referenceNumber;
+    @Builder.Default
+    private Boolean provisionAccount = true;
 }

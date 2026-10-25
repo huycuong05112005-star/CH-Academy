@@ -36,13 +36,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     initAuth()
   }, [])
 
-  const login = async (payload: LoginPayload) => {
+  const login = async (payload: LoginPayload): Promise<User> => {
     setIsLoading(true)
     try {
       const res = await authApi.login(payload)
       if (res.success && res.data) {
         setTokenState(res.data.accessToken)
         setUser(res.data.user)
+        return res.data.user
       } else {
         throw new Error(res.message || 'Đăng nhập không thành công')
       }

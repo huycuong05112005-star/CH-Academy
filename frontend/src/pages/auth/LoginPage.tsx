@@ -28,8 +28,16 @@ export const LoginPage: React.FC = () => {
 
     setIsSubmitting(true)
     try {
-      await login({ username: username.trim(), password })
-      navigate(from, { replace: true })
+      const loggedUser = await login({ username: username.trim(), password })
+      const isStudentOnly = loggedUser.roles?.includes('STUDENT') &&
+        !loggedUser.roles?.includes('ADMIN') &&
+        !loggedUser.roles?.includes('SUPER_ADMIN') &&
+        !loggedUser.roles?.includes('ACADEMIC_ADMIN')
+      if (isStudentOnly) {
+        navigate('/student/portal', { replace: true })
+      } else {
+        navigate(from, { replace: true })
+      }
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message)

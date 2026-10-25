@@ -27,7 +27,7 @@ export interface AuthContextType {
   token: string | null
   isAuthenticated: boolean
   isLoading: boolean
-  login: (payload: LoginPayload) => Promise<void>
+  login: (payload: LoginPayload) => Promise<User>
   logout: () => void
   hasRole: (role: string) => boolean
   hasAnyRole: (roles: string[]) => boolean
