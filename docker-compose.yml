@@ -1,3 +1,5 @@
+name: ch-academy
+
 services:
   postgres:
     image: postgres:16-alpine
@@ -22,8 +24,11 @@ services:
 
 volumes:
   postgres_data:
+    name: ch-academy_postgres_data
     driver: local
 
 networks:
   ch_academy_network:
+    name: ch-academy_ch_academy_network
     driver: bridge
+
