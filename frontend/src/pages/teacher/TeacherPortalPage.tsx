@@ -78,21 +78,83 @@ export const TeacherPortalPage: React.FC = () => {
   // Notifications
   const [notifications, setNotifications] = useState<NotificationItem[]>([])
 
-  useEffect(() => {
-    loadPortalData()
-    loadNotifications()
-    loadSentAnnouncements()
-    loadUnmarkedSessions()
+  const selectSession = async (sessionId: number, classData?: TeacherClassItem) => {
+    setSelectedSessionId(sessionId)
+    setAttendanceSuccess(null)
+    const targetClass = classData || currentClassDetail
+    if (!targetClass) return
 
-    // Sync active tab from pathname
-    const path = location.pathname
-    if (path.includes('/classes')) setActiveTab('classes')
-    else if (path.includes('/attendance')) setActiveTab('attendance')
-    else if (path.includes('/materials')) setActiveTab('materials')
-    else if (path.includes('/announcements')) setActiveTab('announcements')
-    else if (path.includes('/history')) setActiveTab('history')
-    else if (path.includes('/students')) setActiveTab('students')
-  }, [location.pathname])
+    try {
+      const res = await teacherApi.getSessionAttendance(sessionId)
+      if (res.success && res.data) {
+        const initialMap: Record<number, { status: string; note: string }> = {}
+        targetClass.students?.forEach((stu) => {
+          const rec = res.data.find((r) => r.studentId === stu.studentId)
+          initialMap[stu.studentId] = {
+            status: rec ? rec.status : 'PRESENT',
+            note: rec?.note || ''
+          }
+        })
+        setAttendanceChanges(initialMap)
+      }
+    } catch {
+      // Fallback
+    }
+  }
+
+  const loadClassDetail = async (classId: number) => {
+    setSelectedClassId(classId)
+    try {
+      const res = await teacherApi.getClassDetails(classId)
+      if (res.success && res.data) {
+        setCurrentClassDetail(res.data)
+        if (res.data.sessions && res.data.sessions.length > 0) {
+          selectSession(res.data.sessions[0].id, res.data)
+        }
+      }
+    } catch (err: unknown) {
+      const e = err as { message?: string }
+      alert(e.message || 'Không thể tải chi tiết lớp học')
+    }
+  }
+
+  const loadPortalData = async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      const [profileRes, classesRes] = await Promise.all([
+        teacherApi.getProfile(),
+        teacherApi.getMyClasses()
+      ])
+
+      if (profileRes.success && profileRes.data) {
+        setProfile(profileRes.data)
+      }
+
+      if (classesRes.success && classesRes.data) {
+        setClasses(classesRes.data)
+        if (classesRes.data.length > 0) {
+          loadClassDetail(classesRes.data[0].id)
+        }
+      }
+    } catch (err: unknown) {
+      const e = err as { message?: string }
+      setError(e.message || 'Lỗi khi tải dữ liệu Cổng Giáo viên')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const loadNotifications = async () => {
+    try {
+      const res = await teacherApi.getMyNotifications()
+      if (res.success && res.data) {
+        setNotifications(res.data)
+      }
+    } catch {
+      // Non-fatal
+    }
+  }
 
   const loadSentAnnouncements = async () => {
     try {
@@ -115,6 +177,22 @@ export const TeacherPortalPage: React.FC = () => {
       console.error(e)
     }
   }
+
+  useEffect(() => {
+    loadPortalData()
+    loadNotifications()
+    loadSentAnnouncements()
+    loadUnmarkedSessions()
+
+    // Sync active tab from pathname
+    const path = location.pathname
+    if (path.includes('/classes')) setActiveTab('classes')
+    else if (path.includes('/attendance')) setActiveTab('attendance')
+    else if (path.includes('/materials')) setActiveTab('materials')
+    else if (path.includes('/announcements')) setActiveTab('announcements')
+    else if (path.includes('/history')) setActiveTab('history')
+    else if (path.includes('/students')) setActiveTab('students')
+  }, [location.pathname])
 
   const handleSendAnnouncement = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -157,85 +235,6 @@ export const TeacherPortalPage: React.FC = () => {
       }
     } catch (err: any) {
       alert(err.message || 'Không thể thu hồi thông báo')
-    }
-  }
-
-  const loadPortalData = async () => {
-    setLoading(true)
-    setError(null)
-    try {
-      const [profileRes, classesRes] = await Promise.all([
-        teacherApi.getProfile(),
-        teacherApi.getMyClasses()
-      ])
-
-      if (profileRes.success && profileRes.data) {
-        setProfile(profileRes.data)
-      }
-
-      if (classesRes.success && classesRes.data) {
-        setClasses(classesRes.data)
-        if (classesRes.data.length > 0) {
-          loadClassDetail(classesRes.data[0].id)
-        }
-      }
-    } catch (err: unknown) {
-      const e = err as { message?: string }
-      setError(e.message || 'Lỗi khi tải dữ liệu Cổng Giáo viên')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const loadNotifications = async () => {
-    try {
-      const res = await teacherApi.getMyNotifications()
-      if (res.success && res.data) {
-        setNotifications(res.data)
-      }
-    } catch {
-      // Non-fatal
-    }
-  }
-
-  const loadClassDetail = async (classId: number) => {
-    setSelectedClassId(classId)
-    try {
-      const res = await teacherApi.getClassDetails(classId)
-      if (res.success && res.data) {
-        setCurrentClassDetail(res.data)
-        if (res.data.sessions && res.data.sessions.length > 0) {
-          selectSession(res.data.sessions[0].id, res.data)
-        }
-      }
-    } catch (err: unknown) {
-      const e = err as { message?: string }
-      alert(e.message || 'Không thể tải chi tiết lớp học')
-    }
-  }
-
-  const selectSession = async (sessionId: number, classData?: TeacherClassItem) => {
-    setSelectedSessionId(sessionId)
-    setAttendanceSuccess(null)
-    const targetClass = classData || currentClassDetail
-    if (!targetClass) return
-
-    try {
-      const res = await teacherApi.getSessionAttendance(sessionId)
-      if (res.success && res.data) {
-        // Init form changes from existing records or students
-        const initialMap: Record<number, { status: string; note: string }> = {}
-        targetClass.students?.forEach((stu) => {
-          const rec = res.data.find((r) => r.studentId === stu.studentId)
-          initialMap[stu.studentId] = {
-            status: rec ? rec.status : 'PRESENT',
-            note: rec?.note || ''
-          }
-        })
-        setAttendanceChanges(initialMap)
-      }
-    } catch {
-      // Fallback
     }
   }
 

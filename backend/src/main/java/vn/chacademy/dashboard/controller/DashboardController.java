@@ -17,7 +17,7 @@ public class DashboardController {
 
     private final DashboardService dashboardService;
 
-    @GetMapping("/stats")
+    @GetMapping({"", "/", "/stats"})
     @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'CENTER_ADMIN', 'ACADEMIC_STAFF', 'ADMISSIONS_STAFF', 'ACCOUNTANT')")
     public ResponseEntity<ApiResponse<DashboardStatsDto>> getDashboardStats() {
         DashboardStatsDto stats = dashboardService.getDashboardStats();

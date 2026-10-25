@@ -8,7 +8,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import vn.chacademy.academic.entity.ClassEntity;
 import vn.chacademy.academic.entity.ClassSession;
-import vn.chacademy.academic.repository.ClassRepository;
 import vn.chacademy.academic.repository.ClassSessionRepository;
 import vn.chacademy.academic.repository.EnrollmentRepository;
 import vn.chacademy.attendance.dto.AttendanceMonitoringDto;
@@ -25,11 +24,10 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/admin/attendance-monitoring")
 @RequiredArgsConstructor
-@PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
+@PreAuthorize("hasAnyRole('SUPER_ADMIN', 'CENTER_ADMIN', 'ACADEMIC_STAFF', 'ADMIN')")
 public class AttendanceMonitoringAdminController {
 
     private final ClassSessionRepository classSessionRepository;
-    private final ClassRepository classRepository;
     private final AttendanceRecordRepository attendanceRecordRepository;
     private final EnrollmentRepository enrollmentRepository;
     private final AttendanceService attendanceService;

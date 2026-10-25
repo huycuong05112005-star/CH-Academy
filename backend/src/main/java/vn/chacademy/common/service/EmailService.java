@@ -33,7 +33,7 @@ public class EmailService {
 
     private String formatVnd(BigDecimal amount) {
         if (amount == null) return "0 đ";
-        NumberFormat nf = NumberFormat.getInstance(new Locale("vi", "VN"));
+        NumberFormat nf = NumberFormat.getInstance(Locale.of("vi", "VN"));
         return nf.format(amount) + " đ";
     }
 

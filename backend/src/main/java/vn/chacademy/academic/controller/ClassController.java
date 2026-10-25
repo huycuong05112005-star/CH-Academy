@@ -10,7 +10,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import vn.chacademy.academic.dto.*;
+import vn.chacademy.academic.dto.ClassDto;
+import vn.chacademy.academic.dto.CreateClassRequest;
+import vn.chacademy.academic.dto.CreateEnrollmentRequest;
+import vn.chacademy.academic.dto.EnrollmentDto;
 import vn.chacademy.academic.service.AcademicService;
 import vn.chacademy.common.dto.ApiResponse;
 
