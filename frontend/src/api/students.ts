@@ -5,10 +5,16 @@ import type {
   Guardian,
   CreateStudentPayload,
   UpdateStudentPayload,
-  StudentFilterParams
+  StudentFilterParams,
+  StudentStats
 } from '../types/student'
 
 export const studentsApi = {
+  // Stats
+  getStats: async (): Promise<ApiResponse<StudentStats>> => {
+    return apiClient.get<StudentStats>('/students/stats')
+  },
+
   // Students
   searchStudents: async (params: StudentFilterParams): Promise<ApiResponse<PageResponse<Student>>> => {
     const query = new URLSearchParams()

@@ -17,6 +17,10 @@ import { financeApi } from '../../../api/finance'
 import { studentsApi } from '../../../api/students'
 import type { Receivable, Payment, FinanceOverview } from '../../../types/finance'
 import type { Student } from '../../../types/student'
+import { StatCard } from '../../../components/ui/StatCard'
+import { Badge } from '../../../components/ui/Badge'
+import { TableSkeleton } from '../../../components/ui/LoadingSkeleton'
+import { EmptyState } from '../../../components/ui/EmptyState'
 
 export function FinancePage() {
   const [activeTab, setActiveTab] = useState<'receivables' | 'payments'>('receivables')
@@ -215,24 +219,29 @@ export function FinancePage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-in fade-in duration-200">
       {/* Toast */}
       {toastMessage && (
-        <div className="fixed top-4 right-4 z-50 bg-[#142B4A] text-white px-5 py-3 rounded-lg shadow-xl flex items-center gap-3 animate-fade-in border border-slate-700">
+        <div className="fixed top-4 right-4 z-50 bg-[#142B4A] dark:bg-[#151F31] text-white px-5 py-3 rounded-xl shadow-xl flex items-center gap-3 animate-fade-in border border-slate-700 dark:border-[#2A3A50]">
           <CheckCircle className="w-5 h-5 text-emerald-400" />
-          <span className="font-medium">{toastMessage}</span>
+          <span className="font-semibold text-sm">{toastMessage}</span>
         </div>
       )}
 
       {/* Top Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-4 border-b border-slate-200 dark:border-[#2A3A50]">
         <div>
-          <h1 className="text-2xl font-bold text-[#142B4A] flex items-center gap-2">
-            <CreditCard className="w-7 h-7 text-[#142B4A]" />
+          <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-[#A6B4C8] uppercase tracking-wider mb-1">
+            <span>Tài chính & Hệ thống</span>
+            <span>/</span>
+            <span className="text-[#142B4A] dark:text-[#38BDF8]">Học phí & Công nợ</span>
+          </div>
+          <h1 className="text-2xl font-bold tracking-tight text-[#142B4A] dark:text-[#E8EEF7] flex items-center gap-2.5">
+            <CreditCard className="w-7 h-7 text-[#142B4A] dark:text-[#38BDF8]" />
             Học phí & Quản lý Tài chính
           </h1>
-          <p className="text-slate-500 text-sm mt-1">
-            Theo dõi khoản phải thu, ghi nhận thanh toán, quản lý công nợ và hoàn tiền minh bạch
+          <p className="text-slate-500 dark:text-[#A6B4C8] text-sm mt-1">
+            Theo dõi khoản phải thu, ghi nhận thanh toán, quản lý công nợ và hoàn tiền minh bạch.
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -246,115 +255,90 @@ export function FinancePage() {
               setFormError('')
               setIsReceivableModalOpen(true)
             }}
-            className="flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-lg text-sm font-semibold transition"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-[#2A3A50] bg-white dark:bg-[#151F31] hover:bg-slate-50 dark:hover:bg-[#1C293D] text-slate-800 dark:text-[#E8EEF7] text-sm font-semibold shadow-xs transition"
           >
             <Plus className="w-4 h-4" />
-            Tạo khoản thu
+            <span>Tạo khoản thu</span>
           </button>
           <button
             onClick={() => handleOpenPaymentModal()}
-            className="flex items-center gap-2 px-4 py-2 bg-[#142B4A] hover:bg-[#1b3860] text-white rounded-lg text-sm font-semibold shadow-sm transition"
+            className="flex items-center gap-2 px-4 py-2.5 bg-[#142B4A] dark:bg-[#38BDF8] hover:bg-[#1D4168] dark:hover:bg-[#0284C7] text-white dark:text-[#0B1220] rounded-xl text-sm font-semibold shadow-sm transition"
           >
             <Receipt className="w-4 h-4" />
-            Ghi nhận thanh toán
+            <span>Ghi nhận thanh toán</span>
           </button>
         </div>
       </div>
 
-      {/* Overview Cards */}
+      {/* Overview KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
-          <div>
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Tổng phải thu</p>
-            <p className="text-xl font-bold text-[#142B4A] mt-1">
-              {formatVND(overview?.totalReceivables || 0)}
-            </p>
-            <p className="text-xs text-slate-400 mt-1">{overview?.totalReceivableCount || 0} khoản phải thu</p>
-          </div>
-          <div className="w-12 h-12 bg-blue-50 text-[#142B4A] rounded-xl flex items-center justify-center">
-            <DollarSign className="w-6 h-6" />
-          </div>
-        </div>
-
-        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
-          <div>
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Đã thực thu</p>
-            <p className="text-xl font-bold text-emerald-600 mt-1">
-              {formatVND(overview?.totalPaid || 0)}
-            </p>
-            <p className="text-xs text-slate-400 mt-1">{overview?.totalPaymentCount || 0} giao dịch</p>
-          </div>
-          <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center">
-            <TrendingUp className="w-6 h-6" />
-          </div>
-        </div>
-
-        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
-          <div>
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Còn nợ (Công nợ)</p>
-            <p className="text-xl font-bold text-amber-600 mt-1">
-              {formatVND(overview?.totalDebt || 0)}
-            </p>
-            <p className="text-xs text-slate-400 mt-1">Cần đôn đốc thanh toán</p>
-          </div>
-          <div className="w-12 h-12 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center">
-            <AlertCircle className="w-6 h-6" />
-          </div>
-        </div>
-
-        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
-          <div>
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Đã hoàn tiền</p>
-            <p className="text-xl font-bold text-rose-600 mt-1">
-              {formatVND(overview?.totalRefunds || 0)}
-            </p>
-            <p className="text-xs text-slate-400 mt-1">Xử lý theo quy định</p>
-          </div>
-          <div className="w-12 h-12 bg-rose-50 text-rose-600 rounded-xl flex items-center justify-center">
-            <RotateCcw className="w-6 h-6" />
-          </div>
-        </div>
+        <StatCard
+          title="Tổng phải thu"
+          value={formatVND(overview?.totalReceivables || 0)}
+          icon={DollarSign}
+          subtitle={`${overview?.totalReceivableCount || 0} khoản phải thu`}
+        />
+        <StatCard
+          title="Đã thực thu"
+          value={formatVND(overview?.totalPaid || 0)}
+          icon={TrendingUp}
+          subtitle={`${overview?.totalPaymentCount || 0} giao dịch`}
+          badge={<Badge variant="success">Hoàn thành</Badge>}
+        />
+        <StatCard
+          title="Còn nợ (Công nợ)"
+          value={formatVND(overview?.totalDebt || 0)}
+          icon={AlertCircle}
+          subtitle="Cần đôn đốc thanh toán"
+          badge={<Badge variant="warning">Công nợ</Badge>}
+        />
+        <StatCard
+          title="Đã hoàn tiền"
+          value={formatVND(overview?.totalRefunds || 0)}
+          icon={RotateCcw}
+          subtitle="Xử lý theo quy định"
+        />
       </div>
 
       {/* Tabs */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="flex border-b border-slate-200">
+      <div className="bg-white dark:bg-[#151F31] rounded-2xl border border-slate-200/80 dark:border-[#2A3A50] shadow-xs overflow-hidden">
+        <div className="flex border-b border-slate-200 dark:border-[#2A3A50] px-4 pt-2 bg-slate-50/50 dark:bg-[#1C293D]/30">
           <button
             onClick={() => setActiveTab('receivables')}
-            className={`flex items-center gap-2 px-6 py-3.5 text-sm font-semibold border-b-2 transition ${
+            className={`flex items-center gap-2 px-5 py-3 text-sm font-semibold border-b-2 transition ${
               activeTab === 'receivables'
-                ? 'border-[#142B4A] text-[#142B4A] bg-slate-50/50'
-                : 'border-transparent text-slate-500 hover:text-slate-800'
+                ? 'border-[#142B4A] dark:border-[#38BDF8] text-[#142B4A] dark:text-[#38BDF8] bg-white dark:bg-[#151F31] rounded-t-xl'
+                : 'border-transparent text-slate-500 dark:text-[#A6B4C8] hover:text-slate-800 dark:hover:text-white'
             }`}
           >
             <FileText className="w-4 h-4" />
-            Khoản phải thu & Công nợ
+            <span>Khoản phải thu & Công nợ</span>
           </button>
           <button
             onClick={() => setActiveTab('payments')}
-            className={`flex items-center gap-2 px-6 py-3.5 text-sm font-semibold border-b-2 transition ${
+            className={`flex items-center gap-2 px-5 py-3 text-sm font-semibold border-b-2 transition ${
               activeTab === 'payments'
-                ? 'border-[#142B4A] text-[#142B4A] bg-slate-50/50'
-                : 'border-transparent text-slate-500 hover:text-slate-800'
+                ? 'border-[#142B4A] dark:border-[#38BDF8] text-[#142B4A] dark:text-[#38BDF8] bg-white dark:bg-[#151F31] rounded-t-xl'
+                : 'border-transparent text-slate-500 dark:text-[#A6B4C8] hover:text-slate-800 dark:hover:text-white'
             }`}
           >
             <Receipt className="w-4 h-4" />
-            Lịch sử thanh toán
+            <span>Lịch sử thanh toán</span>
           </button>
         </div>
 
         {/* Tab 1: Receivables */}
         {activeTab === 'receivables' && (
-          <div className="p-6 space-y-4">
+          <div className="p-5 space-y-4">
             <div className="flex flex-col sm:flex-row gap-3">
               <div className="relative flex-1">
-                <Search className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
+                <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
                 <input
                   type="text"
                   placeholder="Tìm kiếm theo mã, học viên, tiêu đề..."
                   value={recSearch}
                   onChange={(e) => setRecSearch(e.target.value)}
-                  className="w-full pl-9 pr-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#142B4A]"
+                  className="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-200 dark:border-[#2A3A50] bg-slate-50/50 dark:bg-[#1C293D] text-sm text-[#142B4A] dark:text-[#E8EEF7] placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#142B4A] dark:focus:ring-[#38BDF8]"
                 />
               </div>
               <div className="flex items-center gap-2">
@@ -362,86 +346,74 @@ export function FinancePage() {
                 <select
                   value={recStatus}
                   onChange={(e) => setRecStatus(e.target.value)}
-                  className="border border-slate-300 rounded-lg text-sm px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-[#142B4A]"
+                  className="px-3 py-2 rounded-xl border border-slate-200 dark:border-[#2A3A50] bg-white dark:bg-[#1C293D] text-sm text-[#142B4A] dark:text-[#E8EEF7] focus:outline-none focus:ring-2 focus:ring-[#142B4A] dark:focus:ring-[#38BDF8]"
                 >
                   <option value="">Tất cả trạng thái</option>
-                  <option value="PENDING">Chưa thanh toán</option>
-                  <option value="PARTIALLY_PAID">Thanh toán 1 phần</option>
-                  <option value="PAID">Đã hoàn thành</option>
+                  <option value="PENDING">Chờ nộp</option>
+                  <option value="PARTIALLY_PAID">Nộp một phần</option>
+                  <option value="PAID">Đã nộp đủ</option>
                   <option value="CANCELLED">Đã hủy</option>
                 </select>
               </div>
             </div>
 
             {loading ? (
-              <div className="py-12 text-center text-slate-400">Đang tải dữ liệu khoản thu...</div>
+              <TableSkeleton rows={5} columns={9} />
             ) : receivables.length === 0 ? (
-              <div className="py-12 text-center text-slate-400">Không tìm thấy khoản thu nào</div>
+              <EmptyState
+                title="Không tìm thấy khoản thu nào"
+                description="Chưa có khoản thu học phí nào khớp với điều kiện lọc."
+                icon={FileText}
+              />
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse text-sm">
+                <table className="w-full text-left border-collapse text-table">
                   <thead>
-                    <tr className="border-b border-slate-200 bg-slate-50 text-slate-600 font-semibold">
-                      <th className="py-3 px-4">Mã</th>
-                      <th className="py-3 px-4">Học viên</th>
-                      <th className="py-3 px-4">Khoản thu</th>
-                      <th className="py-3 px-4 text-right">Tổng tiền</th>
-                      <th className="py-3 px-4 text-right">Đã nộp</th>
-                      <th className="py-3 px-4 text-right">Còn nợ</th>
-                      <th className="py-3 px-4">Hạn nộp</th>
-                      <th className="py-3 px-4 text-center">Trạng thái</th>
-                      <th className="py-3 px-4 text-right">Hành động</th>
+                    <tr className="bg-slate-50/80 dark:bg-[#1C293D] border-b border-slate-200 dark:border-[#2A3A50] text-xs font-semibold text-slate-500 dark:text-[#A6B4C8] uppercase tracking-wider">
+                      <th className="py-3.5 px-4">Mã</th>
+                      <th className="py-3.5 px-4">Học viên</th>
+                      <th className="py-3.5 px-4">Khoản thu</th>
+                      <th className="py-3.5 px-4 text-right">Tổng tiền</th>
+                      <th className="py-3.5 px-4 text-right">Đã nộp</th>
+                      <th className="py-3.5 px-4 text-right">Còn nợ</th>
+                      <th className="py-3.5 px-4">Hạn nộp</th>
+                      <th className="py-3.5 px-4 text-center">Trạng thái</th>
+                      <th className="py-3.5 px-4 text-right">Hành động</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100">
+                  <tbody className="divide-y divide-slate-100 dark:divide-[#2A3A50]/60">
                     {receivables.map((r) => {
                       const isOverdue = r.dueDate && new Date(r.dueDate) < new Date() && r.status !== 'PAID'
                       return (
-                        <tr key={r.id} className="hover:bg-slate-50/80 transition">
-                          <td className="py-3 px-4 font-mono font-medium text-slate-800">{r.code}</td>
-                          <td className="py-3 px-4">
-                            <div className="font-medium text-slate-900">{r.studentFullName}</div>
-                            <div className="text-xs text-slate-400 font-mono">{r.studentCode}</div>
+                        <tr key={r.id} className="hover:bg-slate-50/60 dark:hover:bg-[#1C293D]/40 transition">
+                          <td className="py-3.5 px-4 font-mono font-bold text-xs text-[#142B4A] dark:text-[#38BDF8]">{r.code}</td>
+                          <td className="py-3.5 px-4">
+                            <div className="font-bold text-[#142B4A] dark:text-[#E8EEF7]">{r.studentFullName}</div>
+                            <div className="text-xs text-slate-500 dark:text-[#A6B4C8] font-mono mt-0.5">{r.studentCode}</div>
                           </td>
-                          <td className="py-3 px-4">
-                            <div className="font-medium text-slate-800">{r.title}</div>
-                            {r.className && <div className="text-xs text-slate-500">Lớp: {r.className}</div>}
+                          <td className="py-3.5 px-4">
+                            <div className="font-semibold text-slate-800 dark:text-[#E8EEF7]">{r.title}</div>
+                            {r.className && <div className="text-xs text-slate-500 dark:text-[#A6B4C8] mt-0.5">Lớp: {r.className}</div>}
                           </td>
-                          <td className="py-3 px-4 text-right font-medium text-slate-900">{formatVND(r.totalAmount)}</td>
-                          <td className="py-3 px-4 text-right text-emerald-600 font-medium">{formatVND(r.paidAmount)}</td>
-                          <td className="py-3 px-4 text-right font-bold text-amber-600">{formatVND(r.remainingAmount)}</td>
-                          <td className="py-3 px-4">
-                            <span className={isOverdue ? 'text-rose-600 font-medium' : 'text-slate-600'}>
+                          <td className="py-3.5 px-4 text-right font-bold text-slate-800 dark:text-[#E8EEF7]">{formatVND(r.totalAmount)}</td>
+                          <td className="py-3.5 px-4 text-right text-emerald-600 dark:text-emerald-400 font-bold">{formatVND(r.paidAmount)}</td>
+                          <td className="py-3.5 px-4 text-right font-bold text-amber-600 dark:text-amber-400">{formatVND(r.remainingAmount)}</td>
+                          <td className="py-3.5 px-4 text-xs">
+                            <span className={isOverdue ? 'text-rose-600 dark:text-rose-400 font-semibold' : 'text-slate-600 dark:text-[#A6B4C8]'}>
                               {r.dueDate || '---'}
                             </span>
                           </td>
-                          <td className="py-3 px-4 text-center">
-                            {r.status === 'PAID' && (
-                              <span className="px-2.5 py-1 text-xs font-semibold rounded-full bg-emerald-100 text-emerald-800">
-                                Đã nộp đủ
-                              </span>
-                            )}
-                            {r.status === 'PARTIALLY_PAID' && (
-                              <span className="px-2.5 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
-                                Nộp một phần
-                              </span>
-                            )}
-                            {r.status === 'PENDING' && (
-                              <span className="px-2.5 py-1 text-xs font-semibold rounded-full bg-amber-100 text-amber-800">
-                                Chờ nộp
-                              </span>
-                            )}
-                            {r.status === 'CANCELLED' && (
-                              <span className="px-2.5 py-1 text-xs font-semibold rounded-full bg-slate-100 text-slate-600">
-                                Đã hủy
-                              </span>
-                            )}
+                          <td className="py-3.5 px-4 text-center">
+                            {r.status === 'PAID' && <Badge variant="success">Đã nộp đủ</Badge>}
+                            {r.status === 'PARTIALLY_PAID' && <Badge variant="info">Nộp một phần</Badge>}
+                            {r.status === 'PENDING' && <Badge variant="warning">Chờ nộp</Badge>}
+                            {r.status === 'CANCELLED' && <Badge variant="neutral">Đã hủy</Badge>}
                           </td>
-                          <td className="py-3 px-4 text-right">
+                          <td className="py-3.5 px-4 text-right">
                             {r.status !== 'PAID' && r.status !== 'CANCELLED' && (
                               <button
                                 onClick={() => handleOpenPaymentModal(r)}
-                                className="px-3 py-1 bg-[#142B4A] hover:bg-[#1b3860] text-white rounded text-xs font-medium transition"
+                                className="px-3 py-1.5 bg-[#142B4A] dark:bg-[#38BDF8] hover:bg-[#1D4168] dark:hover:bg-[#0284C7] text-white dark:text-[#0B1220] rounded-lg text-xs font-semibold transition shadow-xs"
                               >
                                 Thu tiền
                               </button>
@@ -457,20 +429,20 @@ export function FinancePage() {
 
             {/* Pagination */}
             {recTotalPages > 1 && (
-              <div className="flex justify-between items-center pt-4 border-t border-slate-100 text-sm">
-                <span className="text-slate-500">Trang {recPage + 1} / {recTotalPages}</span>
+              <div className="flex justify-between items-center pt-4 border-t border-slate-100 dark:border-[#2A3A50] text-xs text-slate-600 dark:text-[#A6B4C8]">
+                <span>Trang {recPage + 1} / {recTotalPages}</span>
                 <div className="flex gap-2">
                   <button
                     disabled={recPage === 0}
                     onClick={() => setRecPage(p => Math.max(0, p - 1))}
-                    className="px-3 py-1 border border-slate-300 rounded text-slate-700 disabled:opacity-40"
+                    className="px-3 py-1.5 border border-slate-200 dark:border-[#2A3A50] bg-white dark:bg-[#151F31] rounded-lg disabled:opacity-40 font-medium"
                   >
                     Trước
                   </button>
                   <button
                     disabled={recPage >= recTotalPages - 1}
                     onClick={() => setRecPage(p => p + 1)}
-                    className="px-3 py-1 border border-slate-300 rounded text-slate-700 disabled:opacity-40"
+                    className="px-3 py-1.5 border border-slate-200 dark:border-[#2A3A50] bg-white dark:bg-[#151F31] rounded-lg disabled:opacity-40 font-medium"
                   >
                     Sau
                   </button>
@@ -482,16 +454,16 @@ export function FinancePage() {
 
         {/* Tab 2: Payments */}
         {activeTab === 'payments' && (
-          <div className="p-6 space-y-4">
+          <div className="p-5 space-y-4">
             <div className="flex flex-col sm:flex-row gap-3">
               <div className="relative flex-1">
-                <Search className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
+                <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
                 <input
                   type="text"
                   placeholder="Tìm theo mã thanh toán, học viên, số tham chiếu..."
                   value={paySearch}
                   onChange={(e) => setPaySearch(e.target.value)}
-                  className="w-full pl-9 pr-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#142B4A]"
+                  className="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-200 dark:border-[#2A3A50] bg-slate-50/50 dark:bg-[#1C293D] text-sm text-[#142B4A] dark:text-[#E8EEF7] placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#142B4A] dark:focus:ring-[#38BDF8]"
                 />
               </div>
               <div className="flex items-center gap-2">
@@ -499,7 +471,7 @@ export function FinancePage() {
                 <select
                   value={payMethod}
                   onChange={(e) => setPayMethod(e.target.value)}
-                  className="border border-slate-300 rounded-lg text-sm px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-[#142B4A]"
+                  className="px-3 py-2 rounded-xl border border-slate-200 dark:border-[#2A3A50] bg-white dark:bg-[#1C293D] text-sm text-[#142B4A] dark:text-[#E8EEF7] focus:outline-none focus:ring-2 focus:ring-[#142B4A] dark:focus:ring-[#38BDF8]"
                 >
                   <option value="">Tất cả hình thức</option>
                   <option value="CASH">Tiền mặt</option>
@@ -510,52 +482,46 @@ export function FinancePage() {
             </div>
 
             {loading ? (
-              <div className="py-12 text-center text-slate-400">Đang tải lịch sử thanh toán...</div>
+              <TableSkeleton rows={5} columns={7} />
             ) : payments.length === 0 ? (
-              <div className="py-12 text-center text-slate-400">Chưa có giao dịch thanh toán nào</div>
+              <EmptyState
+                title="Chưa có giao dịch thanh toán nào"
+                description="Chưa có khoản thu nào được ghi nhận."
+                icon={Receipt}
+              />
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse text-sm">
+                <table className="w-full text-left border-collapse text-table">
                   <thead>
-                    <tr className="border-b border-slate-200 bg-slate-50 text-slate-600 font-semibold">
-                      <th className="py-3 px-4">Mã giao dịch</th>
-                      <th className="py-3 px-4">Ngày nộp</th>
-                      <th className="py-3 px-4">Học viên</th>
-                      <th className="py-3 px-4 text-right">Số tiền</th>
-                      <th className="py-3 px-4">Hình thức</th>
-                      <th className="py-3 px-4">Mã tham chiếu</th>
-                      <th className="py-3 px-4">Phân bổ khoản thu</th>
-                      <th className="py-3 px-4">Người thu</th>
+                    <tr className="bg-slate-50/80 dark:bg-[#1C293D] border-b border-slate-200 dark:border-[#2A3A50] text-xs font-semibold text-slate-500 dark:text-[#A6B4C8] uppercase tracking-wider">
+                      <th className="py-3.5 px-4">Mã GD</th>
+                      <th className="py-3.5 px-4">Học viên</th>
+                      <th className="py-3.5 px-4 text-right">Số tiền</th>
+                      <th className="py-3.5 px-4">Phương thức</th>
+                      <th className="py-3.5 px-4">Ngày nộp</th>
+                      <th className="py-3.5 px-4">Mã tham chiếu</th>
+                      <th className="py-3.5 px-4">Người thu</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100">
+                  <tbody className="divide-y divide-slate-100 dark:divide-[#2A3A50]/60">
                     {payments.map((p) => (
-                      <tr key={p.id} className="hover:bg-slate-50/80 transition">
-                        <td className="py-3 px-4 font-mono font-medium text-slate-800">{p.paymentCode}</td>
-                        <td className="py-3 px-4 text-slate-600">{p.paymentDate}</td>
-                        <td className="py-3 px-4">
-                          <div className="font-medium text-slate-900">{p.studentFullName}</div>
-                          <div className="text-xs text-slate-400 font-mono">{p.studentCode}</div>
+                      <tr key={p.id} className="hover:bg-slate-50/60 dark:hover:bg-[#1C293D]/40 transition">
+                        <td className="py-3.5 px-4 font-mono font-bold text-xs text-[#142B4A] dark:text-[#38BDF8]">{p.paymentCode}</td>
+                        <td className="py-3.5 px-4">
+                          <div className="font-bold text-[#142B4A] dark:text-[#E8EEF7]">{p.studentFullName}</div>
+                          <div className="text-xs text-slate-500 dark:text-[#A6B4C8] font-mono mt-0.5">{p.studentCode}</div>
                         </td>
-                        <td className="py-3 px-4 text-right font-bold text-emerald-600">{formatVND(p.amount)}</td>
-                        <td className="py-3 px-4">
-                          <span className="px-2 py-0.5 text-xs font-medium rounded bg-slate-100 text-slate-700">
-                            {p.paymentMethod === 'BANK_TRANSFER' ? 'Chuyển khoản' : p.paymentMethod === 'CASH' ? 'Tiền mặt' : p.paymentMethod}
-                          </span>
+                        <td className="py-3.5 px-4 text-right font-bold text-emerald-600 dark:text-emerald-400">
+                          {formatVND(p.amount)}
                         </td>
-                        <td className="py-3 px-4 font-mono text-xs text-slate-500">{p.referenceNumber || '---'}</td>
-                        <td className="py-3 px-4 text-xs text-slate-600">
-                          {p.allocations && p.allocations.length > 0 ? (
-                            p.allocations.map(a => (
-                              <div key={a.id}>
-                                {a.receivableTitle} ({formatVND(a.allocatedAmount)})
-                              </div>
-                            ))
-                          ) : (
-                            <span className="text-slate-400">Tự động phân bổ</span>
-                          )}
+                        <td className="py-3.5 px-4">
+                          <Badge variant="primary">
+                            {p.paymentMethod === 'BANK_TRANSFER' ? 'Chuyển khoản' : p.paymentMethod === 'CASH' ? 'Tiền mặt' : 'Thẻ / POS'}
+                          </Badge>
                         </td>
-                        <td className="py-3 px-4 text-xs text-slate-600">{p.createdByName || 'Hệ thống'}</td>
+                        <td className="py-3.5 px-4 text-xs text-slate-600 dark:text-[#A6B4C8]">{p.paymentDate}</td>
+                        <td className="py-3.5 px-4 font-mono text-xs text-slate-500 dark:text-[#A6B4C8]">{p.referenceNumber || '---'}</td>
+                        <td className="py-3.5 px-4 text-xs text-slate-600 dark:text-[#A6B4C8]">{p.createdByName || 'Hệ thống'}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -565,20 +531,20 @@ export function FinancePage() {
 
             {/* Pagination */}
             {payTotalPages > 1 && (
-              <div className="flex justify-between items-center pt-4 border-t border-slate-100 text-sm">
-                <span className="text-slate-500">Trang {payPage + 1} / {payTotalPages}</span>
+              <div className="flex justify-between items-center pt-4 border-t border-slate-100 dark:border-[#2A3A50] text-xs text-slate-600 dark:text-[#A6B4C8]">
+                <span>Trang {payPage + 1} / {payTotalPages}</span>
                 <div className="flex gap-2">
                   <button
                     disabled={payPage === 0}
                     onClick={() => setPayPage(p => Math.max(0, p - 1))}
-                    className="px-3 py-1 border border-slate-300 rounded text-slate-700 disabled:opacity-40"
+                    className="px-3 py-1.5 border border-slate-200 dark:border-[#2A3A50] bg-white dark:bg-[#151F31] rounded-lg disabled:opacity-40 font-medium"
                   >
                     Trước
                   </button>
                   <button
                     disabled={payPage >= payTotalPages - 1}
                     onClick={() => setPayPage(p => p + 1)}
-                    className="px-3 py-1 border border-slate-300 rounded text-slate-700 disabled:opacity-40"
+                    className="px-3 py-1.5 border border-slate-200 dark:border-[#2A3A50] bg-white dark:bg-[#151F31] rounded-lg disabled:opacity-40 font-medium"
                   >
                     Sau
                   </button>
@@ -591,37 +557,37 @@ export function FinancePage() {
 
       {/* Modal: Ghi nhận thanh toán */}
       {isPaymentModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full p-6 animate-scale-up">
-            <div className="flex justify-between items-center pb-3 border-b border-slate-100">
-              <h3 className="text-lg font-bold text-[#142B4A] flex items-center gap-2">
-                <Receipt className="w-5 h-5 text-emerald-600" />
-                Ghi nhận thanh toán học phí
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-150">
+          <div className="bg-white dark:bg-[#151F31] rounded-2xl border border-slate-200 dark:border-[#2A3A50] shadow-2xl max-w-lg w-full p-6">
+            <div className="flex justify-between items-center pb-3 border-b border-slate-100 dark:border-[#2A3A50]">
+              <h3 className="text-lg font-bold text-[#142B4A] dark:text-[#E8EEF7] flex items-center gap-2">
+                <Receipt className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                <span>Ghi nhận thanh toán học phí</span>
               </h3>
               <button
                 onClick={() => setIsPaymentModalOpen(false)}
-                className="text-slate-400 hover:text-slate-600"
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 rounded-lg"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             {formError && (
-              <div className="mt-3 p-3 bg-rose-50 border border-rose-200 text-rose-700 text-sm rounded-lg">
+              <div className="mt-3 p-3 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 text-sm rounded-xl">
                 {formError}
               </div>
             )}
 
             <form onSubmit={handleRecordPayment} className="mt-4 space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 uppercase mb-1">
+                <label className="block text-xs font-semibold text-slate-700 dark:text-[#E8EEF7] mb-1">
                   Học viên nộp tiền <span className="text-rose-500">*</span>
                 </label>
                 <select
                   required
                   value={payStudentId}
                   onChange={(e) => setPayStudentId(Number(e.target.value))}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#142B4A]"
+                  className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-[#2A3A50] bg-white dark:bg-[#1C293D] text-sm text-[#142B4A] dark:text-[#E8EEF7]"
                 >
                   <option value="">-- Chọn học viên --</option>
                   {students.map((s) => (
@@ -633,7 +599,7 @@ export function FinancePage() {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 uppercase mb-1">
+                <label className="block text-xs font-semibold text-slate-700 dark:text-[#E8EEF7] mb-1">
                   Số tiền thanh toán (VND) <span className="text-rose-500">*</span>
                 </label>
                 <input
@@ -644,19 +610,19 @@ export function FinancePage() {
                   placeholder="Ví dụ: 3000000"
                   value={payAmount}
                   onChange={(e) => setPayAmount(e.target.value === '' ? '' : Number(e.target.value))}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#142B4A]"
+                  className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-[#2A3A50] bg-white dark:bg-[#1C293D] text-sm text-[#142B4A] dark:text-[#E8EEF7]"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 uppercase mb-1">
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-[#E8EEF7] mb-1">
                     Hình thức
                   </label>
                   <select
                     value={payMethodSelect}
                     onChange={(e) => setPayMethodSelect(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#142B4A]"
+                    className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-[#2A3A50] bg-white dark:bg-[#1C293D] text-sm text-[#142B4A] dark:text-[#E8EEF7]"
                   >
                     <option value="BANK_TRANSFER">Chuyển khoản</option>
                     <option value="CASH">Tiền mặt</option>
@@ -664,7 +630,7 @@ export function FinancePage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 uppercase mb-1">
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-[#E8EEF7] mb-1">
                     Số tham chiếu / Bill
                   </label>
                   <input
@@ -672,13 +638,13 @@ export function FinancePage() {
                     placeholder="Mã giao dịch ngân hàng"
                     value={payRef}
                     onChange={(e) => setPayRef(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#142B4A]"
+                    className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-[#2A3A50] bg-white dark:bg-[#1C293D] text-sm text-[#142B4A] dark:text-[#E8EEF7]"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 uppercase mb-1">
+                <label className="block text-xs font-semibold text-slate-700 dark:text-[#E8EEF7] mb-1">
                   Ghi chú nội bộ
                 </label>
                 <input
@@ -686,22 +652,22 @@ export function FinancePage() {
                   placeholder="Ví dụ: Phụ huynh chuyển khoản qua Vietcombank"
                   value={payNote}
                   onChange={(e) => setPayNote(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#142B4A]"
+                  className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-[#2A3A50] bg-white dark:bg-[#1C293D] text-sm text-[#142B4A] dark:text-[#E8EEF7]"
                 />
               </div>
 
-              <div className="flex justify-end gap-3 pt-3 border-t border-slate-100">
+              <div className="flex justify-end gap-3 pt-3 border-t border-slate-100 dark:border-[#2A3A50]">
                 <button
                   type="button"
                   onClick={() => setIsPaymentModalOpen(false)}
-                  className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg text-sm font-semibold hover:bg-slate-50"
+                  className="px-4 py-2 rounded-xl border border-slate-200 dark:border-[#2A3A50] text-sm font-semibold text-slate-700 dark:text-[#E8EEF7] hover:bg-slate-100 dark:hover:bg-[#1C293D]"
                 >
                   Hủy
                 </button>
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-semibold shadow-sm transition disabled:opacity-50"
+                  className="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold shadow-xs disabled:opacity-50"
                 >
                   {submitting ? 'Đang lưu...' : 'Xác nhận thu tiền'}
                 </button>
@@ -713,37 +679,37 @@ export function FinancePage() {
 
       {/* Modal: Tạo khoản thu mới */}
       {isReceivableModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full p-6 animate-scale-up">
-            <div className="flex justify-between items-center pb-3 border-b border-slate-100">
-              <h3 className="text-lg font-bold text-[#142B4A] flex items-center gap-2">
-                <Plus className="w-5 h-5 text-[#142B4A]" />
-                Tạo khoản phải thu mới
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-150">
+          <div className="bg-white dark:bg-[#151F31] rounded-2xl border border-slate-200 dark:border-[#2A3A50] shadow-2xl max-w-lg w-full p-6">
+            <div className="flex justify-between items-center pb-3 border-b border-slate-100 dark:border-[#2A3A50]">
+              <h3 className="text-lg font-bold text-[#142B4A] dark:text-[#E8EEF7] flex items-center gap-2">
+                <Plus className="w-5 h-5 text-[#142B4A] dark:text-[#38BDF8]" />
+                <span>Tạo khoản phải thu mới</span>
               </h3>
               <button
                 onClick={() => setIsReceivableModalOpen(false)}
-                className="text-slate-400 hover:text-slate-600"
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 rounded-lg"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             {formError && (
-              <div className="mt-3 p-3 bg-rose-50 border border-rose-200 text-rose-700 text-sm rounded-lg">
+              <div className="mt-3 p-3 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 text-sm rounded-xl">
                 {formError}
               </div>
             )}
 
             <form onSubmit={handleCreateReceivable} className="mt-4 space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 uppercase mb-1">
+                <label className="block text-xs font-semibold text-slate-700 dark:text-[#E8EEF7] mb-1">
                   Học viên <span className="text-rose-500">*</span>
                 </label>
                 <select
                   required
                   value={recStudentId}
                   onChange={(e) => setRecStudentId(Number(e.target.value))}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#142B4A]"
+                  className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-[#2A3A50] bg-white dark:bg-[#1C293D] text-sm text-[#142B4A] dark:text-[#E8EEF7]"
                 >
                   <option value="">-- Chọn học viên --</option>
                   {students.map((s) => (
@@ -755,7 +721,7 @@ export function FinancePage() {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 uppercase mb-1">
+                <label className="block text-xs font-semibold text-slate-700 dark:text-[#E8EEF7] mb-1">
                   Nội dung khoản thu <span className="text-rose-500">*</span>
                 </label>
                 <input
@@ -764,13 +730,13 @@ export function FinancePage() {
                   placeholder="Ví dụ: Học phí khóa Tiếng Anh Giao Tiếp Q3/2026"
                   value={recTitle}
                   onChange={(e) => setRecTitle(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#142B4A]"
+                  className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-[#2A3A50] bg-white dark:bg-[#1C293D] text-sm text-[#142B4A] dark:text-[#E8EEF7]"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 uppercase mb-1">
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-[#E8EEF7] mb-1">
                     Số tiền phải thu (VND) <span className="text-rose-500">*</span>
                   </label>
                   <input
@@ -781,24 +747,24 @@ export function FinancePage() {
                     placeholder="Ví dụ: 4500000"
                     value={recAmount}
                     onChange={(e) => setRecAmount(e.target.value === '' ? '' : Number(e.target.value))}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#142B4A]"
+                    className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-[#2A3A50] bg-white dark:bg-[#1C293D] text-sm text-[#142B4A] dark:text-[#E8EEF7]"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 uppercase mb-1">
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-[#E8EEF7] mb-1">
                     Hạn nộp
                   </label>
                   <input
                     type="date"
                     value={recDueDate}
                     onChange={(e) => setRecDueDate(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#142B4A]"
+                    className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-[#2A3A50] bg-white dark:bg-[#1C293D] text-sm text-[#142B4A] dark:text-[#E8EEF7]"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 uppercase mb-1">
+                <label className="block text-xs font-semibold text-slate-700 dark:text-[#E8EEF7] mb-1">
                   Ghi chú
                 </label>
                 <input
@@ -806,22 +772,22 @@ export function FinancePage() {
                   placeholder="Ví dụ: Đã áp dụng học bổng 10%"
                   value={recNote}
                   onChange={(e) => setRecNote(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#142B4A]"
+                  className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-[#2A3A50] bg-white dark:bg-[#1C293D] text-sm text-[#142B4A] dark:text-[#E8EEF7]"
                 />
               </div>
 
-              <div className="flex justify-end gap-3 pt-3 border-t border-slate-100">
+              <div className="flex justify-end gap-3 pt-3 border-t border-slate-100 dark:border-[#2A3A50]">
                 <button
                   type="button"
                   onClick={() => setIsReceivableModalOpen(false)}
-                  className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg text-sm font-semibold hover:bg-slate-50"
+                  className="px-4 py-2 rounded-xl border border-slate-200 dark:border-[#2A3A50] text-sm font-semibold text-slate-700 dark:text-[#E8EEF7] hover:bg-slate-100 dark:hover:bg-[#1C293D]"
                 >
                   Hủy
                 </button>
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="px-4 py-2 bg-[#142B4A] hover:bg-[#1b3860] text-white rounded-lg text-sm font-semibold shadow-sm transition disabled:opacity-50"
+                  className="px-5 py-2 rounded-xl bg-[#142B4A] dark:bg-[#38BDF8] text-white dark:text-[#0B1220] text-sm font-semibold hover:bg-[#1D4168] dark:hover:bg-[#0284C7] shadow-sm disabled:opacity-50"
                 >
                   {submitting ? 'Đang tạo...' : 'Tạo khoản thu'}
                 </button>

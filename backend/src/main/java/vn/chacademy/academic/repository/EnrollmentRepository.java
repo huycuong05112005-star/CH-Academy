@@ -37,4 +37,7 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
                                        @Param("studentId") Long studentId,
                                        @Param("status") String status,
                                        Pageable pageable);
+
+    @Query("SELECT COUNT(DISTINCT e.student.id) FROM Enrollment e WHERE e.status = 'ENROLLED'")
+    long countDistinctActiveEnrolledStudents();
 }

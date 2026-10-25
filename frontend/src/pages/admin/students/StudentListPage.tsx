@@ -1,6 +1,10 @@
 import React, { useEffect, useState, useCallback } from 'react'
 import { studentsApi } from '../../../api/students'
-import type { Student, Guardian, CreateStudentPayload } from '../../../types/student'
+import type { Student, Guardian, CreateStudentPayload, StudentStats } from '../../../types/student'
+import { Badge } from '../../../components/ui/Badge'
+import { StatCard } from '../../../components/ui/StatCard'
+import { TableSkeleton } from '../../../components/ui/LoadingSkeleton'
+import { EmptyState } from '../../../components/ui/EmptyState'
 import {
   Users,
   Plus,
@@ -9,19 +13,24 @@ import {
   AlertCircle,
   CheckCircle2,
   X,
-  RefreshCw,
+  RotateCcw,
   ChevronLeft,
   ChevronRight,
   Shield,
   Phone,
   Mail,
-  UserCheck
+  UserCheck,
+  Eye,
+  Sparkles,
+  GraduationCap
 } from 'lucide-react'
 
 export const StudentListPage: React.FC = () => {
   const [students, setStudents] = useState<Student[]>([])
+  const [stats, setStats] = useState<StudentStats | null>(null)
   const [guardians, setGuardians] = useState<Guardian[]>([])
   const [loading, setLoading] = useState<boolean>(true)
+  const [statsLoading, setStatsLoading] = useState<boolean>(true)
   const [error, setError] = useState<string | null>(null)
   const [successMsg, setSuccessMsg] = useState<string | null>(null)
 
@@ -62,7 +71,22 @@ export const StudentListPage: React.FC = () => {
     internalNotes: ''
   })
 
-  // Load guardians list
+  // Load aggregate stats from real API
+  const loadStats = useCallback(async () => {
+    setStatsLoading(true)
+    try {
+      const res = await studentsApi.getStats()
+      if (res.success && res.data) {
+        setStats(res.data)
+      }
+    } catch {
+      // Non-fatal, fallback to page elements
+    } finally {
+      setStatsLoading(false)
+    }
+  }, [])
+
+  // Load guardians list for linking
   useEffect(() => {
     const loadGuardians = async () => {
       try {
@@ -75,7 +99,8 @@ export const StudentListPage: React.FC = () => {
       }
     }
     loadGuardians()
-  }, [])
+    loadStats()
+  }, [loadStats])
 
   // Load students list
   const loadStudents = useCallback(async () => {
@@ -109,6 +134,13 @@ export const StudentListPage: React.FC = () => {
   useEffect(() => {
     loadStudents()
   }, [loadStudents])
+
+  const handleResetFilters = () => {
+    setKeyword('')
+    setSelectedTargetType('')
+    setSelectedStatus('')
+    setPage(0)
+  }
 
   const openCreateModal = () => {
     setEditingStudent(null)
@@ -183,6 +215,7 @@ export const StudentListPage: React.FC = () => {
           setSuccessMsg(`Cập nhật hồ sơ học viên "${res.data?.fullName}" thành công!`)
           setIsModalOpen(false)
           loadStudents()
+          loadStats()
         } else {
           alert(res.message || 'Cập nhật thất bại')
         }
@@ -192,6 +225,7 @@ export const StudentListPage: React.FC = () => {
           setSuccessMsg(`Tạo mới học viên "${res.data?.fullName}" (${res.data?.studentCode}) thành công!`)
           setIsModalOpen(false)
           loadStudents()
+          loadStats()
         } else {
           alert(res.message || 'Tạo mới thất bại')
         }
@@ -218,6 +252,7 @@ export const StudentListPage: React.FC = () => {
         setSuccessMsg(`Đã cập nhật trạng thái học viên "${statusStudent.studentCode}" sang ${newStatus}`)
         setIsStatusModalOpen(false)
         loadStudents()
+        loadStats()
       } else {
         alert(res.message || 'Cập nhật trạng thái thất bại')
       }
@@ -228,19 +263,26 @@ export const StudentListPage: React.FC = () => {
     }
   }
 
-  const getStatusBadge = (status: string) => {
+  const renderStatusBadge = (status: string) => {
     switch (status) {
       case 'ACTIVE':
-        return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">Đang học</span>
+        return <Badge variant="success" dot>Đang học</Badge>
       case 'INACTIVE':
-        return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">Tạm nghỉ</span>
+        return <Badge variant="warning" dot>Tạm nghỉ</Badge>
       case 'GRADUATED':
-        return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">Tốt nghiệp</span>
+        return <Badge variant="info" dot>Tốt nghiệp</Badge>
       case 'DROPPED':
-        return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-rose-100 text-rose-800">Thôi học</span>
+        return <Badge variant="danger" dot>Thôi học</Badge>
       default:
-        return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-800">{status}</span>
+        return <Badge variant="neutral">{status}</Badge>
     }
+  }
+
+  const renderTargetTypeBadge = (type: string) => {
+    if (type === 'KID') {
+      return <Badge variant="purple">Trẻ em (KID)</Badge>
+    }
+    return <Badge variant="neutral">Người lớn (ADULT)</Badge>
   }
 
   const getGenderLabel = (gender: string) => {
@@ -260,83 +302,103 @@ export const StudentListPage: React.FC = () => {
     }
   }
 
-  // Summary counts
-  const countKid = students.filter(s => s.targetType === 'KID').length
-  const countAdult = students.filter(s => s.targetType === 'ADULT').length
-  const countActive = students.filter(s => s.status === 'ACTIVE').length
+  const isFiltering = keyword.trim() !== '' || selectedTargetType !== '' || selectedStatus !== ''
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-in fade-in duration-200">
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-slate-200">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-slate-200 dark:border-[#2A3A50]">
         <div>
-          <h1 className="text-2xl font-bold text-[#142B4A] flex items-center gap-2">
-            <Users className="w-7 h-7 text-[#142B4A]" />
+          <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-[#A6B4C8] uppercase tracking-wider mb-1">
+            <span>Học viên & Tuyển sinh</span>
+            <span>/</span>
+            <span className="text-[#142B4A] dark:text-[#38BDF8]">Danh sách</span>
+          </div>
+          <h1 className="text-2xl font-bold tracking-tight text-[#142B4A] dark:text-[#E8EEF7] flex items-center gap-2.5">
+            <Users className="w-7 h-7 text-[#142B4A] dark:text-[#38BDF8]" />
             Quản lý Học viên & Người giám hộ
           </h1>
-          <p className="text-sm text-slate-600 mt-1">
-            Theo dõi hồ sơ người học, phân loại lứa tuổi và liên kết thông tin phụ huynh/người giám hộ.
+          <p className="text-sm text-slate-600 dark:text-[#A6B4C8] mt-1">
+            Theo dõi hồ sơ người học, đối chiếu lứa tuổi và liên kết thông tin phụ huynh/người giám hộ.
           </p>
         </div>
 
         <button
           onClick={openCreateModal}
-          className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-[#142B4A] hover:bg-[#1a3860] text-white rounded-lg text-sm font-medium shadow-sm transition-colors duration-200"
+          className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-[#142B4A] dark:bg-[#38BDF8] hover:bg-[#1D4168] dark:hover:bg-[#0284C7] text-white dark:text-[#0B1220] rounded-xl text-sm font-semibold shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-[#3977B8]"
         >
-          <Plus className="w-4 h-4" />
-          Thêm học viên mới
+          <Plus size={16} />
+          <span>Thêm học viên mới</span>
         </button>
       </div>
 
-      {/* Metric Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-          <div className="text-xs text-slate-500 font-medium">Tổng học viên</div>
-          <div className="text-2xl font-bold text-[#142B4A] mt-1">{totalElements}</div>
-        </div>
-        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-          <div className="text-xs text-emerald-600 font-medium">Đang theo học</div>
-          <div className="text-2xl font-bold text-emerald-700 mt-1">{countActive}</div>
-        </div>
-        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-          <div className="text-xs text-purple-600 font-medium">Học viên nhí (KID)</div>
-          <div className="text-2xl font-bold text-purple-700 mt-1">{countKid}</div>
-        </div>
-        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-          <div className="text-xs text-blue-600 font-medium">Người lớn (ADULT)</div>
-          <div className="text-2xl font-bold text-blue-700 mt-1">{countAdult}</div>
-        </div>
+      {/* KPI Overview Strip (Real Database Metrics) */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard
+          title="Tổng hồ sơ"
+          value={stats ? stats.totalStudents : totalElements}
+          icon={Users}
+          subtitle="Hồ sơ được lưu trữ"
+          loading={statsLoading && loading}
+        />
+        <StatCard
+          title="Đang theo học"
+          value={stats ? stats.activeStudents : 0}
+          icon={UserCheck}
+          subtitle="Trạng thái ACTIVE"
+          badge={<Badge variant="success">Hoạt động</Badge>}
+          loading={statsLoading}
+        />
+        <StatCard
+          title="Đã xếp lớp"
+          value={stats ? stats.enrolledStudents : 0}
+          icon={GraduationCap}
+          subtitle="Có lịch học đang diễn ra"
+          badge={<Badge variant="info">Đang học</Badge>}
+          loading={statsLoading}
+        />
+        <StatCard
+          title="Phân loại lứa tuổi"
+          value={stats ? `${stats.kidStudents} Nhí / ${stats.adultStudents} Lớn` : '0 / 0'}
+          icon={Sparkles}
+          subtitle="KID vs ADULT thực tế"
+          loading={statsLoading}
+        />
       </div>
 
       {/* Alerts */}
       {successMsg && (
-        <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 p-4 rounded-lg flex items-center justify-between text-sm shadow-sm animate-fade-in">
-          <div className="flex items-center gap-2">
-            <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0" />
+        <div className="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 flex items-center justify-between text-sm shadow-xs animate-in fade-in">
+          <div className="flex items-center gap-2.5">
+            <CheckCircle2 size={18} className="text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
             <span>{successMsg}</span>
           </div>
-          <button onClick={() => setSuccessMsg(null)} className="text-emerald-600 hover:text-emerald-800">
-            <X className="w-4 h-4" />
+          <button onClick={() => setSuccessMsg(null)} className="text-emerald-600 hover:text-emerald-800 dark:hover:text-emerald-200">
+            <X size={16} />
           </button>
         </div>
       )}
 
       {error && (
-        <div className="bg-rose-50 border border-rose-200 text-rose-800 p-4 rounded-lg flex items-center justify-between text-sm shadow-sm">
-          <div className="flex items-center gap-2">
-            <AlertCircle className="w-5 h-5 text-rose-600 flex-shrink-0" />
+        <div className="p-4 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-300 flex items-center justify-between text-sm shadow-xs animate-in fade-in">
+          <div className="flex items-center gap-2.5">
+            <AlertCircle size={18} className="text-rose-600 dark:text-rose-400 flex-shrink-0" />
             <span>{error}</span>
           </div>
-          <button onClick={() => setError(null)} className="text-rose-600 hover:text-rose-800">
-            <X className="w-4 h-4" />
+          <button
+            onClick={() => loadStudents()}
+            className="px-3 py-1 bg-white dark:bg-[#1C293D] border border-rose-300 dark:border-rose-800 text-rose-700 dark:text-rose-300 rounded-lg text-xs font-semibold hover:bg-rose-50"
+          >
+            Thử lại
           </button>
         </div>
       )}
 
-      {/* Filters Toolbar */}
-      <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col md:flex-row gap-3">
+      {/* Search & Filters Toolbar */}
+      <div className="bg-white dark:bg-[#151F31] p-4 rounded-2xl border border-slate-200/80 dark:border-[#2A3A50] shadow-xs flex flex-col md:flex-row gap-3 items-stretch md:items-center">
+        {/* Search Input */}
         <div className="relative flex-1">
-          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+          <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
           <input
             type="text"
             placeholder="Tìm theo mã học viên, họ tên hoặc số điện thoại..."
@@ -345,481 +407,302 @@ export const StudentListPage: React.FC = () => {
               setKeyword(e.target.value)
               setPage(0)
             }}
-            className="w-full pl-9 pr-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#142B4A]"
+            className="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-200 dark:border-[#2A3A50] bg-slate-50/50 dark:bg-[#1C293D] text-sm text-[#142B4A] dark:text-[#E8EEF7] placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#142B4A] dark:focus:ring-[#38BDF8] transition-colors"
           />
         </div>
 
-        <div className="w-full md:w-48">
-          <select
-            value={selectedTargetType}
-            onChange={(e) => {
-              setSelectedTargetType(e.target.value)
-              setPage(0)
-            }}
-            className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#142B4A]"
-          >
-            <option value="">Tất cả phân loại</option>
-            <option value="KID">Trẻ em (KID)</option>
-            <option value="ADULT">Người lớn (ADULT)</option>
-          </select>
-        </div>
+        {/* Age Group Filter */}
+        <select
+          value={selectedTargetType}
+          onChange={(e) => {
+            setSelectedTargetType(e.target.value)
+            setPage(0)
+          }}
+          className="px-3 py-2 rounded-xl border border-slate-200 dark:border-[#2A3A50] bg-white dark:bg-[#1C293D] text-sm text-[#142B4A] dark:text-[#E8EEF7] focus:outline-none focus:ring-2 focus:ring-[#142B4A] dark:focus:ring-[#38BDF8]"
+        >
+          <option value="">Tất cả lứa tuổi</option>
+          <option value="KID">Trẻ em (KID)</option>
+          <option value="ADULT">Người lớn (ADULT)</option>
+        </select>
 
-        <div className="w-full md:w-44">
-          <select
-            value={selectedStatus}
-            onChange={(e) => {
-              setSelectedStatus(e.target.value)
-              setPage(0)
-            }}
-            className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#142B4A]"
+        {/* Status Filter */}
+        <select
+          value={selectedStatus}
+          onChange={(e) => {
+            setSelectedStatus(e.target.value)
+            setPage(0)
+          }}
+          className="px-3 py-2 rounded-xl border border-slate-200 dark:border-[#2A3A50] bg-white dark:bg-[#1C293D] text-sm text-[#142B4A] dark:text-[#E8EEF7] focus:outline-none focus:ring-2 focus:ring-[#142B4A] dark:focus:ring-[#38BDF8]"
+        >
+          <option value="">Tất cả trạng thái</option>
+          <option value="ACTIVE">Đang học (ACTIVE)</option>
+          <option value="INACTIVE">Tạm nghỉ (INACTIVE)</option>
+          <option value="GRADUATED">Tốt nghiệp (GRADUATED)</option>
+          <option value="DROPPED">Thôi học (DROPPED)</option>
+        </select>
+
+        {/* Reset button */}
+        {isFiltering && (
+          <button
+            onClick={handleResetFilters}
+            className="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl border border-slate-200 dark:border-[#2A3A50] bg-slate-100 dark:bg-[#1C293D] hover:bg-slate-200 text-slate-700 dark:text-[#A6B4C8] text-xs font-semibold transition-colors"
+            title="Xóa bộ lọc"
           >
-            <option value="">Tất cả trạng thái</option>
-            <option value="ACTIVE">Đang học</option>
-            <option value="INACTIVE">Tạm nghỉ</option>
-            <option value="GRADUATED">Đã tốt nghiệp</option>
-            <option value="DROPPED">Thôi học</option>
-          </select>
+            <RotateCcw size={14} />
+            <span>Đặt lại</span>
+          </button>
+        )}
+
+        {/* Result Counter */}
+        <div className="text-xs text-slate-500 dark:text-[#A6B4C8] font-medium whitespace-nowrap self-center px-1">
+          Hiển thị <span className="font-bold text-[#142B4A] dark:text-[#E8EEF7]">{students.length}</span> / {totalElements}
         </div>
       </div>
 
-      {/* Table */}
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse text-sm">
-            <thead>
-              <tr className="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold">
-                <th className="py-3 px-4">Mã HV</th>
-                <th className="py-3 px-4">Họ và tên</th>
-                <th className="py-3 px-4">Phân loại</th>
-                <th className="py-3 px-4">Ngày sinh & Giới tính</th>
-                <th className="py-3 px-4">Liên hệ</th>
-                <th className="py-3 px-4">Người giám hộ</th>
-                <th className="py-3 px-4 text-center">Trạng thái</th>
-                <th className="py-3 px-4 text-right">Thao tác</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {loading ? (
-                Array.from({ length: 4 }).map((_, i) => (
-                  <tr key={i} className="animate-pulse">
-                    <td className="py-4 px-4"><div className="h-4 bg-slate-200 rounded w-16"></div></td>
-                    <td className="py-4 px-4"><div className="h-4 bg-slate-200 rounded w-32"></div></td>
-                    <td className="py-4 px-4"><div className="h-4 bg-slate-200 rounded w-16"></div></td>
-                    <td className="py-4 px-4"><div className="h-4 bg-slate-200 rounded w-24"></div></td>
-                    <td className="py-4 px-4"><div className="h-4 bg-slate-200 rounded w-28"></div></td>
-                    <td className="py-4 px-4"><div className="h-4 bg-slate-200 rounded w-32"></div></td>
-                    <td className="py-4 px-4 text-center"><div className="h-4 bg-slate-200 rounded-full w-16 mx-auto"></div></td>
-                    <td className="py-4 px-4 text-right"><div className="h-4 bg-slate-200 rounded w-12 ml-auto"></div></td>
-                  </tr>
-                ))
-              ) : students.length === 0 ? (
-                <tr>
-                  <td colSpan={8} className="py-12 text-center text-slate-500">
-                    <div className="flex flex-col items-center justify-center">
-                      <Users className="w-12 h-12 text-slate-300 mb-2" />
-                      <p className="font-medium text-slate-700">Chưa có học viên nào phù hợp</p>
-                      <p className="text-xs text-slate-400 mt-1">Thử thay đổi từ khóa hoặc bộ lọc tìm kiếm.</p>
-                    </div>
-                  </td>
+      {/* Main Content: Table or Loading */}
+      {loading ? (
+        <TableSkeleton rows={6} columns={7} />
+      ) : students.length === 0 ? (
+        <EmptyState
+          title={isFiltering ? 'Không tìm thấy kết quả phù hợp' : 'Chưa có học viên nào'}
+          description={
+            isFiltering
+              ? 'Không có hồ sơ học viên nào khớp với điều kiện tìm kiếm hoặc bộ lọc hiện tại.'
+              : 'Trung tâm chưa ghi nhận học viên nào. Hãy bấm "Thêm học viên mới" để khởi tạo hồ sơ đầu tiên.'
+          }
+          action={
+            isFiltering
+              ? { label: 'Xóa bộ lọc', onClick: handleResetFilters, icon: RotateCcw }
+              : { label: 'Thêm học viên mới', onClick: openCreateModal, icon: Plus }
+          }
+        />
+      ) : (
+        <div className="bg-white dark:bg-[#151F31] rounded-2xl border border-slate-200/80 dark:border-[#2A3A50] shadow-xs overflow-hidden">
+          {/* Desktop Table View */}
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse text-table">
+              <thead>
+                <tr className="bg-slate-50/80 dark:bg-[#1C293D] border-b border-slate-200 dark:border-[#2A3A50] text-xs font-semibold text-slate-500 dark:text-[#A6B4C8] uppercase tracking-wider">
+                  <th className="py-3.5 px-4">Học viên</th>
+                  <th className="py-3.5 px-4">Độ tuổi & Giới tính</th>
+                  <th className="py-3.5 px-4">Thông tin Liên hệ</th>
+                  <th className="py-3.5 px-4">Người giám hộ</th>
+                  <th className="py-3.5 px-4">Trạng thái</th>
+                  <th className="py-3.5 px-4 text-right">Thao tác</th>
                 </tr>
-              ) : (
-                students.map((s) => (
-                  <tr key={s.id} className="hover:bg-slate-50/80 transition-colors">
-                    <td className="py-3.5 px-4 font-mono font-semibold text-[#142B4A]">
-                      {s.studentCode}
-                    </td>
-                    <td className="py-3.5 px-4">
-                      <div className="font-medium text-slate-900">{s.fullName}</div>
-                    </td>
-                    <td className="py-3.5 px-4">
-                      {s.targetType === 'KID' ? (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800">
-                          <Shield className="w-3 h-3" />
-                          Trẻ em
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-100 text-slate-700">
-                          Người lớn
-                        </span>
-                      )}
-                    </td>
-                    <td className="py-3.5 px-4 text-slate-600">
-                      <div>{s.dateOfBirth || '—'}</div>
-                      <div className="text-xs text-slate-400">{getGenderLabel(s.gender)}</div>
-                    </td>
-                    <td className="py-3.5 px-4 text-slate-600">
-                      {s.phone && (
-                        <div className="flex items-center gap-1 text-xs">
-                          <Phone className="w-3 h-3 text-slate-400" />
-                          {s.phone}
-                        </div>
-                      )}
-                      {s.email && (
-                        <div className="flex items-center gap-1 text-xs text-slate-400">
-                          <Mail className="w-3 h-3" />
-                          {s.email}
-                        </div>
-                      )}
-                      {!s.phone && !s.email && <span className="text-xs text-slate-400">Qua người giám hộ</span>}
-                    </td>
-                    <td className="py-3.5 px-4">
-                      {s.guardians && s.guardians.length > 0 ? (
-                        <div>
-                          <div className="font-medium text-xs text-slate-900">
-                            {s.guardians[0].fullName}{' '}
-                            <span className="text-slate-400 font-normal">
-                              ({getRelationshipLabel(s.guardians[0].relationshipType)})
-                            </span>
+              </thead>
+              <tbody className="divide-y divide-slate-100 dark:divide-[#2A3A50]/60">
+                {students.map((student) => {
+                  const guardian = student.guardians && student.guardians.length > 0 ? student.guardians[0] : null
+                  return (
+                    <tr
+                      key={student.id}
+                      className="hover:bg-slate-50/60 dark:hover:bg-[#1C293D]/40 transition-colors"
+                    >
+                      {/* Name & Code */}
+                      <td className="py-3.5 px-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#142B4A] to-[#1D4168] dark:from-[#38BDF8] dark:to-[#0284C7] text-white dark:text-[#0B1220] font-bold text-xs flex items-center justify-center flex-shrink-0 shadow-xs">
+                            {student.fullName.charAt(0)}
                           </div>
-                          <div className="text-xs text-slate-500 font-mono">{s.guardians[0].phone}</div>
+                          <div>
+                            <div className="font-bold text-[#142B4A] dark:text-[#E8EEF7] leading-tight">
+                              {student.fullName}
+                            </div>
+                            <div className="text-xs text-slate-500 dark:text-[#A6B4C8] font-mono mt-0.5">
+                              {student.studentCode}
+                            </div>
+                          </div>
                         </div>
-                      ) : (
-                        <span className="text-xs text-slate-400">Chưa liên kết</span>
-                      )}
-                    </td>
-                    <td className="py-3.5 px-4 text-center">
-                      {getStatusBadge(s.status)}
-                    </td>
-                    <td className="py-3.5 px-4 text-right">
-                      <div className="inline-flex items-center gap-2">
-                        <button
-                          onClick={() => setDetailStudent(s)}
-                          className="p-1.5 text-slate-600 hover:text-[#142B4A] hover:bg-slate-100 rounded transition-colors"
-                          title="Xem chi tiết hồ sơ"
-                        >
-                          <UserCheck className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => openEditModal(s)}
-                          className="p-1.5 text-slate-600 hover:text-[#142B4A] hover:bg-slate-100 rounded transition-colors"
-                          title="Chỉnh sửa hồ sơ"
-                        >
-                          <Edit2 className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => openStatusModal(s)}
-                          className="p-1.5 text-slate-600 hover:text-amber-600 hover:bg-slate-100 rounded transition-colors"
-                          title="Đổi trạng thái"
-                        >
-                          <RefreshCw className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+                      </td>
 
-        {/* Pagination Footer */}
-        <div className="p-4 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3 text-sm text-slate-600">
-          <div>
-            Hiển thị <span className="font-medium text-slate-900">{students.length}</span> trên tổng số{' '}
-            <span className="font-medium text-slate-900">{totalElements}</span> học viên
+                      {/* TargetType & Gender */}
+                      <td className="py-3.5 px-4">
+                        <div className="space-y-1">
+                          {renderTargetTypeBadge(student.targetType)}
+                          <div className="text-xs text-slate-500 dark:text-[#A6B4C8]">
+                            {student.dateOfBirth ? (
+                              <span>{student.dateOfBirth} • {getGenderLabel(student.gender)}</span>
+                            ) : (
+                              <span>{getGenderLabel(student.gender)}</span>
+                            )}
+                          </div>
+                        </div>
+                      </td>
+
+                      {/* Contact Phone & Email */}
+                      <td className="py-3.5 px-4">
+                        <div className="space-y-1 text-xs">
+                          {student.phone ? (
+                            <a
+                              href={`tel:${student.phone}`}
+                              className="flex items-center gap-1.5 text-slate-700 dark:text-[#E8EEF7] hover:text-[#3977B8] dark:hover:text-[#38BDF8]"
+                            >
+                              <Phone size={13} className="text-slate-400" />
+                              <span>{student.phone}</span>
+                            </a>
+                          ) : (
+                            <span className="text-slate-400 italic">Chưa có SĐT</span>
+                          )}
+                          {student.email && (
+                            <a
+                              href={`mailto:${student.email}`}
+                              className="flex items-center gap-1.5 text-slate-500 dark:text-[#A6B4C8] hover:text-[#3977B8] dark:hover:text-[#38BDF8] truncate max-w-[180px]"
+                            >
+                              <Mail size={13} className="text-slate-400 flex-shrink-0" />
+                              <span className="truncate">{student.email}</span>
+                            </a>
+                          )}
+                        </div>
+                      </td>
+
+                      {/* Guardian */}
+                      <td className="py-3.5 px-4">
+                        {guardian ? (
+                          <div className="space-y-0.5 text-xs">
+                            <div className="font-semibold text-slate-800 dark:text-[#E8EEF7] flex items-center gap-1.5">
+                              <Shield size={13} className="text-indigo-500" />
+                              <span>{guardian.fullName}</span>
+                              <span className="text-[11px] px-1.5 py-0.2 rounded bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 font-normal">
+                                {getRelationshipLabel(guardian.relationshipType)}
+                              </span>
+                            </div>
+                            <div className="text-slate-500 dark:text-[#A6B4C8] pl-5 font-mono">
+                              {guardian.phone}
+                            </div>
+                          </div>
+                        ) : (
+                          <span className="text-xs text-slate-400 italic">Không có người giám hộ</span>
+                        )}
+                      </td>
+
+                      {/* Status */}
+                      <td className="py-3.5 px-4">
+                        {renderStatusBadge(student.status)}
+                      </td>
+
+                      {/* Actions */}
+                      <td className="py-3.5 px-4 text-right">
+                        <div className="inline-flex items-center gap-1">
+                          <button
+                            onClick={() => setDetailStudent(student)}
+                            className="p-1.5 rounded-lg text-slate-500 dark:text-slate-400 hover:text-[#142B4A] dark:hover:text-[#38BDF8] hover:bg-slate-100 dark:hover:bg-[#1C293D] transition-colors"
+                            title="Xem chi tiết hồ sơ"
+                          >
+                            <Eye size={16} />
+                          </button>
+                          <button
+                            onClick={() => openEditModal(student)}
+                            className="p-1.5 rounded-lg text-slate-500 dark:text-slate-400 hover:text-[#142B4A] dark:hover:text-[#38BDF8] hover:bg-slate-100 dark:hover:bg-[#1C293D] transition-colors"
+                            title="Chỉnh sửa hồ sơ"
+                          >
+                            <Edit2 size={16} />
+                          </button>
+                          <button
+                            onClick={() => openStatusModal(student)}
+                            className="p-1.5 rounded-lg text-slate-500 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-slate-100 dark:hover:bg-[#1C293D] transition-colors"
+                            title="Thay đổi trạng thái"
+                          >
+                            <UserCheck size={16} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
           </div>
 
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setPage(prev => Math.max(0, prev - 1))}
-              disabled={page === 0 || loading}
-              className="px-3 py-1.5 border border-slate-300 rounded-lg text-slate-700 hover:bg-slate-50 disabled:opacity-50 disabled:pointer-events-none flex items-center gap-1"
-            >
-              <ChevronLeft className="w-4 h-4" />
-              Trước
-            </button>
-            <span className="text-xs text-slate-500">
-              Trang {page + 1} / {totalPages || 1}
-            </span>
-            <button
-              onClick={() => setPage(prev => Math.min(totalPages - 1, prev + 1))}
-              disabled={page >= totalPages - 1 || loading}
-              className="px-3 py-1.5 border border-slate-300 rounded-lg text-slate-700 hover:bg-slate-50 disabled:opacity-50 disabled:pointer-events-none flex items-center gap-1"
-            >
-              Sau
-              <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Create / Edit Student Modal */}
-      {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden border border-slate-200 max-h-[90vh] flex flex-col">
-            <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
-              <h2 className="text-lg font-bold text-[#142B4A]">
-                {editingStudent ? 'Chỉnh sửa Hồ sơ Học viên' : 'Thêm Hồ sơ Học viên Mới'}
-              </h2>
+          {/* Pagination Toolbar */}
+          <div className="px-4 py-3.5 bg-slate-50/50 dark:bg-[#1C293D]/50 border-t border-slate-200 dark:border-[#2A3A50] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-600 dark:text-[#A6B4C8]">
+            <div>
+              Trang <span className="font-bold text-[#142B4A] dark:text-[#E8EEF7]">{page + 1}</span> / {totalPages} (Tổng số {totalElements} bản ghi)
+            </div>
+            <div className="flex items-center gap-1.5">
               <button
-                onClick={() => setIsModalOpen(false)}
-                className="text-slate-400 hover:text-slate-600 transition-colors"
+                onClick={() => setPage(Math.max(0, page - 1))}
+                disabled={page === 0}
+                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-[#2A3A50] bg-white dark:bg-[#151F31] disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-100 dark:hover:bg-[#1C293D] font-medium transition-colors"
               >
-                <X className="w-5 h-5" />
+                <ChevronLeft size={14} />
+                <span>Trước</span>
+              </button>
+              <button
+                onClick={() => setPage(Math.min(totalPages - 1, page + 1))}
+                disabled={page >= totalPages - 1}
+                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-[#2A3A50] bg-white dark:bg-[#151F31] disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-100 dark:hover:bg-[#1C293D] font-medium transition-colors"
+              >
+                <span>Sau</span>
+                <ChevronRight size={14} />
               </button>
             </div>
-
-            <form onSubmit={handleFormSubmit} className="p-6 overflow-y-auto space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Mã học viên <span className="text-rose-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="VD: HV20240001"
-                    value={formData.studentCode}
-                    onChange={(e) => setFormData({ ...formData, studentCode: e.target.value.toUpperCase() })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm font-mono uppercase focus:ring-2 focus:ring-[#142B4A] focus:outline-none"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Họ và tên học viên <span className="text-rose-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="VD: Nguyễn Văn An"
-                    value={formData.fullName}
-                    onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-[#142B4A] focus:outline-none"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Phân loại đối tượng <span className="text-rose-500">*</span>
-                  </label>
-                  <select
-                    value={formData.targetType}
-                    onChange={(e) => setFormData({ ...formData, targetType: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-[#142B4A]"
-                  >
-                    <option value="ADULT">Người lớn (ADULT)</option>
-                    <option value="KID">Trẻ em (KID)</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Ngày sinh
-                  </label>
-                  <input
-                    type="date"
-                    value={formData.dateOfBirth || ''}
-                    onChange={(e) => setFormData({ ...formData, dateOfBirth: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-[#142B4A]"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Giới tính <span className="text-rose-500">*</span>
-                  </label>
-                  <select
-                    value={formData.gender}
-                    onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-[#142B4A]"
-                  >
-                    <option value="MALE">Nam</option>
-                    <option value="FEMALE">Nữ</option>
-                    <option value="OTHER">Khác</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Số điện thoại
-                  </label>
-                  <input
-                    type="tel"
-                    placeholder="0912345678"
-                    value={formData.phone || ''}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-[#142B4A]"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    placeholder="hocvien@email.com"
-                    value={formData.email || ''}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-[#142B4A]"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Địa chỉ cư trú
-                </label>
-                <input
-                  type="text"
-                  placeholder="Số nhà, đường, quận/huyện, tỉnh/thành..."
-                  value={formData.address || ''}
-                  onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-[#142B4A]"
-                />
-              </div>
-
-              {/* Guardian Section for KID */}
-              {formData.targetType === 'KID' && (
-                <div className="p-4 bg-purple-50/60 rounded-xl border border-purple-200 space-y-3">
-                  <div className="flex items-center gap-2 text-purple-900 font-semibold text-xs">
-                    <Shield className="w-4 h-4 text-purple-700" />
-                    Thông tin Phụ huynh / Người giám hộ (Bảo vệ trẻ em)
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                    <div className="md:col-span-2">
-                      <label className="block text-xs font-medium text-slate-700 mb-1">
-                        Chọn người giám hộ đã có:
-                      </label>
-                      <select
-                        value={selectedGuardianId}
-                        onChange={(e) => setSelectedGuardianId(Number(e.target.value))}
-                        className="w-full px-3 py-1.5 border border-slate-300 rounded-lg text-xs bg-white focus:ring-2 focus:ring-[#142B4A]"
-                      >
-                        <option value={0}>-- Chọn người giám hộ từ danh bạ --</option>
-                        {guardians.map((g) => (
-                          <option key={g.id} value={g.id}>
-                            {g.fullName} - {g.phone} ({g.guardianCode})
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-medium text-slate-700 mb-1">
-                        Mối quan hệ:
-                      </label>
-                      <select
-                        value={selectedRelation}
-                        onChange={(e) => setSelectedRelation(e.target.value)}
-                        className="w-full px-3 py-1.5 border border-slate-300 rounded-lg text-xs bg-white focus:ring-2 focus:ring-[#142B4A]"
-                      >
-                        <option value="FATHER">Bố (FATHER)</option>
-                        <option value="MOTHER">Mẹ (MOTHER)</option>
-                        <option value="GUARDIAN">Người giám hộ</option>
-                        <option value="OTHER">Khác</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2 pt-1">
-                    <input
-                      type="checkbox"
-                      id="primaryContact"
-                      checked={isPrimaryContact}
-                      onChange={(e) => setIsPrimaryContact(e.target.checked)}
-                      className="w-3.5 h-3.5 text-[#142B4A] rounded"
-                    />
-                    <label htmlFor="primaryContact" className="text-xs text-slate-700 cursor-pointer">
-                      Đánh dấu là người liên hệ chính khi trung tâm thông báo lịch học & tài chính
-                    </label>
-                  </div>
-                </div>
-              )}
-
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Ghi chú nội bộ
-                </label>
-                <textarea
-                  rows={2}
-                  placeholder="Ghi chú về thói quen học tập, lưu ý sức khỏe hoặc yêu cầu phụ huynh..."
-                  value={formData.internalNotes || ''}
-                  onChange={(e) => setFormData({ ...formData, internalNotes: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-[#142B4A]"
-                />
-              </div>
-
-              <div className="pt-4 border-t border-slate-200 flex justify-end gap-3">
-                <button
-                  type="button"
-                  onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 border border-slate-300 rounded-lg text-slate-700 hover:bg-slate-50 text-sm font-medium"
-                >
-                  Hủy
-                </button>
-                <button
-                  type="submit"
-                  disabled={formSubmitting}
-                  className="px-5 py-2 bg-[#142B4A] hover:bg-[#1a3860] text-white rounded-lg text-sm font-medium disabled:opacity-50"
-                >
-                  {formSubmitting ? 'Đang lưu...' : editingStudent ? 'Lưu thay đổi' : 'Tạo hồ sơ'}
-                </button>
-              </div>
-            </form>
           </div>
         </div>
       )}
 
-      {/* Detail Drawer Modal */}
+      {/* Student Detail Modal / Drawer */}
       {detailStudent && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden border border-slate-200 p-6 space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-200">
-              <h3 className="text-lg font-bold text-[#142B4A]">Chi tiết Hồ sơ Học viên</h3>
-              <button onClick={() => setDetailStudent(null)} className="text-slate-400 hover:text-slate-600">
-                <X className="w-5 h-5" />
-              </button>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="bg-white dark:bg-[#151F31] rounded-2xl border border-slate-200 dark:border-[#2A3A50] max-w-lg w-full p-6 shadow-2xl relative">
+            <button
+              onClick={() => setDetailStudent(null)}
+              className="absolute top-4 right-4 p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-[#1C293D]"
+            >
+              <X size={18} />
+            </button>
+
+            <div className="flex items-center gap-3.5 mb-5">
+              <div className="w-12 h-12 rounded-2xl bg-[#142B4A] dark:bg-[#38BDF8] text-white dark:text-[#0B1220] font-bold text-lg flex items-center justify-center shadow-md">
+                {detailStudent.fullName.charAt(0)}
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-[#142B4A] dark:text-[#E8EEF7]">{detailStudent.fullName}</h3>
+                <div className="text-xs text-slate-500 dark:text-[#A6B4C8] font-mono">{detailStudent.studentCode}</div>
+              </div>
             </div>
 
-            <div className="space-y-3 text-sm">
-              <div className="flex justify-between py-1 border-b border-slate-100">
-                <span className="text-slate-500">Mã học viên:</span>
-                <span className="font-mono font-bold text-[#142B4A]">{detailStudent.studentCode}</span>
+            <div className="space-y-3.5 text-xs border-t border-b border-slate-100 dark:border-[#2A3A50] py-4">
+              <div className="flex justify-between py-1 border-b border-slate-50 dark:border-[#2A3A50]/40">
+                <span className="text-slate-500 dark:text-[#A6B4C8]">Trạng thái hồ sơ:</span>
+                <span>{renderStatusBadge(detailStudent.status)}</span>
               </div>
-              <div className="flex justify-between py-1 border-b border-slate-100">
-                <span className="text-slate-500">Họ và tên:</span>
-                <span className="font-semibold text-slate-900">{detailStudent.fullName}</span>
+              <div className="flex justify-between py-1 border-b border-slate-50 dark:border-[#2A3A50]/40">
+                <span className="text-slate-500 dark:text-[#A6B4C8]">Nhóm đối tượng:</span>
+                <span>{renderTargetTypeBadge(detailStudent.targetType)}</span>
               </div>
-              <div className="flex justify-between py-1 border-b border-slate-100">
-                <span className="text-slate-500">Phân loại:</span>
-                <span className="font-medium text-slate-800">{detailStudent.targetType === 'KID' ? 'Trẻ em' : 'Người lớn'}</span>
+              <div className="flex justify-between py-1 border-b border-slate-50 dark:border-[#2A3A50]/40">
+                <span className="text-slate-500 dark:text-[#A6B4C8]">Giới tính & Ngày sinh:</span>
+                <span className="font-semibold text-slate-800 dark:text-[#E8EEF7]">
+                  {getGenderLabel(detailStudent.gender)} • {detailStudent.dateOfBirth || 'Chưa cập nhật'}
+                </span>
               </div>
-              <div className="flex justify-between py-1 border-b border-slate-100">
-                <span className="text-slate-500">Ngày sinh:</span>
-                <span className="text-slate-800">{detailStudent.dateOfBirth || 'Chưa cập nhật'}</span>
+              <div className="flex justify-between py-1 border-b border-slate-50 dark:border-[#2A3A50]/40">
+                <span className="text-slate-500 dark:text-[#A6B4C8]">Số điện thoại:</span>
+                <span className="font-semibold text-slate-800 dark:text-[#E8EEF7]">{detailStudent.phone || 'Chưa cập nhật'}</span>
               </div>
-              <div className="flex justify-between py-1 border-b border-slate-100">
-                <span className="text-slate-500">Số điện thoại:</span>
-                <span className="font-mono text-slate-800">{detailStudent.phone || 'Chưa cập nhật'}</span>
+              <div className="flex justify-between py-1 border-b border-slate-50 dark:border-[#2A3A50]/40">
+                <span className="text-slate-500 dark:text-[#A6B4C8]">Hòm thư Email:</span>
+                <span className="font-semibold text-slate-800 dark:text-[#E8EEF7]">{detailStudent.email || 'Chưa cập nhật'}</span>
               </div>
-              <div className="flex justify-between py-1 border-b border-slate-100">
-                <span className="text-slate-500">Email:</span>
-                <span className="text-slate-800">{detailStudent.email || 'Chưa cập nhật'}</span>
+              <div className="flex justify-between py-1 border-b border-slate-50 dark:border-[#2A3A50]/40">
+                <span className="text-slate-500 dark:text-[#A6B4C8]">Địa chỉ liên hệ:</span>
+                <span className="font-semibold text-slate-800 dark:text-[#E8EEF7] text-right max-w-[260px]">{detailStudent.address || 'Chưa cập nhật'}</span>
               </div>
-              <div className="flex justify-between py-1 border-b border-slate-100">
-                <span className="text-slate-500">Trạng thái:</span>
-                <span>{getStatusBadge(detailStudent.status)}</span>
-              </div>
-
               {detailStudent.internalNotes && (
-                <div className="p-3 bg-slate-50 rounded-lg border border-slate-200 text-xs text-slate-700">
-                  <span className="font-semibold block mb-1">Ghi chú nội bộ:</span>
-                  {detailStudent.internalNotes}
+                <div className="py-1">
+                  <span className="text-slate-500 dark:text-[#A6B4C8] block mb-1">Ghi chú nội bộ:</span>
+                  <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-[#1C293D] text-slate-700 dark:text-[#E8EEF7]">
+                    {detailStudent.internalNotes}
+                  </div>
                 </div>
               )}
             </div>
 
-            <div className="flex justify-end pt-2">
+            <div className="mt-5 flex justify-end">
               <button
                 onClick={() => setDetailStudent(null)}
-                className="px-4 py-1.5 bg-[#142B4A] text-white rounded-lg text-xs font-medium hover:bg-[#1a3860]"
+                className="px-4 py-2 rounded-xl border border-slate-200 dark:border-[#2A3A50] text-sm font-semibold text-slate-700 dark:text-[#E8EEF7] hover:bg-slate-100 dark:hover:bg-[#1C293D]"
               >
                 Đóng
               </button>
@@ -828,25 +711,240 @@ export const StudentListPage: React.FC = () => {
         </div>
       )}
 
-      {/* Change Status Modal */}
-      {isStatusModalOpen && statusStudent && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm overflow-hidden border border-slate-200 p-6 space-y-4">
-            <h3 className="text-base font-bold text-[#142B4A]">
-              Cập nhật Trạng thái Học viên
+      {/* Create / Edit Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150 overflow-y-auto">
+          <div className="bg-white dark:bg-[#151F31] rounded-2xl border border-slate-200 dark:border-[#2A3A50] max-w-2xl w-full p-6 shadow-2xl relative my-8">
+            <button
+              onClick={() => setIsModalOpen(false)}
+              className="absolute top-4 right-4 p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-[#1C293D]"
+            >
+              <X size={18} />
+            </button>
+
+            <h3 className="text-lg font-bold text-[#142B4A] dark:text-[#E8EEF7] mb-1">
+              {editingStudent ? 'Cập nhật Hồ sơ Học viên' : 'Thêm Hồ sơ Học viên Mới'}
             </h3>
-            <p className="text-xs text-slate-600">
-              Học viên: <span className="font-semibold text-slate-900">{statusStudent.fullName}</span> ({statusStudent.studentCode})
+            <p className="text-xs text-slate-500 dark:text-[#A6B4C8] mb-5">
+              Điền các thông tin định danh và liên hệ của người học.
             </p>
 
-            <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">
-                Chọn trạng thái mới
+            <form onSubmit={handleFormSubmit} className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-[#E8EEF7] mb-1">
+                    Mã học viên *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    disabled={!!editingStudent}
+                    value={formData.studentCode}
+                    onChange={(e) => setFormData({ ...formData, studentCode: e.target.value })}
+                    placeholder="VD: HV20240001"
+                    className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-[#2A3A50] bg-white dark:bg-[#1C293D] text-sm text-[#142B4A] dark:text-[#E8EEF7] disabled:opacity-50"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-[#E8EEF7] mb-1">
+                    Họ và tên *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.fullName}
+                    onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                    placeholder="VD: Nguyễn Văn An"
+                    className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-[#2A3A50] bg-white dark:bg-[#1C293D] text-sm text-[#142B4A] dark:text-[#E8EEF7]"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-[#E8EEF7] mb-1">
+                    Nhóm đối tượng *
+                  </label>
+                  <select
+                    value={formData.targetType}
+                    onChange={(e) => setFormData({ ...formData, targetType: e.target.value as 'KID' | 'ADULT' })}
+                    className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-[#2A3A50] bg-white dark:bg-[#1C293D] text-sm text-[#142B4A] dark:text-[#E8EEF7]"
+                  >
+                    <option value="ADULT">Người lớn (ADULT)</option>
+                    <option value="KID">Trẻ em (KID)</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-[#E8EEF7] mb-1">
+                    Giới tính *
+                  </label>
+                  <select
+                    value={formData.gender}
+                    onChange={(e) => setFormData({ ...formData, gender: e.target.value as 'MALE' | 'FEMALE' | 'OTHER' })}
+                    className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-[#2A3A50] bg-white dark:bg-[#1C293D] text-sm text-[#142B4A] dark:text-[#E8EEF7]"
+                  >
+                    <option value="MALE">Nam</option>
+                    <option value="FEMALE">Nữ</option>
+                    <option value="OTHER">Khác</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-[#E8EEF7] mb-1">
+                    Ngày sinh
+                  </label>
+                  <input
+                    type="date"
+                    value={formData.dateOfBirth}
+                    onChange={(e) => setFormData({ ...formData, dateOfBirth: e.target.value })}
+                    className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-[#2A3A50] bg-white dark:bg-[#1C293D] text-sm text-[#142B4A] dark:text-[#E8EEF7]"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-[#E8EEF7] mb-1">
+                    Số điện thoại
+                  </label>
+                  <input
+                    type="tel"
+                    value={formData.phone}
+                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    placeholder="VD: 0988123456"
+                    className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-[#2A3A50] bg-white dark:bg-[#1C293D] text-sm text-[#142B4A] dark:text-[#E8EEF7]"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-[#E8EEF7] mb-1">
+                    Hòm thư Email
+                  </label>
+                  <input
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    placeholder="VD: hocvien@chacademy.edu.vn"
+                    className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-[#2A3A50] bg-white dark:bg-[#1C293D] text-sm text-[#142B4A] dark:text-[#E8EEF7]"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 dark:text-[#E8EEF7] mb-1">
+                  Địa chỉ thường trú
+                </label>
+                <input
+                  type="text"
+                  value={formData.address}
+                  onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                  placeholder="VD: 123 Phố Huế, Hai Bà Trưng, Hà Nội"
+                  className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-[#2A3A50] bg-white dark:bg-[#1C293D] text-sm text-[#142B4A] dark:text-[#E8EEF7]"
+                />
+              </div>
+
+              {/* Guardian Selection for KID */}
+              {formData.targetType === 'KID' && (
+                <div className="p-4 rounded-xl border border-indigo-100 dark:border-indigo-900/60 bg-indigo-50/50 dark:bg-indigo-950/20 space-y-3">
+                  <div className="text-xs font-bold text-indigo-900 dark:text-indigo-300 flex items-center gap-2">
+                    <Shield size={15} />
+                    <span>Liên kết Người giám hộ (Phụ huynh)</span>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-[11px] font-semibold text-slate-600 dark:text-slate-300 mb-1">
+                        Chọn phụ huynh đã có
+                      </label>
+                      <select
+                        value={selectedGuardianId}
+                        onChange={(e) => setSelectedGuardianId(Number(e.target.value))}
+                        className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-[#2A3A50] bg-white dark:bg-[#1C293D] text-xs text-[#142B4A] dark:text-[#E8EEF7]"
+                      >
+                        <option value="0">-- Chưa chọn phụ huynh --</option>
+                        {guardians.map((g) => (
+                          <option key={g.id} value={g.id}>
+                            {g.fullName} ({g.phone})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-semibold text-slate-600 dark:text-slate-300 mb-1">
+                        Mối quan hệ
+                      </label>
+                      <select
+                        value={selectedRelation}
+                        onChange={(e) => setSelectedRelation(e.target.value)}
+                        className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-[#2A3A50] bg-white dark:bg-[#1C293D] text-xs text-[#142B4A] dark:text-[#E8EEF7]"
+                      >
+                        <option value="FATHER">Bố</option>
+                        <option value="MOTHER">Mẹ</option>
+                        <option value="GUARDIAN">Người giám hộ</option>
+                        <option value="OTHER">Người thân khác</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 dark:text-[#E8EEF7] mb-1">
+                  Ghi chú nội bộ
+                </label>
+                <textarea
+                  rows={2}
+                  value={formData.internalNotes}
+                  onChange={(e) => setFormData({ ...formData, internalNotes: e.target.value })}
+                  placeholder="Ghi chú về học lực, nhu cầu đặc biệt..."
+                  className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-[#2A3A50] bg-white dark:bg-[#1C293D] text-sm text-[#142B4A] dark:text-[#E8EEF7]"
+                />
+              </div>
+
+              <div className="pt-3 border-t border-slate-100 dark:border-[#2A3A50] flex items-center justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => setIsModalOpen(false)}
+                  className="px-4 py-2 rounded-xl border border-slate-200 dark:border-[#2A3A50] text-sm font-semibold text-slate-700 dark:text-[#E8EEF7] hover:bg-slate-100 dark:hover:bg-[#1C293D]"
+                >
+                  Hủy bỏ
+                </button>
+                <button
+                  type="submit"
+                  disabled={formSubmitting}
+                  className="px-5 py-2 rounded-xl bg-[#142B4A] dark:bg-[#38BDF8] text-white dark:text-[#0B1220] text-sm font-semibold hover:bg-[#1D4168] dark:hover:bg-[#0284C7] shadow-sm disabled:opacity-50"
+                >
+                  {formSubmitting ? 'Đang lưu...' : editingStudent ? 'Lưu cập nhật' : 'Tạo mới'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Status Modal */}
+      {isStatusModalOpen && statusStudent && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="bg-white dark:bg-[#151F31] rounded-2xl border border-slate-200 dark:border-[#2A3A50] max-w-md w-full p-6 shadow-2xl relative">
+            <button
+              onClick={() => setIsStatusModalOpen(false)}
+              className="absolute top-4 right-4 p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-[#1C293D]"
+            >
+              <X size={18} />
+            </button>
+
+            <h3 className="text-base font-bold text-[#142B4A] dark:text-[#E8EEF7] mb-1">
+              Đổi trạng thái học viên
+            </h3>
+            <p className="text-xs text-slate-500 dark:text-[#A6B4C8] mb-4">
+              Cập nhật trạng thái học tập của học viên <span className="font-bold text-[#142B4A] dark:text-[#E8EEF7]">{statusStudent.fullName}</span> ({statusStudent.studentCode}).
+            </p>
+
+            <div className="space-y-3 mb-5">
+              <label className="block text-xs font-semibold text-slate-700 dark:text-[#E8EEF7]">
+                Chọn trạng thái mới:
               </label>
               <select
                 value={newStatus}
                 onChange={(e) => setNewStatus(e.target.value)}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-[#142B4A] focus:outline-none"
+                className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-[#2A3A50] bg-white dark:bg-[#1C293D] text-sm text-[#142B4A] dark:text-[#E8EEF7]"
               >
                 <option value="ACTIVE">Đang học (ACTIVE)</option>
                 <option value="INACTIVE">Tạm nghỉ (INACTIVE)</option>
@@ -855,20 +953,20 @@ export const StudentListPage: React.FC = () => {
               </select>
             </div>
 
-            <div className="flex justify-end gap-2 pt-2">
+            <div className="flex items-center justify-end gap-2.5">
               <button
                 type="button"
                 onClick={() => setIsStatusModalOpen(false)}
-                className="px-3 py-1.5 border border-slate-300 rounded-lg text-slate-700 hover:bg-slate-50 text-xs font-medium"
+                className="px-4 py-2 rounded-xl border border-slate-200 dark:border-[#2A3A50] text-xs font-semibold text-slate-700 dark:text-[#E8EEF7] hover:bg-slate-100 dark:hover:bg-[#1C293D]"
               >
-                Đóng
+                Hủy
               </button>
               <button
                 type="button"
                 onClick={handleStatusSubmit}
-                className="px-4 py-1.5 bg-[#142B4A] hover:bg-[#1a3860] text-white rounded-lg text-xs font-medium"
+                className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-xs"
               >
-                Cập nhật
+                Cập nhật trạng thái
               </button>
             </div>
           </div>

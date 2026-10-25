@@ -86,6 +86,19 @@ class StudentControllerTest {
     }
 
     @Test
+    @DisplayName("GET /api/v1/students/stats - Lấy thống kê tổng quan học viên thành công")
+    @WithMockUser(username = "admin", roles = {"SUPER_ADMIN"})
+    void getStudentStats_Success() throws Exception {
+        mockMvc.perform(get("/api/v1/students/stats")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.totalStudents", greaterThanOrEqualTo(1)))
+                .andExpect(jsonPath("$.data.activeStudents", greaterThanOrEqualTo(1)))
+                .andExpect(jsonPath("$.data.kidStudents", greaterThanOrEqualTo(1)));
+    }
+
+    @Test
     @DisplayName("POST /api/v1/students - Tạo mới học viên và liên kết người giám hộ thành công")
     @WithMockUser(username = "admin", roles = {"SUPER_ADMIN"})
     void createStudent_Success() throws Exception {

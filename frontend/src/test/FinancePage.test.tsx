@@ -134,7 +134,7 @@ describe('FinancePage Component', () => {
     await waitFor(() => {
       expect(screen.getByText('REC20240001')).toBeInTheDocument()
       expect(screen.getByText('Trần Minh Khôi')).toBeInTheDocument()
-      expect(screen.getByText('Nộp một phần')).toBeInTheDocument()
+      expect(screen.getAllByText('Nộp một phần').length).toBeGreaterThanOrEqual(1)
     })
   })
 

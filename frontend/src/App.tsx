@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { ThemeProvider } from './context/ThemeContext'
 import { AuthProvider } from './context/AuthContext'
 import { ProtectedRoute } from './components/auth/ProtectedRoute'
 import { LandingPage } from './pages/public/LandingPage'
@@ -17,40 +18,44 @@ import { LeadListPage } from './pages/admin/leads/LeadListPage'
 import { ClassListPage } from './pages/admin/classes/ClassListPage'
 import { AttendancePage } from './pages/admin/attendance/AttendancePage'
 import { FinancePage } from './pages/admin/finance/FinancePage'
+import { SettingsPage } from './pages/admin/settings/SettingsPage'
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <AuthProvider>
-        <Routes>
-          {/* Public Website */}
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/courses" element={<CoursesPublicPage />} />
-          <Route path="/about" element={<AboutPage />} />
-          <Route path="/contact" element={<ContactPage />} />
-          <Route path="/terms" element={<TermsPage />} />
-          <Route path="/privacy" element={<PrivacyPage />} />
-          <Route path="/login" element={<LoginPage />} />
+    <ThemeProvider>
+      <BrowserRouter>
+        <AuthProvider>
+          <Routes>
+            {/* Public Website */}
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/courses" element={<CoursesPublicPage />} />
+            <Route path="/about" element={<AboutPage />} />
+            <Route path="/contact" element={<ContactPage />} />
+            <Route path="/terms" element={<TermsPage />} />
+            <Route path="/privacy" element={<PrivacyPage />} />
+            <Route path="/login" element={<LoginPage />} />
 
-          {/* Admin Portal (Protected) */}
-          <Route
-            path="/admin"
-            element={
-              <ProtectedRoute>
-                <AdminLayout />
-              </ProtectedRoute>
-            }
-          >
-            <Route index element={<DashboardPage />} />
-            <Route path="courses" element={<CourseListPage />} />
-            <Route path="classes" element={<ClassListPage />} />
-            <Route path="students" element={<StudentListPage />} />
-            <Route path="leads" element={<LeadListPage />} />
-            <Route path="attendance" element={<AttendancePage />} />
-            <Route path="finance" element={<FinancePage />} />
-          </Route>
-        </Routes>
-      </AuthProvider>
-    </BrowserRouter>
+            {/* Admin Portal (Protected) */}
+            <Route
+              path="/admin"
+              element={
+                <ProtectedRoute>
+                  <AdminLayout />
+                </ProtectedRoute>
+              }
+            >
+              <Route index element={<DashboardPage />} />
+              <Route path="courses" element={<CourseListPage />} />
+              <Route path="classes" element={<ClassListPage />} />
+              <Route path="students" element={<StudentListPage />} />
+              <Route path="leads" element={<LeadListPage />} />
+              <Route path="attendance" element={<AttendancePage />} />
+              <Route path="finance" element={<FinancePage />} />
+              <Route path="settings" element={<SettingsPage />} />
+            </Route>
+          </Routes>
+        </AuthProvider>
+      </BrowserRouter>
+    </ThemeProvider>
   )
 }

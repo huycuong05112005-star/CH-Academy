@@ -5,6 +5,16 @@ import { studentsApi } from '../api/students'
 
 vi.mock('../api/students', () => ({
   studentsApi: {
+    getStats: vi.fn().mockResolvedValue({
+      success: true,
+      data: {
+        totalStudents: 1,
+        activeStudents: 1,
+        enrolledStudents: 1,
+        kidStudents: 1,
+        adultStudents: 0
+      }
+    }),
     getAllGuardians: vi.fn(),
     searchStudents: vi.fn(),
     createStudent: vi.fn(),

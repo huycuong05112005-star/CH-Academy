@@ -3,13 +3,19 @@ import { attendanceApi } from '../../../api/attendance'
 import { classesApi } from '../../../api/classes'
 import type { ClassItem, Enrollment } from '../../../types/class'
 import type { AttendanceRecord, ClassSessionItem } from '../../../types/attendance'
+import { StatCard } from '../../../components/ui/StatCard'
+import { Badge } from '../../../components/ui/Badge'
 import {
   UserCheck,
   AlertCircle,
   CheckCircle2,
   X,
   RefreshCw,
-  Save
+  Save,
+  Users,
+  Clock,
+  Calendar,
+  AlertTriangle
 } from 'lucide-react'
 
 export const AttendancePage: React.FC = () => {
@@ -101,17 +107,20 @@ export const AttendancePage: React.FC = () => {
         })
       }
 
-      // Default remaining enrolled students to PRESENT
+      // Default to PRESENT for students without existing record
       enrolledStudents.forEach((enr) => {
         if (!initialMap[enr.studentId]) {
-          initialMap[enr.studentId] = { status: 'PRESENT', note: '' }
+          initialMap[enr.studentId] = {
+            status: 'PRESENT',
+            note: ''
+          }
         }
       })
 
       setAttendanceMap(initialMap)
     } catch (err: unknown) {
       const e = err as { message?: string }
-      setError(e.message || 'Lỗi khi tải bảng điểm danh')
+      setError(e.message || 'Lỗi khi tải dữ liệu điểm danh')
     } finally {
       setLoading(false)
     }
@@ -177,13 +186,21 @@ export const AttendancePage: React.FC = () => {
   const rate = total > 0 ? Math.round(((present + late) / total) * 100) : 0
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-in fade-in duration-200">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-slate-200 dark:border-[#2A3A50]">
         <div>
-          <h1 className="text-2xl font-bold text-[#142B4A]">Điểm danh & Chuyên cần</h1>
-          <p className="text-sm text-gray-500 mt-1">
-            Ghi nhận hiện diện từng buổi học, theo dõi tỷ lệ chuyên cần và lý do vắng/nghỉ có phép
+          <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-[#A6B4C8] uppercase tracking-wider mb-1">
+            <span>Đào tạo & Học vụ</span>
+            <span>/</span>
+            <span className="text-[#142B4A] dark:text-[#38BDF8]">Chuyên cần</span>
+          </div>
+          <h1 className="text-2xl font-bold tracking-tight text-[#142B4A] dark:text-[#E8EEF7] flex items-center gap-2.5">
+            <UserCheck className="w-7 h-7 text-[#142B4A] dark:text-[#38BDF8]" />
+            Điểm danh & Chuyên cần
+          </h1>
+          <p className="text-sm text-slate-600 dark:text-[#A6B4C8] mt-1">
+            Ghi nhận hiện diện từng buổi học, theo dõi tỷ lệ chuyên cần và lý do vắng/nghỉ có phép.
           </p>
         </div>
 
@@ -191,49 +208,49 @@ export const AttendancePage: React.FC = () => {
           <button
             onClick={handleSaveAttendance}
             disabled={saving}
-            className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#142B4A] text-white text-sm font-semibold rounded-lg hover:bg-[#1a3860] transition-colors shadow-sm disabled:opacity-50"
+            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-[#142B4A] dark:bg-[#38BDF8] hover:bg-[#1D4168] dark:hover:bg-[#0284C7] text-white dark:text-[#0B1220] rounded-xl text-sm font-semibold shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-[#3977B8] disabled:opacity-50"
           >
-            <Save className="w-4 h-4" />
-            {saving ? 'Đang lưu...' : 'Lưu kết quả điểm danh'}
+            <Save size={16} />
+            <span>{saving ? 'Đang lưu...' : 'Lưu kết quả điểm danh'}</span>
           </button>
         )}
       </div>
 
       {/* Notifications */}
       {successMsg && (
-        <div className="p-4 bg-green-50 border border-green-200 rounded-lg flex items-center justify-between text-green-800 text-sm">
-          <div className="flex items-center gap-2">
-            <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0" />
+        <div className="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 flex items-center justify-between text-sm shadow-xs animate-in fade-in">
+          <div className="flex items-center gap-2.5">
+            <CheckCircle2 size={18} className="text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
             <span>{successMsg}</span>
           </div>
-          <button onClick={() => setSuccessMsg(null)} className="text-green-600 hover:text-green-800">
-            <X className="w-4 h-4" />
+          <button onClick={() => setSuccessMsg(null)} className="text-emerald-600 hover:text-emerald-800 dark:hover:text-emerald-200">
+            <X size={16} />
           </button>
         </div>
       )}
 
       {error && (
-        <div className="p-4 bg-red-50 border border-red-200 rounded-lg flex items-center justify-between text-red-800 text-sm">
-          <div className="flex items-center gap-2">
-            <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
+        <div className="p-4 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-300 flex items-center justify-between text-sm shadow-xs animate-in fade-in">
+          <div className="flex items-center gap-2.5">
+            <AlertCircle size={18} className="text-rose-600 dark:text-rose-400 flex-shrink-0" />
             <span>{error}</span>
           </div>
-          <button onClick={() => setError(null)} className="text-red-600 hover:text-red-800">
-            <X className="w-4 h-4" />
+          <button onClick={() => setError(null)} className="text-rose-600 hover:text-rose-800 dark:hover:text-rose-200">
+            <X size={16} />
           </button>
         </div>
       )}
 
       {/* Selectors Card */}
-      <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="bg-white dark:bg-[#151F31] p-5 rounded-2xl border border-slate-200/80 dark:border-[#2A3A50] shadow-xs grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-xs font-semibold text-gray-700 mb-1.5">
+          <label className="block text-xs font-semibold text-slate-700 dark:text-[#E8EEF7] mb-1.5">
             1. Chọn Lớp học giảng dạy
           </label>
           <select
             value={selectedClassId}
             onChange={(e) => setSelectedClassId(Number(e.target.value))}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#142B4A]"
+            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#2A3A50] bg-white dark:bg-[#1C293D] text-sm text-[#142B4A] dark:text-[#E8EEF7] focus:outline-none focus:ring-2 focus:ring-[#142B4A] dark:focus:ring-[#38BDF8]"
           >
             {classes.map((cls) => (
               <option key={cls.id} value={cls.id}>
@@ -244,18 +261,18 @@ export const AttendancePage: React.FC = () => {
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-gray-700 mb-1.5">
+          <label className="block text-xs font-semibold text-slate-700 dark:text-[#E8EEF7] mb-1.5">
             2. Chọn Buổi học (Class Session)
           </label>
           {sessions.length === 0 ? (
-            <div className="text-xs text-amber-700 bg-amber-50 p-2.5 rounded border border-amber-200">
+            <div className="text-xs text-amber-800 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 p-2.5 rounded-xl border border-amber-200 dark:border-amber-800">
               Lớp này chưa có buổi học cụ thể nào được tạo trong lịch.
             </div>
           ) : (
             <select
               value={selectedSessionId}
               onChange={(e) => setSelectedSessionId(Number(e.target.value))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#142B4A]"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#2A3A50] bg-white dark:bg-[#1C293D] text-sm text-[#142B4A] dark:text-[#E8EEF7] focus:outline-none focus:ring-2 focus:ring-[#142B4A] dark:focus:ring-[#38BDF8]"
             >
               {sessions.map((sess) => (
                 <option key={sess.id} value={sess.id}>
@@ -269,181 +286,168 @@ export const AttendancePage: React.FC = () => {
 
       {/* Live Stats Overview Bar */}
       {selectedSessionId > 0 && enrolledStudents.length > 0 && (
-        <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-wrap items-center justify-between gap-4 text-xs">
-          <div className="flex items-center gap-6">
-            <div>
-              <span className="text-gray-500 block">Sĩ số lớp</span>
-              <span className="text-lg font-bold text-gray-900">{total}</span>
-            </div>
-            <div>
-              <span className="text-green-600 block font-semibold">Có mặt</span>
-              <span className="text-lg font-bold text-green-700">{present}</span>
-            </div>
-            <div>
-              <span className="text-amber-600 block font-semibold">Đi muộn</span>
-              <span className="text-lg font-bold text-amber-700">{late}</span>
-            </div>
-            <div>
-              <span className="text-purple-600 block font-semibold">Có phép</span>
-              <span className="text-lg font-bold text-purple-700">{excused}</span>
-            </div>
-            <div>
-              <span className="text-red-600 block font-semibold">Vắng mặt</span>
-              <span className="text-lg font-bold text-red-700">{absent}</span>
-            </div>
-            <div>
-              <span className="text-[#142B4A] block font-semibold">Tỷ lệ chuyên cần</span>
-              <span className="text-lg font-bold text-[#142B4A]">{rate}%</span>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => handleMarkAll('PRESENT')}
-              className="px-3 py-1.5 bg-green-50 text-green-700 hover:bg-green-100 rounded text-xs font-semibold transition-colors border border-green-200"
-            >
-              Đánh dấu tất cả có mặt
-            </button>
-            <button
-              onClick={() => handleMarkAll('ABSENT')}
-              className="px-3 py-1.5 bg-gray-50 text-gray-700 hover:bg-gray-100 rounded text-xs font-semibold transition-colors border border-gray-200"
-            >
-              Đặt lại
-            </button>
-          </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+          <StatCard title="Sĩ số lớp" value={total} icon={Users} />
+          <StatCard title="Có mặt" value={present} icon={UserCheck} badge={<Badge variant="success">Đủ</Badge>} />
+          <StatCard title="Đi muộn" value={late} icon={Clock} badge={<Badge variant="warning">Muộn</Badge>} />
+          <StatCard title="Có phép" value={excused} icon={Calendar} badge={<Badge variant="info">Phép</Badge>} />
+          <StatCard title="Vắng mặt" value={absent} icon={AlertTriangle} badge={<Badge variant="danger">Vắng</Badge>} />
+          <StatCard title="Chuyên cần" value={`${rate}%`} icon={UserCheck} />
         </div>
       )}
 
       {/* Attendance Matrix Table */}
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+      <div className="bg-white dark:bg-[#151F31] rounded-2xl border border-slate-200/80 dark:border-[#2A3A50] shadow-xs overflow-hidden">
         {loading ? (
-          <div className="p-8 text-center text-gray-500">
-            <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2 text-[#142B4A]" />
+          <div className="p-12 text-center text-slate-500 dark:text-[#A6B4C8]">
+            <RefreshCw className="w-7 h-7 animate-spin mx-auto mb-3 text-[#142B4A] dark:text-[#38BDF8]" />
             Đang tải dữ liệu điểm danh...
           </div>
         ) : enrolledStudents.length === 0 ? (
           <div className="p-12 text-center">
-            <UserCheck className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-            <h3 className="text-base font-semibold text-gray-700 mb-1">Chưa có học viên nào trong lớp</h3>
-            <p className="text-sm text-gray-500">
+            <UserCheck className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
+            <h3 className="text-base font-bold text-[#142B4A] dark:text-[#E8EEF7] mb-1">Chưa có học viên nào trong lớp</h3>
+            <p className="text-sm text-slate-500 dark:text-[#A6B4C8]">
               Vui lòng ghi danh học viên vào lớp học tại mục <strong>Lớp học & Lịch</strong> trước khi thực hiện điểm danh.
             </p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse text-sm">
-              <thead>
-                <tr className="bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  <th className="py-3 px-4 w-12 text-center">STT</th>
-                  <th className="py-3 px-4">Mã HV</th>
-                  <th className="py-3 px-4">Họ và tên học viên</th>
-                  <th className="py-3 px-4 text-center">Trạng thái điểm danh</th>
-                  <th className="py-3 px-4">Ghi chú buổi học</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {enrolledStudents.map((enr, idx) => {
-                  const currentStatus = attendanceMap[enr.studentId]?.status || 'PRESENT'
-                  const currentNote = attendanceMap[enr.studentId]?.note || ''
+          <div>
+            <div className="p-4 bg-slate-50/60 dark:bg-[#1C293D]/60 border-b border-slate-200 dark:border-[#2A3A50] flex flex-wrap items-center justify-between gap-3 text-xs">
+              <span className="font-semibold text-slate-700 dark:text-[#E8EEF7]">Danh sách học viên trong buổi</span>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => handleMarkAll('PRESENT')}
+                  className="px-3 py-1.5 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 rounded-lg text-xs font-semibold transition-colors border border-emerald-200 dark:border-emerald-800"
+                >
+                  Đánh dấu tất cả có mặt
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleMarkAll('ABSENT')}
+                  className="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 rounded-lg text-xs font-semibold transition-colors border border-slate-200 dark:border-slate-700"
+                >
+                  Đặt lại
+                </button>
+              </div>
+            </div>
 
-                  return (
-                    <tr key={enr.studentId} className="hover:bg-gray-50/80 transition-colors">
-                      <td className="py-3 px-4 text-center text-gray-400 text-xs">
-                        {idx + 1}
-                      </td>
-                      <td className="py-3 px-4 font-mono font-medium text-xs text-[#142B4A]">
-                        {enr.studentCode}
-                      </td>
-                      <td className="py-3 px-4 font-semibold text-gray-900">
-                        {enr.studentFullName}
-                      </td>
-                      <td className="py-3 px-4 text-center">
-                        <div className="inline-flex rounded-lg border border-gray-200 p-0.5 bg-gray-50 gap-1 text-xs">
-                          <button
-                            type="button"
-                            onClick={() =>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse text-table">
+                <thead>
+                  <tr className="bg-slate-50/80 dark:bg-[#1C293D] border-b border-slate-200 dark:border-[#2A3A50] text-xs font-semibold text-slate-500 dark:text-[#A6B4C8] uppercase tracking-wider">
+                    <th className="py-3.5 px-4 w-12 text-center">STT</th>
+                    <th className="py-3.5 px-4">Mã HV</th>
+                    <th className="py-3.5 px-4">Họ và tên học viên</th>
+                    <th className="py-3.5 px-4 text-center">Trạng thái điểm danh</th>
+                    <th className="py-3.5 px-4">Ghi chú buổi học</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 dark:divide-[#2A3A50]/60">
+                  {enrolledStudents.map((enr, idx) => {
+                    const currentStatus = attendanceMap[enr.studentId]?.status || 'PRESENT'
+                    const currentNote = attendanceMap[enr.studentId]?.note || ''
+
+                    return (
+                      <tr key={enr.studentId} className="hover:bg-slate-50/60 dark:hover:bg-[#1C293D]/40 transition-colors">
+                        <td className="py-3.5 px-4 text-center text-slate-400 text-xs font-mono">
+                          {idx + 1}
+                        </td>
+                        <td className="py-3.5 px-4 font-mono font-bold text-xs text-[#142B4A] dark:text-[#38BDF8]">
+                          {enr.studentCode}
+                        </td>
+                        <td className="py-3.5 px-4 font-bold text-[#142B4A] dark:text-[#E8EEF7]">
+                          {enr.studentFullName}
+                        </td>
+                        <td className="py-3.5 px-4 text-center">
+                          <div className="inline-flex rounded-xl border border-slate-200 dark:border-[#2A3A50] p-1 bg-slate-50 dark:bg-[#1C293D] gap-1 text-xs">
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setAttendanceMap({
+                                  ...attendanceMap,
+                                  [enr.studentId]: { status: 'PRESENT', note: currentNote }
+                                })
+                              }
+                              className={`px-3 py-1 rounded-lg font-semibold transition-all ${
+                                currentStatus === 'PRESENT'
+                                  ? 'bg-emerald-600 text-white shadow-xs'
+                                  : 'text-slate-600 dark:text-slate-300 hover:bg-slate-200/60 dark:hover:bg-slate-700/60'
+                              }`}
+                            >
+                              Có mặt
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setAttendanceMap({
+                                  ...attendanceMap,
+                                  [enr.studentId]: { status: 'LATE', note: currentNote }
+                                })
+                              }
+                              className={`px-3 py-1 rounded-lg font-semibold transition-all ${
+                                currentStatus === 'LATE'
+                                  ? 'bg-amber-500 text-white shadow-xs'
+                                  : 'text-slate-600 dark:text-slate-300 hover:bg-slate-200/60 dark:hover:bg-slate-700/60'
+                              }`}
+                            >
+                              Đi muộn
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setAttendanceMap({
+                                  ...attendanceMap,
+                                  [enr.studentId]: { status: 'EXCUSED', note: currentNote }
+                                })
+                              }
+                              className={`px-3 py-1 rounded-lg font-semibold transition-all ${
+                                currentStatus === 'EXCUSED'
+                                  ? 'bg-purple-600 text-white shadow-xs'
+                                  : 'text-slate-600 dark:text-slate-300 hover:bg-slate-200/60 dark:hover:bg-slate-700/60'
+                              }`}
+                            >
+                              Có phép
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setAttendanceMap({
+                                  ...attendanceMap,
+                                  [enr.studentId]: { status: 'ABSENT', note: currentNote }
+                                })
+                              }
+                              className={`px-3 py-1 rounded-lg font-semibold transition-all ${
+                                currentStatus === 'ABSENT'
+                                  ? 'bg-rose-600 text-white shadow-xs'
+                                  : 'text-slate-600 dark:text-slate-300 hover:bg-slate-200/60 dark:hover:bg-slate-700/60'
+                              }`}
+                            >
+                              Vắng mặt
+                            </button>
+                          </div>
+                        </td>
+                        <td className="py-3.5 px-4">
+                          <input
+                            type="text"
+                            placeholder="Ghi chú (đến muộn 15p, có phụ huynh xin phép)..."
+                            value={currentNote}
+                            onChange={(e) =>
                               setAttendanceMap({
                                 ...attendanceMap,
-                                [enr.studentId]: { status: 'PRESENT', note: currentNote }
+                                [enr.studentId]: { status: currentStatus, note: e.target.value }
                               })
                             }
-                            className={`px-3 py-1 rounded font-medium transition-colors ${
-                              currentStatus === 'PRESENT'
-                                ? 'bg-green-600 text-white shadow-sm'
-                                : 'text-gray-600 hover:bg-gray-200/60'
-                            }`}
-                          >
-                            Có mặt
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() =>
-                              setAttendanceMap({
-                                ...attendanceMap,
-                                [enr.studentId]: { status: 'LATE', note: currentNote }
-                              })
-                            }
-                            className={`px-3 py-1 rounded font-medium transition-colors ${
-                              currentStatus === 'LATE'
-                                ? 'bg-amber-500 text-white shadow-sm'
-                                : 'text-gray-600 hover:bg-gray-200/60'
-                            }`}
-                          >
-                            Đi muộn
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() =>
-                              setAttendanceMap({
-                                ...attendanceMap,
-                                [enr.studentId]: { status: 'EXCUSED', note: currentNote }
-                              })
-                            }
-                            className={`px-3 py-1 rounded font-medium transition-colors ${
-                              currentStatus === 'EXCUSED'
-                                ? 'bg-purple-600 text-white shadow-sm'
-                                : 'text-gray-600 hover:bg-gray-200/60'
-                            }`}
-                          >
-                            Có phép
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() =>
-                              setAttendanceMap({
-                                ...attendanceMap,
-                                [enr.studentId]: { status: 'ABSENT', note: currentNote }
-                              })
-                            }
-                            className={`px-3 py-1 rounded font-medium transition-colors ${
-                              currentStatus === 'ABSENT'
-                                ? 'bg-red-600 text-white shadow-sm'
-                                : 'text-gray-600 hover:bg-gray-200/60'
-                            }`}
-                          >
-                            Vắng mặt
-                          </button>
-                        </div>
-                      </td>
-                      <td className="py-3 px-4">
-                        <input
-                          type="text"
-                          placeholder="Ghi chú (đến muộn 15p, có phụ huynh xin phép)..."
-                          value={currentNote}
-                          onChange={(e) =>
-                            setAttendanceMap({
-                              ...attendanceMap,
-                              [enr.studentId]: { status: currentStatus, note: e.target.value }
-                            })
-                          }
-                          className="w-full px-2.5 py-1 text-xs border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#142B4A] bg-white"
-                        />
-                      </td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
+                            className="w-full px-3 py-1.5 text-xs rounded-lg border border-slate-200 dark:border-[#2A3A50] bg-white dark:bg-[#1C293D] text-[#142B4A] dark:text-[#E8EEF7] placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#142B4A] dark:focus:ring-[#38BDF8]"
+                          />
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
       </div>

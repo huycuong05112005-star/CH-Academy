@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import vn.chacademy.common.dto.ApiResponse;
 import vn.chacademy.student.dto.CreateStudentRequest;
 import vn.chacademy.student.dto.StudentDto;
+import vn.chacademy.student.dto.StudentStatsDto;
 import vn.chacademy.student.dto.UpdateStudentRequest;
 import vn.chacademy.student.service.StudentService;
 
@@ -24,6 +25,12 @@ import java.util.Map;
 public class StudentController {
 
     private final StudentService studentService;
+
+    @GetMapping("/stats")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'CENTER_ADMIN', 'ACADEMIC_STAFF', 'ADMISSIONS_STAFF', 'ACCOUNTANT', 'TEACHER')")
+    public ResponseEntity<ApiResponse<StudentStatsDto>> getStudentStats() {
+        return ResponseEntity.ok(ApiResponse.success(studentService.getStudentStats()));
+    }
 
     @GetMapping
     @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'CENTER_ADMIN', 'ACADEMIC_STAFF', 'ADMISSIONS_STAFF', 'ACCOUNTANT', 'TEACHER')")

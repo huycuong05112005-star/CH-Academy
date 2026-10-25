@@ -7,8 +7,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.chacademy.common.exception.BadRequestException;
 import vn.chacademy.common.exception.ResourceNotFoundException;
+import vn.chacademy.academic.repository.EnrollmentRepository;
 import vn.chacademy.student.dto.CreateStudentRequest;
 import vn.chacademy.student.dto.StudentDto;
+import vn.chacademy.student.dto.StudentStatsDto;
 import vn.chacademy.student.dto.UpdateStudentRequest;
 import vn.chacademy.student.entity.Guardian;
 import vn.chacademy.student.entity.Student;
@@ -29,10 +31,28 @@ public class StudentService {
     private final StudentRepository studentRepository;
     private final GuardianRepository guardianRepository;
     private final StudentGuardianRepository studentGuardianRepository;
+    private final EnrollmentRepository enrollmentRepository;
 
     private static final Set<String> VALID_STATUSES = Set.of("ACTIVE", "INACTIVE", "GRADUATED", "DROPPED");
     private static final Set<String> VALID_TARGET_TYPES = Set.of("KID", "ADULT");
     private static final Set<String> VALID_GENDERS = Set.of("MALE", "FEMALE", "OTHER");
+
+    @Transactional(readOnly = true)
+    public StudentStatsDto getStudentStats() {
+        long total = studentRepository.count();
+        long active = studentRepository.countByStatus("ACTIVE");
+        long enrolled = enrollmentRepository.countDistinctActiveEnrolledStudents();
+        long kid = studentRepository.countByTargetType("KID");
+        long adult = studentRepository.countByTargetType("ADULT");
+
+        return StudentStatsDto.builder()
+                .totalStudents(total)
+                .activeStudents(active)
+                .enrolledStudents(enrolled)
+                .kidStudents(kid)
+                .adultStudents(adult)
+                .build();
+    }
 
     @Transactional(readOnly = true)
     public Page<StudentDto> searchStudents(String keyword, String status, String targetType, Pageable pageable) {

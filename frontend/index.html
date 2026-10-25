@@ -13,6 +13,22 @@
     <meta property="og:title" content="CH Academy - Hệ thống Quản lý Trung tâm Giáo dục" />
     <meta property="og:description" content="Nền tảng quản lý trung tâm giáo dục toàn diện" />
     <meta property="og:type" content="website" />
+    <!-- Immediate theme bootstrap to eliminate Flash of Unstyled Theme -->
+    <script>
+      (function() {
+        try {
+          var stored = localStorage.getItem('ch_academy_theme');
+          var systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          if (stored === 'dark' || (!stored && systemDark) || (stored === 'system' && systemDark)) {
+            document.documentElement.classList.add('dark');
+            document.documentElement.setAttribute('data-theme', 'dark');
+          } else {
+            document.documentElement.classList.remove('dark');
+            document.documentElement.setAttribute('data-theme', 'light');
+          }
+        } catch (e) {}
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

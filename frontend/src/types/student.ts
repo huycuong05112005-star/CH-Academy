@@ -64,3 +64,12 @@ export interface StudentFilterParams {
   sortBy?: string
   direction?: 'asc' | 'desc'
 }
+
+export interface StudentStats {
+  totalStudents: number
+  activeStudents: number
+  enrolledStudents: number
+  kidStudents: number
+  adultStudents: number
+}
+

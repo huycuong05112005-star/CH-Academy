@@ -1,6 +1,7 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { ThemeSwitcher } from '../components/ui/ThemeSwitcher'
 import {
   LayoutDashboard,
   BookOpen,
@@ -14,13 +15,16 @@ import {
   ChevronLeft,
   ChevronRight,
   GraduationCap,
-  Bell
+  Bell,
+  Menu,
+  X,
+  CheckCircle2
 } from 'lucide-react'
 
 interface NavItem {
   label: string
   path: string
-  icon: React.ComponentType<{ size?: number; style?: React.CSSProperties }>
+  icon: React.ComponentType<{ size?: number; style?: React.CSSProperties; className?: string }>
   end?: boolean
 }
 
@@ -31,9 +35,17 @@ interface NavGroup {
 
 export const AdminLayout: React.FC = () => {
   const [collapsed, setCollapsed] = useState(false)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [notifOpen, setNotifOpen] = useState(false)
   const { user, logout } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
+
+  // Close mobile menu on route change
+  useEffect(() => {
+    setMobileMenuOpen(false)
+    setNotifOpen(false)
+  }, [location.pathname])
 
   const handleLogout = () => {
     logout()
@@ -72,8 +84,6 @@ export const AdminLayout: React.FC = () => {
   ]
 
   const allNavItems = navGroups.flatMap(g => g.items)
-
-  // Get current section label for breadcrumb
   const currentItem = allNavItems.find((item) =>
     item.end ? location.pathname === item.path : location.pathname.startsWith(item.path)
   )
@@ -89,257 +99,202 @@ export const AdminLayout: React.FC = () => {
     }
   }
 
-  return (
-    <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#F5F7FB', color: '#18283F', fontFamily: 'Inter, -apple-system, sans-serif' }}>
-      {/* Sidebar */}
-      <aside style={{
-        width: collapsed ? '76px' : '260px',
-        backgroundColor: '#142B4A',
-        color: '#ffffff',
-        display: 'flex',
-        flexDirection: 'column',
-        transition: 'width 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
-        boxShadow: '4px 0 16px rgba(11, 24, 48, 0.08)',
-        position: 'sticky',
-        top: 0,
-        height: '100vh',
-        zIndex: 50,
-        boxSizing: 'border-box'
-      }}>
-        {/* Brand */}
-        <div style={{
-          padding: '1.25rem 1rem',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.75rem',
-          borderBottom: '1px solid rgba(255,255,255,0.08)',
-          overflow: 'hidden'
-        }}>
-          <div style={{
-            width: '40px',
-            height: '40px',
-            borderRadius: '10px',
-            backgroundColor: '#ffffff',
-            color: '#142B4A',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            flexShrink: 0,
-            boxShadow: '0 2px 6px rgba(0,0,0,0.1)'
-          }}>
+  const renderSidebarContent = () => (
+    <div className="flex flex-col h-full bg-[#142B4A] dark:bg-[#101B2D] text-white">
+      {/* Brand */}
+      <div className="h-16 px-4 flex items-center justify-between border-b border-white/10 flex-shrink-0">
+        <div className="flex items-center gap-3 overflow-hidden">
+          <div className="w-10 h-10 rounded-xl bg-white text-[#142B4A] flex items-center justify-center flex-shrink-0 shadow-sm">
             <GraduationCap size={24} />
           </div>
-          {!collapsed && (
-            <div style={{ whiteSpace: 'nowrap' }}>
-              <div style={{ fontWeight: 800, fontSize: '1.15rem', letterSpacing: '-0.02em', color: '#ffffff' }}>CH Academy</div>
-              <div style={{ fontSize: '0.7rem', color: '#94a3b8', fontWeight: 500, letterSpacing: '0.05em' }}>TRUNG TÂM ĐÀO TẠO</div>
+          {(!collapsed || mobileMenuOpen) && (
+            <div className="whitespace-nowrap">
+              <div className="font-extrabold text-lg tracking-tight text-white">CH Academy</div>
+              <div className="text-[10px] text-slate-400 font-semibold tracking-wider uppercase">Trung tâm Đào tạo</div>
             </div>
           )}
         </div>
-
-        {/* Nav Links */}
-        <nav style={{ flex: 1, padding: '1rem 0.65rem', overflowY: 'auto' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-            {navGroups.map((group, gIdx) => (
-              <div key={gIdx}>
-                {!collapsed && (
-                  <div style={{
-                    fontSize: '0.65rem',
-                    fontWeight: 700,
-                    color: '#64748B',
-                    letterSpacing: '0.08em',
-                    textTransform: 'uppercase',
-                    padding: '0 0.75rem',
-                    marginBottom: '0.4rem'
-                  }}>
-                    {group.group}
-                  </div>
-                )}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
-                  {group.items.map((item) => {
-                    const Icon = item.icon
-                    return (
-                      <NavLink
-                        key={item.path}
-                        to={item.path}
-                        end={item.end}
-                        style={({ isActive }) => ({
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '0.85rem',
-                          padding: collapsed ? '0.75rem 0' : '0.65rem 0.85rem',
-                          justifyContent: collapsed ? 'center' : 'flex-start',
-                          borderRadius: '8px',
-                          color: isActive ? '#ffffff' : '#94A3B8',
-                          backgroundColor: isActive ? 'rgba(255, 255, 255, 0.14)' : 'transparent',
-                          textDecoration: 'none',
-                          fontWeight: isActive ? 600 : 500,
-                          fontSize: '0.875rem',
-                          transition: 'all 0.15s ease',
-                          whiteSpace: 'nowrap',
-                          borderLeft: isActive ? '3px solid #38BDF8' : '3px solid transparent'
-                        })}
-                        title={collapsed ? item.label : undefined}
-                      >
-                        <Icon size={19} style={{ flexShrink: 0 }} />
-                        {!collapsed && <span>{item.label}</span>}
-                      </NavLink>
-                    )
-                  })}
-                </div>
-              </div>
-            ))}
-          </div>
-        </nav>
-
-        {/* Sidebar Footer & Toggle */}
-        <div style={{
-          padding: '0.85rem 1rem',
-          borderTop: '1px solid rgba(255,255,255,0.08)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: collapsed ? 'center' : 'space-between',
-          backgroundColor: 'rgba(11, 24, 48, 0.5)'
-        }}>
-          {!collapsed && (
-            <div style={{ display: 'flex', flexDirection: 'column' }}>
-              <span style={{ fontSize: '0.75rem', color: '#cbd5e1', fontWeight: 600 }}>CH-Academy v1.0</span>
-              <span style={{ fontSize: '0.65rem', color: '#64748b' }}>Hệ thống Quản lý Chuẩn</span>
-            </div>
-          )}
+        {mobileMenuOpen && (
           <button
-            onClick={() => setCollapsed(!collapsed)}
-            style={{
-              background: 'rgba(255,255,255,0.08)',
-              border: 'none',
-              borderRadius: '6px',
-              color: '#cbd5e1',
-              padding: '0.4rem',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              transition: 'background 0.2s'
-            }}
-            aria-label={collapsed ? 'Mở rộng menu' : 'Thu gọn menu'}
+            onClick={() => setMobileMenuOpen(false)}
+            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 lg:hidden"
+            aria-label="Đóng menu"
           >
-            {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
+            <X size={20} />
           </button>
-        </div>
+        )}
+      </div>
+
+      {/* Nav Menu */}
+      <nav className="flex-1 px-3 py-4 overflow-y-auto space-y-6">
+        {navGroups.map((group, gIdx) => (
+          <div key={gIdx}>
+            {(!collapsed || mobileMenuOpen) && (
+              <div className="text-[11px] font-bold text-slate-400 tracking-wider uppercase px-3 mb-2">
+                {group.group}
+              </div>
+            )}
+            <div className="space-y-1">
+              {group.items.map((item) => {
+                const Icon = item.icon
+                return (
+                  <NavLink
+                    key={item.path}
+                    to={item.path}
+                    end={item.end}
+                    className={({ isActive }) => `
+                      flex items-center gap-3.5 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all
+                      ${collapsed && !mobileMenuOpen ? 'justify-center px-0' : 'justify-start'}
+                      ${
+                        isActive
+                          ? 'bg-white/15 dark:bg-[#1C293D] text-white dark:text-[#38BDF8] border-l-3 border-[#38BDF8] shadow-xs'
+                          : 'text-slate-400 hover:text-white hover:bg-white/5 border-l-3 border-transparent'
+                      }
+                    `}
+                    title={collapsed && !mobileMenuOpen ? item.label : undefined}
+                  >
+                    <Icon size={19} className="flex-shrink-0" />
+                    {(!collapsed || mobileMenuOpen) && <span>{item.label}</span>}
+                  </NavLink>
+                )
+              })}
+            </div>
+          </div>
+        ))}
+      </nav>
+
+      {/* Sidebar Footer */}
+      <div className="p-3 border-t border-white/10 flex items-center justify-between bg-black/20 flex-shrink-0">
+        {(!collapsed || mobileMenuOpen) && (
+          <div className="px-2">
+            <div className="text-xs font-bold text-slate-200">CH-Academy v1.0</div>
+            <div className="text-[10px] text-slate-400">Hệ thống Quản lý Chuẩn</div>
+          </div>
+        )}
+        <button
+          onClick={() => setCollapsed(!collapsed)}
+          className="hidden lg:flex p-2 rounded-lg bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white transition-colors ml-auto"
+          aria-label={collapsed ? 'Mở rộng thanh điều hướng' : 'Thu gọn thanh điều hướng'}
+        >
+          {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
+        </button>
+      </div>
+    </div>
+  )
+
+  return (
+    <div className="flex min-h-screen bg-[var(--bg-app)] text-[var(--text-main)] transition-colors duration-200">
+      {/* Desktop Sidebar */}
+      <aside
+        className={`hidden lg:block sticky top-0 h-screen z-40 transition-all duration-200 flex-shrink-0 shadow-md ${
+          collapsed ? 'w-20' : 'w-64'
+        }`}
+      >
+        {renderSidebarContent()}
       </aside>
 
-      {/* Main Content Area */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, backgroundColor: '#F5F7FB' }}>
-        {/* Top Header */}
-        <header style={{
-          height: '64px',
-          backgroundColor: '#ffffff',
-          borderBottom: '1px solid #E2E8F0',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '0 2rem',
-          position: 'sticky',
-          top: 0,
-          zIndex: 40,
-          boxShadow: '0 1px 3px rgba(0,0,0,0.02)'
-        }}>
-          {/* Breadcrumb & Context */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem' }}>
-            <span style={{ color: '#64748B', fontWeight: 500 }}>Quản trị trung tâm</span>
-            <span style={{ color: '#CBD5E1' }}>/</span>
-            <span style={{ fontWeight: 700, color: '#142B4A' }}>{currentItem?.label || 'Bảng điều khiển'}</span>
-          </div>
+      {/* Mobile Drawer Backdrop */}
+      {mobileMenuOpen && (
+        <div
+          className="fixed inset-0 bg-black/60 z-50 lg:hidden backdrop-blur-xs transition-opacity"
+          onClick={() => setMobileMenuOpen(false)}
+        />
+      )}
 
-          {/* Right Header items */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
+      {/* Mobile Sidebar Drawer */}
+      <aside
+        className={`fixed top-0 bottom-0 left-0 w-72 z-50 lg:hidden transform transition-transform duration-300 ease-in-out shadow-2xl ${
+          mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
+      >
+        {renderSidebarContent()}
+      </aside>
+
+      {/* Main Container */}
+      <div className="flex-1 flex flex-col min-w-0">
+        {/* Top Header */}
+        <header className="h-16 sticky top-0 z-30 bg-white dark:bg-[#151F31] border-b border-slate-200 dark:border-[#2A3A50] px-4 lg:px-8 flex items-center justify-between shadow-xs transition-colors duration-200">
+          {/* Left: Mobile Toggle & Breadcrumb */}
+          <div className="flex items-center gap-3">
             <button
-              style={{
-                background: 'none',
-                border: 'none',
-                color: '#64748B',
-                cursor: 'pointer',
-                position: 'relative',
-                display: 'flex',
-                alignItems: 'center',
-                padding: '0.4rem',
-                borderRadius: '8px'
-              }}
-              aria-label="Thông báo"
+              onClick={() => setMobileMenuOpen(true)}
+              className="p-2 rounded-lg border border-slate-200 dark:border-[#2A3A50] text-slate-700 dark:text-[#E8EEF7] hover:bg-slate-100 dark:hover:bg-[#1C293D] lg:hidden"
+              aria-label="Mở menu điều hướng"
             >
-              <Bell size={19} />
-              <span style={{
-                position: 'absolute',
-                top: '4px',
-                right: '4px',
-                width: '7px',
-                height: '7px',
-                backgroundColor: '#38BDF8',
-                borderRadius: '50%'
-              }} />
+              <Menu size={20} />
             </button>
 
-            {/* User Profile */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', paddingLeft: '0.75rem', borderLeft: '1px solid #E2E8F0' }}>
-              <div style={{
-                width: '38px',
-                height: '38px',
-                borderRadius: '50%',
-                backgroundColor: '#142B4A',
-                color: '#ffffff',
-                fontWeight: 700,
-                fontSize: '0.875rem',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                boxShadow: '0 2px 4px rgba(20, 43, 74, 0.15)'
-              }}>
+            <div className="flex items-center gap-2 text-sm">
+              <span className="hidden sm:inline text-slate-500 dark:text-[#A6B4C8] font-medium">Quản trị trung tâm</span>
+              <span className="hidden sm:inline text-slate-300 dark:text-slate-600">/</span>
+              <span className="font-bold text-[#142B4A] dark:text-[#E8EEF7]">{currentItem?.label || 'Bảng điều khiển'}</span>
+            </div>
+          </div>
+
+          {/* Right: Theme Switcher, Notifications, User profile */}
+          <div className="flex items-center gap-3">
+            {/* Theme Switcher */}
+            <ThemeSwitcher />
+
+            {/* Notification Entry */}
+            <div className="relative">
+              <button
+                onClick={() => setNotifOpen(!notifOpen)}
+                className="flex items-center justify-center w-9 h-9 rounded-lg border border-slate-200 dark:border-[#2A3A50] bg-white dark:bg-[#151F31] text-slate-700 dark:text-[#E8EEF7] hover:bg-slate-50 dark:hover:bg-[#1C293D] transition-colors shadow-xs"
+                aria-label="Thông báo hệ thống"
+              >
+                <Bell size={17} />
+              </button>
+
+              {notifOpen && (
+                <div className="absolute right-0 mt-2 w-80 rounded-2xl border border-slate-200 dark:border-[#2A3A50] bg-white dark:bg-[#151F31] shadow-xl py-3 z-50 animate-in fade-in zoom-in-95 duration-150">
+                  <div className="px-4 pb-2 border-b border-slate-100 dark:border-[#2A3A50] flex items-center justify-between">
+                    <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-[#A6B4C8]">
+                      Thông báo hệ thống
+                    </span>
+                    <span className="text-[11px] text-slate-400">Thời gian thực</span>
+                  </div>
+                  <div className="p-6 text-center">
+                    <div className="w-10 h-10 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 mx-auto flex items-center justify-center mb-2">
+                      <CheckCircle2 size={22} />
+                    </div>
+                    <div className="text-sm font-semibold text-[#142B4A] dark:text-[#E8EEF7]">Mọi thứ đang ổn định</div>
+                    <p className="text-xs text-slate-500 dark:text-[#A6B4C8] mt-1">
+                      Chưa có cảnh báo hoặc công việc mới cần xử lý ngay.
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* User Profile Info */}
+            <div className="flex items-center gap-3 pl-3 border-l border-slate-200 dark:border-[#2A3A50]">
+              <div className="w-9 h-9 rounded-xl bg-[#142B4A] dark:bg-[#38BDF8] text-white dark:text-[#0B1220] font-bold text-sm flex items-center justify-center shadow-xs">
                 {user?.fullName?.charAt(0) || 'U'}
               </div>
-              <div style={{ textAlign: 'left', lineHeight: 1.25 }}>
-                <div style={{ fontSize: '0.875rem', fontWeight: 700, color: '#18283F' }}>
+              <div className="hidden md:block text-left leading-tight">
+                <div className="text-sm font-bold text-[#142B4A] dark:text-[#E8EEF7]">
                   {user?.fullName || 'Người dùng'}
                 </div>
-                <div style={{ fontSize: '0.75rem', color: '#64748B', fontWeight: 500 }}>
+                <div className="text-[11px] text-slate-500 dark:text-[#A6B4C8] font-medium">
                   {getRoleLabel(user?.roles?.[0])}
                 </div>
               </div>
 
               <button
                 onClick={handleLogout}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.35rem',
-                  marginLeft: '0.75rem',
-                  padding: '0.45rem 0.85rem',
-                  borderRadius: '8px',
-                  border: '1px solid #FEE2E2',
-                  backgroundColor: '#FEF2F2',
-                  color: '#DC2626',
-                  fontSize: '0.8rem',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  transition: 'all 0.15s ease'
-                }}
+                className="flex items-center gap-1.5 ml-1 px-3 py-1.5 rounded-lg border border-rose-200 dark:border-rose-900/60 bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/60 text-xs font-semibold transition-colors"
                 title="Đăng xuất khỏi hệ thống"
               >
                 <LogOut size={14} />
-                <span>Thoát</span>
+                <span className="hidden sm:inline">Thoát</span>
               </button>
             </div>
           </div>
         </header>
 
-        {/* Page Content: Generous, centered, comfortable layout */}
-        <main style={{
-          flex: 1,
-          padding: '2rem',
-          maxWidth: '1600px',
-          width: '100%',
-          margin: '0 auto',
-          boxSizing: 'border-box'
-        }}>
+        {/* Main Content Area */}
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-[1600px] w-full mx-auto box-border">
           <Outlet />
         </main>
       </div>
