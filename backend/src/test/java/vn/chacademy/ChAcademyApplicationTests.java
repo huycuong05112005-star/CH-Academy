@@ -18,7 +18,6 @@ class ChAcademyApplicationTests {
 
     @Test
     void contextLoads() {
-        // Nếu test này pass, Spring context nạp thành công
-        // Không cần assert gì thêm
+        // Assert context loads successfully
     }
 }

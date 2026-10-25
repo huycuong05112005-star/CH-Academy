@@ -62,6 +62,45 @@ export const studentsApi = {
     return apiClient.get<StudentPortalSummary>('/student/portal/me')
   },
 
+  getClassDetails: async (classId: number): Promise<ApiResponse<import('../types/student').StudentClassDetail>> => {
+    return apiClient.get<import('../types/student').StudentClassDetail>(`/student/portal/classes/${classId}`)
+  },
+
+  getMyNotifications: async (): Promise<ApiResponse<import('../types/notification').NotificationItem[]>> => {
+    return apiClient.get<import('../types/notification').NotificationItem[]>('/student/portal/notifications')
+  },
+
+  changePassword: async (payload: { currentPassword: string; newPassword: string }): Promise<ApiResponse<void>> => {
+    return apiClient.post<void>('/student/portal/change-password', payload)
+  },
+
+  getMySchedule: async (): Promise<ApiResponse<import('../types/student').StudentScheduleItem[]>> => {
+    return apiClient.get<import('../types/student').StudentScheduleItem[]>('/student/portal/schedule')
+  },
+
+  getMyAttendance: async (): Promise<ApiResponse<import('../types/student').StudentAttendanceItem[]>> => {
+    return apiClient.get<import('../types/student').StudentAttendanceItem[]>('/student/portal/attendance')
+  },
+
+  getMyTuition: async (): Promise<ApiResponse<{
+    totalTuition: number
+    paidTuition: number
+    remainingTuition: number
+    tuitionStatus: string
+    receivables: any[]
+    payments: any[]
+  }>> => {
+    return apiClient.get('/student/portal/tuition')
+  },
+
+  getMyProfile: async (): Promise<ApiResponse<import('../types/student').StudentProfileData>> => {
+    return apiClient.get<import('../types/student').StudentProfileData>('/student/portal/profile')
+  },
+
+  getMyCourses: async (): Promise<ApiResponse<any[]>> => {
+    return apiClient.get<any[]>('/student/portal/courses')
+  },
+
   // Guardians
   searchGuardians: async (keyword?: string, page = 0, size = 10): Promise<ApiResponse<PageResponse<Guardian>>> => {
     const query = new URLSearchParams()

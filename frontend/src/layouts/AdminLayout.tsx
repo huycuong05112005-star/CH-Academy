@@ -18,7 +18,8 @@ import {
   Bell,
   Menu,
   X,
-  CheckCircle2
+  CheckCircle2,
+  ShieldCheck
 } from 'lucide-react'
 
 interface NavItem {
@@ -64,7 +65,10 @@ export const AdminLayout: React.FC = () => {
       items: [
         { label: 'Khóa học', path: '/admin/courses', icon: BookOpen },
         { label: 'Lớp học & Lịch', path: '/admin/classes', icon: Calendar },
-        { label: 'Điểm danh', path: '/admin/attendance', icon: UserCheck },
+        { label: 'Phân công GV', path: '/admin/teacher-assignments', icon: UserCheck },
+        { label: 'Điểm danh lớp', path: '/admin/attendance', icon: UserCheck },
+        { label: 'Giám sát Điểm danh', path: '/admin/attendance-monitoring', icon: CheckCircle2 },
+        { label: 'Thông báo & GV', path: '/admin/notifications', icon: Bell },
       ]
     },
     {
@@ -78,6 +82,7 @@ export const AdminLayout: React.FC = () => {
       group: 'TÀI CHÍNH & HỆ THỐNG',
       items: [
         { label: 'Học phí & Công nợ', path: '/admin/finance', icon: CreditCard },
+        { label: 'Nhật ký Audit', path: '/admin/audit-logs', icon: ShieldCheck },
         { label: 'Cấu hình hệ thống', path: '/admin/settings', icon: Settings },
       ]
     }

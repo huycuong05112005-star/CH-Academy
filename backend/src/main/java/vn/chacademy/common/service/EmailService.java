@@ -21,6 +21,9 @@ public class EmailService {
     @Value("${spring.mail.username:noreply@chacademy.vn}")
     private String fromEmail;
 
+    @Value("${spring.mail.password:}")
+    private String mailPassword;
+
     @Value("${app.frontend.url:http://localhost:5173}")
     private String frontendUrl;
 
@@ -179,8 +182,8 @@ public class EmailService {
         log.info("Subject: {}", subject);
         log.info("============================================");
 
-        if (mailSender == null) {
-            log.info("JavaMailSender is not configured. Email simulated successfully for {}", toEmail);
+        if (mailSender == null || mailPassword == null || mailPassword.isBlank()) {
+            log.info("Chưa cấu hình Mật khẩu ứng dụng Gmail (spring.mail.password). Email thông tin tài khoản được mô phỏng an toàn cho {}", toEmail);
             return true;
         }
 

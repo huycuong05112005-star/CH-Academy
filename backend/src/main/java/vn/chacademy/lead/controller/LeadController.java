@@ -27,7 +27,7 @@ public class LeadController {
     private final UserRepository userRepository;
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'CENTER_ADMIN', 'ADMISSIONS_STAFF', 'ACADEMIC_STAFF')")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'CENTER_ADMIN', 'ADMISSIONS_STAFF', 'ACADEMIC_STAFF', 'ACCOUNTANT')")
     public ResponseEntity<ApiResponse<Page<LeadDto>>> searchLeads(
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) String status,

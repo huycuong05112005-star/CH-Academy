@@ -17,6 +17,7 @@ public class UserDto {
     private String status;
     private String avatarUrl;
     private Instant lastLoginAt;
+    private String rawPassword;
     private Set<String> roles = new HashSet<>();
     private Set<String> permissions = new HashSet<>();
 
@@ -33,6 +34,7 @@ public class UserDto {
         dto.setStatus(user.getStatus());
         dto.setAvatarUrl(user.getAvatarUrl());
         dto.setLastLoginAt(user.getLastLoginAt());
+        dto.setRawPassword(user.getRawPassword());
 
         if (user.getRoles() != null) {
             dto.setRoles(user.getRoles().stream()
@@ -121,6 +123,14 @@ public class UserDto {
 
     public void setRoles(Set<String> roles) {
         this.roles = roles;
+    }
+
+    public String getRawPassword() {
+        return rawPassword;
+    }
+
+    public void setRawPassword(String rawPassword) {
+        this.rawPassword = rawPassword;
     }
 
     public Set<String> getPermissions() {

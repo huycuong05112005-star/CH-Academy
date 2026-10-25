@@ -37,6 +37,7 @@ export interface Student {
   // Automated course, tuition & account metadata
   hasUserAccount?: boolean
   username?: string
+  rawPassword?: string
   enrolledCourseName?: string
   enrolledClassName?: string
   totalTuition?: number
@@ -140,5 +141,99 @@ export interface StudentPortalSummary {
   totalSessions: number
   presentSessions: number
   attendanceRate: number
+}
+
+export interface StudentMaterialItem {
+  id: number
+  sessionId: number
+  sessionTopic?: string
+  title: string
+  description?: string
+  materialType: 'SLIDE' | 'DOCUMENT' | 'EXERCISE' | 'VIDEO' | 'LINK' | string
+  fileUrl: string
+  uploadedById?: number
+  uploadedByName?: string
+  createdAt: string
+}
+
+export interface StudentSessionItem {
+  id: number
+  sessionDate: string
+  startTime: string
+  endTime: string
+  room?: string
+  topic?: string
+  status: string
+  attendanceStatus: 'PRESENT' | 'ABSENT' | 'LATE' | 'NOT_RECORDED' | string
+  teacherNote?: string
+  materials: StudentMaterialItem[]
+}
+
+export interface StudentClassDetail {
+  id: number
+  code: string
+  name: string
+  courseName?: string
+  teacherName?: string
+  room?: string
+  startDate: string
+  endDate?: string
+  status: string
+  sessions: StudentSessionItem[]
+}
+
+export interface StudentScheduleItem {
+  sessionId: number
+  classId: number
+  classCode: string
+  className: string
+  courseName?: string
+  teacherName?: string
+  sessionDate: string
+  startTime: string
+  endTime: string
+  room?: string
+  topic?: string
+  status: string
+  attendanceStatus: string
+  teacherNote?: string
+}
+
+export interface StudentAttendanceItem {
+  id: number
+  sessionId: number
+  classId: number
+  classCode: string
+  className: string
+  sessionDate: string
+  startTime: string
+  endTime: string
+  topic?: string
+  status: 'PRESENT' | 'ABSENT' | 'LATE' | 'EXCUSED' | string
+  note?: string
+  recordedAt: string
+}
+
+export interface StudentProfileData {
+  id: number
+  studentCode: string
+  fullName: string
+  dateOfBirth?: string
+  gender: string
+  phone?: string
+  email?: string
+  address?: string
+  targetType: string
+  status: string
+  username?: string
+  guardians: {
+    id: number
+    guardianCode: string
+    fullName: string
+    phone: string
+    email?: string
+    relationshipType: string
+    isPrimaryContact: boolean
+  }[]
 }
 

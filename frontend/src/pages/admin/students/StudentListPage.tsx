@@ -25,6 +25,7 @@ import {
   Mail,
   UserCheck,
   Eye,
+  EyeOff,
   Sparkles,
   GraduationCap,
   CreditCard,
@@ -88,6 +89,21 @@ export const StudentListPage: React.FC = () => {
   const [provisionSubmitting, setProvisionSubmitting] = useState<boolean>(false)
   const [provisionResult, setProvisionResult] = useState<AccountProvisionResponse | null>(null)
   const [copiedPassword, setCopiedPassword] = useState<boolean>(false)
+  const [showPasswordMap, setShowPasswordMap] = useState<Record<number, boolean>>({})
+  const [copiedAccountMap, setCopiedAccountMap] = useState<Record<number, boolean>>({})
+
+  const toggleShowPassword = (studentId: number) => {
+    setShowPasswordMap(prev => ({ ...prev, [studentId]: !prev[studentId] }))
+  }
+
+  const copyAccountInfo = (student: Student) => {
+    const text = `Tài khoản: ${student.username}\nMật khẩu: ${student.rawPassword || 'Chưa cập nhật'}`
+    navigator.clipboard.writeText(text)
+    setCopiedAccountMap(prev => ({ ...prev, [student.id]: true }))
+    setTimeout(() => {
+      setCopiedAccountMap(prev => ({ ...prev, [student.id]: false }))
+    }, 2000)
+  }
 
   // Form state
   const [formData, setFormData] = useState<CreateStudentPayload>({
@@ -715,16 +731,54 @@ export const StudentListPage: React.FC = () => {
                       {/* Account Portal Status */}
                       <td className="py-3.5 px-4">
                         {student.hasUserAccount ? (
-                          <div className="space-y-1">
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300">
-                              <CheckCircle2 size={11} /> Đã cấp TK
-                            </span>
-                            <div className="text-xs font-mono text-slate-600 dark:text-[#A6B4C8]">
-                              @{student.username}
+                          <div className="space-y-1.5 min-w-[170px]">
+                            <div className="flex items-center justify-between gap-1">
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300">
+                                <CheckCircle2 size={10} /> Đã cấp TK
+                              </span>
+                              <button
+                                onClick={() => copyAccountInfo(student)}
+                                className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-medium bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition"
+                                title="Sao chép tài khoản và mật khẩu"
+                              >
+                                {copiedAccountMap[student.id] ? (
+                                  <>
+                                    <Check size={10} className="text-emerald-600 dark:text-emerald-400" />
+                                    <span className="text-[10px] text-emerald-600 dark:text-emerald-400">Đã chép</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <Copy size={10} />
+                                    <span>Copy</span>
+                                  </>
+                                )}
+                              </button>
                             </div>
+                            
+                            <div className="text-[11px] font-mono font-medium text-slate-700 dark:text-[#E8EEF7] truncate max-w-[160px]">
+                              TK: <span className="text-blue-600 dark:text-sky-400 font-bold">{student.username}</span>
+                            </div>
+
+                            <div className="flex items-center gap-1.5 text-[11px] font-mono text-slate-600 dark:text-[#A6B4C8]">
+                              <span className="text-slate-400 text-[10px]">MK:</span>
+                              <span className="font-semibold text-slate-800 dark:text-slate-200">
+                                {showPasswordMap[student.id]
+                                  ? (student.rawPassword || 'Chưa lưu MK cũ')
+                                  : '••••••••'}
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => toggleShowPassword(student.id)}
+                                className="p-0.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition"
+                                title={showPasswordMap[student.id] ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+                              >
+                                {showPasswordMap[student.id] ? <EyeOff size={12} /> : <Eye size={12} />}
+                              </button>
+                            </div>
+
                             <button
                               onClick={() => openProvisionModal(student)}
-                              className="text-[10px] text-slate-400 hover:text-blue-600 flex items-center gap-0.5 underline"
+                              className="text-[10px] text-slate-400 hover:text-blue-600 dark:hover:text-sky-400 flex items-center gap-0.5 underline pt-0.5"
                             >
                               <Key size={10} /> Đổi MK / Gửi lại mail
                             </button>
@@ -1509,7 +1563,230 @@ export const StudentListPage: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Student Details Modal */}
+      {detailStudent && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="bg-white dark:bg-[#151F31] rounded-3xl border border-slate-200 dark:border-[#2A3A50] max-w-2xl w-full p-6 sm:p-8 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+            <button
+              onClick={() => setDetailStudent(null)}
+              className="absolute top-5 right-5 p-2 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-[#1C293D] transition"
+            >
+              <X size={20} />
+            </button>
+
+            {/* Header */}
+            <div className="flex items-center gap-4 pb-6 border-b border-slate-100 dark:border-[#2A3A50]">
+              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#142B4A] to-[#1D4168] dark:from-[#38BDF8] dark:to-[#0284C7] text-white dark:text-[#0B1220] font-black text-xl flex items-center justify-center shadow-md">
+                {detailStudent.fullName.charAt(0)}
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-xl font-bold text-[#142B4A] dark:text-[#E8EEF7]">
+                    {detailStudent.fullName}
+                  </h3>
+                  {renderStatusBadge(detailStudent.status)}
+                </div>
+                <div className="text-xs text-slate-500 dark:text-[#A6B4C8] font-mono mt-1 flex items-center gap-2">
+                  <span>Mã: <strong className="text-slate-700 dark:text-slate-300">{detailStudent.studentCode}</strong></span>
+                  <span>•</span>
+                  {renderTargetTypeBadge(detailStudent.targetType)}
+                </div>
+              </div>
+            </div>
+
+            <div className="py-6 space-y-6">
+              {/* Account Credentials Card */}
+              <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/40 dark:to-indigo-950/30 border border-blue-200 dark:border-blue-800">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2 text-sm font-bold text-blue-900 dark:text-blue-300">
+                    <Key size={16} />
+                    <span>Tài khoản Đăng nhập Hệ thống (Cổng Học Viên)</span>
+                  </div>
+                  {detailStudent.hasUserAccount && (
+                    <button
+                      onClick={() => copyAccountInfo(detailStudent)}
+                      className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-semibold bg-white dark:bg-[#1C293D] border border-blue-300 dark:border-blue-700 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/40 shadow-xs transition"
+                    >
+                      {copiedAccountMap[detailStudent.id] ? (
+                        <>
+                          <Check size={13} className="text-emerald-600 dark:text-emerald-400" />
+                          <span className="text-emerald-600 dark:text-emerald-400 font-bold">Đã sao chép!</span>
+                        </>
+                      ) : (
+                        <>
+                          <Copy size={13} />
+                          <span>Sao chép TK & MK</span>
+                        </>
+                      )}
+                    </button>
+                  )}
+                </div>
+
+                {detailStudent.hasUserAccount ? (
+                  <div className="space-y-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div className="bg-white dark:bg-[#151F31] p-3 rounded-xl border border-blue-100 dark:border-blue-900/60">
+                        <div className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
+                          Tên đăng nhập
+                        </div>
+                        <div className="text-sm font-mono font-bold text-blue-600 dark:text-sky-400 mt-0.5">
+                          {detailStudent.username}
+                        </div>
+                      </div>
+
+                      <div className="bg-white dark:bg-[#151F31] p-3 rounded-xl border border-blue-100 dark:border-blue-900/60 flex items-center justify-between">
+                        <div>
+                          <div className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
+                            Mật khẩu hiện tại
+                          </div>
+                          <div className="text-sm font-mono font-bold text-slate-900 dark:text-white mt-0.5">
+                            {showPasswordMap[detailStudent.id]
+                              ? (detailStudent.rawPassword || 'Chưa lưu MK cũ')
+                              : '••••••••••••'}
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => toggleShowPassword(detailStudent.id)}
+                          className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-[#1C293D] transition"
+                          title={showPasswordMap[detailStudent.id] ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+                        >
+                          {showPasswordMap[detailStudent.id] ? <EyeOff size={16} /> : <Eye size={16} />}
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between pt-2 text-xs text-slate-500 dark:text-[#A6B4C8]">
+                      <span>💡 <em>Mật khẩu được đồng bộ tự động ngay cả khi học viên tự đổi mật khẩu.</em></span>
+                      <button
+                        onClick={() => {
+                          const s = detailStudent
+                          setDetailStudent(null)
+                          openProvisionModal(s)
+                        }}
+                        className="text-xs font-semibold text-blue-600 dark:text-sky-400 hover:underline flex items-center gap-1"
+                      >
+                        <RotateCcw size={12} /> Đổi mật khẩu mới
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-between p-3 bg-white dark:bg-[#151F31] rounded-xl border border-dashed border-blue-300 dark:border-blue-800">
+                    <span className="text-xs text-slate-500 italic">
+                      Học viên này chưa được cấp tài khoản Cổng Web.
+                    </span>
+                    <button
+                      onClick={() => {
+                        const s = detailStudent
+                        setDetailStudent(null)
+                        openProvisionModal(s)
+                      }}
+                      className="px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-xs transition"
+                    >
+                      Cấp tài khoản ngay
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Course & Finance Card */}
+              <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#1C293D]/50 border border-slate-200 dark:border-[#2A3A50] space-y-3">
+                <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-[#E8EEF7]">
+                  <BookOpen size={14} className="text-emerald-500" />
+                  <span>Khóa học & Học phí</span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                  <div>
+                    <span className="text-slate-500">Khóa học:</span>
+                    <p className="font-bold text-[#142B4A] dark:text-[#E8EEF7] mt-0.5">
+                      {detailStudent.enrolledCourseName || 'Chưa ghi danh'}
+                    </p>
+                  </div>
+                  <div>
+                    <span className="text-slate-500">Lớp học:</span>
+                    <p className="font-bold text-[#142B4A] dark:text-[#E8EEF7] mt-0.5">
+                      {detailStudent.enrolledClassName || '—'}
+                    </p>
+                  </div>
+                  <div>
+                    <span className="text-slate-500">Học phí:</span>
+                    <p className="font-semibold text-slate-800 dark:text-slate-200 mt-0.5">
+                      {formatVND(detailStudent.totalTuition)}
+                    </p>
+                  </div>
+                  <div>
+                    <span className="text-slate-500">Trạng thái đóng phí:</span>
+                    <div className="mt-0.5">
+                      {renderTuitionBadge(detailStudent)}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Personal Details */}
+              <div className="space-y-3">
+                <div className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-[#E8EEF7]">
+                  Thông tin liên hệ & Hồ sơ
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                  <div className="p-3 rounded-xl bg-slate-50 dark:bg-[#1C293D]/30 border border-slate-100 dark:border-[#2A3A50]">
+                    <span className="text-slate-400">Giới tính:</span>
+                    <p className="font-semibold text-slate-800 dark:text-slate-200 mt-0.5">
+                      {getGenderLabel(detailStudent.gender)}
+                    </p>
+                  </div>
+                  <div className="p-3 rounded-xl bg-slate-50 dark:bg-[#1C293D]/30 border border-slate-100 dark:border-[#2A3A50]">
+                    <span className="text-slate-400">Ngày sinh:</span>
+                    <p className="font-semibold text-slate-800 dark:text-slate-200 mt-0.5">
+                      {detailStudent.dateOfBirth || '—'}
+                    </p>
+                  </div>
+                  <div className="p-3 rounded-xl bg-slate-50 dark:bg-[#1C293D]/30 border border-slate-100 dark:border-[#2A3A50]">
+                    <span className="text-slate-400">Số điện thoại:</span>
+                    <p className="font-semibold text-slate-800 dark:text-slate-200 mt-0.5">
+                      {detailStudent.phone || '—'}
+                    </p>
+                  </div>
+                  <div className="p-3 rounded-xl bg-slate-50 dark:bg-[#1C293D]/30 border border-slate-100 dark:border-[#2A3A50]">
+                    <span className="text-slate-400">Email:</span>
+                    <p className="font-semibold text-slate-800 dark:text-slate-200 mt-0.5 truncate">
+                      {detailStudent.email || '—'}
+                    </p>
+                  </div>
+                  <div className="sm:col-span-2 p-3 rounded-xl bg-slate-50 dark:bg-[#1C293D]/30 border border-slate-100 dark:border-[#2A3A50]">
+                    <span className="text-slate-400">Địa chỉ thường trú:</span>
+                    <p className="font-semibold text-slate-800 dark:text-slate-200 mt-0.5">
+                      {detailStudent.address || '—'}
+                    </p>
+                  </div>
+                  {detailStudent.internalNotes && (
+                    <div className="sm:col-span-2 p-3 rounded-xl bg-amber-50/50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800">
+                      <span className="text-amber-800 dark:text-amber-400 font-semibold">Ghi chú nội bộ:</span>
+                      <p className="text-slate-700 dark:text-slate-300 mt-0.5">
+                        {detailStudent.internalNotes}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="pt-4 border-t border-slate-100 dark:border-[#2A3A50] flex items-center justify-end">
+              <button
+                type="button"
+                onClick={() => setDetailStudent(null)}
+                className="px-5 py-2.5 rounded-xl bg-[#142B4A] dark:bg-[#38BDF8] text-white dark:text-[#0B1220] font-semibold text-sm hover:opacity-90 transition"
+              >
+                Đóng
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
+
 export default StudentListPage

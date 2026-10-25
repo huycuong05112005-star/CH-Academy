@@ -43,6 +43,7 @@ public class StudentDto {
     private BigDecimal paidTuition;
     private BigDecimal remainingTuition;
     private String tuitionStatus;
+    private String rawPassword;
 
     public static StudentDto fromEntity(Student s) {
         if (s == null) return null;
@@ -55,6 +56,7 @@ public class StudentDto {
 
         boolean hasAccount = s.getUser() != null;
         String userLogin = hasAccount ? s.getUser().getUsername() : null;
+        String rawPwd = (hasAccount && s.getUser() != null) ? s.getUser().getRawPassword() : null;
 
         return StudentDto.builder()
                 .id(s.getId())
@@ -73,6 +75,7 @@ public class StudentDto {
                 .guardians(guardianDtos)
                 .hasUserAccount(hasAccount)
                 .username(userLogin)
+                .rawPassword(rawPwd)
                 .totalTuition(BigDecimal.ZERO)
                 .paidTuition(BigDecimal.ZERO)
                 .remainingTuition(BigDecimal.ZERO)

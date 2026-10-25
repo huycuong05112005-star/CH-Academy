@@ -14,7 +14,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   requiredRoles,
   requiredPermission,
 }) => {
-  const { isAuthenticated, isLoading, hasAnyRole, hasPermission } = useAuth()
+  const { isAuthenticated, isLoading, hasRole, hasAnyRole, hasPermission } = useAuth()
   const location = useLocation()
 
   if (isLoading) {
@@ -31,26 +31,28 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   }
 
   if (requiredRoles && requiredRoles.length > 0 && !hasAnyRole(requiredRoles)) {
+    const isTeacher = hasRole('TEACHER')
+    const isStudent = hasRole('STUDENT')
+    const portalUrl = isTeacher ? '/teacher' : isStudent ? '/student' : '/admin'
+
     return (
-      <div style={{ padding: '3rem', textAlign: 'center', maxWidth: '500px', margin: '4rem auto' }}>
-        <ShieldAlert size={56} color="#ef4444" style={{ margin: '0 auto 1.5rem' }} />
-        <h2 style={{ color: '#0f172a', marginBottom: '0.5rem' }}>403 - Không có quyền truy cập</h2>
-        <p style={{ color: '#64748b', marginBottom: '1.5rem' }}>
-          Tài khoản của bạn không có vai trò phù hợp để truy cập trang này. Vui lòng liên hệ ban quản trị.
+      <div className="p-8 text-center max-w-lg mx-auto my-16 bg-white dark:bg-[#151F31] rounded-2xl border border-slate-200 dark:border-[#2A3A50] shadow-xl">
+        <ShieldAlert size={56} className="mx-auto mb-4 text-rose-500" />
+        <h2 className="text-xl font-bold text-slate-900 dark:text-[#E8EEF7] mb-2">403 - Giới hạn quyền truy cập</h2>
+        <p className="text-sm text-slate-500 dark:text-[#A6B4C8] mb-6">
+          Tài khoản của bạn không có vai trò phù hợp để truy cập phân hệ này. Vui lòng quay lại không gian làm việc của bạn.
         </p>
-        <a href="/admin" style={{ display: 'inline-block', padding: '0.6rem 1.2rem', backgroundColor: '#142B4A', color: '#fff', borderRadius: '6px', textDecoration: 'none' }}>
-          Về trang tổng quan
-        </a>
+        <Navigate to={portalUrl} replace />
       </div>
     )
   }
 
   if (requiredPermission && !hasPermission(requiredPermission)) {
     return (
-      <div style={{ padding: '3rem', textAlign: 'center', maxWidth: '500px', margin: '4rem auto' }}>
-        <ShieldAlert size={56} color="#ef4444" style={{ margin: '0 auto 1.5rem' }} />
-        <h2 style={{ color: '#0f172a', marginBottom: '0.5rem' }}>403 - Giới hạn quyền hạn</h2>
-        <p style={{ color: '#64748b', marginBottom: '1.5rem' }}>
+      <div className="p-8 text-center max-w-lg mx-auto my-16 bg-white dark:bg-[#151F31] rounded-2xl border border-slate-200 dark:border-[#2A3A50] shadow-xl">
+        <ShieldAlert size={56} className="mx-auto mb-4 text-amber-500" />
+        <h2 className="text-xl font-bold text-slate-900 dark:text-[#E8EEF7] mb-2">403 - Giới hạn quyền hạn</h2>
+        <p className="text-sm text-slate-500 dark:text-[#A6B4C8] mb-4">
           Bạn không có quyền thực hiện hoặc xem tính năng này ({requiredPermission}).
         </p>
       </div>

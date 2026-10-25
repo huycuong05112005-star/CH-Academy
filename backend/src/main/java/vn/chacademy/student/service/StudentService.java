@@ -350,6 +350,7 @@ public class StudentService {
             user.setEmail(student.getEmail());
             user.setPhone(student.getPhone());
             user.setPasswordHash(passwordEncoder.encode(plainPassword));
+            user.setRawPassword(plainPassword);
             user.setStatus("ACTIVE");
             user.setRoles(Set.of(studentRole));
 
@@ -369,6 +370,7 @@ public class StudentService {
             if (customPassword != null && !customPassword.isBlank()) {
                 plainPassword = customPassword.trim();
                 user.setPasswordHash(passwordEncoder.encode(plainPassword));
+                user.setRawPassword(plainPassword);
                 userRepository.save(user);
                 if (student.getEmail() != null && !student.getEmail().isBlank()) {
                     emailSent = emailService.sendAccountCredentialsEmail(

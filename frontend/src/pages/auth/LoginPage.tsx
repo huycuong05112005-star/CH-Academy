@@ -29,12 +29,18 @@ export const LoginPage: React.FC = () => {
     setIsSubmitting(true)
     try {
       const loggedUser = await login({ username: username.trim(), password })
+      const isTeacher = loggedUser.roles?.includes('TEACHER') &&
+        !loggedUser.roles?.includes('ADMIN') &&
+        !loggedUser.roles?.includes('SUPER_ADMIN')
       const isStudentOnly = loggedUser.roles?.includes('STUDENT') &&
         !loggedUser.roles?.includes('ADMIN') &&
         !loggedUser.roles?.includes('SUPER_ADMIN') &&
         !loggedUser.roles?.includes('ACADEMIC_ADMIN')
-      if (isStudentOnly) {
-        navigate('/student/portal', { replace: true })
+
+      if (isTeacher) {
+        navigate('/teacher', { replace: true })
+      } else if (isStudentOnly) {
+        navigate('/student', { replace: true })
       } else {
         navigate(from, { replace: true })
       }
@@ -152,12 +158,21 @@ export const LoginPage: React.FC = () => {
         </form>
 
         {/* Demo Tip */}
-        <div className="mt-8 p-3.5 rounded-2xl bg-slate-50 dark:bg-[#1C293D]/60 border border-slate-200/60 dark:border-[#2A3A50] text-center text-xs text-slate-500 dark:text-[#A6B4C8]">
-          <div className="font-semibold text-slate-700 dark:text-[#E8EEF7] mb-1">
-            💡 Tài khoản Quản trị viên mặc định:
+        <div className="mt-6 p-4 rounded-2xl bg-slate-50 dark:bg-[#1C293D]/60 border border-slate-200/60 dark:border-[#2A3A50] text-xs text-slate-500 dark:text-[#A6B4C8] space-y-2">
+          <div className="font-bold text-slate-700 dark:text-[#E8EEF7] text-center mb-1">
+            💡 Tài khoản đăng nhập các vai trò:
           </div>
-          <div>
-            Tên đăng nhập: <code className="font-mono bg-white dark:bg-[#151F31] px-1.5 py-0.5 rounded border border-slate-200 dark:border-[#2A3A50] text-[#142B4A] dark:text-[#38BDF8]">admin</code> | Mật khẩu: <code className="font-mono bg-white dark:bg-[#151F31] px-1.5 py-0.5 rounded border border-slate-200 dark:border-[#2A3A50] text-[#142B4A] dark:text-[#38BDF8]">Admin@123456</code>
+          <div className="flex items-center justify-between text-[11px] p-1.5 rounded-lg bg-white dark:bg-[#151F31] border border-slate-200/80 dark:border-[#2A3A50]">
+            <span className="font-semibold text-slate-700 dark:text-slate-200">👑 Quản trị:</span>
+            <code className="font-mono text-[#142B4A] dark:text-[#38BDF8]">admin / Admin@123456</code>
+          </div>
+          <div className="flex items-center justify-between text-[11px] p-1.5 rounded-lg bg-white dark:bg-[#151F31] border border-slate-200/80 dark:border-[#2A3A50]">
+            <span className="font-semibold text-indigo-700 dark:text-indigo-300">🎓 Giáo viên:</span>
+            <code className="font-mono text-indigo-600 dark:text-indigo-400">gv.hoangnam / Teacher@123456</code>
+          </div>
+          <div className="flex items-center justify-between text-[11px] p-1.5 rounded-lg bg-white dark:bg-[#151F31] border border-slate-200/80 dark:border-[#2A3A50]">
+            <span className="font-semibold text-emerald-700 dark:text-emerald-300">🎒 Học viên:</span>
+            <code className="font-mono text-emerald-600 dark:text-emerald-400">thuylinh.nguyen@gmail.com / Student@123456</code>
           </div>
         </div>
       </div>

@@ -80,6 +80,7 @@ public class AuthService {
         }
 
         user.setPasswordHash(passwordEncoder.encode(request.getNewPassword()));
+        user.setRawPassword(request.getNewPassword());
         userRepository.save(user);
         log.info("Người dùng '{}' đã đổi mật khẩu thành công", username);
     }

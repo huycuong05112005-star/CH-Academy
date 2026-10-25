@@ -53,7 +53,7 @@ public class Guardian {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
-    @OneToMany(mappedBy = "guardian", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "guardian")
     @Builder.Default
     private List<StudentGuardian> studentGuardians = new ArrayList<>();
 }

@@ -69,7 +69,7 @@ public class Student {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
-    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "student")
     @Builder.Default
     private List<StudentGuardian> studentGuardians = new ArrayList<>();
 }
