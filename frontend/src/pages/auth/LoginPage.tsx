@@ -31,30 +31,43 @@ export const LoginPage: React.FC = () => {
   const location = useLocation()
 
   const rawFrom = (location.state as { from?: { pathname: string } })?.from?.pathname
-  const from = rawFrom && rawFrom !== '/login' ? rawFrom : '/admin'
+
+  // Xác định chính xác cổng đích phù hợp với vai trò của tài khoản
+  const getTargetPortal = (roles: string[] = [], rawTarget?: string): string => {
+    const isSuperOrAdmin = roles.some((r) =>
+      ['SUPER_ADMIN', 'CENTER_ADMIN', 'ADMIN', 'ACADEMIC_STAFF', 'ADMISSIONS_STAFF', 'ACCOUNTANT'].includes(r)
+    )
+    const isTeacher = roles.includes('TEACHER') && !isSuperOrAdmin
+    const isStudent = roles.includes('STUDENT') && !isSuperOrAdmin
+
+    if (isTeacher) {
+      if (rawTarget && (rawTarget.startsWith('/teacher') || rawTarget.startsWith('/exam'))) {
+        return rawTarget
+      }
+      return '/teacher'
+    }
+
+    if (isStudent) {
+      if (rawTarget && (rawTarget.startsWith('/student') || rawTarget.startsWith('/exam'))) {
+        return rawTarget
+      }
+      return '/student'
+    }
+
+    // Quản trị viên và Nhân viên trung tâm
+    if (rawTarget && (rawTarget.startsWith('/admin') || rawTarget.startsWith('/exam'))) {
+      return rawTarget
+    }
+    return '/admin'
+  }
 
   // Tự động điều hướng nếu đã có phiên đăng nhập hợp lệ
   React.useEffect(() => {
     if (!authLoading && isAuthenticated && user) {
-      const isTeacher =
-        user.roles?.includes('TEACHER') &&
-        !user.roles?.includes('ADMIN') &&
-        !user.roles?.includes('SUPER_ADMIN')
-      const isStudentOnly =
-        user.roles?.includes('STUDENT') &&
-        !user.roles?.includes('ADMIN') &&
-        !user.roles?.includes('SUPER_ADMIN') &&
-        !user.roles?.includes('ACADEMIC_ADMIN')
-
-      if (isTeacher) {
-        navigate('/teacher', { replace: true })
-      } else if (isStudentOnly) {
-        navigate('/student', { replace: true })
-      } else {
-        navigate(from, { replace: true })
-      }
+      const destination = getTargetPortal(user.roles, rawFrom)
+      navigate(destination, { replace: true })
     }
-  }, [authLoading, isAuthenticated, user, navigate, from])
+  }, [authLoading, isAuthenticated, user, navigate, rawFrom])
 
   const executeLogin = async (targetUser: string, targetPass: string) => {
     if (isSubmitting) return
@@ -69,23 +82,8 @@ export const LoginPage: React.FC = () => {
     setIsSubmitting(true)
     try {
       const loggedUser = await login({ username: targetUser.trim(), password: targetPass })
-      const isTeacher =
-        loggedUser.roles?.includes('TEACHER') &&
-        !loggedUser.roles?.includes('ADMIN') &&
-        !loggedUser.roles?.includes('SUPER_ADMIN')
-      const isStudentOnly =
-        loggedUser.roles?.includes('STUDENT') &&
-        !loggedUser.roles?.includes('ADMIN') &&
-        !loggedUser.roles?.includes('SUPER_ADMIN') &&
-        !loggedUser.roles?.includes('ACADEMIC_ADMIN')
-
-      if (isTeacher) {
-        navigate('/teacher', { replace: true })
-      } else if (isStudentOnly) {
-        navigate('/student', { replace: true })
-      } else {
-        navigate(from, { replace: true })
-      }
+      const destination = getTargetPortal(loggedUser.roles, rawFrom)
+      navigate(destination, { replace: true })
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message)

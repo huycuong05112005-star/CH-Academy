@@ -100,12 +100,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const hasRole = (role: string): boolean => {
     if (!user || !user.roles) return false
-    return user.roles.includes(role) || user.roles.includes('SUPER_ADMIN')
+    return user.roles.includes(role)
   }
 
   const hasAnyRole = (roles: string[]): boolean => {
     if (!user || !user.roles) return false
-    if (user.roles.includes('SUPER_ADMIN')) return true
     return roles.some((r) => user.roles.includes(r))
   }
 

@@ -67,7 +67,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/v1/teacher/portal")
 @RequiredArgsConstructor
-@PreAuthorize("hasAnyRole('TEACHER', 'ADMIN', 'SUPER_ADMIN', 'CENTER_ADMIN', 'ACADEMIC_STAFF')")
+@PreAuthorize("hasAnyRole('TEACHER')")
 public class TeacherPortalController {
 
     private final UserRepository userRepository;
@@ -93,11 +93,7 @@ public class TeacherPortalController {
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy tài khoản"));
 
         return teacherRepository.findByUserId(user.getId())
-                .orElseGet(() -> teacherRepository.findByTeacherCode("GV20240001")
-                        .orElseGet(() -> teacherRepository.findAll().stream()
-                                .filter(t -> "ACTIVE".equalsIgnoreCase(t.getStatus()))
-                                .findFirst()
-                                .orElseThrow(() -> new ResourceNotFoundException("Hồ sơ giáo viên chưa được kích hoạt"))));
+                .orElseThrow(() -> new ResourceNotFoundException("Tài khoản '" + user.getUsername() + "' chưa được liên kết với hồ sơ giảng viên"));
     }
 
     private User getCurrentUser(UserDetails userDetails) {
