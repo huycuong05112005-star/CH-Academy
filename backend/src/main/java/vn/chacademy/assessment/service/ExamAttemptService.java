@@ -39,22 +39,7 @@ public class ExamAttemptService {
             throw new IllegalStateException("Chưa xác thực người dùng");
         }
         return studentRepository.findByUserId(user.getId())
-                .orElseGet(() -> {
-                    boolean isStaffOrAdmin = user.getRoles() != null && user.getRoles().stream()
-                            .anyMatch(r -> r.getId() != null && (
-                                    r.getId().contains("ADMIN") ||
-                                    r.getId().equals("ACADEMIC_STAFF") ||
-                                    r.getId().equals("TEACHER")
-                            ));
-                    if (isStaffOrAdmin) {
-                        return studentRepository.findByStudentCode("HV20240002")
-                                .orElseGet(() -> studentRepository.findAll().stream()
-                                        .filter(s -> "ACTIVE".equalsIgnoreCase(s.getStatus()))
-                                        .findFirst()
-                                        .orElseThrow(() -> new IllegalStateException("Hệ thống chưa có hồ sơ học viên nào hoạt động!")));
-                    }
-                    throw new IllegalStateException("Người dùng hiện tại chưa được liên kết với hồ sơ học viên!");
-                });
+                .orElseThrow(() -> new IllegalStateException("Tài khoản '" + user.getUsername() + "' chưa được liên kết với hồ sơ học viên!"));
     }
 
     @Transactional(readOnly = true)
@@ -474,5 +459,69 @@ public class ExamAttemptService {
                 .canReviewAnswers(canReviewAnswers)
                 .answers(details)
                 .build();
+    }
+
+    @Transactional
+    public AttemptResultDto gradeManualAttempt(Long attemptId, ManualGradeRequest req, User teacher) {
+        ExamAttempt attempt = examAttemptRepository.findById(attemptId)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy lượt thi với ID: " + attemptId));
+
+        if (req != null && req.getItems() != null) {
+            for (var item : req.getItems()) {
+                if (item.getQuestionId() == null) continue;
+                attemptAnswerRepository.findByAttemptIdAndQuestionId(attemptId, item.getQuestionId())
+                        .ifPresent(ans -> {
+                            if (item.getScore() != null) {
+                                ans.setScore(item.getScore());
+                                BigDecimal max = ans.getMaxScore() != null ? ans.getMaxScore() : BigDecimal.ZERO;
+                                ans.setIsCorrect(item.getScore().compareTo(max) >= 0);
+                            }
+                            if (item.getTeacherFeedback() != null) {
+                                ans.setTeacherFeedback(item.getTeacherFeedback());
+                            }
+                            if (item.getRubricBreakdown() != null) {
+                                ans.setRubricBreakdown(item.getRubricBreakdown());
+                            }
+                            ans.setAutoGraded(false);
+                            ans.setUpdatedAt(Instant.now());
+                            attemptAnswerRepository.save(ans);
+                        });
+            }
+        }
+
+        // Tính lại tổng điểm sau khi chấm tự luận
+        List<AttemptAnswer> allAnswers = attemptAnswerRepository.findByAttemptId(attemptId);
+        BigDecimal totalScore = BigDecimal.ZERO;
+        BigDecimal maxScore = BigDecimal.ZERO;
+        for (AttemptAnswer a : allAnswers) {
+            if (a.getScore() != null) totalScore = totalScore.add(a.getScore());
+            if (a.getMaxScore() != null) maxScore = maxScore.add(a.getMaxScore());
+        }
+
+        attempt.setTotalScore(totalScore.setScale(2, java.math.RoundingMode.HALF_UP));
+        attempt.setMaxScore(maxScore.setScale(2, java.math.RoundingMode.HALF_UP));
+
+        BigDecimal percentage = BigDecimal.ZERO;
+        if (maxScore.compareTo(BigDecimal.ZERO) > 0) {
+            percentage = totalScore.divide(maxScore, 4, java.math.RoundingMode.HALF_UP)
+                    .multiply(BigDecimal.valueOf(100)).setScale(2, java.math.RoundingMode.HALF_UP);
+        }
+        attempt.setPercentage(percentage);
+
+        BigDecimal passPercent = attempt.getExam() != null && attempt.getExam().getPassPercentage() != null ?
+                attempt.getExam().getPassPercentage() : BigDecimal.valueOf(50.00);
+        attempt.setIsPassed(percentage.compareTo(passPercent) >= 0);
+
+        attempt.setStatus("GRADED");
+        attempt.setGradedAt(Instant.now());
+        attempt.setGradedBy(teacher);
+        attempt.setUpdatedAt(Instant.now());
+        examAttemptRepository.save(attempt);
+
+        String teacherName = teacher != null ? teacher.getFullName() : "Hệ thống";
+        auditService.recordAction(teacher, "MANUAL_GRADE", "EXAM_ATTEMPT", String.valueOf(attempt.getId()),
+                "Chấm thi & đánh giá tự luận lượt thi #" + attempt.getId() + " bởi " + teacherName + " - Điểm mới: " + totalScore + "/" + maxScore, null);
+
+        return getAttemptResult(attempt.getId(), teacher, true);
     }
 }

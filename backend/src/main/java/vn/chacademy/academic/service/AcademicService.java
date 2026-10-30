@@ -12,6 +12,7 @@ import vn.chacademy.common.exception.BadRequestException;
 import vn.chacademy.common.exception.ResourceNotFoundException;
 import vn.chacademy.course.entity.Course;
 import vn.chacademy.course.repository.CourseRepository;
+import vn.chacademy.chat.service.ClassChatService;
 import vn.chacademy.student.entity.Student;
 import vn.chacademy.student.repository.StudentRepository;
 
@@ -35,6 +36,7 @@ public class AcademicService {
     private final vn.chacademy.identity.repository.UserRepository userRepository;
     private final vn.chacademy.identity.repository.RoleRepository roleRepository;
     private final org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
+    private final ClassChatService classChatService;
 
     private static final Set<String> VALID_CLASS_STATUSES = Set.of("PLANNING", "OPEN_FOR_ENROLLMENT", "IN_PROGRESS", "COMPLETED", "CANCELLED");
 
@@ -322,6 +324,7 @@ public class AcademicService {
                 .build();
 
         Enrollment saved = enrollmentRepository.save(enrollment);
+        classChatService.syncClassGroup(classEntity.getId());
         return EnrollmentDto.fromEntity(saved);
     }
 }

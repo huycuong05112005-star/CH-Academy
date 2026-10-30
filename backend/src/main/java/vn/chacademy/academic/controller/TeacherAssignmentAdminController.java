@@ -16,6 +16,7 @@ import vn.chacademy.academic.entity.TeacherAssignment;
 import vn.chacademy.academic.repository.ClassRepository;
 import vn.chacademy.academic.repository.TeacherAssignmentRepository;
 import vn.chacademy.academic.repository.TeacherRepository;
+import vn.chacademy.chat.service.ClassChatService;
 import vn.chacademy.common.audit.service.AuditService;
 import vn.chacademy.common.dto.ApiResponse;
 import vn.chacademy.common.exception.ResourceNotFoundException;
@@ -36,6 +37,7 @@ public class TeacherAssignmentAdminController {
     private final TeacherRepository teacherRepository;
     private final UserRepository userRepository;
     private final AuditService auditService;
+    private final ClassChatService classChatService;
 
     @GetMapping
     @Transactional(readOnly = true)
@@ -90,6 +92,7 @@ public class TeacherAssignmentAdminController {
                 .build();
 
         TeacherAssignment saved = teacherAssignmentRepository.save(assignment);
+        classChatService.syncClassGroup(classEntity.getId());
 
         auditService.recordAction(actor, "TEACHER_ASSIGN", "CLASS", classEntity.getId().toString(),
                 "Phân công giáo viên " + teacher.getFullName() + " vào lớp " + classEntity.getName() + " (vai trò: " + role + ")", null);

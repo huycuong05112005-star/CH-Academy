@@ -8,6 +8,7 @@ import { AuthProvider } from './context/AuthContext'
 import { ProtectedRoute } from './components/auth/ProtectedRoute'
 import { PageLoadingFallback } from './components/ui/LoadingSkeleton'
 import { GlassBackground } from './components/ui/GlassBackground'
+import { FloatingChatWidget } from './components/chat/FloatingChatWidget'
 
 function AdminPaymentsRedirect() {
   const [searchParams] = useSearchParams()
@@ -159,6 +160,7 @@ export default function App() {
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
             </Suspense>
+            <FloatingChatWidget />
           </AuthProvider>
         </BrowserRouter>
       </SettingsProvider>

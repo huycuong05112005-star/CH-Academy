@@ -57,23 +57,7 @@ public class AssessmentAnalyticsController {
         if (user == null) {
             throw new IllegalStateException("Chưa xác thực người dùng");
         }
-        Student student = studentRepository.findByUserId(user.getId())
-                .orElseGet(() -> {
-                    boolean isStaffOrAdmin = user.getRoles() != null && user.getRoles().stream()
-                            .anyMatch(r -> r.getId() != null && (
-                                    r.getId().contains("ADMIN") ||
-                                    r.getId().equals("ACADEMIC_STAFF") ||
-                                    r.getId().equals("TEACHER")
-                            ));
-                    if (isStaffOrAdmin) {
-                        return studentRepository.findByStudentCode("HV20240002")
-                                .orElseGet(() -> studentRepository.findAll().stream()
-                                        .filter(s -> "ACTIVE".equalsIgnoreCase(s.getStatus()))
-                                        .findFirst()
-                                        .orElse(null));
-                    }
-                    return null;
-                });
+        Student student = studentRepository.findByUserId(user.getId()).orElse(null);
         if (student == null) {
             return ResponseEntity.ok(ApiResponse.success(
                     StudentAnalyticsDto.builder()

@@ -1,0 +1,1433 @@
+{
+  "backend": [
+    {
+      "controller": "ClassController.java",
+      "method": "GET",
+      "path": "/api/v1/classes",
+      "methodName": "searchClasses"
+    },
+    {
+      "controller": "ClassController.java",
+      "method": "GET",
+      "path": "/api/v1/classes/{id}",
+      "methodName": "getClassById"
+    },
+    {
+      "controller": "ClassController.java",
+      "method": "POST",
+      "path": "/api/v1/classes",
+      "methodName": "createClass"
+    },
+    {
+      "controller": "ClassController.java",
+      "method": "GET",
+      "path": "/api/v1/classes/{id}/enrollments",
+      "methodName": "getEnrollments"
+    },
+    {
+      "controller": "ClassController.java",
+      "method": "POST",
+      "path": "/api/v1/classes/enrollments",
+      "methodName": "enrollStudent"
+    },
+    {
+      "controller": "ClassController.java",
+      "method": "GET",
+      "path": "/api/v1/classes/{id}/sessions",
+      "methodName": "getClassSessions"
+    },
+    {
+      "controller": "TeacherAssignmentAdminController.java",
+      "method": "GET",
+      "path": "/api/v1/admin/teacher-assignments",
+      "methodName": "getAllAssignments"
+    },
+    {
+      "controller": "TeacherAssignmentAdminController.java",
+      "method": "POST",
+      "path": "/api/v1/admin/teacher-assignments",
+      "methodName": "assignTeacher"
+    },
+    {
+      "controller": "TeacherAssignmentAdminController.java",
+      "method": "PUT",
+      "path": "/api/v1/admin/teacher-assignments/{id}/end",
+      "methodName": "endAssignment"
+    },
+    {
+      "controller": "TeacherController.java",
+      "method": "GET",
+      "path": "/api/v1/teachers",
+      "methodName": "getAllTeachers"
+    },
+    {
+      "controller": "TeacherController.java",
+      "method": "GET",
+      "path": "/api/v1/teachers/active",
+      "methodName": "getActiveTeachers"
+    },
+    {
+      "controller": "TeacherController.java",
+      "method": "POST",
+      "path": "/api/v1/teachers",
+      "methodName": "createTeacher"
+    },
+    {
+      "controller": "TeacherPortalController.java",
+      "method": "GET",
+      "path": "/api/v1/teacher/portal/profile",
+      "methodName": "getProfile"
+    },
+    {
+      "controller": "TeacherPortalController.java",
+      "method": "GET",
+      "path": "/api/v1/teacher/portal/classes",
+      "methodName": "getMyClasses"
+    },
+    {
+      "controller": "TeacherPortalController.java",
+      "method": "GET",
+      "path": "/api/v1/teacher/portal/classes/{classId}",
+      "methodName": "getClassDetails"
+    },
+    {
+      "controller": "TeacherPortalController.java",
+      "method": "GET",
+      "path": "/api/v1/teacher/portal/sessions/{sessionId}",
+      "methodName": "getSessionDetails"
+    },
+    {
+      "controller": "TeacherPortalController.java",
+      "method": "GET",
+      "path": "/api/v1/teacher/portal/sessions/{sessionId}/attendance",
+      "methodName": "getSessionAttendance"
+    },
+    {
+      "controller": "TeacherPortalController.java",
+      "method": "POST",
+      "path": "/api/v1/teacher/portal/sessions/{sessionId}/attendance",
+      "methodName": "markAttendance"
+    },
+    {
+      "controller": "TeacherPortalController.java",
+      "method": "POST",
+      "path": "/api/v1/teacher/portal/sessions/{sessionId}/materials",
+      "methodName": "uploadMaterial"
+    },
+    {
+      "controller": "TeacherPortalController.java",
+      "method": "DELETE",
+      "path": "/api/v1/teacher/portal/materials/{materialId}",
+      "methodName": "deleteMaterial"
+    },
+    {
+      "controller": "TeacherPortalController.java",
+      "method": "GET",
+      "path": "/api/v1/teacher/portal/notifications",
+      "methodName": "getMyNotifications"
+    },
+    {
+      "controller": "TeacherPortalController.java",
+      "method": "POST",
+      "path": "/api/v1/teacher/portal/announcements",
+      "methodName": "createClassAnnouncement"
+    },
+    {
+      "controller": "TeacherPortalController.java",
+      "method": "GET",
+      "path": "/api/v1/teacher/portal/announcements/my-sent",
+      "methodName": "getMySentAnnouncements"
+    },
+    {
+      "controller": "TeacherPortalController.java",
+      "method": "DELETE",
+      "path": "/api/v1/teacher/portal/announcements/{id}",
+      "methodName": "deleteMyAnnouncement"
+    },
+    {
+      "controller": "TeacherPortalController.java",
+      "method": "GET",
+      "path": "/api/v1/teacher/portal/sessions/unmarked",
+      "methodName": "getUnmarkedSessions"
+    },
+    {
+      "controller": "TeacherPortalController.java",
+      "method": "GET",
+      "path": "/api/v1/teacher/portal/dashboard-summary",
+      "methodName": "getDashboardSummary"
+    },
+    {
+      "controller": "TeacherPortalController.java",
+      "method": "GET",
+      "path": "/api/v1/teacher/portal/classes/{classId}/exam-results",
+      "methodName": "getClassExamResults"
+    },
+    {
+      "controller": "AssessmentAnalyticsController.java",
+      "method": "GET",
+      "path": "/api/v1/assessment/analytics/exam/{examId}",
+      "methodName": "getExamAnalytics"
+    },
+    {
+      "controller": "AssessmentAnalyticsController.java",
+      "method": "GET",
+      "path": "/api/v1/assessment/analytics/student/{studentId}",
+      "methodName": "getStudentAnalytics"
+    },
+    {
+      "controller": "AssessmentAnalyticsController.java",
+      "method": "GET",
+      "path": "/api/v1/assessment/analytics/my-progress",
+      "methodName": "getMyProgress"
+    },
+    {
+      "controller": "AssessmentAnalyticsController.java",
+      "method": "GET",
+      "path": "/api/v1/assessment/analytics/class/{classId}",
+      "methodName": "getClassAnalytics"
+    },
+    {
+      "controller": "AssessmentAnalyticsController.java",
+      "method": "GET",
+      "path": "/api/v1/assessment/analytics/student/{studentId}/class/{classId}",
+      "methodName": "getStudentClassDetail"
+    },
+    {
+      "controller": "AssessmentAnalyticsController.java",
+      "method": "GET",
+      "path": "/api/v1/assessment/analytics/session/{sessionId}",
+      "methodName": "getSessionQuality"
+    },
+    {
+      "controller": "ExamController.java",
+      "method": "GET",
+      "path": "/api/v1/assessment/exams",
+      "methodName": "searchExams"
+    },
+    {
+      "controller": "ExamController.java",
+      "method": "GET",
+      "path": "/api/v1/assessment/exams/{id}",
+      "methodName": "getExam"
+    },
+    {
+      "controller": "ExamController.java",
+      "method": "POST",
+      "path": "/api/v1/assessment/exams",
+      "methodName": "createExam"
+    },
+    {
+      "controller": "ExamController.java",
+      "method": "PUT",
+      "path": "/api/v1/assessment/exams/{id}",
+      "methodName": "updateExam"
+    },
+    {
+      "controller": "ExamController.java",
+      "method": "POST",
+      "path": "/api/v1/assessment/exams/{id}/submit-review",
+      "methodName": "submitForReview"
+    },
+    {
+      "controller": "ExamController.java",
+      "method": "POST",
+      "path": "/api/v1/assessment/exams/{id}/approve",
+      "methodName": "approveExam"
+    },
+    {
+      "controller": "ExamController.java",
+      "method": "POST",
+      "path": "/api/v1/assessment/exams/{id}/request-changes",
+      "methodName": "requestChanges"
+    },
+    {
+      "controller": "ExamController.java",
+      "method": "POST",
+      "path": "/api/v1/assessment/exams/{id}/reject",
+      "methodName": "rejectExam"
+    },
+    {
+      "controller": "ExamController.java",
+      "method": "POST",
+      "path": "/api/v1/assessment/exams/{id}/publish",
+      "methodName": "publishExam"
+    },
+    {
+      "controller": "ExamController.java",
+      "method": "GET",
+      "path": "/api/v1/assessment/exams/{id}/review-history",
+      "methodName": "getReviewHistory"
+    },
+    {
+      "controller": "ExamController.java",
+      "method": "GET",
+      "path": "/api/v1/assessment/exams/approval-stats",
+      "methodName": "getApprovalStats"
+    },
+    {
+      "controller": "ExamController.java",
+      "method": "POST",
+      "path": "/api/v1/assessment/exams/{id}/re-grade",
+      "methodName": "reGradeExam"
+    },
+    {
+      "controller": "ExamController.java",
+      "method": "POST",
+      "path": "/api/v1/assessment/exams/{id}/duplicate",
+      "methodName": "duplicateExam"
+    },
+    {
+      "controller": "GradingController.java",
+      "method": "GET",
+      "path": "/api/v1/assessment/grading/attempts",
+      "methodName": "searchAttempts"
+    },
+    {
+      "controller": "GradingController.java",
+      "method": "GET",
+      "path": "/api/v1/assessment/grading/attempts/{attemptId}",
+      "methodName": "getAttemptDetail"
+    },
+    {
+      "controller": "GradingController.java",
+      "method": "POST",
+      "path": "/api/v1/assessment/grading/attempts/{attemptId}/manual",
+      "methodName": "gradeManual"
+    },
+    {
+      "controller": "OnlineExamController.java",
+      "method": "GET",
+      "path": "/api/v1/assessment/student/assigned-exams",
+      "methodName": "getAssignedExams"
+    },
+    {
+      "controller": "OnlineExamController.java",
+      "method": "POST",
+      "path": "/api/v1/assessment/exam-room/start/{examId}",
+      "methodName": "startOrResumeAttempt"
+    },
+    {
+      "controller": "OnlineExamController.java",
+      "method": "POST",
+      "path": "/api/v1/assessment/exam-room/save/{attemptId}",
+      "methodName": "saveAnswer"
+    },
+    {
+      "controller": "OnlineExamController.java",
+      "method": "POST",
+      "path": "/api/v1/assessment/exam-room/submit/{attemptId}",
+      "methodName": "submitAttempt"
+    },
+    {
+      "controller": "OnlineExamController.java",
+      "method": "GET",
+      "path": "/api/v1/assessment/exam-room/result/{attemptId}",
+      "methodName": "getResult"
+    },
+    {
+      "controller": "QuestionController.java",
+      "method": "GET",
+      "path": "/api/v1/assessment/questions",
+      "methodName": "searchQuestions"
+    },
+    {
+      "controller": "QuestionController.java",
+      "method": "GET",
+      "path": "/api/v1/assessment/questions/{id}",
+      "methodName": "getQuestion"
+    },
+    {
+      "controller": "QuestionController.java",
+      "method": "POST",
+      "path": "/api/v1/assessment/questions",
+      "methodName": "createQuestion"
+    },
+    {
+      "controller": "QuestionController.java",
+      "method": "PUT",
+      "path": "/api/v1/assessment/questions/{id}",
+      "methodName": "updateQuestion"
+    },
+    {
+      "controller": "QuestionController.java",
+      "method": "DELETE",
+      "path": "/api/v1/assessment/questions/{id}",
+      "methodName": "deleteQuestion"
+    },
+    {
+      "controller": "QuestionController.java",
+      "method": "GET",
+      "path": "/api/v1/assessment/banks",
+      "methodName": "getQuestionBanks"
+    },
+    {
+      "controller": "QuestionController.java",
+      "method": "POST",
+      "path": "/api/v1/assessment/banks",
+      "methodName": "createQuestionBank"
+    },
+    {
+      "controller": "QuestionController.java",
+      "method": "GET",
+      "path": "/api/v1/assessment/questions/import/template",
+      "methodName": "downloadImportTemplate"
+    },
+    {
+      "controller": "QuestionController.java",
+      "method": "POST",
+      "path": "/api/v1/assessment/questions/import/preview",
+      "methodName": "previewImport"
+    },
+    {
+      "controller": "QuestionController.java",
+      "method": "POST",
+      "path": "/api/v1/assessment/questions/import/confirm",
+      "methodName": "confirmImport"
+    },
+    {
+      "controller": "AttendanceController.java",
+      "method": "GET",
+      "path": "/api/v1/attendance/sessions/{sessionId}",
+      "methodName": "getSessionAttendance"
+    },
+    {
+      "controller": "AttendanceController.java",
+      "method": "POST",
+      "path": "/api/v1/attendance/sessions/{sessionId}",
+      "methodName": "markAttendance"
+    },
+    {
+      "controller": "AttendanceController.java",
+      "method": "GET",
+      "path": "/api/v1/attendance/students/{studentId}/stats",
+      "methodName": "getStudentStats"
+    },
+    {
+      "controller": "AttendanceController.java",
+      "method": "GET",
+      "path": "/api/v1/attendance/sessions",
+      "methodName": "getSessions"
+    },
+    {
+      "controller": "AttendanceMonitoringAdminController.java",
+      "method": "GET",
+      "path": "/api/v1/admin/attendance-monitoring",
+      "methodName": "getMonitoringSessions"
+    },
+    {
+      "controller": "AttendanceMonitoringAdminController.java",
+      "method": "GET",
+      "path": "/api/v1/admin/attendance-monitoring/sessions/{sessionId}",
+      "methodName": "getSessionDetails"
+    },
+    {
+      "controller": "AuditLogAdminController.java",
+      "method": "GET",
+      "path": "/api/v1/admin/audit-logs",
+      "methodName": "getAuditLogs"
+    },
+    {
+      "controller": "AuditLogAdminController.java",
+      "method": "GET",
+      "path": "/api/v1/admin/audit-logs/recent",
+      "methodName": "getRecentLogs"
+    },
+    {
+      "controller": "HealthController.java",
+      "method": "GET",
+      "path": "/api/v1/health",
+      "methodName": "unknown"
+    },
+    {
+      "controller": "FileUploadController.java",
+      "method": "POST",
+      "path": "/api/v1/files/upload",
+      "methodName": "uploadFile"
+    },
+    {
+      "controller": "FileUploadController.java",
+      "method": "GET",
+      "path": "/api/v1/files/download/{filename:.+}",
+      "methodName": "downloadFile"
+    },
+    {
+      "controller": "SystemSettingController.java",
+      "method": "GET",
+      "path": "/api/v1/admin/settings",
+      "methodName": "getSettings"
+    },
+    {
+      "controller": "SystemSettingController.java",
+      "method": "PUT",
+      "path": "/api/v1/admin/settings",
+      "methodName": "updateSettings"
+    },
+    {
+      "controller": "SystemSettingController.java",
+      "method": "GET",
+      "path": "/api/v1/public/settings",
+      "methodName": "getPublicSettings"
+    },
+    {
+      "controller": "CourseCategoryController.java",
+      "method": "GET",
+      "path": "/api/v1/course-categories",
+      "methodName": "getAllCategories"
+    },
+    {
+      "controller": "CourseCategoryController.java",
+      "method": "GET",
+      "path": "/api/v1/course-categories/active",
+      "methodName": "getActiveCategories"
+    },
+    {
+      "controller": "CourseCategoryController.java",
+      "method": "GET",
+      "path": "/api/v1/course-categories/{id}",
+      "methodName": "getCategoryById"
+    },
+    {
+      "controller": "CourseCategoryController.java",
+      "method": "POST",
+      "path": "/api/v1/course-categories",
+      "methodName": "createCategory"
+    },
+    {
+      "controller": "CourseCategoryController.java",
+      "method": "PUT",
+      "path": "/api/v1/course-categories/{id}",
+      "methodName": "updateCategory"
+    },
+    {
+      "controller": "CourseCategoryController.java",
+      "method": "DELETE",
+      "path": "/api/v1/course-categories/{id}",
+      "methodName": "deleteCategory"
+    },
+    {
+      "controller": "CourseController.java",
+      "method": "GET",
+      "path": "/api/v1/courses",
+      "methodName": "searchCourses"
+    },
+    {
+      "controller": "CourseController.java",
+      "method": "GET",
+      "path": "/api/v1/courses/{id}",
+      "methodName": "getCourseById"
+    },
+    {
+      "controller": "CourseController.java",
+      "method": "POST",
+      "path": "/api/v1/courses",
+      "methodName": "createCourse"
+    },
+    {
+      "controller": "CourseController.java",
+      "method": "PUT",
+      "path": "/api/v1/courses/{id}",
+      "methodName": "updateCourse"
+    },
+    {
+      "controller": "CourseController.java",
+      "method": "PATCH",
+      "path": "/api/v1/courses/{id}/status",
+      "methodName": "updateCourseStatus"
+    },
+    {
+      "controller": "CourseController.java",
+      "method": "DELETE",
+      "path": "/api/v1/courses/{id}",
+      "methodName": "deleteCourse"
+    },
+    {
+      "controller": "PublicCourseController.java",
+      "method": "GET",
+      "path": "/api/v1/public/courses",
+      "methodName": "searchPublicCourses"
+    },
+    {
+      "controller": "PublicCourseController.java",
+      "method": "GET",
+      "path": "/api/v1/public/courses/featured",
+      "methodName": "getFeaturedCourses"
+    },
+    {
+      "controller": "PublicCourseController.java",
+      "method": "GET",
+      "path": "/api/v1/public/courses/{id}",
+      "methodName": "getPublicCourseDetail"
+    },
+    {
+      "controller": "PublicCourseController.java",
+      "method": "GET",
+      "path": "/api/v1/public/courses/categories",
+      "methodName": "getPublicCategories"
+    },
+    {
+      "controller": "DashboardController.java",
+      "method": "GET",
+      "path": "/api/v1/dashboard",
+      "methodName": "getDashboardStats"
+    },
+    {
+      "controller": "DashboardController.java",
+      "method": "GET",
+      "path": "/api/v1/dashboard",
+      "methodName": "getDashboardStats"
+    },
+    {
+      "controller": "DashboardController.java",
+      "method": "GET",
+      "path": "/api/v1/dashboard/stats",
+      "methodName": "getDashboardStats"
+    },
+    {
+      "controller": "DashboardController.java",
+      "method": "GET",
+      "path": "/api/v1/admin/dashboard",
+      "methodName": "getDashboardStats"
+    },
+    {
+      "controller": "DashboardController.java",
+      "method": "GET",
+      "path": "/api/v1/admin/dashboard",
+      "methodName": "getDashboardStats"
+    },
+    {
+      "controller": "DashboardController.java",
+      "method": "GET",
+      "path": "/api/v1/admin/dashboard/stats",
+      "methodName": "getDashboardStats"
+    },
+    {
+      "controller": "FinanceController.java",
+      "method": "GET",
+      "path": "/api/v1/finance/overview",
+      "methodName": "getOverview"
+    },
+    {
+      "controller": "FinanceController.java",
+      "method": "GET",
+      "path": "/api/v1/finance/receivables",
+      "methodName": "searchReceivables"
+    },
+    {
+      "controller": "FinanceController.java",
+      "method": "GET",
+      "path": "/api/v1/finance/receivables/{id}",
+      "methodName": "getReceivableById"
+    },
+    {
+      "controller": "FinanceController.java",
+      "method": "POST",
+      "path": "/api/v1/finance/receivables",
+      "methodName": "createReceivable"
+    },
+    {
+      "controller": "FinanceController.java",
+      "method": "GET",
+      "path": "/api/v1/finance/payments",
+      "methodName": "searchPayments"
+    },
+    {
+      "controller": "FinanceController.java",
+      "method": "GET",
+      "path": "/api/v1/finance/payments/{id}",
+      "methodName": "getPaymentById"
+    },
+    {
+      "controller": "FinanceController.java",
+      "method": "POST",
+      "path": "/api/v1/finance/payments",
+      "methodName": "recordPayment"
+    },
+    {
+      "controller": "FinanceController.java",
+      "method": "POST",
+      "path": "/api/v1/finance/refunds",
+      "methodName": "processRefund"
+    },
+    {
+      "controller": "AuthController.java",
+      "method": "POST",
+      "path": "/api/v1/auth/login",
+      "methodName": "login"
+    },
+    {
+      "controller": "AuthController.java",
+      "method": "POST",
+      "path": "/api/v1/auth/oauth/google",
+      "methodName": "loginGoogle"
+    },
+    {
+      "controller": "AuthController.java",
+      "method": "POST",
+      "path": "/api/v1/auth/oauth/facebook",
+      "methodName": "loginFacebook"
+    },
+    {
+      "controller": "AuthController.java",
+      "method": "GET",
+      "path": "/api/v1/auth/me",
+      "methodName": "getCurrentUser"
+    },
+    {
+      "controller": "AuthController.java",
+      "method": "PUT",
+      "path": "/api/v1/auth/profile",
+      "methodName": "updateProfile"
+    },
+    {
+      "controller": "AuthController.java",
+      "method": "POST",
+      "path": "/api/v1/auth/change-password",
+      "methodName": "changePassword"
+    },
+    {
+      "controller": "AuthController.java",
+      "method": "POST",
+      "path": "/api/v1/auth/logout",
+      "methodName": "logout"
+    },
+    {
+      "controller": "SecurityAdminController.java",
+      "method": "GET",
+      "path": "/api/v1/admin/security/users",
+      "methodName": "getUsers"
+    },
+    {
+      "controller": "SecurityAdminController.java",
+      "method": "POST",
+      "path": "/api/v1/admin/security/users/{id}/require-password-change",
+      "methodName": "requirePasswordChange"
+    },
+    {
+      "controller": "SecurityAdminController.java",
+      "method": "POST",
+      "path": "/api/v1/admin/security/users/{id}/reset-password",
+      "methodName": "resetPassword"
+    },
+    {
+      "controller": "SecurityAdminController.java",
+      "method": "POST",
+      "path": "/api/v1/admin/security/users/{id}/toggle-lock",
+      "methodName": "toggleLock"
+    },
+    {
+      "controller": "SecurityAdminController.java",
+      "method": "GET",
+      "path": "/api/v1/admin/security/audit",
+      "methodName": "getSecurityAuditHistory"
+    },
+    {
+      "controller": "LeadController.java",
+      "method": "GET",
+      "path": "/api/v1/leads",
+      "methodName": "searchLeads"
+    },
+    {
+      "controller": "LeadController.java",
+      "method": "GET",
+      "path": "/api/v1/leads/{id}",
+      "methodName": "getLeadById"
+    },
+    {
+      "controller": "LeadController.java",
+      "method": "POST",
+      "path": "/api/v1/leads",
+      "methodName": "createLead"
+    },
+    {
+      "controller": "LeadController.java",
+      "method": "PATCH",
+      "path": "/api/v1/leads/{id}/status",
+      "methodName": "updateLeadStatus"
+    },
+    {
+      "controller": "LeadController.java",
+      "method": "POST",
+      "path": "/api/v1/leads/{id}/activities",
+      "methodName": "addActivity"
+    },
+    {
+      "controller": "LeadController.java",
+      "method": "POST",
+      "path": "/api/v1/leads/{id}/convert",
+      "methodName": "convertLead"
+    },
+    {
+      "controller": "PublicLeadController.java",
+      "method": "POST",
+      "path": "/api/v1/public/leads",
+      "methodName": "submitPublicLead"
+    },
+    {
+      "controller": "NotificationAdminController.java",
+      "method": "GET",
+      "path": "/api/v1/admin/notifications",
+      "methodName": "getAllNotifications"
+    },
+    {
+      "controller": "NotificationAdminController.java",
+      "method": "POST",
+      "path": "/api/v1/admin/notifications",
+      "methodName": "createNotification"
+    },
+    {
+      "controller": "NotificationAdminController.java",
+      "method": "DELETE",
+      "path": "/api/v1/admin/notifications/{id}",
+      "methodName": "deleteNotification"
+    },
+    {
+      "controller": "NotificationAdminController.java",
+      "method": "GET",
+      "path": "/api/v1/admin/notifications/teacher-materials",
+      "methodName": "getAllTeacherMaterials"
+    },
+    {
+      "controller": "NotificationController.java",
+      "method": "GET",
+      "path": "/api/v1/notifications/{id}",
+      "methodName": "getNotificationDetail"
+    },
+    {
+      "controller": "NotificationController.java",
+      "method": "POST",
+      "path": "/api/v1/notifications/{id}/read",
+      "methodName": "markAsRead"
+    },
+    {
+      "controller": "NotificationController.java",
+      "method": "POST",
+      "path": "/api/v1/notifications/read-all",
+      "methodName": "markAllAsRead"
+    },
+    {
+      "controller": "GuardianController.java",
+      "method": "GET",
+      "path": "/api/v1/guardians",
+      "methodName": "searchGuardians"
+    },
+    {
+      "controller": "GuardianController.java",
+      "method": "GET",
+      "path": "/api/v1/guardians/all",
+      "methodName": "getAllGuardiansList"
+    },
+    {
+      "controller": "GuardianController.java",
+      "method": "GET",
+      "path": "/api/v1/guardians/{id}",
+      "methodName": "getGuardianById"
+    },
+    {
+      "controller": "GuardianController.java",
+      "method": "POST",
+      "path": "/api/v1/guardians",
+      "methodName": "createGuardian"
+    },
+    {
+      "controller": "GuardianController.java",
+      "method": "PUT",
+      "path": "/api/v1/guardians/{id}",
+      "methodName": "updateGuardian"
+    },
+    {
+      "controller": "StudentController.java",
+      "method": "GET",
+      "path": "/api/v1/students/stats",
+      "methodName": "getStudentStats"
+    },
+    {
+      "controller": "StudentController.java",
+      "method": "GET",
+      "path": "/api/v1/students",
+      "methodName": "searchStudents"
+    },
+    {
+      "controller": "StudentController.java",
+      "method": "GET",
+      "path": "/api/v1/students/{id}",
+      "methodName": "getStudentById"
+    },
+    {
+      "controller": "StudentController.java",
+      "method": "POST",
+      "path": "/api/v1/students",
+      "methodName": "createStudent"
+    },
+    {
+      "controller": "StudentController.java",
+      "method": "PUT",
+      "path": "/api/v1/students/{id}",
+      "methodName": "updateStudent"
+    },
+    {
+      "controller": "StudentController.java",
+      "method": "PATCH",
+      "path": "/api/v1/students/{id}/status",
+      "methodName": "updateStudentStatus"
+    },
+    {
+      "controller": "StudentController.java",
+      "method": "POST",
+      "path": "/api/v1/students/{id}/provision-account",
+      "methodName": "provisionAccount"
+    },
+    {
+      "controller": "StudentController.java",
+      "method": "POST",
+      "path": "/api/v1/students/{id}/enroll-and-pay",
+      "methodName": "enrollAndPay"
+    },
+    {
+      "controller": "StudentController.java",
+      "method": "DELETE",
+      "path": "/api/v1/students/{id}",
+      "methodName": "deleteStudent"
+    },
+    {
+      "controller": "StudentPortalController.java",
+      "method": "GET",
+      "path": "/api/v1/student/portal/me",
+      "methodName": "getMyPortalDashboard"
+    },
+    {
+      "controller": "StudentPortalController.java",
+      "method": "GET",
+      "path": "/api/v1/student/portal/classes/{classId}",
+      "methodName": "getClassDetails"
+    },
+    {
+      "controller": "StudentPortalController.java",
+      "method": "GET",
+      "path": "/api/v1/student/portal/notifications",
+      "methodName": "getMyNotifications"
+    },
+    {
+      "controller": "StudentPortalController.java",
+      "method": "POST",
+      "path": "/api/v1/student/portal/change-password",
+      "methodName": "changePassword"
+    },
+    {
+      "controller": "StudentPortalController.java",
+      "method": "GET",
+      "path": "/api/v1/student/portal/courses",
+      "methodName": "getMyCourses"
+    },
+    {
+      "controller": "StudentPortalController.java",
+      "method": "GET",
+      "path": "/api/v1/student/portal/schedule",
+      "methodName": "getMySchedule"
+    },
+    {
+      "controller": "StudentPortalController.java",
+      "method": "GET",
+      "path": "/api/v1/student/portal/attendance",
+      "methodName": "getMyAttendance"
+    },
+    {
+      "controller": "StudentPortalController.java",
+      "method": "GET",
+      "path": "/api/v1/student/portal/tuition",
+      "methodName": "unknown"
+    },
+    {
+      "controller": "StudentPortalController.java",
+      "method": "GET",
+      "path": "/api/v1/student/portal/profile",
+      "methodName": "getMyProfile"
+    }
+  ],
+  "frontend": [
+    {
+      "file": "api/adminAudit.ts",
+      "method": "GET",
+      "rawUrl": "/admin/audit-logs/recent"
+    },
+    {
+      "file": "api/assessment.ts",
+      "method": "GET",
+      "rawUrl": "/assessment/questions/${id}"
+    },
+    {
+      "file": "api/assessment.ts",
+      "method": "POST",
+      "rawUrl": "/assessment/questions"
+    },
+    {
+      "file": "api/assessment.ts",
+      "method": "PUT",
+      "rawUrl": "/assessment/questions/${id}"
+    },
+    {
+      "file": "api/assessment.ts",
+      "method": "DELETE",
+      "rawUrl": "/assessment/questions/${id}"
+    },
+    {
+      "file": "api/assessment.ts",
+      "method": "GET",
+      "rawUrl": "/assessment/banks"
+    },
+    {
+      "file": "api/assessment.ts",
+      "method": "POST",
+      "rawUrl": "/assessment/banks"
+    },
+    {
+      "file": "api/assessment.ts",
+      "method": "GET",
+      "rawUrl": "/assessment/exams/${id}"
+    },
+    {
+      "file": "api/assessment.ts",
+      "method": "POST",
+      "rawUrl": "/assessment/exams"
+    },
+    {
+      "file": "api/assessment.ts",
+      "method": "PUT",
+      "rawUrl": "/assessment/exams/${id}"
+    },
+    {
+      "file": "api/assessment.ts",
+      "method": "POST",
+      "rawUrl": "/assessment/exams/${id}/duplicate"
+    },
+    {
+      "file": "api/assessment.ts",
+      "method": "POST",
+      "rawUrl": "/assessment/exams/${id}/submit-review"
+    },
+    {
+      "file": "api/assessment.ts",
+      "method": "POST",
+      "rawUrl": "/assessment/exams/${id}/approve"
+    },
+    {
+      "file": "api/assessment.ts",
+      "method": "POST",
+      "rawUrl": "/assessment/exams/${id}/request-changes"
+    },
+    {
+      "file": "api/assessment.ts",
+      "method": "POST",
+      "rawUrl": "/assessment/exams/${id}/reject"
+    },
+    {
+      "file": "api/assessment.ts",
+      "method": "POST",
+      "rawUrl": "/assessment/exams/${id}/publish"
+    },
+    {
+      "file": "api/assessment.ts",
+      "method": "GET",
+      "rawUrl": "/assessment/exams/${id}/review-history"
+    },
+    {
+      "file": "api/assessment.ts",
+      "method": "GET",
+      "rawUrl": "/assessment/exams/approval-stats"
+    },
+    {
+      "file": "api/assessment.ts",
+      "method": "POST",
+      "rawUrl": "/assessment/exams/${id}/re-grade"
+    },
+    {
+      "file": "api/assessment.ts",
+      "method": "GET",
+      "rawUrl": "/assessment/student/assigned-exams"
+    },
+    {
+      "file": "api/assessment.ts",
+      "method": "POST",
+      "rawUrl": "/assessment/exam-room/start/${examId}"
+    },
+    {
+      "file": "api/assessment.ts",
+      "method": "POST",
+      "rawUrl": "/assessment/exam-room/save/${attemptId}"
+    },
+    {
+      "file": "api/assessment.ts",
+      "method": "POST",
+      "rawUrl": "/assessment/exam-room/submit/${attemptId}"
+    },
+    {
+      "file": "api/assessment.ts",
+      "method": "GET",
+      "rawUrl": "/assessment/exam-room/result/${attemptId}"
+    },
+    {
+      "file": "api/assessment.ts",
+      "method": "POST",
+      "rawUrl": "/assessment/grading/attempts/${attemptId}/manual"
+    },
+    {
+      "file": "api/assessment.ts",
+      "method": "GET",
+      "rawUrl": "/assessment/analytics/exam/${examId}"
+    },
+    {
+      "file": "api/assessment.ts",
+      "method": "GET",
+      "rawUrl": "/assessment/analytics/student/${studentId}"
+    },
+    {
+      "file": "api/assessment.ts",
+      "method": "GET",
+      "rawUrl": "/assessment/analytics/my-progress"
+    },
+    {
+      "file": "api/assessment.ts",
+      "method": "POST",
+      "rawUrl": "/assessment/questions/import/preview"
+    },
+    {
+      "file": "api/assessment.ts",
+      "method": "POST",
+      "rawUrl": "/assessment/questions/import/confirm"
+    },
+    {
+      "file": "api/assessment.ts",
+      "method": "GET",
+      "rawUrl": "/assessment/analytics/class/${classId}?${q.toString()}"
+    },
+    {
+      "file": "api/assessment.ts",
+      "method": "GET",
+      "rawUrl": "/assessment/analytics/student/${studentId}/class/${classId}"
+    },
+    {
+      "file": "api/assessment.ts",
+      "method": "GET",
+      "rawUrl": "/assessment/analytics/session/${sessionId}"
+    },
+    {
+      "file": "api/attendance.ts",
+      "method": "GET",
+      "rawUrl": "/attendance/sessions?${query.toString()}"
+    },
+    {
+      "file": "api/attendance.ts",
+      "method": "GET",
+      "rawUrl": "/attendance/sessions/${sessionId}"
+    },
+    {
+      "file": "api/attendance.ts",
+      "method": "POST",
+      "rawUrl": "/attendance/sessions/${sessionId}"
+    },
+    {
+      "file": "api/attendance.ts",
+      "method": "GET",
+      "rawUrl": "/attendance/students/${studentId}/stats"
+    },
+    {
+      "file": "api/attendanceMonitoring.ts",
+      "method": "GET",
+      "rawUrl": "/admin/attendance-monitoring?${query.toString()}"
+    },
+    {
+      "file": "api/attendanceMonitoring.ts",
+      "method": "GET",
+      "rawUrl": "/admin/attendance-monitoring/sessions/${sessionId}"
+    },
+    {
+      "file": "api/classes.ts",
+      "method": "GET",
+      "rawUrl": "/classes/${classId}/sessions"
+    },
+    {
+      "file": "api/classes.ts",
+      "method": "GET",
+      "rawUrl": "/classes/${id}"
+    },
+    {
+      "file": "api/classes.ts",
+      "method": "POST",
+      "rawUrl": "/classes"
+    },
+    {
+      "file": "api/classes.ts",
+      "method": "GET",
+      "rawUrl": "/teachers/active"
+    },
+    {
+      "file": "api/classes.ts",
+      "method": "GET",
+      "rawUrl": "/classes/${classId}/enrollments"
+    },
+    {
+      "file": "api/classes.ts",
+      "method": "POST",
+      "rawUrl": "/classes/enrollments"
+    },
+    {
+      "file": "api/courses.ts",
+      "method": "GET",
+      "rawUrl": "/courses/${id}"
+    },
+    {
+      "file": "api/courses.ts",
+      "method": "POST",
+      "rawUrl": "/courses"
+    },
+    {
+      "file": "api/courses.ts",
+      "method": "PUT",
+      "rawUrl": "/courses/${id}"
+    },
+    {
+      "file": "api/courses.ts",
+      "method": "PATCH",
+      "rawUrl": "/courses/${id}/status"
+    },
+    {
+      "file": "api/courses.ts",
+      "method": "DELETE",
+      "rawUrl": "/courses/${id}"
+    },
+    {
+      "file": "api/courses.ts",
+      "method": "GET",
+      "rawUrl": "/course-categories"
+    },
+    {
+      "file": "api/courses.ts",
+      "method": "GET",
+      "rawUrl": "/course-categories/active"
+    },
+    {
+      "file": "api/courses.ts",
+      "method": "POST",
+      "rawUrl": "/course-categories"
+    },
+    {
+      "file": "api/files.ts",
+      "method": "POST",
+      "rawUrl": "/files/upload"
+    },
+    {
+      "file": "api/finance.ts",
+      "method": "GET",
+      "rawUrl": "/finance/overview"
+    },
+    {
+      "file": "api/finance.ts",
+      "method": "GET",
+      "rawUrl": "/finance/receivables/${id}"
+    },
+    {
+      "file": "api/finance.ts",
+      "method": "POST",
+      "rawUrl": "/finance/receivables"
+    },
+    {
+      "file": "api/finance.ts",
+      "method": "GET",
+      "rawUrl": "/finance/payments/${id}"
+    },
+    {
+      "file": "api/finance.ts",
+      "method": "POST",
+      "rawUrl": "/finance/payments"
+    },
+    {
+      "file": "api/finance.ts",
+      "method": "POST",
+      "rawUrl": "/finance/refunds"
+    },
+    {
+      "file": "api/leads.ts",
+      "method": "GET",
+      "rawUrl": "/leads/${id}"
+    },
+    {
+      "file": "api/leads.ts",
+      "method": "POST",
+      "rawUrl": "/leads"
+    },
+    {
+      "file": "api/leads.ts",
+      "method": "POST",
+      "rawUrl": "/public/leads"
+    },
+    {
+      "file": "api/leads.ts",
+      "method": "PATCH",
+      "rawUrl": "/leads/${id}/status?status=${encodeURIComponent(status)}"
+    },
+    {
+      "file": "api/leads.ts",
+      "method": "POST",
+      "rawUrl": "/leads/${id}/activities"
+    },
+    {
+      "file": "api/leads.ts",
+      "method": "POST",
+      "rawUrl": "/leads/${id}/convert"
+    },
+    {
+      "file": "api/public.ts",
+      "method": "GET",
+      "rawUrl": "/public/courses/featured"
+    },
+    {
+      "file": "api/public.ts",
+      "method": "GET",
+      "rawUrl": "/public/courses/categories"
+    },
+    {
+      "file": "api/public.ts",
+      "method": "GET",
+      "rawUrl": "/public/courses/${id}"
+    },
+    {
+      "file": "api/public.ts",
+      "method": "POST",
+      "rawUrl": "/public/leads"
+    },
+    {
+      "file": "api/settings.ts",
+      "method": "GET",
+      "rawUrl": "/admin/settings"
+    },
+    {
+      "file": "api/settings.ts",
+      "method": "PUT",
+      "rawUrl": "/admin/settings"
+    },
+    {
+      "file": "api/settings.ts",
+      "method": "GET",
+      "rawUrl": "/public/settings"
+    },
+    {
+      "file": "api/students.ts",
+      "method": "GET",
+      "rawUrl": "/students/stats"
+    },
+    {
+      "file": "api/students.ts",
+      "method": "GET",
+      "rawUrl": "/students/${id}"
+    },
+    {
+      "file": "api/students.ts",
+      "method": "POST",
+      "rawUrl": "/students"
+    },
+    {
+      "file": "api/students.ts",
+      "method": "PUT",
+      "rawUrl": "/students/${id}"
+    },
+    {
+      "file": "api/students.ts",
+      "method": "PATCH",
+      "rawUrl": "/students/${id}/status"
+    },
+    {
+      "file": "api/students.ts",
+      "method": "DELETE",
+      "rawUrl": "/students/${id}"
+    },
+    {
+      "file": "api/students.ts",
+      "method": "POST",
+      "rawUrl": "/students/${id}/provision-account"
+    },
+    {
+      "file": "api/students.ts",
+      "method": "POST",
+      "rawUrl": "/students/${id}/enroll-and-pay"
+    },
+    {
+      "file": "api/students.ts",
+      "method": "GET",
+      "rawUrl": "/student/portal/me"
+    },
+    {
+      "file": "api/students.ts",
+      "method": "GET",
+      "rawUrl": "/student/portal/classes/${classId}"
+    },
+    {
+      "file": "api/students.ts",
+      "method": "GET",
+      "rawUrl": "/student/portal/notifications"
+    },
+    {
+      "file": "api/students.ts",
+      "method": "POST",
+      "rawUrl": "/student/portal/change-password"
+    },
+    {
+      "file": "api/students.ts",
+      "method": "GET",
+      "rawUrl": "/student/portal/schedule"
+    },
+    {
+      "file": "api/students.ts",
+      "method": "GET",
+      "rawUrl": "/student/portal/attendance"
+    },
+    {
+      "file": "api/students.ts",
+      "method": "GET",
+      "rawUrl": "/student/portal/tuition"
+    },
+    {
+      "file": "api/students.ts",
+      "method": "GET",
+      "rawUrl": "/student/portal/profile"
+    },
+    {
+      "file": "api/students.ts",
+      "method": "GET",
+      "rawUrl": "/student/portal/courses"
+    },
+    {
+      "file": "api/students.ts",
+      "method": "GET",
+      "rawUrl": "/guardians/all"
+    },
+    {
+      "file": "api/students.ts",
+      "method": "POST",
+      "rawUrl": "/guardians"
+    },
+    {
+      "file": "api/teacherAssignments.ts",
+      "method": "GET",
+      "rawUrl": "/admin/teacher-assignments?${query.toString()}"
+    },
+    {
+      "file": "api/teacherAssignments.ts",
+      "method": "POST",
+      "rawUrl": "/admin/teacher-assignments"
+    },
+    {
+      "file": "api/teacherAssignments.ts",
+      "method": "PUT",
+      "rawUrl": "/admin/teacher-assignments/${id}/end${query}"
+    },
+    {
+      "file": "pages/admin/assessment/GradingListPage.tsx",
+      "method": "GET",
+      "rawUrl": "/assessment/grading/attempts?${q.toString()}"
+    },
+    {
+      "file": "pages/admin/assessment/GradingListPage.tsx",
+      "method": "GET",
+      "rawUrl": "/assessment/grading/attempts/${attemptId}"
+    }
+  ]
+}

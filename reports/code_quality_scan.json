@@ -1,0 +1,17 @@
+{
+  "todos": [],
+  "fixmes": [],
+  "mockFallbacks": [
+    {
+      "file": "vn/chacademy/assessment/controller/AssessmentAnalyticsController.java",
+      "line": 70,
+      "text": ".orElseGet(() -> studentRepository.findAll().stream()"
+    },
+    {
+      "file": "vn/chacademy/assessment/service/ExamAttemptService.java",
+      "line": 51,
+      "text": ".orElseGet(() -> studentRepository.findAll().stream()"
+    }
+  ],
+  "emptyCatches": []
+}

@@ -90,8 +90,8 @@ export const GradingListPage: React.FC = () => {
     try {
       const items = Object.entries(essayScores).map(([qId, val]) => ({
         questionId: Number(qId),
-        score: Number(val.score),
-        teacherFeedback: val.feedback.trim()
+        score: Number(val.score || 0),
+        teacherFeedback: (val.feedback || '').trim()
       }))
 
       const res = await assessmentApi.submitManualGrade(selectedAttemptId, items)

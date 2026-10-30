@@ -1,0 +1,796 @@
+{
+  "summary": {
+    "totalFrontend": 97,
+    "matched": 96,
+    "unmatched": 1
+  },
+  "matrix": [
+    {
+      "frontendFile": "api/adminAudit.ts",
+      "rawUrl": "/admin/audit-logs/recent",
+      "method": "GET",
+      "normalized": "/admin/audit-logs/recent",
+      "matchedBackend": "AuditLogAdminController.java -> getRecentLogs (/api/v1/admin/audit-logs/recent)",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/assessment.ts",
+      "rawUrl": "/assessment/questions/${id}",
+      "method": "GET",
+      "normalized": "/assessment/questions/{param}",
+      "matchedBackend": "QuestionController.java -> getQuestion (/api/v1/assessment/questions/{id})",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/assessment.ts",
+      "rawUrl": "/assessment/questions",
+      "method": "POST",
+      "normalized": "/assessment/questions",
+      "matchedBackend": "QuestionController.java -> createQuestion (/api/v1/assessment/questions)",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/assessment.ts",
+      "rawUrl": "/assessment/questions/${id}",
+      "method": "PUT",
+      "normalized": "/assessment/questions/{param}",
+      "matchedBackend": "QuestionController.java -> updateQuestion (/api/v1/assessment/questions/{id})",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/assessment.ts",
+      "rawUrl": "/assessment/questions/${id}",
+      "method": "DELETE",
+      "normalized": "/assessment/questions/{param}",
+      "matchedBackend": "QuestionController.java -> deleteQuestion (/api/v1/assessment/questions/{id})",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/assessment.ts",
+      "rawUrl": "/assessment/banks",
+      "method": "GET",
+      "normalized": "/assessment/banks",
+      "matchedBackend": "QuestionController.java -> getQuestionBanks (/api/v1/assessment/banks)",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/assessment.ts",
+      "rawUrl": "/assessment/banks",
+      "method": "POST",
+      "normalized": "/assessment/banks",
+      "matchedBackend": "QuestionController.java -> createQuestionBank (/api/v1/assessment/banks)",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/assessment.ts",
+      "rawUrl": "/assessment/exams/${id}",
+      "method": "GET",
+      "normalized": "/assessment/exams/{param}",
+      "matchedBackend": "ExamController.java -> getExam (/api/v1/assessment/exams/{id})",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/assessment.ts",
+      "rawUrl": "/assessment/exams",
+      "method": "POST",
+      "normalized": "/assessment/exams",
+      "matchedBackend": "ExamController.java -> createExam (/api/v1/assessment/exams)",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/assessment.ts",
+      "rawUrl": "/assessment/exams/${id}",
+      "method": "PUT",
+      "normalized": "/assessment/exams/{param}",
+      "matchedBackend": "ExamController.java -> updateExam (/api/v1/assessment/exams/{id})",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/assessment.ts",
+      "rawUrl": "/assessment/exams/${id}/duplicate",
+      "method": "POST",
+      "normalized": "/assessment/exams/{param}/duplicate",
+      "matchedBackend": "ExamController.java -> duplicateExam (/api/v1/assessment/exams/{id}/duplicate)",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/assessment.ts",
+      "rawUrl": "/assessment/exams/${id}/submit-review",
+      "method": "POST",
+      "normalized": "/assessment/exams/{param}/submit-review",
+      "matchedBackend": "ExamController.java -> submitForReview (/api/v1/assessment/exams/{id}/submit-review)",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/assessment.ts",
+      "rawUrl": "/assessment/exams/${id}/approve",
+      "method": "POST",
+      "normalized": "/assessment/exams/{param}/approve",
+      "matchedBackend": "ExamController.java -> approveExam (/api/v1/assessment/exams/{id}/approve)",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/assessment.ts",
+      "rawUrl": "/assessment/exams/${id}/request-changes",
+      "method": "POST",
+      "normalized": "/assessment/exams/{param}/request-changes",
+      "matchedBackend": "ExamController.java -> requestChanges (/api/v1/assessment/exams/{id}/request-changes)",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/assessment.ts",
+      "rawUrl": "/assessment/exams/${id}/reject",
+      "method": "POST",
+      "normalized": "/assessment/exams/{param}/reject",
+      "matchedBackend": "ExamController.java -> rejectExam (/api/v1/assessment/exams/{id}/reject)",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/assessment.ts",
+      "rawUrl": "/assessment/exams/${id}/publish",
+      "method": "POST",
+      "normalized": "/assessment/exams/{param}/publish",
+      "matchedBackend": "ExamController.java -> publishExam (/api/v1/assessment/exams/{id}/publish)",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/assessment.ts",
+      "rawUrl": "/assessment/exams/${id}/review-history",
+      "method": "GET",
+      "normalized": "/assessment/exams/{param}/review-history",
+      "matchedBackend": "ExamController.java -> getReviewHistory (/api/v1/assessment/exams/{id}/review-history)",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/assessment.ts",
+      "rawUrl": "/assessment/exams/approval-stats",
+      "method": "GET",
+      "normalized": "/assessment/exams/approval-stats",
+      "matchedBackend": "ExamController.java -> getApprovalStats (/api/v1/assessment/exams/approval-stats)",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/assessment.ts",
+      "rawUrl": "/assessment/exams/${id}/re-grade",
+      "method": "POST",
+      "normalized": "/assessment/exams/{param}/re-grade",
+      "matchedBackend": "ExamController.java -> reGradeExam (/api/v1/assessment/exams/{id}/re-grade)",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/assessment.ts",
+      "rawUrl": "/assessment/student/assigned-exams",
+      "method": "GET",
+      "normalized": "/assessment/student/assigned-exams",
+      "matchedBackend": "OnlineExamController.java -> getAssignedExams (/api/v1/assessment/student/assigned-exams)",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/assessment.ts",
+      "rawUrl": "/assessment/exam-room/start/${examId}",
+      "method": "POST",
+      "normalized": "/assessment/exam-room/start/{param}",
+      "matchedBackend": "OnlineExamController.java -> startOrResumeAttempt (/api/v1/assessment/exam-room/start/{examId})",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/assessment.ts",
+      "rawUrl": "/assessment/exam-room/save/${attemptId}",
+      "method": "POST",
+      "normalized": "/assessment/exam-room/save/{param}",
+      "matchedBackend": "OnlineExamController.java -> saveAnswer (/api/v1/assessment/exam-room/save/{attemptId})",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/assessment.ts",
+      "rawUrl": "/assessment/exam-room/submit/${attemptId}",
+      "method": "POST",
+      "normalized": "/assessment/exam-room/submit/{param}",
+      "matchedBackend": "OnlineExamController.java -> submitAttempt (/api/v1/assessment/exam-room/submit/{attemptId})",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/assessment.ts",
+      "rawUrl": "/assessment/exam-room/result/${attemptId}",
+      "method": "GET",
+      "normalized": "/assessment/exam-room/result/{param}",
+      "matchedBackend": "OnlineExamController.java -> getResult (/api/v1/assessment/exam-room/result/{attemptId})",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/assessment.ts",
+      "rawUrl": "/assessment/grading/attempts/${attemptId}/manual",
+      "method": "POST",
+      "normalized": "/assessment/grading/attempts/{param}/manual",
+      "matchedBackend": "GradingController.java -> gradeManual (/api/v1/assessment/grading/attempts/{attemptId}/manual)",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/assessment.ts",
+      "rawUrl": "/assessment/analytics/exam/${examId}",
+      "method": "GET",
+      "normalized": "/assessment/analytics/exam/{param}",
+      "matchedBackend": "AssessmentAnalyticsController.java -> getExamAnalytics (/api/v1/assessment/analytics/exam/{examId})",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/assessment.ts",
+      "rawUrl": "/assessment/analytics/student/${studentId}",
+      "method": "GET",
+      "normalized": "/assessment/analytics/student/{param}",
+      "matchedBackend": "AssessmentAnalyticsController.java -> getStudentAnalytics (/api/v1/assessment/analytics/student/{studentId})",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/assessment.ts",
+      "rawUrl": "/assessment/analytics/my-progress",
+      "method": "GET",
+      "normalized": "/assessment/analytics/my-progress",
+      "matchedBackend": "AssessmentAnalyticsController.java -> getMyProgress (/api/v1/assessment/analytics/my-progress)",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/assessment.ts",
+      "rawUrl": "/assessment/questions/import/preview",
+      "method": "POST",
+      "normalized": "/assessment/questions/import/preview",
+      "matchedBackend": "QuestionController.java -> previewImport (/api/v1/assessment/questions/import/preview)",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/assessment.ts",
+      "rawUrl": "/assessment/questions/import/confirm",
+      "method": "POST",
+      "normalized": "/assessment/questions/import/confirm",
+      "matchedBackend": "QuestionController.java -> confirmImport (/api/v1/assessment/questions/import/confirm)",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/assessment.ts",
+      "rawUrl": "/assessment/analytics/class/${classId}?${q.toString()}",
+      "method": "GET",
+      "normalized": "/assessment/analytics/class/{param}",
+      "matchedBackend": "AssessmentAnalyticsController.java -> getClassAnalytics (/api/v1/assessment/analytics/class/{classId})",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/assessment.ts",
+      "rawUrl": "/assessment/analytics/student/${studentId}/class/${classId}",
+      "method": "GET",
+      "normalized": "/assessment/analytics/student/{param}/class/{param}",
+      "matchedBackend": "AssessmentAnalyticsController.java -> getStudentClassDetail (/api/v1/assessment/analytics/student/{studentId}/class/{classId})",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/assessment.ts",
+      "rawUrl": "/assessment/analytics/session/${sessionId}",
+      "method": "GET",
+      "normalized": "/assessment/analytics/session/{param}",
+      "matchedBackend": "AssessmentAnalyticsController.java -> getSessionQuality (/api/v1/assessment/analytics/session/{sessionId})",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/attendance.ts",
+      "rawUrl": "/attendance/sessions?${query.toString()}",
+      "method": "GET",
+      "normalized": "/attendance/sessions",
+      "matchedBackend": "AttendanceController.java -> getSessions (/api/v1/attendance/sessions)",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/attendance.ts",
+      "rawUrl": "/attendance/sessions/${sessionId}",
+      "method": "GET",
+      "normalized": "/attendance/sessions/{param}",
+      "matchedBackend": "AttendanceController.java -> getSessionAttendance (/api/v1/attendance/sessions/{sessionId})",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/attendance.ts",
+      "rawUrl": "/attendance/sessions/${sessionId}",
+      "method": "POST",
+      "normalized": "/attendance/sessions/{param}",
+      "matchedBackend": "AttendanceController.java -> markAttendance (/api/v1/attendance/sessions/{sessionId})",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/attendance.ts",
+      "rawUrl": "/attendance/students/${studentId}/stats",
+      "method": "GET",
+      "normalized": "/attendance/students/{param}/stats",
+      "matchedBackend": "AttendanceController.java -> getStudentStats (/api/v1/attendance/students/{studentId}/stats)",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/attendanceMonitoring.ts",
+      "rawUrl": "/admin/attendance-monitoring?${query.toString()}",
+      "method": "GET",
+      "normalized": "/admin/attendance-monitoring",
+      "matchedBackend": "AttendanceMonitoringAdminController.java -> getMonitoringSessions (/api/v1/admin/attendance-monitoring)",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/attendanceMonitoring.ts",
+      "rawUrl": "/admin/attendance-monitoring/sessions/${sessionId}",
+      "method": "GET",
+      "normalized": "/admin/attendance-monitoring/sessions/{param}",
+      "matchedBackend": "AttendanceMonitoringAdminController.java -> getSessionDetails (/api/v1/admin/attendance-monitoring/sessions/{sessionId})",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/classes.ts",
+      "rawUrl": "/classes/${classId}/sessions",
+      "method": "GET",
+      "normalized": "/classes/{param}/sessions",
+      "matchedBackend": "ClassController.java -> getClassSessions (/api/v1/classes/{id}/sessions)",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/classes.ts",
+      "rawUrl": "/classes/${id}",
+      "method": "GET",
+      "normalized": "/classes/{param}",
+      "matchedBackend": "ClassController.java -> getClassById (/api/v1/classes/{id})",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/classes.ts",
+      "rawUrl": "/classes",
+      "method": "POST",
+      "normalized": "/classes",
+      "matchedBackend": "ClassController.java -> createClass (/api/v1/classes)",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/classes.ts",
+      "rawUrl": "/teachers/active",
+      "method": "GET",
+      "normalized": "/teachers/active",
+      "matchedBackend": "TeacherController.java -> getActiveTeachers (/api/v1/teachers/active)",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/classes.ts",
+      "rawUrl": "/classes/${classId}/enrollments",
+      "method": "GET",
+      "normalized": "/classes/{param}/enrollments",
+      "matchedBackend": "ClassController.java -> getEnrollments (/api/v1/classes/{id}/enrollments)",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/classes.ts",
+      "rawUrl": "/classes/enrollments",
+      "method": "POST",
+      "normalized": "/classes/enrollments",
+      "matchedBackend": "ClassController.java -> enrollStudent (/api/v1/classes/enrollments)",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/courses.ts",
+      "rawUrl": "/courses/${id}",
+      "method": "GET",
+      "normalized": "/courses/{param}",
+      "matchedBackend": "CourseController.java -> getCourseById (/api/v1/courses/{id})",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/courses.ts",
+      "rawUrl": "/courses",
+      "method": "POST",
+      "normalized": "/courses",
+      "matchedBackend": "CourseController.java -> createCourse (/api/v1/courses)",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/courses.ts",
+      "rawUrl": "/courses/${id}",
+      "method": "PUT",
+      "normalized": "/courses/{param}",
+      "matchedBackend": "CourseController.java -> updateCourse (/api/v1/courses/{id})",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/courses.ts",
+      "rawUrl": "/courses/${id}/status",
+      "method": "PATCH",
+      "normalized": "/courses/{param}/status",
+      "matchedBackend": "CourseController.java -> updateCourseStatus (/api/v1/courses/{id}/status)",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/courses.ts",
+      "rawUrl": "/courses/${id}",
+      "method": "DELETE",
+      "normalized": "/courses/{param}",
+      "matchedBackend": "CourseController.java -> deleteCourse (/api/v1/courses/{id})",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/courses.ts",
+      "rawUrl": "/course-categories",
+      "method": "GET",
+      "normalized": "/course-categories",
+      "matchedBackend": "CourseCategoryController.java -> getAllCategories (/api/v1/course-categories)",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/courses.ts",
+      "rawUrl": "/course-categories/active",
+      "method": "GET",
+      "normalized": "/course-categories/active",
+      "matchedBackend": "CourseCategoryController.java -> getActiveCategories (/api/v1/course-categories/active)",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/courses.ts",
+      "rawUrl": "/course-categories",
+      "method": "POST",
+      "normalized": "/course-categories",
+      "matchedBackend": "CourseCategoryController.java -> createCategory (/api/v1/course-categories)",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/files.ts",
+      "rawUrl": "/files/upload",
+      "method": "POST",
+      "normalized": "/files/upload",
+      "matchedBackend": "FileUploadController.java -> uploadFile (/api/v1/files/upload)",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/finance.ts",
+      "rawUrl": "/finance/overview",
+      "method": "GET",
+      "normalized": "/finance/overview",
+      "matchedBackend": "FinanceController.java -> getOverview (/api/v1/finance/overview)",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/finance.ts",
+      "rawUrl": "/finance/receivables/${id}",
+      "method": "GET",
+      "normalized": "/finance/receivables/{param}",
+      "matchedBackend": "FinanceController.java -> getReceivableById (/api/v1/finance/receivables/{id})",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/finance.ts",
+      "rawUrl": "/finance/receivables",
+      "method": "POST",
+      "normalized": "/finance/receivables",
+      "matchedBackend": "FinanceController.java -> createReceivable (/api/v1/finance/receivables)",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/finance.ts",
+      "rawUrl": "/finance/payments/${id}",
+      "method": "GET",
+      "normalized": "/finance/payments/{param}",
+      "matchedBackend": "FinanceController.java -> getPaymentById (/api/v1/finance/payments/{id})",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/finance.ts",
+      "rawUrl": "/finance/payments",
+      "method": "POST",
+      "normalized": "/finance/payments",
+      "matchedBackend": "FinanceController.java -> recordPayment (/api/v1/finance/payments)",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/finance.ts",
+      "rawUrl": "/finance/refunds",
+      "method": "POST",
+      "normalized": "/finance/refunds",
+      "matchedBackend": "FinanceController.java -> processRefund (/api/v1/finance/refunds)",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/leads.ts",
+      "rawUrl": "/leads/${id}",
+      "method": "GET",
+      "normalized": "/leads/{param}",
+      "matchedBackend": "LeadController.java -> getLeadById (/api/v1/leads/{id})",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/leads.ts",
+      "rawUrl": "/leads",
+      "method": "POST",
+      "normalized": "/leads",
+      "matchedBackend": "LeadController.java -> createLead (/api/v1/leads)",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/leads.ts",
+      "rawUrl": "/public/leads",
+      "method": "POST",
+      "normalized": "/public/leads",
+      "matchedBackend": "PublicLeadController.java -> submitPublicLead (/api/v1/public/leads)",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/leads.ts",
+      "rawUrl": "/leads/${id}/status?status=${encodeURIComponent(status)}",
+      "method": "PATCH",
+      "normalized": "/leads/{param}/status",
+      "matchedBackend": "LeadController.java -> updateLeadStatus (/api/v1/leads/{id}/status)",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/leads.ts",
+      "rawUrl": "/leads/${id}/activities",
+      "method": "POST",
+      "normalized": "/leads/{param}/activities",
+      "matchedBackend": "LeadController.java -> addActivity (/api/v1/leads/{id}/activities)",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/leads.ts",
+      "rawUrl": "/leads/${id}/convert",
+      "method": "POST",
+      "normalized": "/leads/{param}/convert",
+      "matchedBackend": "LeadController.java -> convertLead (/api/v1/leads/{id}/convert)",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/public.ts",
+      "rawUrl": "/public/courses/featured",
+      "method": "GET",
+      "normalized": "/public/courses/featured",
+      "matchedBackend": "PublicCourseController.java -> getFeaturedCourses (/api/v1/public/courses/featured)",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/public.ts",
+      "rawUrl": "/public/courses/categories",
+      "method": "GET",
+      "normalized": "/public/courses/categories",
+      "matchedBackend": "PublicCourseController.java -> getPublicCategories (/api/v1/public/courses/categories)",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/public.ts",
+      "rawUrl": "/public/courses/${id}",
+      "method": "GET",
+      "normalized": "/public/courses/{param}",
+      "matchedBackend": "PublicCourseController.java -> getPublicCourseDetail (/api/v1/public/courses/{id})",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/public.ts",
+      "rawUrl": "/public/leads",
+      "method": "POST",
+      "normalized": "/public/leads",
+      "matchedBackend": "PublicLeadController.java -> submitPublicLead (/api/v1/public/leads)",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/settings.ts",
+      "rawUrl": "/admin/settings",
+      "method": "GET",
+      "normalized": "/admin/settings",
+      "matchedBackend": "SystemSettingController.java -> getSettings (/api/v1/admin/settings)",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/settings.ts",
+      "rawUrl": "/admin/settings",
+      "method": "PUT",
+      "normalized": "/admin/settings",
+      "matchedBackend": "SystemSettingController.java -> updateSettings (/api/v1/admin/settings)",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/settings.ts",
+      "rawUrl": "/public/settings",
+      "method": "GET",
+      "normalized": "/public/settings",
+      "matchedBackend": "SystemSettingController.java -> getPublicSettings (/api/v1/public/settings)",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/students.ts",
+      "rawUrl": "/students/stats",
+      "method": "GET",
+      "normalized": "/students/stats",
+      "matchedBackend": "StudentController.java -> getStudentStats (/api/v1/students/stats)",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/students.ts",
+      "rawUrl": "/students/${id}",
+      "method": "GET",
+      "normalized": "/students/{param}",
+      "matchedBackend": "StudentController.java -> getStudentById (/api/v1/students/{id})",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/students.ts",
+      "rawUrl": "/students",
+      "method": "POST",
+      "normalized": "/students",
+      "matchedBackend": "StudentController.java -> createStudent (/api/v1/students)",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/students.ts",
+      "rawUrl": "/students/${id}",
+      "method": "PUT",
+      "normalized": "/students/{param}",
+      "matchedBackend": "StudentController.java -> updateStudent (/api/v1/students/{id})",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/students.ts",
+      "rawUrl": "/students/${id}/status",
+      "method": "PATCH",
+      "normalized": "/students/{param}/status",
+      "matchedBackend": "StudentController.java -> updateStudentStatus (/api/v1/students/{id}/status)",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/students.ts",
+      "rawUrl": "/students/${id}",
+      "method": "DELETE",
+      "normalized": "/students/{param}",
+      "matchedBackend": "StudentController.java -> deleteStudent (/api/v1/students/{id})",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/students.ts",
+      "rawUrl": "/students/${id}/provision-account",
+      "method": "POST",
+      "normalized": "/students/{param}/provision-account",
+      "matchedBackend": "StudentController.java -> provisionAccount (/api/v1/students/{id}/provision-account)",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/students.ts",
+      "rawUrl": "/students/${id}/enroll-and-pay",
+      "method": "POST",
+      "normalized": "/students/{param}/enroll-and-pay",
+      "matchedBackend": "StudentController.java -> enrollAndPay (/api/v1/students/{id}/enroll-and-pay)",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/students.ts",
+      "rawUrl": "/student/portal/me",
+      "method": "GET",
+      "normalized": "/student/portal/me",
+      "matchedBackend": "StudentPortalController.java -> getMyPortalDashboard (/api/v1/student/portal/me)",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/students.ts",
+      "rawUrl": "/student/portal/classes/${classId}",
+      "method": "GET",
+      "normalized": "/student/portal/classes/{param}",
+      "matchedBackend": "StudentPortalController.java -> getClassDetails (/api/v1/student/portal/classes/{classId})",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/students.ts",
+      "rawUrl": "/student/portal/notifications",
+      "method": "GET",
+      "normalized": "/student/portal/notifications",
+      "matchedBackend": "StudentPortalController.java -> getMyNotifications (/api/v1/student/portal/notifications)",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/students.ts",
+      "rawUrl": "/student/portal/change-password",
+      "method": "POST",
+      "normalized": "/student/portal/change-password",
+      "matchedBackend": "StudentPortalController.java -> changePassword (/api/v1/student/portal/change-password)",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/students.ts",
+      "rawUrl": "/student/portal/schedule",
+      "method": "GET",
+      "normalized": "/student/portal/schedule",
+      "matchedBackend": "StudentPortalController.java -> getMySchedule (/api/v1/student/portal/schedule)",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/students.ts",
+      "rawUrl": "/student/portal/attendance",
+      "method": "GET",
+      "normalized": "/student/portal/attendance",
+      "matchedBackend": "StudentPortalController.java -> getMyAttendance (/api/v1/student/portal/attendance)",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/students.ts",
+      "rawUrl": "/student/portal/tuition",
+      "method": "GET",
+      "normalized": "/student/portal/tuition",
+      "matchedBackend": "StudentPortalController.java -> unknown (/api/v1/student/portal/tuition)",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/students.ts",
+      "rawUrl": "/student/portal/profile",
+      "method": "GET",
+      "normalized": "/student/portal/profile",
+      "matchedBackend": "StudentPortalController.java -> getMyProfile (/api/v1/student/portal/profile)",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/students.ts",
+      "rawUrl": "/student/portal/courses",
+      "method": "GET",
+      "normalized": "/student/portal/courses",
+      "matchedBackend": "StudentPortalController.java -> getMyCourses (/api/v1/student/portal/courses)",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/students.ts",
+      "rawUrl": "/guardians/all",
+      "method": "GET",
+      "normalized": "/guardians/all",
+      "matchedBackend": "GuardianController.java -> getAllGuardiansList (/api/v1/guardians/all)",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/students.ts",
+      "rawUrl": "/guardians",
+      "method": "POST",
+      "normalized": "/guardians",
+      "matchedBackend": "GuardianController.java -> createGuardian (/api/v1/guardians)",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/teacherAssignments.ts",
+      "rawUrl": "/admin/teacher-assignments?${query.toString()}",
+      "method": "GET",
+      "normalized": "/admin/teacher-assignments",
+      "matchedBackend": "TeacherAssignmentAdminController.java -> getAllAssignments (/api/v1/admin/teacher-assignments)",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/teacherAssignments.ts",
+      "rawUrl": "/admin/teacher-assignments",
+      "method": "POST",
+      "normalized": "/admin/teacher-assignments",
+      "matchedBackend": "TeacherAssignmentAdminController.java -> assignTeacher (/api/v1/admin/teacher-assignments)",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "api/teacherAssignments.ts",
+      "rawUrl": "/admin/teacher-assignments/${id}/end${query}",
+      "method": "PUT",
+      "normalized": "/admin/teacher-assignments/{param}/end{param}",
+      "matchedBackend": "NOT FOUND",
+      "status": "UNMATCHED"
+    },
+    {
+      "frontendFile": "pages/admin/assessment/GradingListPage.tsx",
+      "rawUrl": "/assessment/grading/attempts?${q.toString()}",
+      "method": "GET",
+      "normalized": "/assessment/grading/attempts",
+      "matchedBackend": "GradingController.java -> searchAttempts (/api/v1/assessment/grading/attempts)",
+      "status": "MATCHED"
+    },
+    {
+      "frontendFile": "pages/admin/assessment/GradingListPage.tsx",
+      "rawUrl": "/assessment/grading/attempts/${attemptId}",
+      "method": "GET",
+      "normalized": "/assessment/grading/attempts/{param}",
+      "matchedBackend": "GradingController.java -> getAttemptDetail (/api/v1/assessment/grading/attempts/{attemptId})",
+      "status": "MATCHED"
+    }
+  ],
+  "unmatchedFrontend": [
+    {
+      "fe": {
+        "file": "api/teacherAssignments.ts",
+        "method": "PUT",
+        "rawUrl": "/admin/teacher-assignments/${id}/end${query}"
+      },
+      "norm": "/admin/teacher-assignments/{param}/end{param}",
+      "key": "PUT /admin/teacher-assignments/{param}/end{param}"
+    }
+  ]
+}

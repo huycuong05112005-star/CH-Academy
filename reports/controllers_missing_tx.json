@@ -1,0 +1,42 @@
+[
+  {
+    "controller": "GradingController.java",
+    "methodName": "gradeManual",
+    "mapping": "@PostMapping(\"/attempts/{attemptId}/manual\")",
+    "hasRepoWrite": true,
+    "hasLazyAccess": true,
+    "line": 69
+  },
+  {
+    "controller": "FinanceController.java",
+    "methodName": "recordPayment",
+    "mapping": "@PostMapping(\"/payments\")",
+    "hasRepoWrite": false,
+    "hasLazyAccess": true,
+    "line": 96
+  },
+  {
+    "controller": "FinanceController.java",
+    "methodName": "processRefund",
+    "mapping": "@PostMapping(\"/refunds\")",
+    "hasRepoWrite": false,
+    "hasLazyAccess": true,
+    "line": 117
+  },
+  {
+    "controller": "NotificationController.java",
+    "methodName": "markAsRead",
+    "mapping": "@PostMapping(\"/{id}/read\")",
+    "hasRepoWrite": false,
+    "hasLazyAccess": true,
+    "line": 50
+  },
+  {
+    "controller": "NotificationController.java",
+    "methodName": "markAllAsRead",
+    "mapping": "@PostMapping(\"/read-all\")",
+    "hasRepoWrite": false,
+    "hasLazyAccess": true,
+    "line": 66
+  }
+]
