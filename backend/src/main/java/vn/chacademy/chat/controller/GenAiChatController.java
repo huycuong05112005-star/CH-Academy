@@ -7,10 +7,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
-import vn.chacademy.chat.dto.AiChatRequest;
-import vn.chacademy.chat.dto.AiChatResponse;
-import vn.chacademy.chat.dto.AiConversationDto;
-import vn.chacademy.chat.dto.AiMessageDto;
+import vn.chacademy.chat.dto.*;
+import vn.chacademy.chat.service.AiStudioService;
 import vn.chacademy.chat.service.GenAiChatService;
 import vn.chacademy.common.dto.ApiResponse;
 import vn.chacademy.common.exception.ResourceNotFoundException;
@@ -22,10 +20,10 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/chat/ai")
 @RequiredArgsConstructor
-@PreAuthorize("isAuthenticated()")
 public class GenAiChatController {
 
     private final GenAiChatService genAiChatService;
+    private final AiStudioService aiStudioService;
     private final UserRepository userRepository;
 
     private User getAuthenticatedUser(UserDetails userDetails) {
@@ -34,24 +32,33 @@ public class GenAiChatController {
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy thông tin tài khoản"));
     }
 
+    // ==========================================
+    // 1. CỔNG XÁC THỰC (AUTHENTICATED PORTALS)
+    // ==========================================
+
     @GetMapping("/conversations")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<List<AiConversationDto>>> getMyAiConversations(
+            @RequestParam(required = false) String portal,
             @AuthenticationPrincipal UserDetails userDetails) {
         User user = getAuthenticatedUser(userDetails);
-        List<AiConversationDto> list = genAiChatService.getUserConversations(user);
+        List<AiConversationDto> list = genAiChatService.getUserConversations(user, portal);
         return ResponseEntity.ok(ApiResponse.success(list));
     }
 
     @GetMapping("/conversations/{id}/messages")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<List<AiMessageDto>>> getAiMessages(
             @PathVariable Long id,
+            @RequestParam(required = false) String portal,
             @AuthenticationPrincipal UserDetails userDetails) {
         User user = getAuthenticatedUser(userDetails);
-        List<AiMessageDto> messages = genAiChatService.getConversationMessages(id, user);
+        List<AiMessageDto> messages = genAiChatService.getConversationMessages(id, user, portal);
         return ResponseEntity.ok(ApiResponse.success(messages));
     }
 
     @PostMapping("/ask")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<AiChatResponse>> askAi(
             @Valid @RequestBody AiChatRequest request,
             @AuthenticationPrincipal UserDetails userDetails) {
@@ -59,5 +66,51 @@ public class GenAiChatController {
         AiChatResponse response = genAiChatService.askAi(request, user);
         return ResponseEntity.ok(ApiResponse.success("Trợ lý AI đã trả lời", response));
     }
-}
 
+    @PostMapping("/conversations/{id}/handoff")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ApiResponse<String>> requestHumanHandoff(
+            @PathVariable Long id,
+            @RequestParam(required = false) String portal,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        User user = getAuthenticatedUser(userDetails);
+        genAiChatService.markHandoff(id, user, portal);
+        return ResponseEntity.ok(ApiResponse.success("Yêu cầu chuyển nhân viên tư vấn đã được ghi nhận", "HANDOFF_REQUESTED"));
+    }
+
+    // ==========================================
+    // 2. CỔNG CÔNG KHAI (PUBLIC WEBSITE GUEST)
+    // ==========================================
+
+    @GetMapping("/public/conversations")
+    public ResponseEntity<ApiResponse<List<AiConversationDto>>> getPublicConversations(
+            @RequestParam String sessionId) {
+        List<AiConversationDto> list = genAiChatService.getPublicConversations(sessionId);
+        return ResponseEntity.ok(ApiResponse.success(list));
+    }
+
+    @GetMapping("/public/conversations/{id}/messages")
+    public ResponseEntity<ApiResponse<List<AiMessageDto>>> getPublicMessages(
+            @PathVariable Long id,
+            @RequestParam String sessionId) {
+        List<AiMessageDto> messages = genAiChatService.getPublicConversationMessages(id, sessionId);
+        return ResponseEntity.ok(ApiResponse.success(messages));
+    }
+
+    @PostMapping("/public/ask")
+    public ResponseEntity<ApiResponse<AiChatResponse>> askPublicAi(
+            @Valid @RequestBody AiChatRequest request) {
+        request.setPortal("PUBLIC");
+        request.setChannel("WEBSITE");
+        request.setAgentCode("AGENT_ADMISSIONS");
+        AiChatResponse response = genAiChatService.askAi(request, null);
+        return ResponseEntity.ok(ApiResponse.success("Chuyên viên tư vấn AI đã trả lời", response));
+    }
+
+    @PostMapping("/public/lead")
+    public ResponseEntity<ApiResponse<AiLeadDto>> submitLead(
+            @Valid @RequestBody CreateLeadRequest request) {
+        AiLeadDto lead = aiStudioService.createLead(request);
+        return ResponseEntity.ok(ApiResponse.success("Đã ghi nhận thông tin tư vấn thành công", lead));
+    }
+}

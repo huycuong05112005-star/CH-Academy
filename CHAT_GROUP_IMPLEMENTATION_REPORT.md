@@ -45,3 +45,4 @@
   - Luồng tin nhắn phân biệt rõ: Tin của tôi (màu xanh thương hiệu, bo góc bên phải), Tin của bạn cùng lớp / Thầy cô (bo góc bên trái), Tin thông báo hệ thống (System banner).
   - Khung soạn thảo tin nhắn mượt mà, hỗ trợ phím `Enter` để gửi tin.
   - Tự động cuộn xuống tin nhắn mới nhất (`scrollToBottom`).
+

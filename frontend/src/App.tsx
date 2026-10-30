@@ -56,6 +56,7 @@ const AdminExamApprovalPage = lazy(() => import('./pages/admin/assessment/AdminE
 const GradingListPage = lazy(() => import('./pages/admin/assessment/GradingListPage').then(m => ({ default: m.GradingListPage })))
 const ExamAnalyticsPage = lazy(() => import('./pages/admin/assessment/ExamAnalyticsPage').then(m => ({ default: m.ExamAnalyticsPage })))
 const ClassAnalyticsPage = lazy(() => import('./pages/admin/assessment/ClassAnalyticsPage').then(m => ({ default: m.ClassAnalyticsPage })))
+const AiStudioPage = lazy(() => import('./pages/admin/AiStudioPage').then(m => ({ default: m.AiStudioPage })))
 
 export default function App() {
   return (
@@ -143,6 +144,7 @@ export default function App() {
                   <Route path="finance" element={<FinancePage />} />
                   <Route path="payments" element={<AdminPaymentsRedirect />} />
                   <Route path="notifications" element={<AdminNotificationsPage />} />
+                  <Route path="ai-studio" element={<AiStudioPage />} />
                   <Route path="audit-logs" element={<AuditLogsPage />} />
                   <Route path="settings" element={<SettingsPage />} />
 

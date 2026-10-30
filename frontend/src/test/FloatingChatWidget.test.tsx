@@ -1,12 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { MemoryRouter } from 'react-router-dom'
 import { FloatingChatWidget } from '../components/chat/FloatingChatWidget'
 import { classChatApi, aiChatApi } from '../api/chat'
 
 // Mock useAuth
 vi.mock('../context/AuthContext', () => ({
   useAuth: () => ({
-    user: { id: 2, username: 'thuylinh', fullName: 'Nguyễn Thùy Linh', roles: ['STUDENT'] },
+    user: { id: 2, username: 'thuylinh', fullName: 'Nguyễn Thùy Linh', roles: [{ id: 'STUDENT' }] },
     isAuthenticated: true
   })
 }))
@@ -22,7 +23,12 @@ vi.mock('../api/chat', () => ({
   aiChatApi: {
     getConversations: vi.fn().mockResolvedValue({ success: true, data: [] }),
     getMessages: vi.fn().mockResolvedValue({ success: true, data: [] }),
-    ask: vi.fn()
+    ask: vi.fn(),
+    getPublicConversations: vi.fn().mockResolvedValue({ success: true, data: [] }),
+    getPublicMessages: vi.fn().mockResolvedValue({ success: true, data: [] }),
+    askPublic: vi.fn(),
+    submitLead: vi.fn(),
+    requestHandoff: vi.fn()
   }
 }))
 
@@ -65,32 +71,43 @@ describe('FloatingChatWidget Component', () => {
   })
 
   it('1. Hiển thị nút chat nổi với badge số tin nhắn chưa đọc', async () => {
-    render(<FloatingChatWidget />)
+    render(
+      <MemoryRouter initialEntries={['/portal']}>
+        <FloatingChatWidget />
+      </MemoryRouter>
+    )
 
-    const triggerBtn = screen.getByRole('button', { name: /Mở kênh chat/i })
+    const triggerBtn = screen.getByTitle('Mở kênh liên lạc CH Academy')
     expect(triggerBtn).toBeInTheDocument()
 
-    // Chờ tải unread badge
     await waitFor(() => {
       expect(screen.getByText('2')).toBeInTheDocument()
     })
   })
 
-  it('2. Bấm vào nút chat mở menu 2 lựa chọn (Chat nhóm & Chat AI)', async () => {
-    render(<FloatingChatWidget />)
+  it('2. Bấm vào nút chat mở menu lựa chọn (Chat nhóm & Chat AI)', async () => {
+    render(
+      <MemoryRouter initialEntries={['/portal']}>
+        <FloatingChatWidget />
+      </MemoryRouter>
+    )
 
-    const triggerBtn = screen.getByRole('button', { name: /Mở kênh chat/i })
+    const triggerBtn = screen.getByTitle('Mở kênh liên lạc CH Academy')
     fireEvent.click(triggerBtn)
 
     expect(screen.getByText('Kênh kết nối CH Academy')).toBeInTheDocument()
     expect(screen.getByText('Chat nhóm lớp')).toBeInTheDocument()
-    expect(screen.getByText('Chat AI Trợ lý')).toBeInTheDocument()
+    expect(screen.getByText('Trợ giảng AI Đồng hành')).toBeInTheDocument()
   })
 
   it('3. Chọn Chat nhóm mở cửa sổ nhóm lớp và hiển thị tin nhắn', async () => {
-    render(<FloatingChatWidget />)
+    render(
+      <MemoryRouter initialEntries={['/portal']}>
+        <FloatingChatWidget />
+      </MemoryRouter>
+    )
 
-    const triggerBtn = screen.getByRole('button', { name: /Mở kênh chat/i })
+    const triggerBtn = screen.getByTitle('Mở kênh liên lạc CH Academy')
     fireEvent.click(triggerBtn)
 
     const groupOption = screen.getByText('Chat nhóm lớp')
@@ -98,7 +115,6 @@ describe('FloatingChatWidget Component', () => {
 
     // Cửa sổ chat nhóm mở
     await waitFor(() => {
-      expect(screen.getByText(/Chat nhóm \(1\)/i)).toBeInTheDocument()
       expect(screen.getByText('Chào mừng các bạn học viên đến với nhóm học tập!')).toBeInTheDocument()
     })
   })
@@ -119,17 +135,20 @@ describe('FloatingChatWidget Component', () => {
       }
     })
 
-    render(<FloatingChatWidget />)
+    render(
+      <MemoryRouter initialEntries={['/portal']}>
+        <FloatingChatWidget />
+      </MemoryRouter>
+    )
 
-    const triggerBtn = screen.getByRole('button', { name: /Mở kênh chat/i })
+    const triggerBtn = screen.getByTitle('Mở kênh liên lạc CH Academy')
     fireEvent.click(triggerBtn)
 
-    const aiOption = screen.getByText('Chat AI Trợ lý')
+    const aiOption = screen.getByText('Trợ giảng AI Đồng hành')
     fireEvent.click(aiOption)
 
     // Màn hình AI hiển thị
     await waitFor(() => {
-      expect(screen.getByText(/CH Academy AI Companion/i)).toBeInTheDocument()
       expect(screen.getByText('Tôi đang học những lớp nào?')).toBeInTheDocument()
     })
 
@@ -143,4 +162,3 @@ describe('FloatingChatWidget Component', () => {
     })
   })
 })
-

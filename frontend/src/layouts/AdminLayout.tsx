@@ -33,7 +33,8 @@ import {
   BarChart2,
   Search,
   ArrowRight,
-  Clock
+  Clock,
+  Sparkles
 } from 'lucide-react'
 
 interface NavItem {
@@ -142,6 +143,12 @@ export const AdminLayout: React.FC = () => {
       items: [
         { label: 'Tuyển sinh & Khách hàng', path: '/admin/leads', icon: UserPlus },
         { label: 'Học viên & Giám hộ', path: '/admin/students', icon: Users },
+      ]
+    },
+    {
+      group: 'HỆ SINH THÁI AI & AGENTS',
+      items: [
+        { label: 'AI Agent Studio', path: '/admin/ai-studio', icon: Sparkles },
       ]
     },
     {

@@ -12,6 +12,19 @@ public interface AiConversationRepository extends JpaRepository<AiConversation, 
 
     List<AiConversation> findByUserIdOrderByUpdatedAtDesc(Long userId);
 
-    Optional<AiConversation> findByIdAndUserId(Long id, Long userId);
-}
+    List<AiConversation> findByUserIdAndPortalOrderByUpdatedAtDesc(Long userId, String portal);
 
+    Optional<AiConversation> findByIdAndUserId(Long id, Long userId);
+
+    Optional<AiConversation> findByIdAndUserIdAndPortal(Long id, Long userId, String portal);
+
+    List<AiConversation> findBySessionIdAndPortalOrderByUpdatedAtDesc(String sessionId, String portal);
+
+    Optional<AiConversation> findByIdAndSessionIdAndPortal(Long id, String sessionId, String portal);
+
+    List<AiConversation> findByPortalOrderByUpdatedAtDesc(String portal);
+
+    List<AiConversation> findAllByOrderByUpdatedAtDesc();
+
+    List<AiConversation> findByStatusOrderByUpdatedAtDesc(String status);
+}

@@ -45,3 +45,4 @@ Từ việc mổ xẻ mã nguồn `E:\CACMONTRENLOP\nexva`, CH Academy đã kế
 - API key AI chỉ lưu ở biến môi trường backend, không bao giờ lộ ra frontend.
 - Không truyền mật khẩu, password hash hoặc access token vào prompt AI.
 - Có cơ chế chặn prompt injection (Guardrails) để AI không thực thi các yêu cầu vượt thẩm quyền.
+
