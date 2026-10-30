@@ -43,5 +43,11 @@ public interface ReceivableRepository extends JpaRepository<Receivable, Long> {
     @Query("SELECT coalesce(sum(r.paidAmount), 0) FROM Receivable r WHERE r.status != 'CANCELLED'")
     BigDecimal sumTotalPaid();
 
+    @Query("SELECT coalesce(sum(r.totalAmount), 0) FROM Receivable r WHERE r.status != 'CANCELLED' AND r.dueDate BETWEEN :startDate AND :endDate")
+    BigDecimal sumReceivablesBetween(@Param("startDate") java.time.LocalDate startDate, @Param("endDate") java.time.LocalDate endDate);
+
+    @Query("SELECT coalesce(sum(r.paidAmount), 0) FROM Receivable r WHERE r.status != 'CANCELLED' AND r.dueDate BETWEEN :startDate AND :endDate")
+    BigDecimal sumPaidBetween(@Param("startDate") java.time.LocalDate startDate, @Param("endDate") java.time.LocalDate endDate);
+
     List<Receivable> findByStudentIdAndStatusInOrderByIdAsc(Long studentId, java.util.List<String> statuses);
 }

@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { studentsApi } from '../../../api/students'
 import { classesApi } from '../../../api/classes'
 import { coursesApi } from '../../../api/courses'
@@ -49,14 +50,33 @@ export const StudentListPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null)
   const [successMsg, setSuccessMsg] = useState<string | null>(null)
 
+  const [searchParams, setSearchParams] = useSearchParams()
+
   // Filters & Pagination
-  const [keyword, setKeyword] = useState<string>('')
-  const [selectedTargetType, setSelectedTargetType] = useState<string>('')
-  const [selectedStatus, setSelectedStatus] = useState<string>('')
+  const [keyword, setKeyword] = useState<string>(() => searchParams.get('keyword') || '')
+  const [selectedTargetType, setSelectedTargetType] = useState<string>(() => (searchParams.get('targetType') || '').toUpperCase())
+  const [selectedStatus, setSelectedStatus] = useState<string>(() => (searchParams.get('status') || '').toUpperCase())
   const [page, setPage] = useState<number>(0)
   const [totalPages, setTotalPages] = useState<number>(1)
   const [totalElements, setTotalElements] = useState<number>(0)
   const pageSize = 10
+
+  // Sync state if searchParams change in URL (e.g. back/forward navigation or external links)
+  useEffect(() => {
+    const statusParam = searchParams.get('status')?.toUpperCase() || ''
+    const kwParam = searchParams.get('keyword') || ''
+    const ttParam = searchParams.get('targetType')?.toUpperCase() || ''
+
+    if (statusParam !== selectedStatus) {
+      setSelectedStatus(statusParam)
+    }
+    if (kwParam !== keyword) {
+      setKeyword(kwParam)
+    }
+    if (ttParam !== selectedTargetType) {
+      setSelectedTargetType(ttParam)
+    }
+  }, [searchParams])
 
   // Modals
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
@@ -229,6 +249,7 @@ export const StudentListPage: React.FC = () => {
     setSelectedTargetType('')
     setSelectedStatus('')
     setPage(0)
+    setSearchParams({})
   }
 
   const openCreateModal = () => {
@@ -522,7 +543,7 @@ export const StudentListPage: React.FC = () => {
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-slate-200 dark:border-[#2A3A50]">
+      <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4 pb-4 border-b border-slate-200 dark:border-[#2A3A50]">
         <div>
           <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-[#A6B4C8] uppercase tracking-wider mb-1">
             <span>Học viên & Tuyển sinh</span>
@@ -530,7 +551,7 @@ export const StudentListPage: React.FC = () => {
             <span className="text-[#142B4A] dark:text-[#38BDF8]">Danh sách</span>
           </div>
           <h1 className="text-2xl font-bold tracking-tight text-[#142B4A] dark:text-[#E8EEF7] flex items-center gap-2.5">
-            <Users className="w-7 h-7 text-[#142B4A] dark:text-[#38BDF8]" />
+            <Users className="w-7 h-7 text-[#142B4A] dark:text-[#38BDF8] shrink-0" />
             Quản lý Học viên & Người giám hộ
           </h1>
           <p className="text-sm text-slate-600 dark:text-[#A6B4C8] mt-1">
@@ -538,17 +559,17 @@ export const StudentListPage: React.FC = () => {
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5">
+        <div className="flex flex-wrap items-center gap-2.5 w-full xl:w-auto">
           <button
             onClick={handleExportStudents}
-            className="inline-flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl border border-emerald-300 dark:border-emerald-700/60 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-950/50 text-sm font-semibold shadow-xs transition-all"
+            className="inline-flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl border border-emerald-300 dark:border-emerald-700/60 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-950/50 text-sm font-semibold shadow-xs transition-all whitespace-nowrap shrink-0"
           >
             <Download size={16} />
             <span>Xuất file Excel (CSV)</span>
           </button>
           <button
             onClick={openCreateModal}
-            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-[#142B4A] dark:bg-[#38BDF8] hover:bg-[#1D4168] dark:hover:bg-[#0284C7] text-white dark:text-[#0B1220] rounded-xl text-sm font-semibold shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-[#3977B8]"
+            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-[#142B4A] dark:bg-[#38BDF8] hover:bg-[#1D4168] dark:hover:bg-[#0284C7] text-white dark:text-[#0B1220] rounded-xl text-sm font-semibold shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-[#3977B8] whitespace-nowrap shrink-0"
           >
             <Plus size={16} />
             <span>Thêm học viên mới</span>
@@ -557,7 +578,7 @@ export const StudentListPage: React.FC = () => {
       </div>
 
       {/* KPI Overview Strip */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         <StatCard
           title="Tổng hồ sơ"
           value={stats ? stats.totalStudents : totalElements}
@@ -662,7 +683,7 @@ export const StudentListPage: React.FC = () => {
         {isFiltering && (
           <button
             onClick={handleResetFilters}
-            className="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl border border-slate-200 dark:border-[#2A3A50] bg-slate-100 dark:bg-[#1C293D] hover:bg-slate-200 text-slate-700 dark:text-[#A6B4C8] text-xs font-semibold transition-colors"
+            className="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl border border-slate-200 dark:border-[#2A3A50] bg-slate-100 dark:bg-[#1C293D] hover:bg-slate-200 text-slate-700 dark:text-[#A6B4C8] text-xs font-semibold transition-colors cursor-pointer"
             title="Xóa bộ lọc"
           >
             <RotateCcw size={14} />
@@ -671,10 +692,41 @@ export const StudentListPage: React.FC = () => {
         )}
 
         {/* Result Counter */}
-        <div className="text-xs text-slate-500 dark:text-[#A6B4C8] font-medium whitespace-nowrap self-center px-1">
+        <div className="text-xs text-slate-500 dark:text-[#A6B4C8] font-medium whitespace-nowrap self-center px-1 ml-auto">
           Hiển thị <span className="font-bold text-[#142B4A] dark:text-[#E8EEF7]">{students.length}</span> / {totalElements}
         </div>
       </div>
+
+      {/* Active Filter Badges Banner */}
+      {isFiltering && (
+        <div className="flex flex-wrap items-center gap-2 px-4 py-2.5 rounded-xl bg-sky-50/80 dark:bg-sky-950/30 border border-sky-200/80 dark:border-sky-800/60 text-xs text-sky-800 dark:text-sky-300">
+          <span className="font-semibold text-slate-600 dark:text-slate-400">Đang lọc theo:</span>
+          {selectedStatus && (
+            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-sky-100 dark:bg-sky-900/60 font-medium">
+              Trạng thái: <strong>{selectedStatus === 'ACTIVE' ? 'Đang học' : selectedStatus}</strong>
+              <button onClick={() => { setSelectedStatus(''); setPage(0); }} className="hover:text-sky-950 dark:hover:text-white cursor-pointer"><X size={12} /></button>
+            </span>
+          )}
+          {selectedTargetType && (
+            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-sky-100 dark:bg-sky-900/60 font-medium">
+              Đối tượng: <strong>{selectedTargetType === 'ADULT' ? 'Người lớn' : 'Trẻ em'}</strong>
+              <button onClick={() => { setSelectedTargetType(''); setPage(0); }} className="hover:text-sky-950 dark:hover:text-white cursor-pointer"><X size={12} /></button>
+            </span>
+          )}
+          {keyword && (
+            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-sky-100 dark:bg-sky-900/60 font-medium">
+              Từ khóa: <strong>"{keyword}"</strong>
+              <button onClick={() => { setKeyword(''); setPage(0); }} className="hover:text-sky-950 dark:hover:text-white cursor-pointer"><X size={12} /></button>
+            </span>
+          )}
+          <button
+            onClick={handleResetFilters}
+            className="ml-auto text-xs font-semibold text-sky-700 dark:text-sky-300 hover:underline cursor-pointer"
+          >
+            Xóa tất cả bộ lọc
+          </button>
+        </div>
+      )}
 
       {/* Main Content: Table or Loading */}
       {loading ? (
@@ -1699,7 +1751,7 @@ export const StudentListPage: React.FC = () => {
                     </div>
 
                     <div className="flex items-center justify-between pt-2 text-xs text-slate-500 dark:text-[#A6B4C8]">
-                      <span>💡 <em>Mật khẩu được đồng bộ tự động ngay cả khi học viên tự đổi mật khẩu.</em></span>
+                      <span className="flex items-center gap-1.5"><Key size={13} className="text-slate-400" /> <em>Mật khẩu được mã hóa an toàn theo tiêu chuẩn bcrypt.</em></span>
                       <button
                         onClick={() => {
                           const s = detailStudent

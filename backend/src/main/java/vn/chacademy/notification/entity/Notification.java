@@ -35,6 +35,10 @@ public class Notification {
     @JoinColumn(name = "target_class_id")
     private ClassEntity targetClass;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "target_user_id")
+    private User targetUser;
+
     @Column(nullable = false, length = 20)
     @Builder.Default
     private String priority = "NORMAL"; // NORMAL, HIGH, URGENT

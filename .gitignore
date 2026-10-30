@@ -38,10 +38,12 @@ hs_err_pid*
 replay_pid*
 
 # ----- Node / Frontend -----
+node_modules/
 frontend/node_modules/
 frontend/dist/
 frontend/.cache/
 frontend/coverage/
+*.tsbuildinfo
 
 # ----- Logs -----
 *.log

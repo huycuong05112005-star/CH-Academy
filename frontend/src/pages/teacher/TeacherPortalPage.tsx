@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
+import { authApi } from '../../api/auth'
 import { teacherApi } from '../../api/teacher'
 import type {
   TeacherProfile,
@@ -8,7 +9,12 @@ import type {
   TeacherSessionItem
 } from '../../types/teacher'
 import type { NotificationItem } from '../../types/notification'
-import { ThemeSwitcher } from '../../components/ui/ThemeSwitcher'
+import { notificationsApi } from '../../api/notifications'
+import { NotificationDetailModal } from '../../components/ui/NotificationDetailModal'
+import { AccountMenu } from '../../components/account/AccountMenu'
+import { HeaderSearchBar } from '../../components/ui/HeaderSearchBar'
+import { NotificationBell } from '../../components/ui/NotificationBell'
+import { CommandPalette } from '../../components/ui/CommandPalette'
 import { exportToCsv } from '../../utils/exportCsv'
 import { filesApi } from '../../api/files'
 import {
@@ -30,8 +36,22 @@ import {
   Send,
   History,
   Download,
-  FileText
+  FileQuestion,
+  Award,
+  FileText,
+  KeyRound,
+  Eye,
+  EyeOff,
+  Lock,
+  ChevronRight
 } from 'lucide-react'
+import { AmbientGlow } from '../../components/ui/AmbientGlow'
+import { Tilt3DCard } from '../../components/3d/Tilt3DCard'
+import { CyberOrb3D } from '../../components/3d/CyberOrb3D'
+import { LayoutDashboard } from 'lucide-react'
+import { TeacherDashboardTab } from './components/TeacherDashboardTab'
+import { TeacherExamStudioTab } from './components/TeacherExamStudioTab'
+import { TeacherExamResultsTab } from './components/TeacherExamResultsTab'
 
 export const TeacherPortalPage: React.FC = () => {
   const { logout } = useAuth()
@@ -42,7 +62,8 @@ export const TeacherPortalPage: React.FC = () => {
   const [classes, setClasses] = useState<TeacherClassItem[]>([])
   const [loading, setLoading] = useState<boolean>(true)
   const [error, setError] = useState<string | null>(null)
-  const [activeTab, setActiveTab] = useState<'classes' | 'students' | 'attendance' | 'materials' | 'notifications' | 'announcements' | 'history'>('classes')
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'classes' | 'exams' | 'exam-results' | 'students' | 'attendance' | 'materials' | 'notifications' | 'announcements' | 'history'>('dashboard')
+  const [examStudioFilter, setExamStudioFilter] = useState<string>('ALL')
 
   // Unmarked sessions & announcements
   const [unmarkedSessions, setUnmarkedSessions] = useState<TeacherSessionItem[]>([])
@@ -73,10 +94,50 @@ export const TeacherPortalPage: React.FC = () => {
   const [materialDesc, setMaterialDesc] = useState<string>('')
   const [materialType, setMaterialType] = useState<string>('DOCUMENT')
   const [materialUrl, setMaterialUrl] = useState<string>('')
+
+  // Teacher Password Change Modal State
+  const [pwdModalOpen, setPwdModalOpen] = useState<boolean>(false)
+  const [curPwd, setCurPwd] = useState<string>('')
+  const [newPwd, setNewPwd] = useState<string>('')
+  const [confirmPwd, setConfirmPwd] = useState<string>('')
+  const [showPwd, setShowPwd] = useState<boolean>(false)
+  const [pwdLoading, setPwdLoading] = useState<boolean>(false)
+  const [pwdMsg, setPwdMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
   const [submittingMaterial, setSubmittingMaterial] = useState<boolean>(false)
 
   // Notifications
   const [notifications, setNotifications] = useState<NotificationItem[]>([])
+  const [selectedNotification, setSelectedNotification] = useState<NotificationItem | null>(null)
+  const unreadNotificationCount = notifications.filter((n) => !n.isRead).length
+
+  const handleViewNotificationDetail = async (notif: NotificationItem) => {
+    setSelectedNotification(notif)
+    if (!notif.isRead) {
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === notif.id ? { ...n, isRead: true } : n))
+      )
+      try {
+        await notificationsApi.markAsRead(notif.id)
+      } catch (err) {
+        console.error('Failed to mark notification read', err)
+      }
+    }
+  }
+
+  // Command Palette & Quick Search
+  const [commandPaletteOpen, setCommandPaletteOpen] = useState<boolean>(false)
+
+  // Listen for Ctrl+K or Cmd+K
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && (e.key === 'k' || e.key === 'K')) {
+        e.preventDefault()
+        setCommandPaletteOpen((prev) => !prev)
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [])
 
   const selectSession = async (sessionId: number, classData?: TeacherClassItem) => {
     setSelectedSessionId(sessionId)
@@ -184,15 +245,44 @@ export const TeacherPortalPage: React.FC = () => {
     loadSentAnnouncements()
     loadUnmarkedSessions()
 
-    // Sync active tab from pathname
-    const path = location.pathname
-    if (path.includes('/classes')) setActiveTab('classes')
-    else if (path.includes('/attendance')) setActiveTab('attendance')
-    else if (path.includes('/materials')) setActiveTab('materials')
-    else if (path.includes('/announcements')) setActiveTab('announcements')
-    else if (path.includes('/history')) setActiveTab('history')
-    else if (path.includes('/students')) setActiveTab('students')
-  }, [location.pathname])
+    // Sync active tab from search params or pathname
+    const searchParams = new URLSearchParams(location.search)
+    const tabParam = searchParams.get('tab')
+    const filterParam = searchParams.get('filter')
+    if (filterParam) {
+      setExamStudioFilter(filterParam)
+    }
+
+    if (tabParam) {
+      if (tabParam === 'exams') setActiveTab('exams')
+      else if (tabParam === 'exam-results') setActiveTab('exam-results')
+      else if (tabParam === 'classes') setActiveTab('classes')
+      else if (tabParam === 'attendance') setActiveTab('attendance')
+      else if (tabParam === 'materials') setActiveTab('materials')
+      else if (tabParam === 'students') setActiveTab('students')
+      else if (tabParam === 'notifications') setActiveTab('notifications')
+      else if (tabParam === 'announcements') setActiveTab('announcements')
+      else if (tabParam === 'dashboard') setActiveTab('dashboard')
+    } else {
+      const path = location.pathname
+      if (path.includes('/exams')) setActiveTab('exams')
+      else if (path.includes('/exam-results')) setActiveTab('exam-results')
+      else if (path.includes('/classes')) setActiveTab('classes')
+      else if (path.includes('/attendance')) setActiveTab('attendance')
+      else if (path.includes('/materials')) setActiveTab('materials')
+      else if (path.includes('/announcements')) setActiveTab('announcements')
+      else if (path.includes('/history')) setActiveTab('history')
+      else if (path.includes('/students')) setActiveTab('students')
+      else setActiveTab('dashboard')
+    }
+  }, [location.pathname, location.search])
+
+  const handleDashboardNavigate = (tab: string, filter?: string) => {
+    if (tab === 'exams' && filter) {
+      setExamStudioFilter(filter)
+    }
+    setActiveTab(tab as any)
+  }
 
   const handleSendAnnouncement = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -235,6 +325,52 @@ export const TeacherPortalPage: React.FC = () => {
       }
     } catch (err: any) {
       alert(err.message || 'Không thể thu hồi thông báo')
+    }
+  }
+
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!curPwd || !newPwd || !confirmPwd) {
+      setPwdMsg({ type: 'error', text: 'Vui lòng điền đầy đủ các thông tin mật khẩu.' })
+      return
+    }
+    if (newPwd.length < 8) {
+      setPwdMsg({ type: 'error', text: 'Mật khẩu mới phải có ít nhất 8 ký tự.' })
+      return
+    }
+    if (!/[A-Z]/.test(newPwd) || !/[a-z]/.test(newPwd) || !/[0-9]/.test(newPwd)) {
+      setPwdMsg({ type: 'error', text: 'Mật khẩu mới phải bao gồm ít nhất 1 chữ hoa, 1 chữ thường và 1 chữ số.' })
+      return
+    }
+    if (newPwd !== confirmPwd) {
+      setPwdMsg({ type: 'error', text: 'Xác nhận mật khẩu mới không trùng khớp.' })
+      return
+    }
+    if (curPwd === newPwd) {
+      setPwdMsg({ type: 'error', text: 'Mật khẩu mới không được trùng với mật khẩu hiện tại.' })
+      return
+    }
+
+    setPwdLoading(true)
+    setPwdMsg(null)
+    try {
+      const res = await authApi.changePassword(curPwd, newPwd)
+      if (res.success) {
+        setPwdMsg({ type: 'success', text: 'Đổi mật khẩu thành công! Vui lòng lưu lại thông tin.' })
+        setCurPwd('')
+        setNewPwd('')
+        setConfirmPwd('')
+        setTimeout(() => {
+          setPwdModalOpen(false)
+          setPwdMsg(null)
+        }, 2000)
+      } else {
+        setPwdMsg({ type: 'error', text: res.message || 'Không thể cập nhật mật khẩu.' })
+      }
+    } catch (err: any) {
+      setPwdMsg({ type: 'error', text: err.message || 'Lỗi kết nối khi đổi mật khẩu.' })
+    } finally {
+      setPwdLoading(false)
     }
   }
 
@@ -512,11 +648,11 @@ export const TeacherPortalPage: React.FC = () => {
   const selectedSession = currentClassDetail?.sessions?.find((s) => s.id === selectedSessionId)
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#0B1220] text-slate-800 dark:text-[#E8EEF7] font-sans pb-16">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#0B1220] [data-theme=glass]_&:bg-transparent text-slate-800 dark:text-[#E8EEF7] font-sans pb-16">
       {/* Top Header */}
-      <header className="sticky top-0 z-40 bg-white/80 dark:bg-[#151F31]/80 backdrop-blur-md border-b border-slate-200/80 dark:border-[#2A3A50]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
+      <header className="sticky top-0 z-40 bg-white/80 dark:bg-[#151F31]/80 [data-theme=glass]_&:bg-[#070D1B]/45 [data-theme=glass]_&:border-white/15 [data-theme=glass]_&:backdrop-blur-2xl backdrop-blur-md border-b border-slate-200/80 dark:border-[#2A3A50]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3 shrink-0">
             <div className="w-10 h-10 rounded-2xl bg-indigo-600 text-white flex items-center justify-center shadow-sm">
               <GraduationCap className="w-6 h-6" />
             </div>
@@ -533,16 +669,39 @@ export const TeacherPortalPage: React.FC = () => {
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
-            <ThemeSwitcher />
-            <button
-              onClick={handleLogout}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-[#2A3A50] text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition"
-              title="Đăng xuất"
-            >
-              <LogOut className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Đăng xuất</span>
-            </button>
+          {/* Center: Command Palette Trigger Bar */}
+          <HeaderSearchBar
+            onClick={() => setCommandPaletteOpen(true)}
+            placeholder="Tìm kiếm nhanh chức năng, mã lớp, học viên..."
+          />
+
+          {/* Right: Notifications & Account Menu */}
+          <div className="flex items-center gap-2.5 shrink-0">
+            <NotificationBell
+              notifications={notifications}
+              onRefresh={loadNotifications}
+              onViewAll={() => setActiveTab('notifications')}
+              title="Thông báo giảng viên"
+              onNotificationRead={(id) =>
+                setNotifications((prev) =>
+                  prev.map((n) => (n.id === id ? { ...n, isRead: true } : n))
+                )
+              }
+              onMarkAllRead={() =>
+                setNotifications((prev) =>
+                  prev.map((n) => ({ ...n, isRead: true }))
+                )
+              }
+            />
+            <AccountMenu
+              portalRole="teacher"
+              userCode={profile?.teacherCode}
+              extraProfile={{
+                specialization: profile?.specialization,
+                bio: profile?.bio,
+                teacherCode: profile?.teacherCode
+              }}
+            />
           </div>
         </div>
       </header>
@@ -550,31 +709,38 @@ export const TeacherPortalPage: React.FC = () => {
       {/* Main Container */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 space-y-6">
         {/* Teacher Welcome Banner */}
-        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-indigo-900 via-indigo-800 to-slate-900 text-white p-6 sm:p-8 shadow-xl">
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#0F243E] via-indigo-900 to-[#173557] text-white p-6 sm:p-8 shadow-xl card-depth-3d">
+          <AmbientGlow className="-top-12 -left-12 w-64 h-64" variant="cyan" />
+          <AmbientGlow className="-bottom-16 -right-16 w-64 h-64" variant="primary" />
           <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-            <div className="space-y-2">
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md text-xs font-semibold text-indigo-200">
-                <Sparkles className="w-3.5 h-3.5" />
-                <span>Không gian sư phạm chuyên nghiệp</span>
+            <div className="flex items-center gap-5">
+              <div className="hidden md:block shrink-0">
+                <CyberOrb3D size={72} />
               </div>
-              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
-                Thầy/Cô {profile.fullName}
-              </h1>
-              <p className="text-xs text-indigo-200 font-medium">
-                {profile.specialization || 'Giảng viên chuyên môn CH Academy'}
-              </p>
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-300 pt-1">
-                <span>Mã giảng viên: <strong className="font-mono text-white">{profile.teacherCode}</strong></span>
-                <span>•</span>
-                <span>SĐT: <strong className="text-white">{profile.phone || '—'}</strong></span>
-                <span>•</span>
-                <span>Email: <strong className="text-white">{profile.email || '—'}</strong></span>
+              <div className="space-y-2">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md text-xs font-semibold text-sky-200">
+                  <Sparkles className="w-3.5 h-3.5 text-sky-400" />
+                  <span>Không gian sư phạm chuyên nghiệp</span>
+                </div>
+                <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
+                  Thầy/Cô {profile.fullName}
+                </h1>
+                <p className="text-xs text-sky-200 font-medium">
+                  {profile.specialization || 'Giảng viên chuyên môn CH Academy'}
+                </p>
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-300 pt-1">
+                  <span>Mã giảng viên: <strong className="font-mono text-white">{profile.teacherCode}</strong></span>
+                  <span>•</span>
+                  <span>SĐT: <strong className="text-white">{profile.phone || '—'}</strong></span>
+                  <span>•</span>
+                  <span>Email: <strong className="text-white">{profile.email || '—'}</strong></span>
+                </div>
               </div>
             </div>
 
             <div className="flex items-center gap-4 border-t sm:border-t-0 sm:border-l border-white/15 pt-4 sm:pt-0 sm:pl-8">
               <div className="text-center sm:text-right">
-                <div className="text-2xl sm:text-3xl font-black text-indigo-300">
+                <div className="text-2xl sm:text-3xl font-black text-sky-300">
                   {profile.totalClasses}
                 </div>
                 <div className="text-[11px] uppercase tracking-wider text-slate-300 mt-0.5">
@@ -593,9 +759,76 @@ export const TeacherPortalPage: React.FC = () => {
           </div>
         </div>
 
+        {/* 3D Quick Metrics Overview */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <Tilt3DCard maxTilt={6}>
+            <div className="p-4 rounded-2xl bg-white/80 dark:bg-[#151F31]/80 backdrop-blur-sm border border-slate-200/80 dark:border-[#2A3A50] shadow-sm flex items-center gap-3 h-full">
+              <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200/50 dark:border-indigo-800/40 flex items-center justify-center text-indigo-600 dark:text-indigo-400 shrink-0">
+                <BookOpen className="w-5 h-5" />
+              </div>
+              <div>
+                <div className="text-[11px] font-semibold text-slate-500 dark:text-[#A6B4C8]">Lớp phụ trách</div>
+                <div className="text-xl font-black text-slate-900 dark:text-white">{profile.totalClasses} lớp</div>
+                <div className="text-[10px] text-slate-400">Đang hoạt động</div>
+              </div>
+            </div>
+          </Tilt3DCard>
+
+          <Tilt3DCard maxTilt={6}>
+            <div className="p-4 rounded-2xl bg-white/80 dark:bg-[#151F31]/80 backdrop-blur-sm border border-slate-200/80 dark:border-[#2A3A50] shadow-sm flex items-center gap-3 h-full">
+              <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/50 dark:border-emerald-800/40 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0">
+                <Users className="w-5 h-5" />
+              </div>
+              <div>
+                <div className="text-[11px] font-semibold text-slate-500 dark:text-[#A6B4C8]">Học sinh</div>
+                <div className="text-xl font-black text-slate-900 dark:text-white">{profile.activeStudents} bạn</div>
+                <div className="text-[10px] text-slate-400">Theo học các lớp</div>
+              </div>
+            </div>
+          </Tilt3DCard>
+
+          <Tilt3DCard maxTilt={6}>
+            <div className="p-4 rounded-2xl bg-white/80 dark:bg-[#151F31]/80 backdrop-blur-sm border border-slate-200/80 dark:border-[#2A3A50] shadow-sm flex items-center gap-3 h-full">
+              <div className="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200/50 dark:border-amber-800/40 flex items-center justify-center text-amber-600 dark:text-amber-400 shrink-0">
+                <Calendar className="w-5 h-5" />
+              </div>
+              <div>
+                <div className="text-[11px] font-semibold text-slate-500 dark:text-[#A6B4C8]">Chưa điểm danh</div>
+                <div className="text-xl font-black text-amber-600 dark:text-amber-400">{unmarkedSessions.length} buổi</div>
+                <div className="text-[10px] text-slate-400">Cần hoàn thành</div>
+              </div>
+            </div>
+          </Tilt3DCard>
+
+          <Tilt3DCard maxTilt={6}>
+            <div className="p-4 rounded-2xl bg-white/80 dark:bg-[#151F31]/80 backdrop-blur-sm border border-slate-200/80 dark:border-[#2A3A50] shadow-sm flex items-center gap-3 h-full">
+              <div className="w-10 h-10 rounded-xl bg-sky-50 dark:bg-sky-950/40 border border-sky-200/50 dark:border-sky-800/40 flex items-center justify-center text-sky-600 dark:text-sky-400 shrink-0">
+                <Bell className="w-5 h-5" />
+              </div>
+              <div>
+                <div className="text-[11px] font-semibold text-slate-500 dark:text-[#A6B4C8]">Thông báo gửi</div>
+                <div className="text-xl font-black text-slate-900 dark:text-white">{sentAnnouncements.length} tin</div>
+                <div className="text-[10px] text-slate-400">Đã gửi học sinh</div>
+              </div>
+            </div>
+          </Tilt3DCard>
+        </div>
+
         {/* Navigation Tabs */}
         <div className="bg-white/80 dark:bg-[#151F31]/80 backdrop-blur-sm p-1.5 rounded-2xl border border-slate-200/80 dark:border-[#2A3A50] shadow-xs">
           <div className="flex items-center gap-1.5 overflow-x-auto scroll-smooth py-0.5 px-1">
+            <button
+              onClick={() => setActiveTab('dashboard')}
+              className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all flex items-center gap-2 shrink-0 ${
+                activeTab === 'dashboard'
+                  ? 'bg-indigo-600 text-white shadow-sm font-bold'
+                  : 'text-slate-600 dark:text-[#A6B4C8] hover:bg-slate-100 dark:hover:bg-[#1C293D]'
+              }`}
+            >
+              <LayoutDashboard className="w-4 h-4 shrink-0" />
+              <span>Tổng quan</span>
+            </button>
+
             <button
               onClick={() => setActiveTab('classes')}
               className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all flex items-center gap-2 shrink-0 ${
@@ -606,6 +839,30 @@ export const TeacherPortalPage: React.FC = () => {
             >
               <BookOpen className="w-4 h-4 shrink-0" />
               <span>Lớp dạy ({classes.length})</span>
+            </button>
+
+            <button
+              onClick={() => { setExamStudioFilter('ALL'); setActiveTab('exams'); }}
+              className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all flex items-center gap-2 shrink-0 ${
+                activeTab === 'exams'
+                  ? 'bg-indigo-600 text-white shadow-sm font-bold'
+                  : 'text-slate-600 dark:text-[#A6B4C8] hover:bg-slate-100 dark:hover:bg-[#1C293D]'
+              }`}
+            >
+              <FileQuestion className="w-4 h-4 shrink-0" />
+              <span>Soạn đề & Quản lý thi</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('exam-results')}
+              className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all flex items-center gap-2 shrink-0 ${
+                activeTab === 'exam-results'
+                  ? 'bg-indigo-600 text-white shadow-sm font-bold'
+                  : 'text-slate-600 dark:text-[#A6B4C8] hover:bg-slate-100 dark:hover:bg-[#1C293D]'
+              }`}
+            >
+              <Award className="w-4 h-4 shrink-0" />
+              <span>Kết quả thi lớp</span>
             </button>
 
             <button
@@ -645,18 +902,6 @@ export const TeacherPortalPage: React.FC = () => {
             </button>
 
             <button
-              onClick={() => setActiveTab('notifications')}
-              className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all flex items-center gap-2 shrink-0 ${
-                activeTab === 'notifications'
-                  ? 'bg-indigo-600 text-white shadow-sm font-bold'
-                  : 'text-slate-600 dark:text-[#A6B4C8] hover:bg-slate-100 dark:hover:bg-[#1C293D]'
-              }`}
-            >
-              <Bell className="w-4 h-4 shrink-0" />
-              <span>Thông báo BQT ({notifications.length})</span>
-            </button>
-
-            <button
               onClick={() => setActiveTab('announcements')}
               className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all flex items-center gap-2 shrink-0 ${
                 activeTab === 'announcements'
@@ -669,23 +914,52 @@ export const TeacherPortalPage: React.FC = () => {
             </button>
 
             <button
-              onClick={() => setActiveTab('history')}
+              onClick={() => setActiveTab('notifications')}
               className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all flex items-center gap-2 shrink-0 ${
-                activeTab === 'history'
+                activeTab === 'notifications'
                   ? 'bg-indigo-600 text-white shadow-sm font-bold'
                   : 'text-slate-600 dark:text-[#A6B4C8] hover:bg-slate-100 dark:hover:bg-[#1C293D]'
               }`}
             >
-              <History className="w-4 h-4 shrink-0" />
-              <span>Lịch sử & Chưa điểm danh</span>
-              {unmarkedSessions.length > 0 && (
-                <span className="w-5 h-5 rounded-full bg-amber-500 text-white text-[10px] flex items-center justify-center font-bold">
-                  {unmarkedSessions.length}
+              <Bell className="w-4 h-4 shrink-0" />
+              <span>Thông báo BQT</span>
+              {unreadNotificationCount > 0 ? (
+                <span className="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-rose-500 text-white shadow-2xs animate-pulse">
+                  {unreadNotificationCount > 99 ? '99+' : unreadNotificationCount}
                 </span>
+              ) : (
+                <span className="text-[11px] opacity-60">({notifications.length})</span>
               )}
             </button>
           </div>
         </div>
+
+        {/* TAB 0: DASHBOARD GIẢNG VIÊN THỜI GIAN THỰC */}
+        {activeTab === 'dashboard' && (
+          <TeacherDashboardTab
+            onNavigateTab={handleDashboardNavigate}
+            onSelectSession={(sessionId, classId) => {
+              loadClassDetail(classId)
+              selectSession(sessionId)
+              setActiveTab('attendance')
+            }}
+          />
+        )}
+
+        {/* TAB: SOẠN ĐỀ & QUẢN LÝ THI (EXAM STUDIO) */}
+        {activeTab === 'exams' && (
+          <TeacherExamStudioTab
+            teacherClasses={classes}
+            initialStatusFilter={examStudioFilter}
+          />
+        )}
+
+        {/* TAB: KẾT QUẢ THI THEO LỚP & CHẤM BÀI */}
+        {activeTab === 'exam-results' && (
+          <TeacherExamResultsTab
+            teacherClasses={classes}
+          />
+        )}
 
         {/* TAB 1: LỚP DẠY CỦA TÔI */}
         {activeTab === 'classes' && (
@@ -1157,40 +1431,62 @@ export const TeacherPortalPage: React.FC = () => {
               </div>
             ) : (
               <div className="space-y-3">
-                {notifications.map((n) => (
-                  <div
-                    key={n.id}
-                    className={`hover-lift p-6 rounded-2xl border transition-all duration-200 ${
-                      n.priority === 'URGENT'
-                        ? 'bg-rose-50/50 dark:bg-rose-950/20 border-rose-200 dark:border-rose-900 shadow-sm'
-                        : n.priority === 'HIGH'
-                        ? 'bg-amber-50/50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-900 shadow-sm'
-                        : 'bg-white dark:bg-[#151F31] border-slate-200/80 dark:border-[#2A3A50] shadow-xs hover:shadow-md'
-                    }`}
-                  >
-                    <div className="flex items-center gap-2 mb-2">
-                      {n.priority === 'URGENT' && (
-                        <span className="px-2.5 py-0.5 rounded-md text-[10px] font-bold tracking-wider uppercase bg-rose-600 text-white shadow-xs">
-                          KHẨN CẤP
+                {notifications.map((n) => {
+                  const isUnread = !n.isRead
+                  return (
+                    <div
+                      key={n.id}
+                      onClick={() => handleViewNotificationDetail(n)}
+                      className={`hover-lift p-6 rounded-2xl border transition-all duration-200 cursor-pointer group select-none ${
+                        isUnread
+                          ? 'border-indigo-300 dark:border-indigo-800 bg-indigo-50/40 dark:bg-indigo-950/20 shadow-sm'
+                          : n.priority === 'URGENT'
+                          ? 'bg-rose-50/50 dark:bg-rose-950/20 border-rose-200 dark:border-rose-900 shadow-sm'
+                          : n.priority === 'HIGH'
+                          ? 'bg-amber-50/50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-900 shadow-sm'
+                          : 'bg-white dark:bg-[#151F31] border-slate-200/80 dark:border-[#2A3A50] shadow-xs hover:shadow-md'
+                      }`}
+                    >
+                      <div className="flex flex-wrap items-center gap-2 mb-2">
+                        {isUnread && (
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase bg-indigo-600 text-white shadow-xs flex items-center gap-1 animate-pulse">
+                            <span className="w-1.5 h-1.5 rounded-full bg-white" />
+                            MỚI
+                          </span>
+                        )}
+                        {n.priority === 'URGENT' && (
+                          <span className="px-2.5 py-0.5 rounded-md text-[10px] font-bold tracking-wider uppercase bg-rose-600 text-white shadow-xs">
+                            KHẨN CẤP
+                          </span>
+                        )}
+                        {n.priority === 'HIGH' && (
+                          <span className="px-2.5 py-0.5 rounded-md text-[10px] font-bold tracking-wider uppercase bg-amber-500 text-white shadow-xs">
+                            QUAN TRỌNG
+                          </span>
+                        )}
+                        <span className="text-xs font-mono text-slate-400 dark:text-slate-500">
+                          {formatDate(n.createdAt)}
                         </span>
-                      )}
-                      {n.priority === 'HIGH' && (
-                        <span className="px-2.5 py-0.5 rounded-md text-[10px] font-bold tracking-wider uppercase bg-amber-500 text-white shadow-xs">
-                          QUAN TRỌNG
+                      </div>
+                      <h4 className="text-base font-bold text-slate-900 dark:text-[#E8EEF7] tracking-tight leading-snug group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                        {n.title}
+                      </h4>
+                      <p className="text-sm text-slate-600 dark:text-[#A6B4C8] mt-2 whitespace-pre-line leading-relaxed line-clamp-3">
+                        {n.content}
+                      </p>
+
+                      <div className="mt-3 pt-3 border-t border-slate-100 dark:border-[#223147] flex items-center justify-between text-xs text-slate-400">
+                        <span className="text-[11px] font-medium text-slate-400">
+                          Người gửi: <strong className="text-slate-600 dark:text-slate-300">{n.createdByName || 'Ban Quản trị'}</strong>
                         </span>
-                      )}
-                      <span className="text-xs font-mono text-slate-400 dark:text-slate-500">
-                        {formatDate(n.createdAt)}
-                      </span>
+                        <span className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
+                          <span>Xem toàn văn thông báo</span>
+                          <ChevronRight size={14} />
+                        </span>
+                      </div>
                     </div>
-                    <h4 className="text-base font-bold text-slate-900 dark:text-[#E8EEF7] tracking-tight leading-snug">
-                      {n.title}
-                    </h4>
-                    <p className="text-sm text-slate-600 dark:text-[#A6B4C8] mt-2 whitespace-pre-line leading-relaxed">
-                      {n.content}
-                    </p>
-                  </div>
-                ))}
+                  )
+                })}
               </div>
             )}
           </div>
@@ -1426,55 +1722,66 @@ export const TeacherPortalPage: React.FC = () => {
             </div>
           </div>
         )}
+
       </main>
 
       {/* Upload Material Modal */}
       {isMaterialModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150">
-          <div className="bg-white dark:bg-[#151F31] rounded-3xl border border-slate-200 dark:border-[#2A3A50] max-w-lg w-full p-6 sm:p-8 shadow-2xl relative">
-            <button
-              onClick={() => setIsMaterialModalOpen(false)}
-              className="absolute top-5 right-5 p-2 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-[#1C293D]"
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          <div
+            className="fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity animate-in fade-in duration-150"
+            onClick={() => setIsMaterialModalOpen(false)}
+            aria-hidden="true"
+          />
+          <div className="flex min-h-full items-center justify-center p-4 text-center">
+            <div
+              className="bg-white dark:bg-[#151F31] rounded-3xl border border-slate-200 dark:border-[#2A3A50] max-w-lg w-full p-6 sm:p-8 shadow-2xl relative text-left animate-in zoom-in-95 duration-150"
+              onClick={(e) => e.stopPropagation()}
             >
-              <X size={20} />
-            </button>
-
-            <h3 className="text-lg font-bold text-slate-900 dark:text-[#E8EEF7] mb-1">
-              Đẩy tài liệu lên buổi học
-            </h3>
-            <p className="text-xs text-slate-500 dark:text-[#A6B4C8] mb-6">
-              Tài liệu sẽ hiển thị ngay cho học viên của buổi học này để tải về học tập.
-            </p>
-
-            {/* Switch Source Type */}
-            <div className="flex p-1 bg-slate-100 dark:bg-[#1C293D] rounded-2xl mb-4">
               <button
                 type="button"
-                onClick={() => setMaterialSourceType('FILE')}
-                className={`flex-1 py-2 text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 transition ${
-                  materialSourceType === 'FILE'
-                    ? 'bg-white dark:bg-[#151F31] text-indigo-600 dark:text-indigo-400 shadow-xs'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-800'
-                }`}
+                onClick={() => setIsMaterialModalOpen(false)}
+                className="absolute top-5 right-5 p-2 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-[#1C293D] cursor-pointer"
               >
-                <Upload size={14} />
-                <span>Tải file từ máy tính</span>
+                <X size={20} />
               </button>
-              <button
-                type="button"
-                onClick={() => setMaterialSourceType('URL')}
-                className={`flex-1 py-2 text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 transition ${
-                  materialSourceType === 'URL'
-                    ? 'bg-white dark:bg-[#151F31] text-indigo-600 dark:text-indigo-400 shadow-xs'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-800'
-                }`}
-              >
-                <ExternalLink size={14} />
-                <span>Nhập liên kết ngoài (URL)</span>
-              </button>
-            </div>
 
-            <form onSubmit={handleUploadMaterial} className="space-y-4">
+              <h3 className="text-lg font-bold text-slate-900 dark:text-[#E8EEF7] mb-1">
+                Đẩy tài liệu lên buổi học
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-[#A6B4C8] mb-6">
+                Tài liệu sẽ hiển thị ngay cho học viên của buổi học này để tải về học tập.
+              </p>
+
+              {/* Switch Source Type */}
+              <div className="flex p-1 bg-slate-100 dark:bg-[#1C293D] rounded-2xl mb-4">
+                <button
+                  type="button"
+                  onClick={() => setMaterialSourceType('FILE')}
+                  className={`flex-1 py-2 text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 transition cursor-pointer ${
+                    materialSourceType === 'FILE'
+                      ? 'bg-white dark:bg-[#151F31] text-indigo-600 dark:text-indigo-400 shadow-xs'
+                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-800'
+                  }`}
+                >
+                  <Upload size={14} />
+                  <span>Tải file từ máy tính</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setMaterialSourceType('URL')}
+                  className={`flex-1 py-2 text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 transition cursor-pointer ${
+                    materialSourceType === 'URL'
+                      ? 'bg-white dark:bg-[#151F31] text-indigo-600 dark:text-indigo-400 shadow-xs'
+                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-800'
+                  }`}
+                >
+                  <ExternalLink size={14} />
+                  <span>Nhập liên kết ngoài (URL)</span>
+                </button>
+              </div>
+
+              <form onSubmit={handleUploadMaterial} className="space-y-4">
               {materialSourceType === 'FILE' ? (
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 dark:text-[#E8EEF7] mb-1">
@@ -1584,7 +1891,133 @@ export const TeacherPortalPage: React.FC = () => {
             </form>
           </div>
         </div>
+      </div>
+    )}
+      {/* Modal Đổi Mật Khẩu Giáo Viên */}
+      {pwdModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+          <div className="bg-white dark:bg-[#152338] border border-slate-200 dark:border-[#2A3A50] rounded-2xl w-full max-w-md shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+            <div className="px-6 py-4 border-b border-slate-100 dark:border-[#2A3A50] flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
+                  <KeyRound size={18} />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-slate-800 dark:text-[#E8EEF7]">Đổi mật khẩu tài khoản</h3>
+                  <p className="text-[11px] text-slate-500 dark:text-[#A6B4C8]">Bảo mật không gian giảng dạy của bạn</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setPwdModalOpen(false)}
+                className="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-[#1F3352]"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <form onSubmit={handleChangePassword} className="p-6 space-y-4">
+              {pwdMsg && (
+                <div
+                  className={`p-3 rounded-xl text-xs font-medium flex items-center gap-2 ${
+                    pwdMsg.type === 'success'
+                      ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-900/60'
+                      : 'bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-900/60'
+                  }`}
+                >
+                  {pwdMsg.type === 'success' ? <CheckCircle2 size={16} /> : <AlertTriangle size={16} />}
+                  <span>{pwdMsg.text}</span>
+                </div>
+              )}
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 dark:text-[#E8EEF7] mb-1">
+                  Mật khẩu hiện tại *
+                </label>
+                <div className="relative">
+                  <input
+                    type={showPwd ? 'text' : 'password'}
+                    value={curPwd}
+                    onChange={(e) => setCurPwd(e.target.value)}
+                    required
+                    placeholder="Nhập mật khẩu đang dùng"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#2A3A50] bg-slate-50/50 dark:bg-[#1C293D] text-sm text-slate-800 dark:text-[#E8EEF7] focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPwd(!showPwd)}
+                    className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                  >
+                    {showPwd ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 dark:text-[#E8EEF7] mb-1">
+                  Mật khẩu mới *
+                </label>
+                <input
+                  type={showPwd ? 'text' : 'password'}
+                  value={newPwd}
+                  onChange={(e) => setNewPwd(e.target.value)}
+                  required
+                  placeholder="Tối thiểu 8 ký tự, có hoa, thường, số"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#2A3A50] bg-slate-50/50 dark:bg-[#1C293D] text-sm text-slate-800 dark:text-[#E8EEF7] focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
+                />
+                <div className="mt-1 text-[11px] text-slate-500 dark:text-[#A6B4C8]">
+                  Quy chuẩn: Tối thiểu 8 ký tự, bao gồm chữ hoa (A-Z), chữ thường (a-z) và chữ số (0-9).
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 dark:text-[#E8EEF7] mb-1">
+                  Xác nhận mật khẩu mới *
+                </label>
+                <input
+                  type={showPwd ? 'text' : 'password'}
+                  value={confirmPwd}
+                  onChange={(e) => setConfirmPwd(e.target.value)}
+                  required
+                  placeholder="Nhập lại mật khẩu mới"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#2A3A50] bg-slate-50/50 dark:bg-[#1C293D] text-sm text-slate-800 dark:text-[#E8EEF7] focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+
+              <div className="pt-3 border-t border-slate-100 dark:border-[#2A3A50] flex items-center justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setPwdModalOpen(false)}
+                  className="px-4 py-2 rounded-xl border border-slate-200 dark:border-[#2A3A50] text-xs font-semibold text-slate-600 dark:text-[#A6B4C8] hover:bg-slate-100 dark:hover:bg-[#1C293D]"
+                >
+                  Đóng
+                </button>
+                <button
+                  type="submit"
+                  disabled={pwdLoading}
+                  className="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md transition disabled:opacity-50 flex items-center gap-1.5"
+                >
+                  <Lock size={14} />
+                  <span>{pwdLoading ? 'Đang cập nhật...' : 'Cập nhật mật khẩu'}</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       )}
+      {/* Command Palette (Ctrl + K) */}
+      <CommandPalette
+        isOpen={commandPaletteOpen}
+        onClose={() => setCommandPaletteOpen(false)}
+        portal="teacher"
+        onSelectTab={handleDashboardNavigate}
+      />
+
+      {/* Detail Notification Modal */}
+      <NotificationDetailModal
+        notification={selectedNotification}
+        isOpen={Boolean(selectedNotification)}
+        onClose={() => setSelectedNotification(null)}
+      />
     </div>
   )
 }

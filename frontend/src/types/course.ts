@@ -62,6 +62,7 @@ export interface PageResponse<T> {
   totalPages: number
   size: number
   number: number
+  page?: number
   first: boolean
   last: boolean
   empty: boolean

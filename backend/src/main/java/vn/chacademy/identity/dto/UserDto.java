@@ -17,7 +17,9 @@ public class UserDto {
     private String status;
     private String avatarUrl;
     private Instant lastLoginAt;
-    private String rawPassword;
+    private Instant lastPasswordChangedAt;
+    private Boolean mustChangePassword;
+    private String passwordResetSource;
     private Set<String> roles = new HashSet<>();
     private Set<String> permissions = new HashSet<>();
 
@@ -34,7 +36,9 @@ public class UserDto {
         dto.setStatus(user.getStatus());
         dto.setAvatarUrl(user.getAvatarUrl());
         dto.setLastLoginAt(user.getLastLoginAt());
-        dto.setRawPassword(user.getRawPassword());
+        dto.setLastPasswordChangedAt(user.getLastPasswordChangedAt());
+        dto.setMustChangePassword(user.getMustChangePassword());
+        dto.setPasswordResetSource(user.getPasswordResetSource());
 
         if (user.getRoles() != null) {
             dto.setRoles(user.getRoles().stream()
@@ -117,20 +121,36 @@ public class UserDto {
         this.lastLoginAt = lastLoginAt;
     }
 
+    public Instant getLastPasswordChangedAt() {
+        return lastPasswordChangedAt;
+    }
+
+    public void setLastPasswordChangedAt(Instant lastPasswordChangedAt) {
+        this.lastPasswordChangedAt = lastPasswordChangedAt;
+    }
+
+    public Boolean getMustChangePassword() {
+        return mustChangePassword;
+    }
+
+    public void setMustChangePassword(Boolean mustChangePassword) {
+        this.mustChangePassword = mustChangePassword;
+    }
+
+    public String getPasswordResetSource() {
+        return passwordResetSource;
+    }
+
+    public void setPasswordResetSource(String passwordResetSource) {
+        this.passwordResetSource = passwordResetSource;
+    }
+
     public Set<String> getRoles() {
         return roles;
     }
 
     public void setRoles(Set<String> roles) {
         this.roles = roles;
-    }
-
-    public String getRawPassword() {
-        return rawPassword;
-    }
-
-    public void setRawPassword(String rawPassword) {
-        this.rawPassword = rawPassword;
     }
 
     public Set<String> getPermissions() {

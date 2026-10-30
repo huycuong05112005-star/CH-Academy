@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { classesApi } from '../../../api/classes'
 import { coursesApi } from '../../../api/courses'
 import { studentsApi } from '../../../api/students'
@@ -21,9 +22,11 @@ import {
   DoorOpen,
   UserCheck,
   Tag,
-  Download
+  Download,
+  FileQuestion
 } from 'lucide-react'
 import { exportToCsv } from '../../../utils/exportCsv'
+import { SessionQuestionExamModal } from '../../../components/assessment/SessionQuestionExamModal'
 
 export const ClassListPage: React.FC = () => {
   const [classes, setClasses] = useState<ClassItem[]>([])
@@ -35,19 +38,40 @@ export const ClassListPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null)
   const [successMsg, setSuccessMsg] = useState<string | null>(null)
 
+  const [searchParams, setSearchParams] = useSearchParams()
+
+  const parseStatusParam = (param: string | null) => {
+    if (!param) return ''
+    const upper = param.toUpperCase()
+    if (upper === 'ACTIVE') return 'IN_PROGRESS'
+    return upper
+  }
+
   // Filters & Pagination
-  const [keyword, setKeyword] = useState<string>('')
-  const [selectedStatus, setSelectedStatus] = useState<string>('')
-  const [selectedCourseId, setSelectedCourseId] = useState<string>('')
+  const [keyword, setKeyword] = useState<string>(() => searchParams.get('keyword') || '')
+  const [selectedStatus, setSelectedStatus] = useState<string>(() => parseStatusParam(searchParams.get('status')))
+  const [selectedCourseId, setSelectedCourseId] = useState<string>(() => searchParams.get('courseId') || '')
   const [page, setPage] = useState<number>(0)
   const [totalPages, setTotalPages] = useState<number>(1)
   const [totalElements, setTotalElements] = useState<number>(0)
   const pageSize = 10
 
+  // Sync state if searchParams change in URL
+  useEffect(() => {
+    const statusParam = parseStatusParam(searchParams.get('status'))
+    const kwParam = searchParams.get('keyword') || ''
+    const cidParam = searchParams.get('courseId') || ''
+
+    if (statusParam !== selectedStatus) setSelectedStatus(statusParam)
+    if (kwParam !== keyword) setKeyword(kwParam)
+    if (cidParam !== selectedCourseId) setSelectedCourseId(cidParam)
+  }, [searchParams])
+
   // Modals
   const [isCreateModalOpen, setIsCreateModalOpen] = useState<boolean>(false)
   const [isEnrollModalOpen, setIsEnrollModalOpen] = useState<boolean>(false)
   const [activeClassForEnroll, setActiveClassForEnroll] = useState<ClassItem | null>(null)
+  const [sessionExamClass, setSessionExamClass] = useState<ClassItem | null>(null)
   const [enrolledStudents, setEnrolledStudents] = useState<Enrollment[]>([])
   const [formSubmitting, setFormSubmitting] = useState<boolean>(false)
 
@@ -140,6 +164,24 @@ export const ClassListPage: React.FC = () => {
   useEffect(() => {
     loadClasses()
   }, [loadClasses])
+
+  // Auto-open class detail if classId is in URL query
+  useEffect(() => {
+    const classIdParam = searchParams.get('classId')
+    if (classIdParam && !isNaN(Number(classIdParam))) {
+      const targetId = Number(classIdParam)
+      const found = classes.find((c) => c.id === targetId)
+      if (found) {
+        setDetailClass(found)
+      } else {
+        classesApi.getClassById(targetId).then((res) => {
+          if (res.success && res.data) {
+            setDetailClass(res.data)
+          }
+        }).catch(() => {})
+      }
+    }
+  }, [classes, searchParams])
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -378,27 +420,27 @@ export const ClassListPage: React.FC = () => {
               Quản lý các đợt mở lớp, phân công giáo viên giảng dạy, xếp lịch học và quản lý ghi danh
             </p>
           </div>
-          <div className="flex items-center gap-2.5">
+          <div className="flex flex-wrap items-center gap-2.5 w-full xl:w-auto">
             <button
               onClick={handleExportClasses}
-              className="inline-flex items-center gap-2 px-3.5 py-2.5 border border-emerald-300 dark:border-emerald-700/60 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-950/50 text-sm font-semibold rounded-lg transition-colors shadow-xs cursor-pointer"
+              className="inline-flex items-center gap-2 px-3.5 py-2.5 border border-emerald-300 dark:border-emerald-700/60 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-950/50 text-sm font-semibold rounded-lg transition-colors shadow-xs cursor-pointer whitespace-nowrap shrink-0"
             >
-              <Download className="w-4 h-4" />
-              Xuất file Excel (CSV)
+              <Download className="w-4 h-4 shrink-0" />
+              <span>Xuất file Excel (CSV)</span>
             </button>
             <button
               onClick={() => setIsCreateModalOpen(true)}
-              className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#142B4A] text-white text-sm font-semibold rounded-lg hover:bg-[#1a3860] transition-colors shadow-sm cursor-pointer"
+              className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#142B4A] text-white text-sm font-semibold rounded-lg hover:bg-[#1a3860] transition-colors shadow-sm cursor-pointer whitespace-nowrap shrink-0"
             >
-              <Plus className="w-4 h-4" />
-              Tạo lớp học mới
+              <Plus className="w-4 h-4 shrink-0" />
+              <span>Tạo lớp học mới</span>
             </button>
           </div>
         </div>
       </div>
 
       {/* KPI Overview Strip */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-xs flex items-center gap-3">
           <div className="w-10 h-10 rounded-lg bg-blue-50 text-blue-700 flex items-center justify-center font-bold">
             <Calendar className="w-5 h-5" />
@@ -563,6 +605,7 @@ export const ClassListPage: React.FC = () => {
                 setSelectedStatus('')
                 setSelectedCourseId('')
                 setPage(0)
+                setSearchParams({})
               }}
               title="Đặt lại bộ lọc"
               className="p-2 border border-gray-300 text-gray-600 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
@@ -571,6 +614,44 @@ export const ClassListPage: React.FC = () => {
             </button>
           </div>
         </form>
+
+        {/* Active Filter Badges Banner */}
+        {(keyword.trim() !== '' || selectedStatus !== '' || selectedCourseId !== '') && (
+          <div className="flex flex-wrap items-center gap-2 mt-3 pt-3 border-t border-gray-100 text-xs text-sky-800 dark:text-sky-300">
+            <span className="font-semibold text-gray-500">Đang lọc theo:</span>
+            {selectedStatus && (
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-sky-100 dark:bg-sky-900/60 font-medium">
+                Trạng thái: <strong>{selectedStatus === 'IN_PROGRESS' ? 'Đang học' : selectedStatus === 'OPEN_FOR_ENROLLMENT' ? 'Đang tuyển sinh' : selectedStatus}</strong>
+                <button type="button" onClick={() => { setSelectedStatus(''); setPage(0); }} className="hover:text-sky-950 cursor-pointer"><X size={12} /></button>
+              </span>
+            )}
+            {selectedCourseId && (
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-sky-100 dark:bg-sky-900/60 font-medium">
+                Khóa học: <strong>{courses.find(c => c.id === Number(selectedCourseId))?.name || selectedCourseId}</strong>
+                <button type="button" onClick={() => { setSelectedCourseId(''); setPage(0); }} className="hover:text-sky-950 cursor-pointer"><X size={12} /></button>
+              </span>
+            )}
+            {keyword && (
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-sky-100 dark:bg-sky-900/60 font-medium">
+                Từ khóa: <strong>"{keyword}"</strong>
+                <button type="button" onClick={() => { setKeyword(''); setPage(0); }} className="hover:text-sky-950 cursor-pointer"><X size={12} /></button>
+              </span>
+            )}
+            <button
+              type="button"
+              onClick={() => {
+                setKeyword('')
+                setSelectedStatus('')
+                setSelectedCourseId('')
+                setPage(0)
+                setSearchParams({})
+              }}
+              className="ml-auto text-xs font-semibold text-sky-700 dark:text-sky-300 hover:underline cursor-pointer"
+            >
+              Xóa tất cả bộ lọc
+            </button>
+          </div>
+        )}
       </div>
 
       {/* View 1: WEEKLY TIMETABLE MATRIX */}
@@ -761,6 +842,14 @@ export const ClassListPage: React.FC = () => {
                         <td className="py-3.5 px-4 text-right">
                           <div className="inline-flex items-center gap-1.5">
                             <button
+                              onClick={() => setSessionExamClass(cls)}
+                              title="Quản lý câu hỏi & đề thi theo buổi học"
+                              className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-lg text-xs font-semibold transition-colors cursor-pointer"
+                            >
+                              <FileQuestion className="w-3.5 h-3.5" />
+                              <span>Buổi học & Đề thi</span>
+                            </button>
+                            <button
                               onClick={() => setDetailClass(cls)}
                               title="Xem chi tiết lớp học"
                               className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-slate-100 text-slate-700 hover:bg-slate-200 rounded-lg text-xs font-semibold transition-colors cursor-pointer"
@@ -899,18 +988,32 @@ export const ClassListPage: React.FC = () => {
             </div>
 
             <div className="px-6 py-3 border-t border-gray-200 bg-gray-50 flex items-center justify-between">
-              <button
-                type="button"
-                onClick={() => {
-                  const target = detailClass
-                  setDetailClass(null)
-                  handleOpenEnrollModal(target)
-                }}
-                className="px-4 py-2 bg-[#142B4A] text-white text-xs font-semibold rounded-lg hover:bg-[#1a3860] flex items-center gap-1.5 cursor-pointer"
-              >
-                <Users className="w-4 h-4" />
-                Quản lý ghi danh học viên ({detailClass.enrolledCount})
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const target = detailClass
+                    setDetailClass(null)
+                    setSessionExamClass(target)
+                  }}
+                  className="px-4 py-2 bg-blue-600 text-white text-xs font-semibold rounded-lg hover:bg-blue-700 flex items-center gap-1.5 cursor-pointer shadow-xs"
+                >
+                  <FileQuestion className="w-4 h-4" />
+                  Buổi học & Đề thi
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const target = detailClass
+                    setDetailClass(null)
+                    handleOpenEnrollModal(target)
+                  }}
+                  className="px-4 py-2 bg-[#142B4A] text-white text-xs font-semibold rounded-lg hover:bg-[#1a3860] flex items-center gap-1.5 cursor-pointer"
+                >
+                  <Users className="w-4 h-4" />
+                  Quản lý ghi danh ({detailClass.enrolledCount})
+                </button>
+              </div>
               <button
                 type="button"
                 onClick={() => setDetailClass(null)}
@@ -1322,6 +1425,14 @@ export const ClassListPage: React.FC = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {/* MODAL: SESSION QUESTION & EXAM WORKSPACE */}
+      {sessionExamClass && (
+        <SessionQuestionExamModal
+          classItem={sessionExamClass}
+          onClose={() => setSessionExamClass(null)}
+        />
       )}
     </div>
   )

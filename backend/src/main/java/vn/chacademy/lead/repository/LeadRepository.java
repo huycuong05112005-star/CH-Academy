@@ -36,4 +36,8 @@ public interface LeadRepository extends JpaRepository<Lead, Long> {
     boolean existsByPhoneAndStatusNot(String phone, String status);
 
     long countByStatus(String status);
+
+    long countByCreatedAtBetween(java.time.Instant start, java.time.Instant end);
+
+    long countByStatusAndCreatedAtBetween(String status, java.time.Instant start, java.time.Instant end);
 }

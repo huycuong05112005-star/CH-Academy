@@ -42,4 +42,13 @@ public interface ClassRepository extends JpaRepository<ClassEntity, Long> {
     long countByStatus(String status);
 
     long countByStatusIn(java.util.Collection<String> statuses);
+
+    @Query("SELECT COUNT(c) FROM ClassEntity c WHERE c.status IN :statuses AND (c.academicYear = :academicYear OR (c.startDate BETWEEN :start AND :end))")
+    long countByAcademicYearAndStatusIn(@Param("academicYear") String academicYear,
+                                        @Param("start") java.time.LocalDate start,
+                                        @Param("end") java.time.LocalDate end,
+                                        @Param("statuses") java.util.Collection<String> statuses);
+
+    @Query("SELECT DISTINCT c.academicYear FROM ClassEntity c WHERE c.academicYear IS NOT NULL ORDER BY c.academicYear DESC")
+    java.util.List<String> findDistinctAcademicYears();
 }

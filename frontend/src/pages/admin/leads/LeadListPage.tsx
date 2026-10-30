@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { leadsApi } from '../../../api/leads'
 import { coursesApi } from '../../../api/courses'
 import { classesApi } from '../../../api/classes'
@@ -33,14 +34,27 @@ export const LeadListPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null)
   const [successMsg, setSuccessMsg] = useState<string | null>(null)
 
+  const [searchParams, setSearchParams] = useSearchParams()
+
   // Filters & Pagination
-  const [keyword, setKeyword] = useState<string>('')
-  const [selectedStatus, setSelectedStatus] = useState<string>('')
-  const [selectedSource, setSelectedSource] = useState<string>('')
+  const [keyword, setKeyword] = useState<string>(() => searchParams.get('keyword') || '')
+  const [selectedStatus, setSelectedStatus] = useState<string>(() => (searchParams.get('status') || '').toUpperCase())
+  const [selectedSource, setSelectedSource] = useState<string>(() => (searchParams.get('source') || '').toUpperCase())
   const [page, setPage] = useState<number>(0)
   const [totalPages, setTotalPages] = useState<number>(1)
   const [totalElements, setTotalElements] = useState<number>(0)
   const pageSize = 10
+
+  // Sync state if searchParams change in URL
+  useEffect(() => {
+    const statusParam = (searchParams.get('status') || '').toUpperCase()
+    const kwParam = searchParams.get('keyword') || ''
+    const srcParam = (searchParams.get('source') || '').toUpperCase()
+
+    if (statusParam !== selectedStatus) setSelectedStatus(statusParam)
+    if (kwParam !== keyword) setKeyword(kwParam)
+    if (srcParam !== selectedSource) setSelectedSource(srcParam)
+  }, [searchParams])
 
   // Modals
   const [isCreateModalOpen, setIsCreateModalOpen] = useState<boolean>(false)
@@ -318,7 +332,7 @@ export const LeadListPage: React.FC = () => {
           <span>/</span>
           <span className="text-[#142B4A]">Danh sách Leads</span>
         </div>
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4">
           <div>
             <h1 className="text-2xl font-bold text-[#142B4A]">Tuyển sinh & Khách hàng tiềm năng</h1>
             <p className="text-sm text-gray-500 mt-1">
@@ -327,16 +341,16 @@ export const LeadListPage: React.FC = () => {
           </div>
           <button
             onClick={() => setIsCreateModalOpen(true)}
-            className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#142B4A] text-white text-sm font-semibold rounded-lg hover:bg-[#1a3860] transition-colors shadow-sm cursor-pointer"
+            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-[#142B4A] text-white text-sm font-semibold rounded-lg hover:bg-[#1a3860] transition-colors shadow-sm cursor-pointer whitespace-nowrap shrink-0"
           >
             <Plus className="w-4 h-4" />
-            Thêm khách hàng tiềm năng
+            <span>Thêm khách hàng tiềm năng</span>
           </button>
         </div>
       </div>
 
       {/* KPI Overview Strip */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-xs flex items-center gap-3">
           <div className="w-10 h-10 rounded-lg bg-blue-50 text-blue-700 flex items-center justify-center font-bold">
             <Users className="w-5 h-5" />
@@ -476,14 +490,53 @@ export const LeadListPage: React.FC = () => {
                 setSelectedStatus('')
                 setSelectedSource('')
                 setPage(0)
+                setSearchParams({})
               }}
               title="Đặt lại bộ lọc"
-              className="p-2 border border-gray-300 text-gray-600 rounded-lg hover:bg-gray-50 transition-colors"
+              className="p-2 border border-gray-300 text-gray-600 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
             >
               <RefreshCw className="w-4 h-4" />
             </button>
           </div>
         </form>
+
+        {/* Active Filter Badges Banner */}
+        {(keyword.trim() !== '' || selectedStatus !== '' || selectedSource !== '') && (
+          <div className="flex flex-wrap items-center gap-2 mt-3 pt-3 border-t border-gray-100 text-xs text-sky-800 dark:text-sky-300">
+            <span className="font-semibold text-gray-500">Đang lọc theo:</span>
+            {selectedStatus && (
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-sky-100 dark:bg-sky-900/60 font-medium">
+                Trạng thái: <strong>{selectedStatus === 'NEW' ? 'Mới' : selectedStatus === 'CONVERTED' ? 'Đã chuyển đổi' : selectedStatus}</strong>
+                <button type="button" onClick={() => { setSelectedStatus(''); setPage(0); }} className="hover:text-sky-950 cursor-pointer"><X size={12} /></button>
+              </span>
+            )}
+            {selectedSource && (
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-sky-100 dark:bg-sky-900/60 font-medium">
+                Nguồn: <strong>{selectedSource}</strong>
+                <button type="button" onClick={() => { setSelectedSource(''); setPage(0); }} className="hover:text-sky-950 cursor-pointer"><X size={12} /></button>
+              </span>
+            )}
+            {keyword && (
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-sky-100 dark:bg-sky-900/60 font-medium">
+                Từ khóa: <strong>"{keyword}"</strong>
+                <button type="button" onClick={() => { setKeyword(''); setPage(0); }} className="hover:text-sky-950 cursor-pointer"><X size={12} /></button>
+              </span>
+            )}
+            <button
+              type="button"
+              onClick={() => {
+                setKeyword('')
+                setSelectedStatus('')
+                setSelectedSource('')
+                setPage(0)
+                setSearchParams({})
+              }}
+              className="ml-auto text-xs font-semibold text-sky-700 dark:text-sky-300 hover:underline cursor-pointer"
+            >
+              Xóa tất cả bộ lọc
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Leads Table */}

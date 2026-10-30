@@ -51,6 +51,9 @@ public class ClassEntity {
     @Column(name = "end_date")
     private LocalDate endDate;
 
+    @Column(name = "academic_year", length = 20)
+    private String academicYear;
+
     @Column(nullable = false, length = 30)
     @Builder.Default
     private String status = "PLANNING"; // PLANNING, OPEN_FOR_ENROLLMENT, IN_PROGRESS, COMPLETED, CANCELLED

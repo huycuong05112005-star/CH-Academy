@@ -10,7 +10,7 @@ export interface Receivable {
   totalAmount: number;
   paidAmount: number;
   remainingAmount: number;
-  status: 'PENDING' | 'PARTIALLY_PAID' | 'PAID' | 'CANCELLED';
+  status: 'PENDING' | 'UNPAID' | 'PARTIALLY_PAID' | 'PAID' | 'CANCELLED';
   dueDate?: string;
   createdAt: string;
 }

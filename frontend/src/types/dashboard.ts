@@ -12,8 +12,11 @@ export interface UpcomingSession {
 }
 
 export interface DashboardStats {
+  academicYear?: string
+  availableAcademicYears?: string[]
   totalStudents: number
   activeStudents: number
+  totalStudentsCenter?: number
   totalCourses: number
   activeClasses: number
   totalLeads: number

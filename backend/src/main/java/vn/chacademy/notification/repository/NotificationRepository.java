@@ -16,19 +16,35 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
     @EntityGraph(attributePaths = {"targetClass", "createdBy"})
     List<Notification> findAllByOrderByCreatedAtDesc();
 
-    @EntityGraph(attributePaths = {"targetClass", "createdBy"})
+    @EntityGraph(attributePaths = {"targetClass", "createdBy", "targetUser"})
     @Query("SELECT n FROM Notification n WHERE " +
            "n.targetAudience IN ('ALL', 'TEACHERS') OR " +
            "(n.targetAudience = 'CLASS' AND n.targetClass.id IN :classIds) " +
            "ORDER BY n.createdAt DESC")
     List<Notification> findForTeacher(@Param("classIds") Collection<Long> classIds);
 
-    @EntityGraph(attributePaths = {"targetClass", "createdBy"})
+    @EntityGraph(attributePaths = {"targetClass", "createdBy", "targetUser"})
+    @Query("SELECT n FROM Notification n WHERE " +
+           "n.targetAudience IN ('ALL', 'TEACHERS') OR " +
+           "(n.targetAudience = 'CLASS' AND n.targetClass.id IN :classIds) OR " +
+           "(n.targetAudience = 'USER' AND n.targetUser.id = :userId) " +
+           "ORDER BY n.createdAt DESC")
+    List<Notification> findForTeacherWithUser(@Param("classIds") Collection<Long> classIds, @Param("userId") Long userId);
+
+    @EntityGraph(attributePaths = {"targetClass", "createdBy", "targetUser"})
     @Query("SELECT n FROM Notification n WHERE " +
            "n.targetAudience IN ('ALL', 'STUDENTS') OR " +
            "(n.targetAudience = 'CLASS' AND n.targetClass.id IN :classIds) " +
            "ORDER BY n.createdAt DESC")
     List<Notification> findForStudent(@Param("classIds") Collection<Long> classIds);
+
+    @EntityGraph(attributePaths = {"targetClass", "createdBy", "targetUser"})
+    @Query("SELECT n FROM Notification n WHERE " +
+           "n.targetAudience IN ('ALL', 'STUDENTS') OR " +
+           "(n.targetAudience = 'CLASS' AND n.targetClass.id IN :classIds) OR " +
+           "(n.targetAudience = 'USER' AND n.targetUser.id = :userId) " +
+           "ORDER BY n.createdAt DESC")
+    List<Notification> findForStudentWithUser(@Param("classIds") Collection<Long> classIds, @Param("userId") Long userId);
 
     @EntityGraph(attributePaths = {"targetClass", "createdBy"})
     List<Notification> findByCreatedByIdOrderByCreatedAtDesc(Long userId);

@@ -8,7 +8,11 @@ export interface NotificationItem {
   priority: 'NORMAL' | 'HIGH' | 'URGENT' | string
   createdById?: number
   createdByName?: string
+  targetUserId?: number
+  targetUserName?: string
   createdAt: string
+  isRead?: boolean
+  readAt?: string
 }
 
 export interface CreateNotificationPayload {

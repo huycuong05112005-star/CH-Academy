@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react'
 import { settingsApi, type SystemSettings } from '../api/settings'
-import { getAuthToken } from '../api/client'
 
 export const DEFAULT_SYSTEM_SETTINGS: SystemSettings = {
   centerName: 'Học viện Anh ngữ & Năng khiếu CH Academy',
@@ -67,18 +66,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     setIsLoading(true)
     setError(null)
     try {
-      const token = getAuthToken()
-      let res
-      if (token) {
-        try {
-          res = await settingsApi.getSettings()
-        } catch {
-          // If admin endpoint fails (e.g. role restricted), try public
-          res = await settingsApi.getPublicSettings()
-        }
-      } else {
-        res = await settingsApi.getPublicSettings()
-      }
+      const res = await settingsApi.getPublicSettings()
 
       if (res && res.success && res.data) {
         // Clean out undefined/null before merging

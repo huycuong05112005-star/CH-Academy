@@ -1,8 +1,15 @@
-import React, { useState, useEffect } from 'react'
-import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom'
-import { useAuth } from '../context/AuthContext'
+import React, { useState, useEffect, useCallback } from 'react'
+import { NavLink, Outlet, useLocation, Link } from 'react-router-dom'
 import { useSettings } from '../context/SettingsContext'
-import { ThemeSwitcher } from '../components/ui/ThemeSwitcher'
+import { useExperience } from '../context/ExperienceContext'
+import { CommandPalette } from '../components/ui/CommandPalette'
+import { DesktopWorkspaceBar } from '../components/desktop/DesktopWorkspaceBar'
+import { DesktopStatusBar } from '../components/desktop/DesktopStatusBar'
+import { AccountMenu } from '../components/account/AccountMenu'
+import { HeaderSearchBar } from '../components/ui/HeaderSearchBar'
+import { NotificationBell } from '../components/ui/NotificationBell'
+import { notificationsApi } from '../api/notifications'
+import type { NotificationItem } from '../types/notification'
 import {
   LayoutDashboard,
   BookOpen,
@@ -12,7 +19,6 @@ import {
   CreditCard,
   UserPlus,
   Settings,
-  LogOut,
   ChevronLeft,
   ChevronRight,
   GraduationCap,
@@ -20,7 +26,14 @@ import {
   Menu,
   X,
   CheckCircle2,
-  ShieldCheck
+  ShieldCheck,
+  FileQuestion,
+  FileText,
+  CheckSquare,
+  BarChart2,
+  Search,
+  ArrowRight,
+  Clock
 } from 'lucide-react'
 
 interface NavItem {
@@ -38,28 +51,69 @@ interface NavGroup {
 export const AdminLayout: React.FC = () => {
   const [collapsed, setCollapsed] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [notifOpen, setNotifOpen] = useState(false)
-  const { user, logout } = useAuth()
+  const [commandPaletteOpen, setCommandPaletteOpen] = useState(false)
+  const [notifications, setNotifications] = useState<NotificationItem[]>([])
+  const [loadingNotifs, setLoadingNotifs] = useState(false)
+
   const { settings } = useSettings()
-  const navigate = useNavigate()
+  const { effectiveUsageMode, desktopDensity } = useExperience()
   const location = useLocation()
+
+  // Global Ctrl+K / Cmd+K listener for Command Palette
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault()
+        setCommandPaletteOpen((prev) => !prev)
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [])
+
+  // Fetch real notifications for the bell indicator
+  const fetchNotifications = useCallback(async () => {
+    setLoadingNotifs(true)
+    try {
+      const res = await notificationsApi.getAll()
+      if (res.success && res.data) {
+        setNotifications(res.data)
+      }
+    } catch {
+      // Keep silent on failure
+    } finally {
+      setLoadingNotifs(false)
+    }
+  }, [])
+
+  // Fetch notifications on mount
+  useEffect(() => {
+    let ignore = false
+    notificationsApi.getAll().then((res) => {
+      if (!ignore && res.success && res.data) {
+        setNotifications(res.data)
+      }
+    }).catch(() => {
+      // Keep silent on failure
+    })
+    return () => {
+      ignore = true
+    }
+  }, [])
 
   // Close mobile menu on route change
   useEffect(() => {
-    setMobileMenuOpen(false)
-    setNotifOpen(false)
+    const timer = setTimeout(() => {
+      setMobileMenuOpen(false)
+    }, 0)
+    return () => clearTimeout(timer)
   }, [location.pathname])
-
-  const handleLogout = () => {
-    logout()
-    navigate('/login')
-  }
 
   const navGroups: NavGroup[] = [
     {
       group: 'ĐIỀU HÀNH',
       items: [
-        { label: 'Tổng quan', path: '/admin', icon: LayoutDashboard, end: true },
+        { label: 'Tổng quan hệ thống', path: '/admin', icon: LayoutDashboard, end: true },
       ]
     },
     {
@@ -74,9 +128,19 @@ export const AdminLayout: React.FC = () => {
       ]
     },
     {
+      group: 'KIỂM TRA & ĐÁNH GIÁ',
+      items: [
+        { label: 'Duyệt đề thi', path: '/admin/assessment/approval', icon: ShieldCheck },
+        { label: 'Ngân hàng câu hỏi', path: '/admin/assessment/questions', icon: FileQuestion },
+        { label: 'Quản lý đề thi', path: '/admin/assessment/exams', icon: FileText },
+        { label: 'Chấm thi & Tự luận', path: '/admin/assessment/grading', icon: CheckSquare },
+        { label: 'Phân tích theo lớp', path: '/admin/assessment/class-analytics', icon: BarChart2 }
+      ]
+    },
+    {
       group: 'HỌC VIÊN & TUYỂN SINH',
       items: [
-        { label: 'Tuyển sinh & Leads', path: '/admin/leads', icon: UserPlus },
+        { label: 'Tuyển sinh & Khách hàng', path: '/admin/leads', icon: UserPlus },
         { label: 'Học viên & Giám hộ', path: '/admin/students', icon: Users },
       ]
     },
@@ -84,7 +148,7 @@ export const AdminLayout: React.FC = () => {
       group: 'TÀI CHÍNH & HỆ THỐNG',
       items: [
         { label: 'Học phí & Công nợ', path: '/admin/finance', icon: CreditCard },
-        { label: 'Nhật ký Audit', path: '/admin/audit-logs', icon: ShieldCheck },
+        { label: 'Nhật ký hệ thống', path: '/admin/audit-logs', icon: ShieldCheck },
         { label: 'Cấu hình hệ thống', path: '/admin/settings', icon: Settings },
       ]
     }
@@ -95,29 +159,25 @@ export const AdminLayout: React.FC = () => {
     item.end ? location.pathname === item.path : location.pathname.startsWith(item.path)
   )
 
-  const getRoleLabel = (role?: string) => {
-    switch (role) {
-      case 'SUPER_ADMIN': return 'Quản trị cấp cao'
-      case 'ADMIN': return 'Quản trị viên'
-      case 'ACADEMIC_STAFF': return 'Cán bộ giáo vụ'
-      case 'TEACHER': return 'Giảng viên'
-      case 'ACCOUNTANT': return 'Kế toán viên'
-      default: return 'Nhân sự'
-    }
-  }
-
   const renderSidebarContent = () => (
-    <div className="flex flex-col h-full bg-[#142B4A] dark:bg-[#101B2D] text-white">
-      {/* Brand */}
-      <div className="h-16 px-4 flex items-center justify-between border-b border-white/10 flex-shrink-0">
+    <div className="flex flex-col h-full bg-[#0A1120] [data-theme=glass]_&:bg-[#070D1B]/55 [data-theme=glass]_&:backdrop-blur-2xl text-white border-r border-slate-800/80 [data-theme=glass]_&:border-white/15 shadow-2xl">
+      {/* Brand Header */}
+      <div className="h-16 px-4 flex items-center justify-between border-b border-white/10 flex-shrink-0 bg-gradient-to-r from-[#0A1120] to-[#0E1A30] [data-theme=glass]_&:bg-none [data-theme=glass]_&:bg-white/[0.04]">
         <div className="flex items-center gap-3 overflow-hidden">
-          <div className="w-10 h-10 rounded-xl bg-white text-[#142B4A] flex items-center justify-center flex-shrink-0 shadow-sm">
-            <GraduationCap size={24} />
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-500 to-indigo-600 text-white flex items-center justify-center flex-shrink-0 shadow-lg shadow-sky-500/25">
+            <GraduationCap size={22} className="text-white" />
           </div>
           {(!collapsed || mobileMenuOpen) && (
             <div className="whitespace-nowrap">
-              <div className="font-extrabold text-lg tracking-tight text-white">{settings.shortName}</div>
-              <div className="text-[10px] text-slate-400 font-semibold tracking-wider uppercase">Trung tâm Đào tạo</div>
+              <div className="font-black text-base tracking-tight text-white flex items-center gap-1.5">
+                <span>{settings.shortName}</span>
+                <span className="px-1.5 py-0.2 rounded-md text-[9px] font-black uppercase tracking-wider bg-sky-500/20 text-[#38BDF8] border border-sky-500/30">
+                  SaaS
+                </span>
+              </div>
+              <div className="text-[10px] text-slate-400 font-semibold tracking-wider uppercase">
+                Cổng Quản trị viên
+              </div>
             </div>
           )}
         </div>
@@ -133,15 +193,16 @@ export const AdminLayout: React.FC = () => {
       </div>
 
       {/* Nav Menu */}
-      <nav className="flex-1 px-3 py-4 overflow-y-auto space-y-6">
+      <nav className="flex-1 px-3 py-4 overflow-y-auto space-y-5">
         {navGroups.map((group, gIdx) => (
-          <div key={gIdx}>
+          <div key={gIdx} className="space-y-1">
             {(!collapsed || mobileMenuOpen) && (
-              <div className="text-[11px] font-bold text-slate-400 tracking-wider uppercase px-3 mb-2">
-                {group.group}
+              <div className="text-[10px] font-extrabold text-slate-400 tracking-wider uppercase px-3 py-1 flex items-center justify-between">
+                <span>{group.group}</span>
+                <span className="text-[9px] font-mono text-slate-600 font-semibold">{group.items.length}</span>
               </div>
             )}
-            <div className="space-y-1">
+            <div className="space-y-0.5">
               {group.items.map((item) => {
                 const Icon = item.icon
                 return (
@@ -150,18 +211,20 @@ export const AdminLayout: React.FC = () => {
                     to={item.path}
                     end={item.end}
                     className={({ isActive }) => `
-                      flex items-center gap-3.5 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all
+                      flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all group
                       ${collapsed && !mobileMenuOpen ? 'justify-center px-0' : 'justify-start'}
                       ${
                         isActive
-                          ? 'bg-white/15 dark:bg-[#1C293D] text-white dark:text-[#38BDF8] border-l-3 border-[#38BDF8] shadow-xs'
+                          ? 'nav-pill-active'
                           : 'text-slate-400 hover:text-white hover:bg-white/5 border-l-3 border-transparent'
                       }
                     `}
                     title={collapsed && !mobileMenuOpen ? item.label : undefined}
                   >
-                    <Icon size={19} className="flex-shrink-0" />
-                    {(!collapsed || mobileMenuOpen) && <span>{item.label}</span>}
+                    <Icon size={18} className="flex-shrink-0 transition-transform group-hover:scale-110" />
+                    {(!collapsed || mobileMenuOpen) && (
+                      <span className="truncate">{item.label}</span>
+                    )}
                   </NavLink>
                 )
               })}
@@ -171,11 +234,14 @@ export const AdminLayout: React.FC = () => {
       </nav>
 
       {/* Sidebar Footer */}
-      <div className="p-3 border-t border-white/10 flex items-center justify-between bg-black/20 flex-shrink-0">
+      <div className="p-3 border-t border-white/10 flex items-center justify-between bg-black/40 [data-theme=glass]_&:bg-black/20 flex-shrink-0">
         {(!collapsed || mobileMenuOpen) && (
           <div className="px-2">
-            <div className="text-xs font-bold text-slate-200">CH-Academy v1.0</div>
-            <div className="text-[10px] text-slate-400">Hệ thống Quản lý Chuẩn</div>
+            <div className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span>CH Academy v2.4</span>
+            </div>
+            <div className="text-[10px] text-slate-400 font-medium">Nền tảng Quản lý Đào tạo</div>
           </div>
         )}
         <button
@@ -191,10 +257,15 @@ export const AdminLayout: React.FC = () => {
 
   return (
     <div className="flex min-h-screen bg-[var(--bg-app)] text-[var(--text-main)] transition-colors duration-200">
+      {/* Command Palette Modal */}
+      <CommandPalette isOpen={commandPaletteOpen} onClose={() => setCommandPaletteOpen(false)} />
+
       {/* Desktop Sidebar */}
       <aside
-        className={`hidden lg:block sticky top-0 h-screen z-40 transition-all duration-200 flex-shrink-0 shadow-md ${
-          collapsed ? 'w-20' : 'w-64'
+        className={`hidden lg:block sticky top-0 h-screen z-40 transition-all duration-200 flex-shrink-0 ${
+          collapsed
+            ? (effectiveUsageMode === 'desktop' ? 'w-16' : 'w-20')
+            : (effectiveUsageMode === 'desktop' ? 'w-56' : 'w-64')
         }`}
       >
         {renderSidebarContent()}
@@ -219,93 +290,84 @@ export const AdminLayout: React.FC = () => {
 
       {/* Main Container */}
       <div className="flex-1 flex flex-col min-w-0">
+        {/* Desktop Workspace Ribbon (When in Desktop Mode) */}
+        {effectiveUsageMode === 'desktop' && (
+          <DesktopWorkspaceBar
+            onOpenCommandPalette={() => setCommandPaletteOpen(true)}
+            onRefreshData={() => window.location.reload()}
+          />
+        )}
+
         {/* Top Header */}
-        <header className="h-16 sticky top-0 z-30 bg-white dark:bg-[#151F31] border-b border-slate-200 dark:border-[#2A3A50] px-4 lg:px-8 flex items-center justify-between shadow-xs transition-colors duration-200">
+        <header className={`${
+          effectiveUsageMode === 'desktop' ? 'h-12 px-3 lg:px-5' : 'h-16 px-4 lg:px-8'
+        } sticky top-0 z-20 bg-white/90 dark:bg-[#0D1524]/90 [data-theme=glass]_&:bg-[#070D1B]/45 [data-theme=glass]_&:backdrop-blur-2xl backdrop-blur-md border-b border-slate-200/80 dark:border-[#1E2E44] [data-theme=glass]_&:border-white/15 flex items-center justify-between shadow-xs transition-colors duration-200`}>
           {/* Left: Mobile Toggle & Breadcrumb */}
           <div className="flex items-center gap-3">
             <button
               onClick={() => setMobileMenuOpen(true)}
-              className="p-2 rounded-lg border border-slate-200 dark:border-[#2A3A50] text-slate-700 dark:text-[#E8EEF7] hover:bg-slate-100 dark:hover:bg-[#1C293D] lg:hidden"
+              className="p-2 rounded-xl border border-slate-200 dark:border-[#2A3A50] [data-theme=glass]_&:border-white/20 text-slate-700 dark:text-[#E8EEF7] hover:bg-slate-100 dark:hover:bg-[#1C293D] [data-theme=glass]_&:hover:bg-white/10 lg:hidden"
               aria-label="Mở menu điều hướng"
             >
               <Menu size={20} />
             </button>
 
             <div className="flex items-center gap-2 text-sm">
-              <span className="hidden sm:inline text-slate-500 dark:text-[#A6B4C8] font-medium">Quản trị trung tâm</span>
+              <span className="hidden sm:inline text-slate-500 dark:text-[#A6B4C8] font-medium">Trung tâm Quản trị</span>
               <span className="hidden sm:inline text-slate-300 dark:text-slate-600">/</span>
-              <span className="font-bold text-[#142B4A] dark:text-[#E8EEF7]">{currentItem?.label || 'Bảng điều khiển'}</span>
+              <span className="font-bold text-[#0F172A] dark:text-[#38BDF8]">{currentItem?.label || 'Bảng điều khiển'}</span>
             </div>
           </div>
 
-          {/* Right: Theme Switcher, Notifications, User profile */}
-          <div className="flex items-center gap-3">
-            {/* Theme Switcher */}
-            <ThemeSwitcher />
+          {/* Center: Command Palette Trigger Bar */}
+          <HeaderSearchBar
+            onClick={() => setCommandPaletteOpen(true)}
+            placeholder="Tìm kiếm nhanh chức năng, mã lớp, học viên..."
+          />
 
-            {/* Notification Entry */}
-            <div className="relative">
-              <button
-                onClick={() => setNotifOpen(!notifOpen)}
-                className="flex items-center justify-center w-9 h-9 rounded-lg border border-slate-200 dark:border-[#2A3A50] bg-white dark:bg-[#151F31] text-slate-700 dark:text-[#E8EEF7] hover:bg-slate-50 dark:hover:bg-[#1C293D] transition-colors shadow-xs"
-                aria-label="Thông báo hệ thống"
-              >
-                <Bell size={17} />
-              </button>
+          {/* Right: Notifications, User profile */}
+          <div className="flex items-center gap-2.5">
+            {/* Notification Bell with Real Dynamic Data */}
+            <NotificationBell
+              notifications={notifications}
+              loading={loadingNotifs}
+              onRefresh={fetchNotifications}
+              viewAllLink="/admin/notifications"
+              title="Thông báo hệ thống"
+              onNotificationRead={(id) =>
+                setNotifications((prev) =>
+                  prev.map((n) => (n.id === id ? { ...n, isRead: true } : n))
+                )
+              }
+              onMarkAllRead={() =>
+                setNotifications((prev) =>
+                  prev.map((n) => ({ ...n, isRead: true }))
+                )
+              }
+            />
 
-              {notifOpen && (
-                <div className="absolute right-0 mt-2 w-80 rounded-2xl border border-slate-200 dark:border-[#2A3A50] bg-white dark:bg-[#151F31] shadow-xl py-3 z-50 animate-in fade-in zoom-in-95 duration-150">
-                  <div className="px-4 pb-2 border-b border-slate-100 dark:border-[#2A3A50] flex items-center justify-between">
-                    <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-[#A6B4C8]">
-                      Thông báo hệ thống
-                    </span>
-                    <span className="text-[11px] text-slate-400">Thời gian thực</span>
-                  </div>
-                  <div className="p-6 text-center">
-                    <div className="w-10 h-10 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 mx-auto flex items-center justify-center mb-2">
-                      <CheckCircle2 size={22} />
-                    </div>
-                    <div className="text-sm font-semibold text-[#142B4A] dark:text-[#E8EEF7]">Mọi thứ đang ổn định</div>
-                    <p className="text-xs text-slate-500 dark:text-[#A6B4C8] mt-1">
-                      Chưa có cảnh báo hoặc công việc mới cần xử lý ngay.
-                    </p>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* User Profile Info */}
-            <div className="flex items-center gap-3 pl-3 border-l border-slate-200 dark:border-[#2A3A50]">
-              <div className="w-9 h-9 rounded-xl bg-[#142B4A] dark:bg-[#38BDF8] text-white dark:text-[#0B1220] font-bold text-sm flex items-center justify-center shadow-xs">
-                {user?.fullName?.charAt(0) || 'U'}
-              </div>
-              <div className="hidden md:block text-left leading-tight">
-                <div className="text-sm font-bold text-[#142B4A] dark:text-[#E8EEF7]">
-                  {user?.fullName || 'Người dùng'}
-                </div>
-                <div className="text-[11px] text-slate-500 dark:text-[#A6B4C8] font-medium">
-                  {getRoleLabel(user?.roles?.[0])}
-                </div>
-              </div>
-
-              <button
-                onClick={handleLogout}
-                className="flex items-center gap-1.5 ml-1 px-3 py-1.5 rounded-lg border border-rose-200 dark:border-rose-900/60 bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/60 text-xs font-semibold transition-colors"
-                title="Đăng xuất khỏi hệ thống"
-              >
-                <LogOut size={14} />
-                <span className="hidden sm:inline">Thoát</span>
-              </button>
+            {/* Unified Account Profile Menu */}
+            <div className="pl-1.5 border-l border-slate-200 dark:border-[#2A3A50]">
+              <AccountMenu portalRole="admin" />
             </div>
           </div>
         </header>
 
         {/* Main Content Area */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-[1600px] w-full mx-auto box-border animate-fade-in" key={location.pathname}>
+        <main
+          className={`flex-1 min-w-0 box-border animate-fade-in ${
+            effectiveUsageMode === 'desktop'
+              ? (desktopDensity === 'compact' ? 'p-2 sm:p-3 max-w-none w-full' : 'p-3 sm:p-4 max-w-none w-full')
+              : 'p-4 sm:p-6 lg:p-8 max-w-[1600px] w-full mx-auto'
+          }`}
+          key={location.pathname}
+        >
           <Outlet />
         </main>
+
+        {/* Desktop Status Bar (Bottom Application Bar) */}
+        {effectiveUsageMode === 'desktop' && <DesktopStatusBar />}
       </div>
     </div>
   )
-
 }

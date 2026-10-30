@@ -132,7 +132,7 @@
 /* ===================================================
    Dark Mode Surface Overrides for Admin & Component Primaries
    =================================================== */
-.dark .bg-white {
+.dark .bg-white:not([data-keep-white]):not(.keep-white) {
   background-color: var(--bg-surface) !important;
   color: var(--text-main);
 }
@@ -235,6 +235,60 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   transition: background-color var(--transition-normal), color var(--transition-normal);
+  background-image: radial-gradient(at 100% 0%, rgba(56, 189, 248, 0.05) 0px, transparent 50%),
+                    radial-gradient(at 0% 100%, rgba(37, 99, 235, 0.04) 0px, transparent 50%);
+  background-attachment: fixed;
+}
+
+.dark body {
+  background-image: radial-gradient(at 100% 0%, rgba(56, 189, 248, 0.08) 0px, transparent 45%),
+                    radial-gradient(at 0% 100%, rgba(14, 165, 233, 0.06) 0px, transparent 45%),
+                    radial-gradient(at 50% 50%, rgba(15, 23, 42, 0.4) 0px, transparent 75%);
+}
+
+/* Modern High-End EdTech SaaS Tokens */
+.saas-card {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-xl);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 10px 24px -8px rgba(15, 23, 42, 0.04);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dark .saas-card {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3), 0 12px 30px -8px rgba(0, 0, 0, 0.5);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.saas-card-hover {
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease;
+}
+
+.saas-card-hover:hover {
+  transform: translateY(-2px);
+  border-color: rgba(56, 189, 248, 0.4);
+  box-shadow: 0 16px 32px -8px rgba(15, 36, 62, 0.12), 0 0 0 1px rgba(56, 189, 248, 0.15);
+}
+
+.dark .saas-card-hover:hover {
+  border-color: rgba(56, 189, 248, 0.5);
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.7), 0 0 20px -2px rgba(56, 189, 248, 0.25);
+}
+
+.nav-pill-active {
+  background: linear-gradient(90deg, rgba(56, 189, 248, 0.18) 0%, rgba(56, 189, 248, 0.04) 100%) !important;
+  color: #38BDF8 !important;
+  border-left: 3.5px solid #38BDF8 !important;
+  box-shadow: inset 0 0 14px rgba(56, 189, 248, 0.08);
+}
+
+.badge-glow {
+  box-shadow: 0 0 12px -2px currentColor;
+}
+
+.subtle-mesh {
+  background-image: radial-gradient(circle at 15% 20%, rgba(56, 189, 248, 0.06) 0%, transparent 40%),
+                    radial-gradient(circle at 85% 80%, rgba(99, 102, 241, 0.06) 0%, transparent 40%);
 }
 
 /* Standardized Typography Classes */
@@ -459,4 +513,462 @@ td {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--text-muted);
 }
+
+/* ===================================================
+   3D Design Tokens & Spatial Depth Classes
+   =================================================== */
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+.preserve-3d {
+  transform-style: preserve-3d;
+}
+
+.backface-hidden {
+  backface-visibility: hidden;
+}
+
+.translate-z-sm {
+  transform: translateZ(8px);
+}
+
+.translate-z-md {
+  transform: translateZ(16px);
+}
+
+.translate-z-lg {
+  transform: translateZ(24px);
+}
+
+/* 3D Glass Specular Reflection */
+.glass-specular {
+  position: relative;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.75) 100%);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 0 16px 32px -8px rgba(15, 36, 62, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.dark .glass-specular {
+  background: linear-gradient(135deg, rgba(21, 31, 49, 0.85) 0%, rgba(16, 27, 45, 0.75) 100%);
+  border: 1px solid rgba(56, 189, 248, 0.2);
+  box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(56, 189, 248, 0.3);
+}
+
+/* 3D Deep Elevation Card */
+.card-depth-3d {
+  position: relative;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease;
+}
+
+.card-depth-3d:hover {
+  transform: translateY(-4px) scale(1.008);
+  box-shadow: 0 20px 35px -8px rgba(15, 36, 62, 0.12), 0 10px 15px -5px rgba(15, 36, 62, 0.04);
+  border-color: rgba(37, 99, 235, 0.4);
+}
+
+.dark .card-depth-3d:hover {
+  transform: translateY(-4px) scale(1.008);
+  box-shadow: 0 24px 45px -10px rgba(0, 0, 0, 0.7), 0 0 25px -4px rgba(56, 189, 248, 0.25);
+  border-color: rgba(56, 189, 248, 0.5);
+}
+
+/* ===================================================
+   True Glassmorphism Theme (data-theme="glass", .glass, .theme-glass)
+   Frosted glass panels, luminous borders, high contrast Vietnamese typography
+   =================================================== */
+:root[data-theme="glass"],
+.glass,
+.theme-glass,
+.transparent {
+  --bg-app: transparent;
+  --bg-surface: rgba(255, 255, 255, 0.08);
+  --bg-elevated: rgba(255, 255, 255, 0.12);
+  --bg-sidebar: rgba(8, 14, 30, 0.55);
+  --bg-sidebar-hover: rgba(56, 189, 248, 0.18);
+
+  --text-main: #FFFFFF;
+  --text-secondary: #E2E8F0;
+  --text-muted: #94A3B8;
+
+  --border-color: rgba(255, 255, 255, 0.18);
+  --border-subtle: rgba(255, 255, 255, 0.08);
+
+  --primary-navy: #38BDF8;
+  --primary-hover: #0284C7;
+  --accent-blue: #38BDF8;
+  --accent-cyan: #38BDF8;
+  --accent-light: rgba(56, 189, 248, 0.15);
+
+  --glass-panel: rgba(255, 255, 255, 0.08);
+  --glass-panel-hover: rgba(255, 255, 255, 0.14);
+  --glass-border: rgba(255, 255, 255, 0.18);
+  --glass-border-light: rgba(255, 255, 255, 0.32);
+  --glass-blur: 20px;
+  --glass-shadow: 0 16px 40px -10px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.22);
+}
+
+[data-theme="glass"] body,
+.glass body,
+.theme-glass body,
+[data-theme="glass"] #root,
+[data-theme="glass"] .min-h-screen,
+[data-theme="glass"] main {
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+}
+
+/* Glassmorphic Sidebar */
+[data-theme="glass"] aside,
+[data-theme="glass"] aside > div,
+[data-theme="glass"] aside .flex-col,
+.glass aside,
+.glass aside > div {
+  background-color: rgba(8, 14, 30, 0.55) !important;
+  backdrop-filter: blur(28px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
+  border-right-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+[data-theme="glass"] aside .bg-gradient-to-r,
+[data-theme="glass"] aside [class*="from-[#0A1120]"] {
+  background: rgba(255, 255, 255, 0.04) !important;
+  background-image: none !important;
+  border-bottom-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+[data-theme="glass"] aside [class*="bg-black/40"] {
+  background: rgba(0, 0, 0, 0.20) !important;
+  border-top-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+/* Glassmorphic Header */
+[data-theme="glass"] header,
+.glass header {
+  background-color: rgba(8, 14, 30, 0.45) !important;
+  backdrop-filter: blur(24px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
+  border-bottom-color: rgba(255, 255, 255, 0.15) !important;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.25) !important;
+}
+
+/* Glassmorphic Cards & Panels */
+[data-theme="glass"] .saas-card,
+[data-theme="glass"] .card-depth-3d,
+[data-theme="glass"] [class*="bg-white"],
+[data-theme="glass"] [class*="bg-slate-50"],
+[data-theme="glass"] [class*="dark:bg-[#151F31]"],
+[data-theme="glass"] [class*="dark:bg-[#101B2D]"],
+[data-theme="glass"] [class*="dark:bg-[#0E1729]"],
+.glass .saas-card {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+  backdrop-filter: blur(20px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+  border-color: rgba(255, 255, 255, 0.18) !important;
+  box-shadow: 0 16px 40px -10px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.22) !important;
+  color: #FFFFFF !important;
+}
+
+/* Remove linear gradients from hero banners and cards in glass mode so the frosted panel is crystal clear */
+[data-theme="glass"] .card-depth-3d,
+[data-theme="glass"] [class*="from-white"],
+[data-theme="glass"] [class*="from-[#0E1729]"],
+[data-theme="glass"] [class*="from-[#0A1120]"]:not(aside *) {
+  background-image: none !important;
+}
+
+/* Prevent double-blur inside cards */
+[data-theme="glass"] .card-depth-3d > .blur-3xl,
+[data-theme="glass"] .card-depth-3d > div > .blur-3xl {
+  display: none !important;
+}
+
+[data-theme="glass"] .saas-card:hover,
+[data-theme="glass"] .card-depth-3d:hover,
+[data-theme="glass"] .saas-card-hover:hover,
+.glass .saas-card-hover:hover {
+  background-color: rgba(255, 255, 255, 0.14) !important;
+  border-color: rgba(255, 255, 255, 0.32) !important;
+  box-shadow: 0 20px 48px -8px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.35) !important;
+}
+
+[data-theme="glass"] .bg-slate-100:not([data-keep-white]),
+[data-theme="glass"] .bg-gray-100:not([data-keep-white]) {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+/* Glassmorphic Form Inputs */
+[data-theme="glass"] input:not([type="checkbox"]):not([type="radio"]),
+[data-theme="glass"] select,
+[data-theme="glass"] textarea,
+.glass input:not([type="checkbox"]):not([type="radio"]),
+.glass select,
+.glass textarea {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.20) !important;
+  color: #FFFFFF !important;
+}
+
+[data-theme="glass"] input::placeholder,
+[data-theme="glass"] textarea::placeholder,
+.glass input::placeholder,
+.glass textarea::placeholder {
+  color: #94A3B8 !important;
+}
+
+[data-theme="glass"] input:focus,
+[data-theme="glass"] select:focus,
+[data-theme="glass"] textarea:focus,
+.glass input:focus,
+.glass select:focus,
+.glass textarea:focus {
+  border-color: #38BDF8 !important;
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.3) !important;
+  outline: none !important;
+}
+
+/* Glassmorphic Tables */
+[data-theme="glass"] table,
+.glass table {
+  background-color: transparent !important;
+}
+
+[data-theme="glass"] thead,
+[data-theme="glass"] thead tr,
+[data-theme="glass"] thead th,
+.glass thead th {
+  background-color: rgba(255, 255, 255, 0.12) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  color: #F8FAFC !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+[data-theme="glass"] tbody tr,
+.glass tbody tr {
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  background-color: transparent !important;
+}
+
+[data-theme="glass"] tbody tr:hover,
+.glass tbody tr:hover {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+[data-theme="glass"] td,
+.glass td {
+  color: #E2E8F0 !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Glassmorphic Modals & Floating Popovers */
+[data-theme="glass"] .fixed [class*="shadow-2xl"],
+[data-theme="glass"] [role="dialog"],
+.glass [role="dialog"] {
+  background-color: rgba(10, 16, 32, 0.82) !important;
+  backdrop-filter: blur(28px) saturate(190%) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(190%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.25) !important;
+  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.75), inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+}
+
+[data-theme="glass"] .absolute[class*="shadow-xl"],
+[data-theme="glass"] .absolute[class*="shadow-lg"],
+[data-theme="glass"] .shadow-dropdown,
+.glass .shadow-dropdown {
+  background-color: rgba(10, 16, 32, 0.88) !important;
+  backdrop-filter: blur(24px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.20) !important;
+  box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.25) !important;
+}
+
+/* Glassmorphic High Contrast Typography */
+[data-theme="glass"] h1,
+[data-theme="glass"] h2,
+[data-theme="glass"] h3,
+[data-theme="glass"] .text-\[\#0F172A\],
+[data-theme="glass"] .text-slate-900,
+[data-theme="glass"] .text-gray-900,
+[data-theme="glass"] .text-slate-800,
+[data-theme="glass"] .text-gray-800,
+[data-theme="glass"] .text-\[\#142B4A\],
+.glass .text-slate-900,
+.glass .text-\[\#142B4A\] {
+  color: #FFFFFF !important;
+}
+
+[data-theme="glass"] .text-slate-500,
+[data-theme="glass"] .text-gray-500 {
+  color: #CBD5E1 !important;
+}
+
+[data-theme="glass"] .text-slate-400,
+[data-theme="glass"] .text-gray-400 {
+  color: #94A3B8 !important;
+}
+
+[data-theme="glass"] .border-slate-200,
+[data-theme="glass"] .border-gray-200,
+[data-theme="glass"] .border-slate-100,
+[data-theme="glass"] .border-gray-100,
+[data-theme="glass"] .border-slate-300,
+.glass .border-slate-200 {
+  border-color: rgba(255, 255, 255, 0.16) !important;
+}
+
+/* Non-supporting browser fallback */
+@supports not (backdrop-filter: blur(1px)) {
+  [data-theme="glass"] .saas-card,
+  [data-theme="glass"] .bg-white:not([data-keep-white]):not(.keep-white) {
+    background-color: #0E172B !important;
+  }
+  [data-theme="glass"] aside {
+    background-color: #0A1120 !important;
+  }
+  [data-theme="glass"] header {
+    background-color: #0D1524 !important;
+  }
+}
+
+/* Non-supporting browser fallback */
+@supports not (backdrop-filter: blur(1px)) {
+  [data-theme="glass"] .saas-card,
+  [data-theme="glass"] .bg-white:not([data-keep-white]):not(.keep-white) {
+    background-color: #0E172B !important;
+  }
+  [data-theme="glass"] aside {
+    background-color: #0A1120 !important;
+  }
+  [data-theme="glass"] header {
+    background-color: #0D1524 !important;
+  }
+}
+
+/* ===================================================
+   Standardized Typography Hierarchy
+   =================================================== */
+.typo-page-title {
+  font-size: clamp(1.5rem, 2.5vw, 1.875rem); /* 24px - 30px */
+  font-weight: 800;
+  line-height: 1.25;
+  letter-spacing: -0.025em;
+}
+
+.typo-section-title {
+  font-size: clamp(1.125rem, 1.8vw, 1.25rem); /* 18px - 20px */
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.typo-card-title {
+  font-size: 1rem; /* 16px */
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.typo-stat {
+  font-size: clamp(1.5rem, 2.8vw, 2rem); /* 24px - 32px */
+  font-weight: 900;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.typo-body {
+  font-size: 0.9375rem; /* 15px */
+  font-weight: 400;
+  line-height: 1.6;
+}
+
+.typo-menu {
+  font-size: 0.875rem; /* 14px */
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.typo-label {
+  font-size: 0.8125rem; /* 13px */
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.typo-secondary {
+  font-size: 0.75rem; /* 12px */
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+/* ===================================================
+   Multi-Experience UI: Web + Desktop + 3 Themes
+   =================================================== */
+
+/* Desktop Mode Specifics */
+html[data-mode="desktop"] {
+  overflow-x: hidden;
+}
+
+html[data-mode="desktop"].electron-app {
+  user-select: none;
+}
+
+/* Desktop App Surface Elevations */
+html[data-mode="desktop"][data-theme="light"] {
+  --bg-app: #F1F5F9;
+}
+
+html[data-mode="desktop"][data-theme="dark"] {
+  --bg-app: #080D1A;
+}
+
+html[data-mode="desktop"][data-theme="glass"] {
+  --bg-app: #030712;
+}
+
+/* Desktop Mode: High information density & compact software controls */
+html[data-mode="desktop"] table th,
+html[data-mode="desktop"] table td {
+  padding-top: 0.65rem;
+  padding-bottom: 0.65rem;
+}
+
+/* Compact Density Mode */
+html[data-density="compact"] table th,
+html[data-density="compact"] table td {
+  padding-top: 0.4rem !important;
+  padding-bottom: 0.4rem !important;
+  padding-left: 0.75rem !important;
+  padding-right: 0.75rem !important;
+  font-size: 0.8125rem !important;
+}
+
+/* Frameless Window Border for Windows Desktop Native Client */
+html[data-mode="desktop"].electron-app body {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-sizing: border-box;
+}
+
+/* True Desktop-Glass OS Transparency:
+   In native desktop, root canvas is transparent to let Windows wallpaper / underlying windows shine through */
+html[data-mode="desktop"].electron-app[data-theme="glass"] body {
+  background-color: transparent !important;
+}
+
+/* Desktop Draggable Regions */
+.app-drag-region {
+  -webkit-app-region: drag;
+}
+
+.app-no-drag {
+  -webkit-app-region: no-drag;
+}
+
+
+
 

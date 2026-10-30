@@ -40,4 +40,9 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
 
     @Query("SELECT COUNT(DISTINCT e.student.id) FROM Enrollment e WHERE e.status = 'ENROLLED'")
     long countDistinctActiveEnrolledStudents();
+
+    @Query("SELECT COUNT(DISTINCT e.student.id) FROM Enrollment e WHERE e.status = 'ENROLLED' AND (e.classEntity.academicYear = :academicYear OR (e.classEntity.startDate BETWEEN :start AND :end))")
+    long countDistinctActiveEnrolledStudentsInAcademicYear(@Param("academicYear") String academicYear,
+                                                           @Param("start") java.time.LocalDate start,
+                                                           @Param("end") java.time.LocalDate end);
 }

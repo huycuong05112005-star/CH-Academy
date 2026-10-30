@@ -16,6 +16,7 @@ import java.time.LocalTime;
 @AllArgsConstructor
 public class ClassSessionDto {
     private Long id;
+    private Integer sessionNumber;
     private Long classId;
     private String classCode;
     private String className;
@@ -34,6 +35,8 @@ public class ClassSessionDto {
     private String room;
     private String topic;
     private String status;
+    private int questionCount;
+    private int examCount;
 
     public static ClassSessionDto fromEntity(ClassSession s) {
         if (s == null) return null;

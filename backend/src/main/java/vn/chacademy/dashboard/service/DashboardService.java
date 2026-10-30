@@ -6,19 +6,20 @@ import org.springframework.transaction.annotation.Transactional;
 import vn.chacademy.academic.entity.ClassSession;
 import vn.chacademy.academic.repository.ClassRepository;
 import vn.chacademy.academic.repository.ClassSessionRepository;
+import vn.chacademy.academic.repository.EnrollmentRepository;
 import vn.chacademy.course.repository.CourseRepository;
 import vn.chacademy.dashboard.dto.DashboardStatsDto;
 import vn.chacademy.dashboard.dto.UpcomingSessionDto;
-import vn.chacademy.finance.repository.PaymentRepository;
 import vn.chacademy.finance.repository.ReceivableRepository;
 import vn.chacademy.lead.repository.LeadRepository;
 import vn.chacademy.student.repository.StudentRepository;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -28,23 +29,82 @@ public class DashboardService {
     private final StudentRepository studentRepository;
     private final CourseRepository courseRepository;
     private final ClassRepository classRepository;
+    private final EnrollmentRepository enrollmentRepository;
     private final LeadRepository leadRepository;
     private final ReceivableRepository receivableRepository;
-    private final PaymentRepository paymentRepository;
     private final ClassSessionRepository classSessionRepository;
 
     private static final ZoneId VIETNAM_ZONE = ZoneId.of("Asia/Ho_Chi_Minh");
 
     @Transactional(readOnly = true)
     public DashboardStatsDto getDashboardStats() {
-        long totalStudents = studentRepository.count();
-        long activeStudents = studentRepository.countActiveStudents();
+        return getDashboardStats(null);
+    }
 
+    @Transactional(readOnly = true)
+    public DashboardStatsDto getDashboardStats(String requestedYear) {
+        LocalDate today = LocalDate.now(VIETNAM_ZONE);
+
+        // 1. Resolve Academic Year (Default to current academic year: Sept 1 - Aug 31)
+        String currentAcademicYear = today.getMonthValue() >= 9
+                ? today.getYear() + "-" + (today.getYear() + 1)
+                : (today.getYear() - 1) + "-" + today.getYear();
+
+        String selectedYear = (requestedYear != null && !requestedYear.trim().isEmpty())
+                ? requestedYear.trim()
+                : currentAcademicYear;
+
+        // Parse start & end dates of the academic year
+        LocalDate academicStartDate;
+        LocalDate academicEndDate;
+        try {
+            String[] parts = selectedYear.split("-");
+            int startYear = Integer.parseInt(parts[0].trim());
+            int endYear = parts.length > 1 ? Integer.parseInt(parts[1].trim()) : startYear + 1;
+            academicStartDate = LocalDate.of(startYear, 9, 1);
+            academicEndDate = LocalDate.of(endYear, 8, 31);
+        } catch (Exception e) {
+            academicStartDate = LocalDate.of(2026, 9, 1);
+            academicEndDate = LocalDate.of(2027, 8, 31);
+            selectedYear = "2026-2027";
+        }
+
+        Instant academicStartInstant = academicStartDate.atStartOfDay(VIETNAM_ZONE).toInstant();
+        Instant academicEndInstant = academicEndDate.plusDays(1).atStartOfDay(VIETNAM_ZONE).toInstant();
+
+        // 2. Available Academic Years list
+        Set<String> yearSet = new TreeSet<>(Comparator.reverseOrder());
+        yearSet.add("2026-2027");
+        yearSet.add("2025-2026");
+        yearSet.add("2024-2025");
+        yearSet.add("2027-2028");
+        yearSet.addAll(classRepository.findDistinctAcademicYears());
+        List<String> availableYears = new ArrayList<>(yearSet);
+
+        // 3. Center Lifetime Totals (Toàn hệ thống)
+        long totalStudentsCenter = studentRepository.count();
         long totalCourses = courseRepository.count();
-        long activeClasses = classRepository.countByStatusIn(List.of("IN_PROGRESS", "OPEN_FOR_ENROLLMENT", "OPEN"));
 
-        long totalLeads = leadRepository.count();
-        long convertedLeads = leadRepository.countByStatus("CONVERTED");
+        // 4. Academic Year Scoped Metrics
+        // Classes active in this academic year
+        long activeClasses = classRepository.countByAcademicYearAndStatusIn(
+                selectedYear,
+                academicStartDate,
+                academicEndDate,
+                List.of("IN_PROGRESS", "OPEN_FOR_ENROLLMENT", "OPEN")
+        );
+
+        // Students enrolled in this academic year
+        long activeStudents = enrollmentRepository.countDistinctActiveEnrolledStudentsInAcademicYear(
+                selectedYear,
+                academicStartDate,
+                academicEndDate
+        );
+        long totalStudents = activeStudents;
+
+        // Leads in this academic year
+        long totalLeads = leadRepository.countByCreatedAtBetween(academicStartInstant, academicEndInstant);
+        long convertedLeads = leadRepository.countByStatusAndCreatedAtBetween("CONVERTED", academicStartInstant, academicEndInstant);
         double conversionRate = 0.0;
         if (totalLeads > 0) {
             conversionRate = BigDecimal.valueOf((double) convertedLeads / totalLeads * 100)
@@ -52,25 +112,29 @@ public class DashboardService {
                     .doubleValue();
         }
 
-        BigDecimal totalReceivable = receivableRepository.sumTotalReceivables();
-        BigDecimal totalPaid = paymentRepository.sumTotalPayments();
+        // Finances in this academic year
+        BigDecimal totalReceivable = receivableRepository.sumReceivablesBetween(academicStartDate, academicEndDate);
+        BigDecimal totalPaid = receivableRepository.sumPaidBetween(academicStartDate, academicEndDate);
         if (totalPaid == null) {
             totalPaid = BigDecimal.ZERO;
         }
         if (totalReceivable == null) {
             totalReceivable = BigDecimal.ZERO;
         }
-        BigDecimal totalDebt = totalReceivable.subtract(totalPaid);
-        if (totalDebt.compareTo(BigDecimal.ZERO) < 0) {
-            totalDebt = BigDecimal.ZERO;
-        }
+        BigDecimal totalDebt = totalReceivable.subtract(totalPaid).max(BigDecimal.ZERO);
 
-        LocalDate today = LocalDate.now(VIETNAM_ZONE);
-        LocalDate nextPeriod = today.plusDays(14);
-        List<ClassSession> sessions = classSessionRepository.findSessionsInDateRange(null, null, today, nextPeriod);
-        if (sessions.isEmpty()) {
-            // Bao gồm cả các buổi học gần nhất trong 7 ngày qua nếu chưa có buổi mới
-            sessions = classSessionRepository.findSessionsInDateRange(null, null, today.minusDays(7), nextPeriod);
+        // 5. Sessions in this academic year
+        List<ClassSession> sessions;
+        boolean isCurrentYear = selectedYear.equals(currentAcademicYear);
+        if (isCurrentYear) {
+            LocalDate nextPeriod = today.plusDays(14);
+            sessions = classSessionRepository.findSessionsInDateRange(null, null, today, nextPeriod);
+            if (sessions.isEmpty()) {
+                sessions = classSessionRepository.findSessionsInDateRange(null, null, today.minusDays(7), nextPeriod);
+            }
+        } else {
+            // For other academic years, query up to 15 sessions in that year
+            sessions = classSessionRepository.findSessionsInDateRange(null, null, academicStartDate, academicEndDate);
         }
 
         List<UpcomingSessionDto> upcomingDtos = sessions.stream()
@@ -79,8 +143,11 @@ public class DashboardService {
                 .collect(Collectors.toList());
 
         return DashboardStatsDto.builder()
+                .academicYear(selectedYear)
+                .availableAcademicYears(availableYears)
                 .totalStudents(totalStudents)
                 .activeStudents(activeStudents)
+                .totalStudentsCenter(totalStudentsCenter)
                 .totalCourses(totalCourses)
                 .activeClasses(activeClasses)
                 .totalLeads(totalLeads)

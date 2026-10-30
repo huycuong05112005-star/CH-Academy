@@ -24,6 +24,18 @@ export default defineConfig({
       },
     },
   },
+  build: {
+    chunkSizeWarningLimit: 800,
+    rollupOptions: {
+      output: {
+        manualChunks(id: string) {
+          if (id.includes('three')) {
+            return 'three-vendor'
+          }
+        },
+      },
+    },
+  },
   // ----- Cấu hình Vitest -----
   test: {
     globals: true,
@@ -31,5 +43,6 @@ export default defineConfig({
     setupFiles: ['./src/test/setup.ts'],
     css: true,
     testTimeout: 15000,
+    pool: 'threads',
   },
 })

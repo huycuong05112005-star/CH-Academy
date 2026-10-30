@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import {
   CreditCard,
   Plus,
@@ -25,13 +26,30 @@ import { TableSkeleton } from '../../../components/ui/LoadingSkeleton'
 import { EmptyState } from '../../../components/ui/EmptyState'
 
 export function FinancePage() {
-  const [activeTab, setActiveTab] = useState<'receivables' | 'payments'>('receivables')
+  const [searchParams, setSearchParams] = useSearchParams()
+
+  const getInitialTab = (): 'receivables' | 'payments' => {
+    const tab = searchParams.get('tab')
+    if (tab === 'payments') return 'payments'
+    return 'receivables'
+  }
+
+  const getInitialRecStatus = (): string => {
+    const status = searchParams.get('status')
+    if (!status) return ''
+    const upper = status.toUpperCase()
+    if (upper === 'OUTSTANDING' || upper === 'UNPAID') return 'UNPAID'
+    if (upper === 'PAID') return 'PAID'
+    return upper
+  }
+
+  const [activeTab, setActiveTab] = useState<'receivables' | 'payments'>(getInitialTab)
   const [overview, setOverview] = useState<FinanceOverview | null>(null)
   
   // Receivables state
   const [receivables, setReceivables] = useState<Receivable[]>([])
-  const [recSearch, setRecSearch] = useState('')
-  const [recStatus, setRecStatus] = useState('')
+  const [recSearch, setRecSearch] = useState(() => searchParams.get('keyword') || '')
+  const [recStatus, setRecStatus] = useState(getInitialRecStatus)
   const [recPage, setRecPage] = useState(0)
   const [recTotalPages, setRecTotalPages] = useState(1)
 
@@ -41,6 +59,25 @@ export function FinancePage() {
   const [payMethod, setPayMethod] = useState('')
   const [payPage, setPayPage] = useState(0)
   const [payTotalPages, setPayTotalPages] = useState(1)
+
+  // Synchronize on searchParams change (browser navigation, direct links)
+  useEffect(() => {
+    const tabParam = searchParams.get('tab')
+    if (tabParam === 'payments' && activeTab !== 'payments') {
+      setActiveTab('payments')
+    } else if (tabParam === 'receivables' && activeTab !== 'receivables') {
+      setActiveTab('receivables')
+    }
+
+    const stParam = searchParams.get('status')
+    if (stParam) {
+      const upper = stParam.toUpperCase()
+      const mapped = upper === 'OUTSTANDING' ? 'UNPAID' : upper
+      if (mapped !== recStatus) {
+        setRecStatus(mapped)
+      }
+    }
+  }, [searchParams])
 
   const [loading, setLoading] = useState(false)
   const [students, setStudents] = useState<Student[]>([])
@@ -294,7 +331,7 @@ export function FinancePage() {
       )}
 
       {/* Top Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-4 border-b border-slate-200 dark:border-[#2A3A50]">
+      <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 pb-4 border-b border-slate-200 dark:border-[#2A3A50]">
         <div>
           <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-[#A6B4C8] uppercase tracking-wider mb-1">
             <span>Tài chính & Hệ thống</span>
@@ -302,19 +339,19 @@ export function FinancePage() {
             <span className="text-[#142B4A] dark:text-[#38BDF8]">Học phí & Công nợ</span>
           </div>
           <h1 className="text-2xl font-bold tracking-tight text-[#142B4A] dark:text-[#E8EEF7] flex items-center gap-2.5">
-            <CreditCard className="w-7 h-7 text-[#142B4A] dark:text-[#38BDF8]" />
+            <CreditCard className="w-7 h-7 text-[#142B4A] dark:text-[#38BDF8] shrink-0" />
             Học phí & Quản lý Tài chính
           </h1>
           <p className="text-slate-500 dark:text-[#A6B4C8] text-sm mt-1">
             Theo dõi khoản phải thu, ghi nhận thanh toán, quản lý công nợ và hoàn tiền minh bạch.
           </p>
         </div>
-        <div className="flex items-center gap-2.5">
+        <div className="flex flex-wrap items-center gap-2.5 w-full xl:w-auto">
           <button
             onClick={handleExportFinance}
-            className="flex items-center gap-2 px-3.5 py-2.5 border border-emerald-300 dark:border-emerald-700/60 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-950/50 text-sm font-semibold rounded-xl shadow-xs transition"
+            className="flex items-center gap-2 px-3.5 py-2.5 border border-emerald-300 dark:border-emerald-700/60 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-950/50 text-sm font-semibold rounded-xl shadow-xs transition whitespace-nowrap shrink-0"
           >
-            <Download className="w-4 h-4" />
+            <Download className="w-4 h-4 shrink-0" />
             <span>Xuất file Excel (CSV)</span>
           </button>
           <button
@@ -327,23 +364,23 @@ export function FinancePage() {
               setFormError('')
               setIsReceivableModalOpen(true)
             }}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-[#2A3A50] bg-white dark:bg-[#151F31] hover:bg-slate-50 dark:hover:bg-[#1C293D] text-slate-800 dark:text-[#E8EEF7] text-sm font-semibold shadow-xs transition"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-[#2A3A50] bg-white dark:bg-[#151F31] hover:bg-slate-50 dark:hover:bg-[#1C293D] text-slate-800 dark:text-[#E8EEF7] text-sm font-semibold shadow-xs transition whitespace-nowrap shrink-0"
           >
-            <Plus className="w-4 h-4" />
+            <Plus className="w-4 h-4 shrink-0" />
             <span>Tạo khoản thu</span>
           </button>
           <button
             onClick={() => handleOpenPaymentModal()}
-            className="flex items-center gap-2 px-4 py-2.5 bg-[#142B4A] dark:bg-[#38BDF8] hover:bg-[#1D4168] dark:hover:bg-[#0284C7] text-white dark:text-[#0B1220] rounded-xl text-sm font-semibold shadow-sm transition"
+            className="flex items-center gap-2 px-4 py-2.5 bg-[#142B4A] dark:bg-[#38BDF8] hover:bg-[#1D4168] dark:hover:bg-[#0284C7] text-white dark:text-[#0B1220] rounded-xl text-sm font-semibold shadow-sm transition whitespace-nowrap shrink-0"
           >
-            <Receipt className="w-4 h-4" />
+            <Receipt className="w-4 h-4 shrink-0" />
             <span>Ghi nhận thanh toán</span>
           </button>
         </div>
       </div>
 
       {/* Overview KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         <StatCard
           title="Tổng phải thu"
           value={formatVND(overview?.totalReceivables || 0)}
@@ -417,17 +454,51 @@ export function FinancePage() {
                 <Filter className="w-4 h-4 text-slate-500" />
                 <select
                   value={recStatus}
-                  onChange={(e) => setRecStatus(e.target.value)}
+                  onChange={(e) => {
+                    setRecStatus(e.target.value)
+                    setRecPage(0)
+                  }}
                   className="px-3 py-2 rounded-xl border border-slate-200 dark:border-[#2A3A50] bg-white dark:bg-[#1C293D] text-sm text-[#142B4A] dark:text-[#E8EEF7] focus:outline-none focus:ring-2 focus:ring-[#142B4A] dark:focus:ring-[#38BDF8]"
                 >
                   <option value="">Tất cả trạng thái</option>
-                  <option value="PENDING">Chờ nộp</option>
+                  <option value="UNPAID">Chưa nộp (Công nợ)</option>
                   <option value="PARTIALLY_PAID">Nộp một phần</option>
                   <option value="PAID">Đã nộp đủ</option>
                   <option value="CANCELLED">Đã hủy</option>
                 </select>
               </div>
             </div>
+
+            {/* Active Filter Badges Banner */}
+            {(recSearch.trim() !== '' || recStatus !== '') && (
+              <div className="flex flex-wrap items-center gap-2 px-4 py-2.5 rounded-xl bg-sky-50/80 dark:bg-sky-950/30 border border-sky-200/80 dark:border-sky-800/60 text-xs text-sky-800 dark:text-sky-300">
+                <span className="font-semibold text-slate-600 dark:text-slate-400">Đang lọc theo:</span>
+                {recStatus && (
+                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-sky-100 dark:bg-sky-900/60 font-medium">
+                    Trạng thái: <strong>{recStatus === 'UNPAID' ? 'Chưa nộp (Công nợ)' : recStatus === 'PAID' ? 'Đã nộp đủ' : recStatus === 'PARTIALLY_PAID' ? 'Nộp một phần' : recStatus}</strong>
+                    <button type="button" onClick={() => { setRecStatus(''); setRecPage(0); }} className="hover:text-sky-950 dark:hover:text-white cursor-pointer"><X size={12} /></button>
+                  </span>
+                )}
+                {recSearch && (
+                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-sky-100 dark:bg-sky-900/60 font-medium">
+                    Từ khóa: <strong>"{recSearch}"</strong>
+                    <button type="button" onClick={() => { setRecSearch(''); setRecPage(0); }} className="hover:text-sky-950 dark:hover:text-white cursor-pointer"><X size={12} /></button>
+                  </span>
+                )}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setRecSearch('')
+                    setRecStatus('')
+                    setRecPage(0)
+                    setSearchParams({ tab: 'receivables' })
+                  }}
+                  className="ml-auto text-xs font-semibold text-sky-700 dark:text-sky-300 hover:underline cursor-pointer"
+                >
+                  Xóa bộ lọc
+                </button>
+              </div>
+            )}
 
             {loading ? (
               <TableSkeleton rows={5} columns={9} />
@@ -439,18 +510,18 @@ export function FinancePage() {
               />
             ) : (
               <div className="overflow-x-auto rounded-2xl">
-                <table className="w-full text-left border-collapse text-table min-w-[1050px]">
+                <table className="w-full text-left border-collapse text-table min-w-[920px]">
                   <thead>
                     <tr className="bg-slate-50/80 dark:bg-[#1C293D] border-b border-slate-200 dark:border-[#2A3A50] text-xs font-semibold text-slate-500 dark:text-[#A6B4C8] uppercase tracking-wider">
-                      <th className="py-3.5 px-4 w-[110px] whitespace-nowrap">Mã</th>
-                      <th className="py-3.5 px-4 min-w-[180px]">Học viên</th>
-                      <th className="py-3.5 px-4 min-w-[190px]">Khoản thu</th>
-                      <th className="py-3.5 px-4 w-[130px] text-right whitespace-nowrap">Tổng tiền</th>
-                      <th className="py-3.5 px-4 w-[130px] text-right whitespace-nowrap">Đã nộp</th>
-                      <th className="py-3.5 px-4 w-[130px] text-right whitespace-nowrap">Còn nợ</th>
-                      <th className="py-3.5 px-4 w-[110px] whitespace-nowrap">Hạn nộp</th>
-                      <th className="py-3.5 px-4 w-[130px] text-center whitespace-nowrap">Trạng thái</th>
-                      <th className="py-3.5 px-4 w-[110px] text-right whitespace-nowrap">Hành động</th>
+                      <th className="py-3.5 px-4 w-[100px] whitespace-nowrap">Mã</th>
+                      <th className="py-3.5 px-4 min-w-[150px] max-w-[190px]">Học viên</th>
+                      <th className="py-3.5 px-4 min-w-[180px] max-w-[280px]">Khoản thu</th>
+                      <th className="py-3.5 px-4 w-[125px] text-right whitespace-nowrap">Tổng tiền</th>
+                      <th className="py-3.5 px-4 w-[125px] text-right whitespace-nowrap">Đã nộp</th>
+                      <th className="py-3.5 px-4 w-[125px] text-right whitespace-nowrap">Còn nợ</th>
+                      <th className="py-3.5 px-4 w-[105px] whitespace-nowrap">Hạn nộp</th>
+                      <th className="py-3.5 px-4 w-[120px] text-center whitespace-nowrap">Trạng thái</th>
+                      <th className="py-3.5 px-4 w-[95px] text-right whitespace-nowrap">Hành động</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 dark:divide-[#2A3A50]/60">
@@ -458,34 +529,34 @@ export function FinancePage() {
                       const isOverdue = r.dueDate && new Date(r.dueDate) < new Date() && r.status !== 'PAID'
                       return (
                         <tr key={r.id} className="hover:bg-slate-50/60 dark:hover:bg-[#1C293D]/40 transition">
-                          <td className="py-3.5 px-4 font-mono font-bold text-xs text-[#142B4A] dark:text-[#38BDF8]">{r.code}</td>
+                          <td className="py-3.5 px-4 font-mono font-bold text-xs text-[#142B4A] dark:text-[#38BDF8] whitespace-nowrap">{r.code}</td>
                           <td className="py-3.5 px-4">
-                            <div className="font-bold text-[#142B4A] dark:text-[#E8EEF7]">{r.studentFullName}</div>
+                            <div className="font-bold text-[#142B4A] dark:text-[#E8EEF7] truncate max-w-[180px]" title={r.studentFullName}>{r.studentFullName}</div>
                             <div className="text-xs text-slate-500 dark:text-[#A6B4C8] font-mono mt-0.5">{r.studentCode}</div>
                           </td>
                           <td className="py-3.5 px-4">
-                            <div className="font-semibold text-slate-800 dark:text-[#E8EEF7]">{r.title}</div>
-                            {r.className && <div className="text-xs text-slate-500 dark:text-[#A6B4C8] mt-0.5">Lớp: {r.className}</div>}
+                            <div className="font-semibold text-slate-800 dark:text-[#E8EEF7] line-clamp-2 max-w-[280px]" title={r.title}>{r.title}</div>
+                            {r.className && <div className="text-xs text-slate-500 dark:text-[#A6B4C8] mt-0.5 truncate max-w-[280px]">Lớp: {r.className}</div>}
                           </td>
-                          <td className="py-3.5 px-4 text-right font-bold text-slate-800 dark:text-[#E8EEF7]">{formatVND(r.totalAmount)}</td>
-                          <td className="py-3.5 px-4 text-right text-emerald-600 dark:text-emerald-400 font-bold">{formatVND(r.paidAmount)}</td>
-                          <td className="py-3.5 px-4 text-right font-bold text-amber-600 dark:text-amber-400">{formatVND(r.remainingAmount)}</td>
-                          <td className="py-3.5 px-4 text-xs">
+                          <td className="py-3.5 px-4 text-right font-bold text-slate-800 dark:text-[#E8EEF7] whitespace-nowrap">{formatVND(r.totalAmount)}</td>
+                          <td className="py-3.5 px-4 text-right text-emerald-600 dark:text-emerald-400 font-bold whitespace-nowrap">{formatVND(r.paidAmount)}</td>
+                          <td className="py-3.5 px-4 text-right font-bold text-amber-600 dark:text-amber-400 whitespace-nowrap">{formatVND(r.remainingAmount)}</td>
+                          <td className="py-3.5 px-4 text-xs whitespace-nowrap">
                             <span className={isOverdue ? 'text-rose-600 dark:text-rose-400 font-semibold' : 'text-slate-600 dark:text-[#A6B4C8]'}>
                               {r.dueDate || '---'}
                             </span>
                           </td>
-                          <td className="py-3.5 px-4 text-center">
+                          <td className="py-3.5 px-4 text-center whitespace-nowrap">
                             {r.status === 'PAID' && <Badge variant="success">Đã nộp đủ</Badge>}
                             {r.status === 'PARTIALLY_PAID' && <Badge variant="info">Nộp một phần</Badge>}
-                            {r.status === 'PENDING' && <Badge variant="warning">Chờ nộp</Badge>}
+                            {(r.status === 'PENDING' || r.status === 'UNPAID') && <Badge variant="warning">Chưa nộp</Badge>}
                             {r.status === 'CANCELLED' && <Badge variant="neutral">Đã hủy</Badge>}
                           </td>
-                          <td className="py-3.5 px-4 text-right">
+                          <td className="py-3.5 px-4 text-right whitespace-nowrap">
                             {r.status !== 'PAID' && r.status !== 'CANCELLED' && (
                               <button
                                 onClick={() => handleOpenPaymentModal(r)}
-                                className="px-3 py-1.5 bg-[#142B4A] dark:bg-[#38BDF8] hover:bg-[#1D4168] dark:hover:bg-[#0284C7] text-white dark:text-[#0B1220] rounded-lg text-xs font-semibold transition shadow-xs"
+                                className="px-3 py-1.5 bg-[#142B4A] dark:bg-[#38BDF8] hover:bg-[#1D4168] dark:hover:bg-[#0284C7] text-white dark:text-[#0B1220] rounded-lg text-xs font-semibold transition shadow-xs whitespace-nowrap"
                               >
                                 Thu tiền
                               </button>
@@ -563,37 +634,37 @@ export function FinancePage() {
               />
             ) : (
               <div className="overflow-x-auto rounded-2xl">
-                <table className="w-full text-left border-collapse text-table min-w-[950px]">
+                <table className="w-full text-left border-collapse text-table min-w-[860px]">
                   <thead>
                     <tr className="bg-slate-50/80 dark:bg-[#1C293D] border-b border-slate-200 dark:border-[#2A3A50] text-xs font-semibold text-slate-500 dark:text-[#A6B4C8] uppercase tracking-wider">
                       <th className="py-3.5 px-4 w-[110px] whitespace-nowrap">Mã GD</th>
-                      <th className="py-3.5 px-4 min-w-[180px]">Học viên</th>
-                      <th className="py-3.5 px-4 w-[140px] text-right whitespace-nowrap">Số tiền</th>
-                      <th className="py-3.5 px-4 w-[130px] whitespace-nowrap">Phương thức</th>
-                      <th className="py-3.5 px-4 w-[120px] whitespace-nowrap">Ngày nộp</th>
-                      <th className="py-3.5 px-4 w-[140px] whitespace-nowrap">Mã tham chiếu</th>
-                      <th className="py-3.5 px-4 w-[130px] whitespace-nowrap">Người thu</th>
+                      <th className="py-3.5 px-4 min-w-[160px]">Học viên</th>
+                      <th className="py-3.5 px-4 w-[130px] text-right whitespace-nowrap">Số tiền</th>
+                      <th className="py-3.5 px-4 w-[120px] whitespace-nowrap">Phương thức</th>
+                      <th className="py-3.5 px-4 w-[110px] whitespace-nowrap">Ngày nộp</th>
+                      <th className="py-3.5 px-4 w-[130px] whitespace-nowrap">Mã tham chiếu</th>
+                      <th className="py-3.5 px-4 w-[120px] whitespace-nowrap">Người thu</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 dark:divide-[#2A3A50]/60">
                     {payments.map((p) => (
                       <tr key={p.id} className="hover:bg-slate-50/60 dark:hover:bg-[#1C293D]/40 transition">
-                        <td className="py-3.5 px-4 font-mono font-bold text-xs text-[#142B4A] dark:text-[#38BDF8]">{p.paymentCode}</td>
+                        <td className="py-3.5 px-4 font-mono font-bold text-xs text-[#142B4A] dark:text-[#38BDF8] whitespace-nowrap">{p.paymentCode}</td>
                         <td className="py-3.5 px-4">
-                          <div className="font-bold text-[#142B4A] dark:text-[#E8EEF7]">{p.studentFullName}</div>
+                          <div className="font-bold text-[#142B4A] dark:text-[#E8EEF7] truncate max-w-[180px]" title={p.studentFullName}>{p.studentFullName}</div>
                           <div className="text-xs text-slate-500 dark:text-[#A6B4C8] font-mono mt-0.5">{p.studentCode}</div>
                         </td>
-                        <td className="py-3.5 px-4 text-right font-bold text-emerald-600 dark:text-emerald-400">
+                        <td className="py-3.5 px-4 text-right font-bold text-emerald-600 dark:text-emerald-400 whitespace-nowrap">
                           {formatVND(p.amount)}
                         </td>
-                        <td className="py-3.5 px-4">
+                        <td className="py-3.5 px-4 whitespace-nowrap">
                           <Badge variant="primary">
                             {p.paymentMethod === 'BANK_TRANSFER' ? 'Chuyển khoản' : p.paymentMethod === 'CASH' ? 'Tiền mặt' : 'Thẻ / POS'}
                           </Badge>
                         </td>
-                        <td className="py-3.5 px-4 text-xs text-slate-600 dark:text-[#A6B4C8]">{p.paymentDate}</td>
-                        <td className="py-3.5 px-4 font-mono text-xs text-slate-500 dark:text-[#A6B4C8]">{p.referenceNumber || '---'}</td>
-                        <td className="py-3.5 px-4 text-xs text-slate-600 dark:text-[#A6B4C8]">{p.createdByName || 'Hệ thống'}</td>
+                        <td className="py-3.5 px-4 text-xs text-slate-600 dark:text-[#A6B4C8] whitespace-nowrap">{p.paymentDate}</td>
+                        <td className="py-3.5 px-4 font-mono text-xs text-slate-500 dark:text-[#A6B4C8] whitespace-nowrap">{p.referenceNumber || '---'}</td>
+                        <td className="py-3.5 px-4 text-xs text-slate-600 dark:text-[#A6B4C8] whitespace-nowrap">{p.createdByName || 'Hệ thống'}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -630,10 +701,10 @@ export function FinancePage() {
       {/* Modal: Ghi nhận thanh toán */}
       {isPaymentModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-150">
-          <div className="bg-white dark:bg-[#151F31] rounded-2xl border border-slate-200 dark:border-[#2A3A50] shadow-2xl max-w-lg w-full p-6">
+          <div className="bg-white dark:bg-[#151F31] rounded-2xl border border-slate-200 dark:border-[#2A3A50] shadow-2xl max-w-lg w-full p-4 sm:p-6 max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center pb-3 border-b border-slate-100 dark:border-[#2A3A50]">
               <h3 className="text-lg font-bold text-[#142B4A] dark:text-[#E8EEF7] flex items-center gap-2">
-                <Receipt className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                <Receipt className="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0" />
                 <span>Ghi nhận thanh toán học phí</span>
               </h3>
               <button
@@ -686,7 +757,7 @@ export function FinancePage() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 dark:text-[#E8EEF7] mb-1">
                     Hình thức
@@ -752,10 +823,10 @@ export function FinancePage() {
       {/* Modal: Tạo khoản thu mới */}
       {isReceivableModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-150">
-          <div className="bg-white dark:bg-[#151F31] rounded-2xl border border-slate-200 dark:border-[#2A3A50] shadow-2xl max-w-lg w-full p-6">
+          <div className="bg-white dark:bg-[#151F31] rounded-2xl border border-slate-200 dark:border-[#2A3A50] shadow-2xl max-w-lg w-full p-4 sm:p-6 max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center pb-3 border-b border-slate-100 dark:border-[#2A3A50]">
               <h3 className="text-lg font-bold text-[#142B4A] dark:text-[#E8EEF7] flex items-center gap-2">
-                <Plus className="w-5 h-5 text-[#142B4A] dark:text-[#38BDF8]" />
+                <Plus className="w-5 h-5 text-[#142B4A] dark:text-[#38BDF8] shrink-0" />
                 <span>Tạo khoản phải thu mới</span>
               </h3>
               <button
@@ -806,7 +877,7 @@ export function FinancePage() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 dark:text-[#E8EEF7] mb-1">
                     Số tiền phải thu (VND) <span className="text-rose-500">*</span>

@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { MemoryRouter } from 'react-router-dom'
 import { AttendancePage } from '../pages/admin/attendance/AttendancePage'
 import { attendanceApi } from '../api/attendance'
 import { classesApi } from '../api/classes'
@@ -125,7 +126,11 @@ describe('AttendancePage Component', () => {
   })
 
   it('hiển thị trang điểm danh và học viên trong lớp', async () => {
-    render(<AttendancePage />)
+    render(
+      <MemoryRouter>
+        <AttendancePage />
+      </MemoryRouter>
+    )
 
     expect(screen.getByText('Điểm danh & Chuyên cần')).toBeInTheDocument()
 
@@ -136,7 +141,11 @@ describe('AttendancePage Component', () => {
   })
 
   it('cho phép thay đổi trạng thái điểm danh sang Đi muộn', async () => {
-    render(<AttendancePage />)
+    render(
+      <MemoryRouter>
+        <AttendancePage />
+      </MemoryRouter>
+    )
 
     await waitFor(() => {
       expect(screen.getByText('Trần Minh Khôi')).toBeInTheDocument()

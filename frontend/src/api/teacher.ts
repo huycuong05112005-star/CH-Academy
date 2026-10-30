@@ -65,6 +65,12 @@ export const teacherApi = {
   getUnmarkedSessions: () =>
     apiFetch<ApiResponse<TeacherSessionItem[]>>('/teacher/portal/sessions/unmarked'),
 
+  getDashboardSummary: () =>
+    apiFetch<ApiResponse<import('../types/teacher').TeacherDashboardSummary>>('/teacher/portal/dashboard-summary'),
+
+  getClassExamResults: (classId: number) =>
+    apiFetch<ApiResponse<import('../types/teacher').ClassExamResultItem[]>>(`/teacher/portal/classes/${classId}/exam-results`),
+
   getAllTeachers: () =>
     apiFetch<ApiResponse<TeacherAdminItem[]>>('/teachers'),
 

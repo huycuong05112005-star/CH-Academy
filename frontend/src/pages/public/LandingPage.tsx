@@ -17,6 +17,8 @@ import {
   ShieldCheck,
   Clock
 } from 'lucide-react'
+import { Tilt3DCard } from '../../components/3d/Tilt3DCard'
+import { KnowledgeMatrix3D } from '../../components/3d/KnowledgeMatrix3D'
 
 export const LandingPage: React.FC = () => {
   const { settings } = useSettings()
@@ -170,30 +172,43 @@ export const LandingPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Hero right visual card */}
-          <div className="lg:col-span-5 bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-5 animate-slide-up stagger-2">
-            <h3 className="text-lg font-bold text-white flex items-center gap-2.5 pb-2 border-b border-white/10">
-              <ShieldCheck size={22} className="text-[#38BDF8]" />
-              <span>Vì sao chọn {settings.shortName}?</span>
-            </h3>
-            <ul className="space-y-4 text-sm text-slate-200">
-              <li className="flex items-start gap-3">
-                <CheckCircle size={18} className="text-emerald-400 shrink-0 mt-0.5" />
-                <span><strong className="text-white">Đội ngũ chuyên môn cao:</strong> Giáo viên giàu kinh nghiệm, phương pháp sư phạm tương tác cao.</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <CheckCircle size={18} className="text-emerald-400 shrink-0 mt-0.5" />
-                <span><strong className="text-white">Quy mô lớp học tinh gọn:</strong> Giới hạn sĩ số giúp giáo viên sâu sát đến từng học viên.</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <CheckCircle size={18} className="text-emerald-400 shrink-0 mt-0.5" />
-                <span><strong className="text-white">Sổ liên lạc điện tử:</strong> Điểm danh, chuyên cần và tiến độ cập nhật tức thời cho phụ huynh.</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <CheckCircle size={18} className="text-emerald-400 shrink-0 mt-0.5" />
-                <span><strong className="text-white">Chính sách linh hoạt:</strong> Biểu phí rõ ràng, hỗ trợ xếp lịch học và học bù chu đáo.</span>
-              </li>
-            </ul>
+          {/* Hero right 3D visual card */}
+          <div className="lg:col-span-5 relative animate-slide-up stagger-2">
+            <Tilt3DCard maxTilt={5} className="w-full">
+              <div className="bg-white/10 dark:bg-[#111C31]/70 backdrop-blur-xl border border-white/25 rounded-3xl p-6 sm:p-7 shadow-2xl space-y-4">
+                {/* 3D WebGL Matrix Viewport */}
+                <div className="relative w-full h-44 rounded-2xl overflow-hidden bg-slate-950/40 border border-white/15">
+                  <KnowledgeMatrix3D className="w-full h-full" />
+                  <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-slate-900/70 backdrop-blur-md border border-cyan-500/30 text-[10px] font-bold text-cyan-300 flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping" />
+                    <span>3D EDTECH CORE</span>
+                  </div>
+                </div>
+
+                <h3 className="text-base font-bold text-white flex items-center gap-2 pt-1 border-t border-white/10">
+                  <ShieldCheck size={20} className="text-[#38BDF8]" />
+                  <span>Vì sao chọn {settings.shortName}?</span>
+                </h3>
+                <ul className="space-y-3 text-xs sm:text-sm text-slate-200">
+                  <li className="flex items-start gap-2.5">
+                    <CheckCircle size={16} className="text-emerald-400 shrink-0 mt-0.5" />
+                    <span><strong className="text-white">Đội ngũ chuyên môn cao:</strong> Giáo viên giàu kinh nghiệm, phương pháp sư phạm tương tác cao.</span>
+                  </li>
+                  <li className="flex items-start gap-2.5">
+                    <CheckCircle size={16} className="text-emerald-400 shrink-0 mt-0.5" />
+                    <span><strong className="text-white">Quy mô lớp học tinh gọn:</strong> Giới hạn sĩ số giúp giáo viên sâu sát đến từng học viên.</span>
+                  </li>
+                  <li className="flex items-start gap-2.5">
+                    <CheckCircle size={16} className="text-emerald-400 shrink-0 mt-0.5" />
+                    <span><strong className="text-white">Sổ liên lạc điện tử:</strong> Điểm danh, chuyên cần và tiến độ cập nhật tức thời cho phụ huynh.</span>
+                  </li>
+                  <li className="flex items-start gap-2.5">
+                    <CheckCircle size={16} className="text-emerald-400 shrink-0 mt-0.5" />
+                    <span><strong className="text-white">Chính sách linh hoạt:</strong> Biểu phí rõ ràng, hỗ trợ xếp lịch học và học bù chu đáo.</span>
+                  </li>
+                </ul>
+              </div>
+            </Tilt3DCard>
           </div>
         </div>
       </section>
@@ -214,41 +229,47 @@ export const LandingPage: React.FC = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="p-6 rounded-2xl border border-slate-200/80 dark:border-[#1E3152] bg-slate-50/60 dark:bg-[#152238] hover-lift transition-all">
-              <div className="w-12 h-12 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-[#2563EB] dark:text-[#38BDF8] flex items-center justify-center mb-4 shadow-xs">
-                <BookOpen size={24} />
+            <Tilt3DCard maxTilt={6}>
+              <div className="p-6 rounded-2xl border border-slate-200/80 dark:border-[#1E3152] bg-slate-50/60 dark:bg-[#152238] shadow-sm hover:shadow-md transition-all h-full">
+                <div className="w-12 h-12 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-[#2563EB] dark:text-[#38BDF8] flex items-center justify-center mb-4 shadow-xs">
+                  <BookOpen size={24} />
+                </div>
+                <h3 className="text-lg font-bold text-[#0F172A] dark:text-[#F8FAFC] mb-2">
+                  Quản lý Khóa học
+                </h3>
+                <p className="text-sm text-slate-600 dark:text-[#94A3B8] leading-relaxed">
+                  Tổ chức chương trình học đa dạng cho cả trẻ em và người lớn với lộ trình rõ ràng, chuẩn hóa chuẩn đầu ra.
+                </p>
               </div>
-              <h3 className="text-lg font-bold text-[#0F172A] dark:text-[#F8FAFC] mb-2">
-                Quản lý Khóa học
-              </h3>
-              <p className="text-sm text-slate-600 dark:text-[#94A3B8] leading-relaxed">
-                Tổ chức chương trình học đa dạng cho cả trẻ em và người lớn với lộ trình rõ ràng, chuẩn hóa chuẩn đầu ra.
-              </p>
-            </div>
+            </Tilt3DCard>
 
-            <div className="p-6 rounded-2xl border border-slate-200/80 dark:border-[#1E3152] bg-slate-50/60 dark:bg-[#152238] hover-lift transition-all">
-              <div className="w-12 h-12 rounded-xl bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 flex items-center justify-center mb-4 shadow-xs">
-                <Users size={24} />
+            <Tilt3DCard maxTilt={6}>
+              <div className="p-6 rounded-2xl border border-slate-200/80 dark:border-[#1E3152] bg-slate-50/60 dark:bg-[#152238] shadow-sm hover:shadow-md transition-all h-full">
+                <div className="w-12 h-12 rounded-xl bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 flex items-center justify-center mb-4 shadow-xs">
+                  <Users size={24} />
+                </div>
+                <h3 className="text-lg font-bold text-[#0F172A] dark:text-[#F8FAFC] mb-2">
+                  Hồ sơ Học sinh
+                </h3>
+                <p className="text-sm text-slate-600 dark:text-[#94A3B8] leading-relaxed">
+                  Theo dõi tiến độ, điểm danh, kết quả học tập và thông tin người giám hộ tập trung, bảo mật cao.
+                </p>
               </div>
-              <h3 className="text-lg font-bold text-[#0F172A] dark:text-[#F8FAFC] mb-2">
-                Hồ sơ Học sinh
-              </h3>
-              <p className="text-sm text-slate-600 dark:text-[#94A3B8] leading-relaxed">
-                Theo dõi tiến độ, điểm danh, kết quả học tập và thông tin người giám hộ tập trung, bảo mật cao.
-              </p>
-            </div>
+            </Tilt3DCard>
 
-            <div className="p-6 rounded-2xl border border-slate-200/80 dark:border-[#1E3152] bg-slate-50/60 dark:bg-[#152238] hover-lift transition-all">
-              <div className="w-12 h-12 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-4 shadow-xs">
-                <CreditCard size={24} />
+            <Tilt3DCard maxTilt={6}>
+              <div className="p-6 rounded-2xl border border-slate-200/80 dark:border-[#1E3152] bg-slate-50/60 dark:bg-[#152238] shadow-sm hover:shadow-md transition-all h-full">
+                <div className="w-12 h-12 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-4 shadow-xs">
+                  <CreditCard size={24} />
+                </div>
+                <h3 className="text-lg font-bold text-[#0F172A] dark:text-[#F8FAFC] mb-2">
+                  Quản lý Học phí
+                </h3>
+                <p className="text-sm text-slate-600 dark:text-[#94A3B8] leading-relaxed">
+                  Theo dõi thu học phí, ghi nhận thanh toán nhiều đợt, công nợ tự động và hoàn phí theo đúng quy định.
+                </p>
               </div>
-              <h3 className="text-lg font-bold text-[#0F172A] dark:text-[#F8FAFC] mb-2">
-                Quản lý Học phí
-              </h3>
-              <p className="text-sm text-slate-600 dark:text-[#94A3B8] leading-relaxed">
-                Theo dõi thu học phí, ghi nhận thanh toán nhiều đợt, công nợ tự động và hoàn phí theo đúng quy định.
-              </p>
-            </div>
+            </Tilt3DCard>
           </div>
         </div>
       </section>
@@ -260,7 +281,7 @@ export const LandingPage: React.FC = () => {
             Chương trình tiêu biểu
           </span>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-[#0F172A] dark:text-[#F8FAFC] mt-2 mb-3">
-            Khóa học Nổi bật tại CH Academy
+            Khóa học Nổi bật tại {settings.shortName}
           </h2>
           <p className="text-slate-600 dark:text-[#94A3B8] text-sm sm:text-base">
             Các chương trình đào tạo được thiết kế bài bản, chú trọng tính thực tiễn và phát triển kỹ năng toàn diện cho học viên.
@@ -274,51 +295,50 @@ export const LandingPage: React.FC = () => {
         ) : featuredCourses.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {featuredCourses.map((c) => (
-              <div
-                key={c.id}
-                className="bg-white dark:bg-[#111C31] rounded-2xl border border-slate-200/80 dark:border-[#1E3152] shadow-xs p-6 flex flex-col justify-between hover-lift transition-all"
-              >
-                <div>
-                  <div className="flex justify-between items-center mb-3">
-                    <span className={`px-2.5 py-1 rounded-md text-xs font-bold ${
-                      c.targetAudience === 'KIDS'
-                        ? 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800'
-                        : c.targetAudience === 'ADULTS'
-                        ? 'bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800'
-                        : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'
-                    }`}>
-                      {c.targetAudience === 'KIDS' ? 'Trẻ em' : c.targetAudience === 'ADULTS' ? 'Người lớn' : 'Mọi lứa tuổi'}
-                    </span>
-                    <span className="text-xs text-slate-500 dark:text-[#94A3B8] flex items-center gap-1">
-                      <Clock size={13} /> {c.durationHours} giờ
-                    </span>
-                  </div>
-
-                  <h3 className="text-lg font-bold text-[#0F172A] dark:text-[#F8FAFC] mb-2 line-clamp-1">
-                    {c.name}
-                  </h3>
-
-                  <p className="text-sm text-slate-600 dark:text-[#94A3B8] leading-relaxed line-clamp-2 mb-4">
-                    {c.description || 'Chương trình đào tạo chuyên sâu với lộ trình chuẩn mực.'}
-                  </p>
-                </div>
-
-                <div className="border-t border-slate-100 dark:border-[#1E3152] pt-4 flex justify-between items-center">
+              <Tilt3DCard key={c.id} maxTilt={5}>
+                <div className="bg-white dark:bg-[#111C31] rounded-2xl border border-slate-200/80 dark:border-[#1E3152] shadow-xs p-6 flex flex-col justify-between hover-lift transition-all h-full">
                   <div>
-                    <div className="text-xs text-slate-400 dark:text-slate-500">Học phí niêm yết</div>
-                    <div className="text-lg font-extrabold text-[#0F243E] dark:text-[#38BDF8] tabular-nums">
-                      {formatVND(c.defaultTuitionFee)}
+                    <div className="flex justify-between items-center mb-3">
+                      <span className={`px-2.5 py-1 rounded-md text-xs font-bold ${
+                        c.targetAudience === 'KIDS'
+                          ? 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800'
+                          : c.targetAudience === 'ADULTS'
+                          ? 'bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800'
+                          : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'
+                      }`}>
+                        {c.targetAudience === 'KIDS' ? 'Trẻ em' : c.targetAudience === 'ADULTS' ? 'Người lớn' : 'Mọi lứa tuổi'}
+                      </span>
+                      <span className="text-xs text-slate-500 dark:text-[#94A3B8] flex items-center gap-1">
+                        <Clock size={13} /> {c.durationHours} giờ
+                      </span>
                     </div>
+
+                    <h3 className="text-lg font-bold text-[#0F172A] dark:text-[#F8FAFC] mb-2 line-clamp-1">
+                      {c.name}
+                    </h3>
+
+                    <p className="text-sm text-slate-600 dark:text-[#94A3B8] leading-relaxed line-clamp-2 mb-4">
+                      {c.description || 'Chương trình đào tạo chuyên sâu với lộ trình chuẩn mực.'}
+                    </p>
                   </div>
-                  <a
-                    href="#tu-van"
-                    onClick={() => setTargetCourseId(c.id)}
-                    className="px-4 py-2 rounded-xl bg-[#0F243E] dark:bg-[#38BDF8] text-white dark:text-[#0B1220] hover:bg-[#173557] dark:hover:bg-[#0284C7] text-xs font-semibold shadow-xs transition-colors"
-                  >
-                    Đăng ký tư vấn
-                  </a>
+
+                  <div className="border-t border-slate-100 dark:border-[#1E3152] pt-4 flex justify-between items-center">
+                    <div>
+                      <div className="text-xs text-slate-400 dark:text-slate-500">Học phí niêm yết</div>
+                      <div className="text-lg font-extrabold text-[#0F243E] dark:text-[#38BDF8] tabular-nums">
+                        {formatVND(c.defaultTuitionFee)}
+                      </div>
+                    </div>
+                    <a
+                      href="#tu-van"
+                      onClick={() => setTargetCourseId(c.id)}
+                      className="px-4 py-2 rounded-xl bg-[#0F243E] dark:bg-[#38BDF8] text-white dark:text-[#0B1220] hover:bg-[#173557] dark:hover:bg-[#0284C7] text-xs font-semibold shadow-xs transition-colors"
+                    >
+                      Đăng ký tư vấn
+                    </a>
+                  </div>
                 </div>
-              </div>
+              </Tilt3DCard>
             ))}
           </div>
         ) : (
@@ -407,7 +427,7 @@ export const LandingPage: React.FC = () => {
               Đăng ký Nhận Tư vấn & Lộ trình Học
             </h2>
             <p className="text-slate-600 dark:text-[#94A3B8] text-sm">
-              Để lại thông tin, đội ngũ tuyển sinh CH Academy sẽ liên hệ hỗ trợ bạn trong vòng 24 giờ.
+              Để lại thông tin, đội ngũ tuyển sinh {settings.shortName} sẽ liên hệ hỗ trợ bạn trong vòng 24 giờ.
             </p>
           </div>
 
@@ -418,7 +438,7 @@ export const LandingPage: React.FC = () => {
                 Đăng ký tư vấn thành công!
               </h3>
               <p className="text-sm text-emerald-700 dark:text-emerald-400 mb-5 max-w-md mx-auto">
-                Cảm ơn bạn đã quan tâm đến chương trình đào tạo tại CH Academy. Chúng tôi sẽ sớm liên hệ theo số điện thoại bạn đã cung cấp.
+                Cảm ơn bạn đã quan tâm đến chương trình đào tạo tại {settings.shortName}. Chúng tôi sẽ sớm liên hệ theo số điện thoại bạn đã cung cấp.
               </p>
               <button
                 type="button"

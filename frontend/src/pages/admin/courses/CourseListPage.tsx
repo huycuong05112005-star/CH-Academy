@@ -256,7 +256,7 @@ export const CourseListPage: React.FC = () => {
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-slate-200 dark:border-[#2A3A50]">
+      <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4 pb-4 border-b border-slate-200 dark:border-[#2A3A50]">
         <div>
           <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-[#A6B4C8] uppercase tracking-wider mb-1">
             <span>Đào tạo & Học vụ</span>
@@ -264,7 +264,7 @@ export const CourseListPage: React.FC = () => {
             <span className="text-[#142B4A] dark:text-[#38BDF8]">Chương trình học</span>
           </div>
           <h1 className="text-2xl font-bold tracking-tight text-[#142B4A] dark:text-[#E8EEF7] flex items-center gap-2.5">
-            <BookOpen className="w-7 h-7 text-[#142B4A] dark:text-[#38BDF8]" />
+            <BookOpen className="w-7 h-7 text-[#142B4A] dark:text-[#38BDF8] shrink-0" />
             Quản lý Khóa học & Đào tạo
           </h1>
           <p className="text-sm text-slate-600 dark:text-[#A6B4C8] mt-1">
@@ -274,7 +274,7 @@ export const CourseListPage: React.FC = () => {
 
         <button
           onClick={openCreateModal}
-          className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-[#142B4A] dark:bg-[#38BDF8] hover:bg-[#1D4168] dark:hover:bg-[#0284C7] text-white dark:text-[#0B1220] rounded-xl text-sm font-semibold shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-[#3977B8]"
+          className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-[#142B4A] dark:bg-[#38BDF8] hover:bg-[#1D4168] dark:hover:bg-[#0284C7] text-white dark:text-[#0B1220] rounded-xl text-sm font-semibold shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-[#3977B8] whitespace-nowrap shrink-0"
         >
           <Plus size={16} />
           <span>Thêm khóa học mới</span>
@@ -282,7 +282,7 @@ export const CourseListPage: React.FC = () => {
       </div>
 
       {/* KPI Overview Strip */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         <StatCard
           title="Tổng khóa học"
           value={totalElements}

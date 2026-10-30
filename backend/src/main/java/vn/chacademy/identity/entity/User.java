@@ -41,6 +41,27 @@ public class User {
     @Column(name = "last_login_at")
     private Instant lastLoginAt;
 
+    @Column(name = "last_password_changed_at")
+    private Instant lastPasswordChangedAt;
+
+    @Column(name = "must_change_password", nullable = false)
+    private Boolean mustChangePassword = false;
+
+    @Column(name = "password_reset_source", length = 50)
+    private String passwordResetSource = "USER_SELF";
+
+    @Column(name = "failed_login_attempts", nullable = false)
+    private Integer failedLoginAttempts = 0;
+
+    @Column(name = "locked_at")
+    private Instant lockedAt;
+
+    @Column(name = "password_reset_token", length = 255)
+    private String passwordResetToken;
+
+    @Column(name = "password_reset_token_expiry")
+    private Instant passwordResetTokenExpiry;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt = Instant.now();
 
@@ -141,6 +162,62 @@ public class User {
 
     public void setLastLoginAt(Instant lastLoginAt) {
         this.lastLoginAt = lastLoginAt;
+    }
+
+    public Instant getLastPasswordChangedAt() {
+        return lastPasswordChangedAt;
+    }
+
+    public void setLastPasswordChangedAt(Instant lastPasswordChangedAt) {
+        this.lastPasswordChangedAt = lastPasswordChangedAt;
+    }
+
+    public Boolean getMustChangePassword() {
+        return mustChangePassword != null ? mustChangePassword : false;
+    }
+
+    public void setMustChangePassword(Boolean mustChangePassword) {
+        this.mustChangePassword = mustChangePassword;
+    }
+
+    public String getPasswordResetSource() {
+        return passwordResetSource;
+    }
+
+    public void setPasswordResetSource(String passwordResetSource) {
+        this.passwordResetSource = passwordResetSource;
+    }
+
+    public Integer getFailedLoginAttempts() {
+        return failedLoginAttempts != null ? failedLoginAttempts : 0;
+    }
+
+    public void setFailedLoginAttempts(Integer failedLoginAttempts) {
+        this.failedLoginAttempts = failedLoginAttempts;
+    }
+
+    public Instant getLockedAt() {
+        return lockedAt;
+    }
+
+    public void setLockedAt(Instant lockedAt) {
+        this.lockedAt = lockedAt;
+    }
+
+    public String getPasswordResetToken() {
+        return passwordResetToken;
+    }
+
+    public void setPasswordResetToken(String passwordResetToken) {
+        this.passwordResetToken = passwordResetToken;
+    }
+
+    public Instant getPasswordResetTokenExpiry() {
+        return passwordResetTokenExpiry;
+    }
+
+    public void setPasswordResetTokenExpiry(Instant passwordResetTokenExpiry) {
+        this.passwordResetTokenExpiry = passwordResetTokenExpiry;
     }
 
     public Instant getCreatedAt() {

@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { MemoryRouter } from 'react-router-dom'
 import { FinancePage } from '../pages/admin/finance/FinancePage'
 import { financeApi } from '../api/finance'
 import { studentsApi } from '../api/students'
@@ -78,6 +79,9 @@ describe('FinancePage Component', () => {
       data: {
         content: mockReceivables,
         page: 0,
+        number: 0,
+        first: true,
+        empty: false,
         size: 10,
         totalElements: 1,
         totalPages: 1,
@@ -91,6 +95,9 @@ describe('FinancePage Component', () => {
       data: {
         content: mockPayments,
         page: 0,
+        number: 0,
+        first: true,
+        empty: false,
         size: 10,
         totalElements: 1,
         totalPages: 1,
@@ -115,6 +122,9 @@ describe('FinancePage Component', () => {
           }
         ],
         page: 0,
+        number: 0,
+        first: true,
+        empty: false,
         size: 100,
         totalElements: 1,
         totalPages: 1,
@@ -126,7 +136,11 @@ describe('FinancePage Component', () => {
   })
 
   it('renders overview metrics and receivables table correctly', async () => {
-    render(<FinancePage />)
+    render(
+      <MemoryRouter>
+        <FinancePage />
+      </MemoryRouter>
+    )
 
     expect(screen.getByText(/Học phí & Quản lý Tài chính/i)).toBeInTheDocument()
     expect(screen.getByText(/Khoản phải thu & Công nợ/i)).toBeInTheDocument()
@@ -139,7 +153,11 @@ describe('FinancePage Component', () => {
   })
 
   it('switches to payment history tab and shows payments', async () => {
-    render(<FinancePage />)
+    render(
+      <MemoryRouter>
+        <FinancePage />
+      </MemoryRouter>
+    )
 
     const paymentTab = screen.getByRole('button', { name: /Lịch sử thanh toán/i })
     fireEvent.click(paymentTab)
@@ -151,7 +169,11 @@ describe('FinancePage Component', () => {
   })
 
   it('opens and closes payment modal', async () => {
-    render(<FinancePage />)
+    render(
+      <MemoryRouter>
+        <FinancePage />
+      </MemoryRouter>
+    )
 
     const payBtn = screen.getByRole('button', { name: /Ghi nhận thanh toán/i })
     fireEvent.click(payBtn)

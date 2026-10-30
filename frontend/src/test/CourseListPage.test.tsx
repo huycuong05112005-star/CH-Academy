@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { MemoryRouter } from 'react-router-dom'
 import { CourseListPage } from '../pages/admin/courses/CourseListPage'
 import { coursesApi } from '../api/courses'
 
@@ -72,7 +73,11 @@ describe('CourseListPage Component', () => {
   })
 
   it('hiển thị tiêu đề và danh sách khóa học thành công', async () => {
-    render(<CourseListPage />)
+    render(
+      <MemoryRouter>
+        <CourseListPage />
+      </MemoryRouter>
+    )
 
     expect(screen.getByText('Quản lý Khóa học & Đào tạo')).toBeInTheDocument()
 
@@ -84,7 +89,11 @@ describe('CourseListPage Component', () => {
   })
 
   it('mở modal thêm khóa học mới khi nhấn nút', async () => {
-    render(<CourseListPage />)
+    render(
+      <MemoryRouter>
+        <CourseListPage />
+      </MemoryRouter>
+    )
 
     const addButton = screen.getByRole('button', { name: /Thêm khóa học mới/i })
     fireEvent.click(addButton)
@@ -94,7 +103,11 @@ describe('CourseListPage Component', () => {
   })
 
   it('lọc danh sách khi nhập từ khóa tìm kiếm', async () => {
-    render(<CourseListPage />)
+    render(
+      <MemoryRouter>
+        <CourseListPage />
+      </MemoryRouter>
+    )
 
     const searchInput = screen.getByPlaceholderText(/Tìm theo mã hoặc tên/i)
     fireEvent.change(searchInput, { target: { value: 'ENG-KID' } })

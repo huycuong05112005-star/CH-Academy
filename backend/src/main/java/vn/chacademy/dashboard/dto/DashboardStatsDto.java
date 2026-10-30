@@ -13,8 +13,13 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class DashboardStatsDto {
+    private String academicYear;
+    private List<String> availableAcademicYears;
+
+    // Academic Year Scoped Metrics
     private long totalStudents;
     private long activeStudents;
+    private long totalStudentsCenter;
     private long totalCourses;
     private long activeClasses;
     private long totalLeads;

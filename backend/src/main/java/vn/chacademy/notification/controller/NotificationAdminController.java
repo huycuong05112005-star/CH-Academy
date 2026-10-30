@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import vn.chacademy.academic.dto.SessionMaterialDto;
 import vn.chacademy.academic.entity.ClassEntity;
@@ -18,6 +19,7 @@ import vn.chacademy.identity.repository.UserRepository;
 import vn.chacademy.notification.dto.CreateNotificationRequest;
 import vn.chacademy.notification.dto.NotificationDto;
 import vn.chacademy.notification.entity.Notification;
+import vn.chacademy.notification.repository.NotificationReadRepository;
 import vn.chacademy.notification.repository.NotificationRepository;
 
 import java.util.List;
@@ -29,14 +31,24 @@ import java.util.List;
 public class NotificationAdminController {
 
     private final NotificationRepository notificationRepository;
+    private final NotificationReadRepository notificationReadRepository;
     private final ClassRepository classRepository;
     private final UserRepository userRepository;
     private final SessionMaterialRepository sessionMaterialRepository;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<NotificationDto>>> getAllNotifications() {
+    public ResponseEntity<ApiResponse<List<NotificationDto>>> getAllNotifications(
+            @AuthenticationPrincipal UserDetails userDetails) {
+        java.util.Set<Long> readIds = java.util.Collections.emptySet();
+        if (userDetails != null) {
+            User currentUser = userRepository.findByUsername(userDetails.getUsername()).orElse(null);
+            if (currentUser != null) {
+                readIds = notificationReadRepository.findReadNotificationIdsByUserId(currentUser.getId());
+            }
+        }
+        final java.util.Set<Long> finalReadIds = readIds;
         List<NotificationDto> dtos = notificationRepository.findAllByOrderByCreatedAtDesc().stream()
-                .map(NotificationDto::fromEntity)
+                .map(n -> NotificationDto.fromEntity(n, finalReadIds.contains(n.getId()), null))
                 .toList();
         return ResponseEntity.ok(ApiResponse.success(dtos));
     }
@@ -80,9 +92,9 @@ public class NotificationAdminController {
     }
 
     @GetMapping("/teacher-materials")
+    @Transactional(readOnly = true)
     public ResponseEntity<ApiResponse<List<SessionMaterialDto>>> getAllTeacherMaterials() {
-        List<SessionMaterialDto> dtos = sessionMaterialRepository.findAll().stream()
-                .sorted((a, b) -> b.getCreatedAt().compareTo(a.getCreatedAt()))
+        List<SessionMaterialDto> dtos = sessionMaterialRepository.findAllByOrderByCreatedAtDesc().stream()
                 .map(SessionMaterialDto::fromEntity)
                 .toList();
         return ResponseEntity.ok(ApiResponse.success(dtos));

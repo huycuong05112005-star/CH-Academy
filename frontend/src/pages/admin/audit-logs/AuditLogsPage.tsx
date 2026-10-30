@@ -43,13 +43,13 @@ export const AuditLogsPage: React.FC = () => {
   }
 
   const getActionBadge = (action: string) => {
-    if (action.includes('ASSIGN') || action.includes('CREATE') || action.includes('UPLOAD')) {
+    if (action.includes('ASSIGN') || action.includes('CREATE') || action.includes('UPLOAD') || action.includes('LOGIN') || action.includes('PROVISION')) {
       return 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-800'
     }
-    if (action.includes('DELETE') || action.includes('UNASSIGN')) {
+    if (action.includes('DELETE') || action.includes('UNASSIGN') || action.includes('LOGOUT') || action.includes('REFUND')) {
       return 'bg-red-50 text-red-700 border-red-200 dark:bg-red-950/40 dark:text-red-400 dark:border-red-800'
     }
-    if (action.includes('RECORD') || action.includes('UPDATE')) {
+    if (action.includes('RECORD') || action.includes('UPDATE') || action.includes('CHANGE')) {
       return 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-400 dark:border-amber-800'
     }
     return 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/40 dark:text-blue-400 dark:border-blue-800'
@@ -103,6 +103,20 @@ export const AuditLogsPage: React.FC = () => {
               className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#142B4A]/20"
             >
               <option value="">Tất cả hành động</option>
+              <option value="LOGIN">Đăng nhập (LOGIN)</option>
+              <option value="LOGOUT">Đăng xuất (LOGOUT)</option>
+              <option value="SETTINGS_UPDATE">Cập nhật cấu hình (SETTINGS_UPDATE)</option>
+              <option value="COURSE_CREATE">Tạo khóa học (COURSE_CREATE)</option>
+              <option value="COURSE_UPDATE">Cập nhật khóa học (COURSE_UPDATE)</option>
+              <option value="COURSE_DELETE">Lưu trữ khóa học (COURSE_DELETE)</option>
+              <option value="STUDENT_CREATE">Tiếp nhận học viên (STUDENT_CREATE)</option>
+              <option value="STUDENT_UPDATE">Cập nhật học viên (STUDENT_UPDATE)</option>
+              <option value="ACCOUNT_PROVISION">Cấp tài khoản (ACCOUNT_PROVISION)</option>
+              <option value="ENROLL_AND_PAY">Ghi danh & Học phí (ENROLL_AND_PAY)</option>
+              <option value="PAYMENT_RECORD">Thu học phí (PAYMENT_RECORD)</option>
+              <option value="REFUND_PROCESS">Hoàn phí (REFUND_PROCESS)</option>
+              <option value="CLASS_CREATE">Tạo lớp học (CLASS_CREATE)</option>
+              <option value="ENROLLMENT_CREATE">Ghi danh lớp (ENROLLMENT_CREATE)</option>
               <option value="TEACHER_ASSIGN">Phân công GV (TEACHER_ASSIGN)</option>
               <option value="TEACHER_UNASSIGN">Kết thúc phân công (TEACHER_UNASSIGN)</option>
               <option value="ATTENDANCE_RECORD">Điểm danh (ATTENDANCE_RECORD)</option>
@@ -125,7 +139,14 @@ export const AuditLogsPage: React.FC = () => {
               className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#142B4A]/20"
             >
               <option value="">Tất cả tài nguyên</option>
+              <option value="SETTINGS">Cấu hình (SETTINGS)</option>
+              <option value="AUTH">Xác thực (AUTH)</option>
+              <option value="COURSE">Khóa học (COURSE)</option>
+              <option value="STUDENT">Học viên (STUDENT)</option>
               <option value="CLASS">Lớp học (CLASS)</option>
+              <option value="ENROLLMENT">Ghi danh (ENROLLMENT)</option>
+              <option value="PAYMENT">Thanh toán (PAYMENT)</option>
+              <option value="REFUND">Hoàn phí (REFUND)</option>
               <option value="SESSION">Buổi học (SESSION)</option>
               <option value="SESSION_MATERIAL">Tài liệu học tập (SESSION_MATERIAL)</option>
               <option value="NOTIFICATION">Thông báo (NOTIFICATION)</option>

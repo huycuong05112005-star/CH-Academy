@@ -76,7 +76,7 @@ describe('DashboardPage', () => {
     expect(screen.getByText(/Xin chào, Nguyễn Quản Trị!/i)).toBeInTheDocument()
 
     await waitFor(() => {
-      expect(screen.getByText('42')).toBeInTheDocument()
+      expect(screen.getByText('38')).toBeInTheDocument()
       expect(screen.getByText('12')).toBeInTheDocument()
       expect(screen.getByText(/25% chuyển đổi/i)).toBeInTheDocument()
       expect(screen.getByText('Lập trình Web Cơ bản')).toBeInTheDocument()
@@ -106,7 +106,7 @@ describe('DashboardPage', () => {
     )
 
     await waitFor(() => {
-      expect(screen.getByText(/Chưa có buổi học nào sắp tới trong 7 ngày tới/i)).toBeInTheDocument()
+      expect(screen.getByText(/Không có buổi học nào trong năm học/i)).toBeInTheDocument()
     })
   })
 })

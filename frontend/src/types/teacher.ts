@@ -114,3 +114,60 @@ export interface CreateTeacherPayload {
   specialization?: string
   bio?: string
 }
+
+export interface TeacherActionItem {
+  id: string
+  type: 'ATTENDANCE' | 'EXAM_REVIEW' | 'GRADING' | 'GENERAL' | string
+  title: string
+  description: string
+  linkUrl: string
+  priority: 'HIGH' | 'MEDIUM' | 'LOW' | 'NORMAL' | string
+  badge: string
+}
+
+export interface TeacherDashboardSummary {
+  totalClasses: number
+  totalStudents: number
+  todaySessionsCount: number
+  upcomingSessionsCount: number
+  unmarkedAttendanceCount: number
+  draftExamsCount: number
+  pendingReviewExamsCount: number
+  approvedExamsCount: number
+  changesRequestedExamsCount: number
+  publishedExamsCount: number
+  pendingGradingCount: number
+  actionItems: TeacherActionItem[]
+  todaySessions: TeacherSessionItem[]
+  upcomingSessions: TeacherSessionItem[]
+}
+
+export interface StudentExamResultSummary {
+  studentId: number
+  studentCode: string
+  fullName: string
+  email?: string
+  status: 'NOT_STARTED' | 'IN_PROGRESS' | 'SUBMITTED' | 'GRADED' | string
+  score?: number | null
+  maxScore?: number | null
+  isPassed?: boolean | null
+  attemptCount: number
+  submittedAt?: string | null
+}
+
+export interface ClassExamResultItem {
+  examId: number
+  examTitle: string
+  examCode: string
+  classId: number
+  className: string
+  durationMinutes: number
+  totalPoints: number
+  totalStudents: number
+  completedCount: number
+  inProgressCount: number
+  unattemptedCount: number
+  averageScore?: number | null
+  passRate?: number | null
+  studentResults: StudentExamResultSummary[]
+}

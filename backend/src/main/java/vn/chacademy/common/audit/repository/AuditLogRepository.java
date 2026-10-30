@@ -16,9 +16,9 @@ public interface AuditLogRepository extends JpaRepository<AuditLog, Long> {
     Page<AuditLog> findAllByOrderByCreatedAtDesc(Pageable pageable);
 
     @Query("SELECT a FROM AuditLog a WHERE " +
-           "(:actor IS NULL OR LOWER(a.actorUsername) LIKE LOWER(CONCAT('%', :actor, '%'))) AND " +
-           "(:action IS NULL OR a.action = :action) AND " +
-           "(:resourceType IS NULL OR a.resourceType = :resourceType) " +
+           "(cast(:actor as string) IS NULL OR LOWER(a.actorUsername) LIKE LOWER(CONCAT('%', cast(:actor as string), '%'))) AND " +
+           "(cast(:action as string) IS NULL OR a.action = cast(:action as string)) AND " +
+           "(cast(:resourceType as string) IS NULL OR a.resourceType = cast(:resourceType as string)) " +
            "ORDER BY a.createdAt DESC")
     Page<AuditLog> searchLogs(
             @Param("actor") String actor,

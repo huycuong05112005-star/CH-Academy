@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { MemoryRouter } from 'react-router-dom'
 import { LeadListPage } from '../pages/admin/leads/LeadListPage'
 import { leadsApi } from '../api/leads'
 import { coursesApi } from '../api/courses'
@@ -54,10 +55,15 @@ describe('LeadListPage Component', () => {
             code: 'ENG-COMM-PRO',
             name: 'Tiếng Anh Giao Tiếp Công Sở',
             categoryId: 1,
-            targetAgeGroup: 'ADULT',
+            categoryCode: 'ENG',
+            categoryName: 'Tiếng Anh',
+            targetAudience: 'ADULTS',
+            level: 'BEGINNER',
             durationHours: 48,
-            tuitionFee: 4500000,
-            status: 'PUBLISHED',
+            defaultTuitionFee: 4500000,
+            maxStudents: 20,
+            status: 'ACTIVE',
+            isPublic: true,
             createdAt: '2026-10-24T10:00:00Z',
             updatedAt: '2026-10-24T10:00:00Z'
           }
@@ -96,7 +102,11 @@ describe('LeadListPage Component', () => {
   })
 
   it('hiển thị tiêu đề và danh sách khách hàng tiềm năng', async () => {
-    render(<LeadListPage />)
+    render(
+      <MemoryRouter>
+        <LeadListPage />
+      </MemoryRouter>
+    )
 
     expect(screen.getByText('Tuyển sinh & Khách hàng tiềm năng')).toBeInTheDocument()
 
@@ -108,7 +118,11 @@ describe('LeadListPage Component', () => {
   })
 
   it('mở modal thêm khách hàng tiềm năng khi bấm nút', async () => {
-    render(<LeadListPage />)
+    render(
+      <MemoryRouter>
+        <LeadListPage />
+      </MemoryRouter>
+    )
 
     const addButton = screen.getByRole('button', { name: /Thêm khách hàng tiềm năng/i })
     fireEvent.click(addButton)
@@ -118,7 +132,11 @@ describe('LeadListPage Component', () => {
   })
 
   it('lọc danh sách khách hàng khi tìm kiếm từ khóa', async () => {
-    render(<LeadListPage />)
+    render(
+      <MemoryRouter>
+        <LeadListPage />
+      </MemoryRouter>
+    )
 
     const searchInput = screen.getByPlaceholderText(/Tìm theo mã, tên, SĐT, email/i)
     fireEvent.change(searchInput, { target: { value: 'Minh Tuấn' } })

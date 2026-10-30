@@ -24,6 +24,19 @@ export const authApi = {
     })
   },
 
+  updateProfile: async (payload: {
+    fullName: string
+    phone?: string
+    avatarUrl?: string
+    specialization?: string
+    bio?: string
+  }): Promise<ApiResponse<User>> => {
+    return apiFetch<ApiResponse<User>>('/auth/profile', {
+      method: 'PUT',
+      body: JSON.stringify(payload),
+    })
+  },
+
   logout: async (): Promise<void> => {
     try {
       await apiFetch<ApiResponse<void>>('/auth/logout', { method: 'POST' })

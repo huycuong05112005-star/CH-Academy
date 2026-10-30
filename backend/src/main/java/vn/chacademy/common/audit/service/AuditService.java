@@ -22,7 +22,7 @@ public class AuditService {
 
     private final AuditLogRepository auditLogRepository;
 
-    @Transactional
+    @Transactional(propagation = org.springframework.transaction.annotation.Propagation.REQUIRES_NEW)
     public void recordAction(User actor, String action, String resourceType, String resourceId, String details, String ipAddress) {
         try {
             AuditLog auditLog = AuditLog.builder()
@@ -44,10 +44,40 @@ public class AuditService {
         }
     }
 
+    @Transactional(propagation = org.springframework.transaction.annotation.Propagation.REQUIRES_NEW)
+    public void recordAction(String username, String role, String action, String resourceType, String resourceId, String details, String ipAddress) {
+        try {
+            AuditLog auditLog = AuditLog.builder()
+                    .actor(null)
+                    .actorUsername(username != null && !username.isBlank() ? username : "ANONYMOUS")
+                    .actorRole(role != null && !role.isBlank() ? role : "GUEST")
+                    .action(action)
+                    .resourceType(resourceType)
+                    .resourceId(resourceId)
+                    .details(details)
+                    .ipAddress(ipAddress)
+                    .createdAt(Instant.now())
+                    .build();
+
+            auditLogRepository.save(auditLog);
+            log.info("Audit log recorded: {} by {} on {}:{}", action, username, resourceType, resourceId);
+        } catch (Exception e) {
+            log.error("Failed to record audit log: {}", e.getMessage(), e);
+        }
+    }
+
     @Transactional(readOnly = true)
     public Page<AuditLogDto> getAuditLogs(String actor, String action, String resourceType, int page, int size) {
+        String cleanActor = (actor != null && !actor.trim().isEmpty()) ? actor.trim() : null;
+        String cleanAction = (action != null && !action.trim().isEmpty()) ? action.trim() : null;
+        String cleanResource = (resourceType != null && !resourceType.trim().isEmpty()) ? resourceType.trim() : null;
+
         Pageable pageable = PageRequest.of(page, size);
-        return auditLogRepository.searchLogs(actor, action, resourceType, pageable)
+        if (cleanActor == null && cleanAction == null && cleanResource == null) {
+            return auditLogRepository.findAllByOrderByCreatedAtDesc(pageable)
+                    .map(AuditLogDto::fromEntity);
+        }
+        return auditLogRepository.searchLogs(cleanActor, cleanAction, cleanResource, pageable)
                 .map(AuditLogDto::fromEntity);
     }
 

@@ -84,3 +84,22 @@ export interface CreateEnrollmentRequest {
   discountAmount?: number;
   notes?: string;
 }
+
+export interface ClassSessionItem {
+  id: number;
+  classId: number;
+  sessionNumber: number;
+  sessionDate: string;
+  startTime: string;
+  endTime: string;
+  room?: string | null;
+  topic?: string | null;
+  status: 'SCHEDULED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
+  teacherName?: string | null;
+  teacherId?: number | null;
+  attendedCount?: number;
+  totalStudents?: number;
+  attendanceRate?: number;
+  questionCount?: number;
+  examCount?: number;
+}

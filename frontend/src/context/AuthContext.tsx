@@ -11,29 +11,53 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState<boolean>(true)
 
   useEffect(() => {
+    let isCurrent = true
+
     const initAuth = async () => {
       const storedToken = getAuthToken()
       if (storedToken) {
         try {
           const res = await authApi.getMe()
-          if (res.success && res.data) {
-            setUser(res.data)
-            setTokenState(storedToken)
-          } else {
+          if (!isCurrent) return
+
+          // Bảo vệ chống race condition: chỉ cập nhật nếu token trong storage chưa bị ghi đè bởi phiên đăng nhập mới
+          if (getAuthToken() === storedToken) {
+            if (res.success && res.data) {
+              setUser(res.data)
+              setTokenState(storedToken)
+            } else {
+              setAuthToken(null)
+              setTokenState(null)
+              setUser(null)
+            }
+          }
+        } catch {
+          if (!isCurrent) return
+          if (getAuthToken() === storedToken) {
             setAuthToken(null)
             setTokenState(null)
             setUser(null)
           }
-        } catch {
-          setAuthToken(null)
-          setTokenState(null)
-          setUser(null)
         }
       }
-      setIsLoading(false)
+      if (isCurrent) {
+        setIsLoading(false)
+      }
     }
 
     initAuth()
+
+    const handleUnauthorized = () => {
+      setAuthToken(null)
+      setTokenState(null)
+      setUser(null)
+    }
+    window.addEventListener('ch_academy_auth_unauthorized', handleUnauthorized)
+
+    return () => {
+      isCurrent = false
+      window.removeEventListener('ch_academy_auth_unauthorized', handleUnauthorized)
+    }
   }, [])
 
   const login = async (payload: LoginPayload): Promise<User> => {
@@ -57,6 +81,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setAuthToken(null)
     setTokenState(null)
     setUser(null)
+  }
+
+  const updateUser = (updatedUser: User) => {
+    setUser(updatedUser)
+  }
+
+  const refreshUser = async () => {
+    try {
+      const res = await authApi.getMe()
+      if (res.success && res.data) {
+        setUser(res.data)
+      }
+    } catch {
+      // Ignore background refresh failure
+    }
   }
 
   const hasRole = (role: string): boolean => {
@@ -83,6 +122,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     isLoading,
     login,
     logout,
+    updateUser,
+    refreshUser,
     hasRole,
     hasAnyRole,
     hasPermission,

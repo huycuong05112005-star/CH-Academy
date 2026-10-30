@@ -18,5 +18,19 @@ export const notificationsApi = {
     }),
 
   getTeacherMaterials: () =>
-    apiFetch<ApiResponse<SessionMaterial[]>>('/admin/notifications/teacher-materials')
+    apiFetch<ApiResponse<SessionMaterial[]>>('/admin/notifications/teacher-materials'),
+
+  markAsRead: (id: number) =>
+    apiFetch<ApiResponse<NotificationItem>>(`/notifications/${id}/read`, {
+      method: 'POST'
+    }),
+
+  markAllAsRead: (ids?: number[]) =>
+    apiFetch<ApiResponse<void>>('/notifications/read-all', {
+      method: 'POST',
+      body: ids ? JSON.stringify(ids) : undefined
+    }),
+
+  getDetail: (id: number) =>
+    apiFetch<ApiResponse<NotificationItem>>(`/notifications/${id}`)
 }

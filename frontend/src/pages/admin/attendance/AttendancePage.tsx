@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { attendanceApi } from '../../../api/attendance'
 import { classesApi } from '../../../api/classes'
 import type { ClassItem, Enrollment } from '../../../types/class'
@@ -21,10 +22,18 @@ import {
 import { exportToCsv } from '../../../utils/exportCsv'
 
 export const AttendancePage: React.FC = () => {
+  const [searchParams] = useSearchParams()
+  const classIdParam = searchParams.get('classId')
+  const sessionIdParam = searchParams.get('sessionId')
+
   const [classes, setClasses] = useState<ClassItem[]>([])
-  const [selectedClassId, setSelectedClassId] = useState<number>(0)
+  const [selectedClassId, setSelectedClassId] = useState<number>(() => {
+    return classIdParam && !isNaN(Number(classIdParam)) ? Number(classIdParam) : 0
+  })
   const [sessions, setSessions] = useState<ClassSessionItem[]>([])
-  const [selectedSessionId, setSelectedSessionId] = useState<number>(0)
+  const [selectedSessionId, setSelectedSessionId] = useState<number>(() => {
+    return sessionIdParam && !isNaN(Number(sessionIdParam)) ? Number(sessionIdParam) : 0
+  })
 
   const [enrolledStudents, setEnrolledStudents] = useState<Enrollment[]>([])
   const [attendanceMap, setAttendanceMap] = useState<Record<number, { status: 'PRESENT' | 'ABSENT' | 'LATE' | 'EXCUSED'; note: string }>>({})
@@ -33,6 +42,18 @@ export const AttendancePage: React.FC = () => {
   const [saving, setSaving] = useState<boolean>(false)
   const [error, setError] = useState<string | null>(null)
   const [successMsg, setSuccessMsg] = useState<string | null>(null)
+
+  // Sync state if searchParams change
+  useEffect(() => {
+    const cId = searchParams.get('classId')
+    if (cId && !isNaN(Number(cId)) && Number(cId) !== selectedClassId) {
+      setSelectedClassId(Number(cId))
+    }
+    const sId = searchParams.get('sessionId')
+    if (sId && !isNaN(Number(sId)) && Number(sId) !== selectedSessionId) {
+      setSelectedSessionId(Number(sId))
+    }
+  }, [searchParams])
 
   // Load Classes
   useEffect(() => {
@@ -43,7 +64,12 @@ export const AttendancePage: React.FC = () => {
           const list = res.data.content || []
           setClasses(list)
           if (list.length > 0) {
-            setSelectedClassId(list[0].id)
+            const targetId = Number(classIdParam)
+            if (targetId && list.some(c => c.id === targetId)) {
+              setSelectedClassId(targetId)
+            } else if (!selectedClassId) {
+              setSelectedClassId(list[0].id)
+            }
           }
         }
       } catch {
@@ -71,7 +97,12 @@ export const AttendancePage: React.FC = () => {
         if (sessRes.success && sessRes.data) {
           setSessions(sessRes.data)
           if (sessRes.data.length > 0) {
-            setSelectedSessionId(sessRes.data[0].id)
+            const targetSessId = Number(sessionIdParam)
+            if (targetSessId && sessRes.data.some(s => s.id === targetSessId)) {
+              setSelectedSessionId(targetSessId)
+            } else {
+              setSelectedSessionId(sessRes.data[0].id)
+            }
           } else {
             setSelectedSessionId(0)
           }
@@ -346,7 +377,7 @@ export const AttendancePage: React.FC = () => {
 
       {/* Live Stats Overview Bar */}
       {selectedSessionId > 0 && enrolledStudents.length > 0 && (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-3">
           <StatCard title="Sĩ số lớp" value={total} icon={Users} />
           <StatCard title="Có mặt" value={present} icon={UserCheck} badge={<Badge variant="success">Đủ</Badge>} />
           <StatCard title="Đi muộn" value={late} icon={Clock} badge={<Badge variant="warning">Muộn</Badge>} />

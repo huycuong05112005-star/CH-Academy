@@ -19,12 +19,20 @@ public class NotificationDto {
     private String targetAudience;
     private Long targetClassId;
     private String targetClassName;
+    private Long targetUserId;
+    private String targetUserName;
     private String priority;
     private Long createdById;
     private String createdByName;
     private Instant createdAt;
+    private Boolean isRead;
+    private Instant readAt;
 
     public static NotificationDto fromEntity(Notification n) {
+        return fromEntity(n, false, null);
+    }
+
+    public static NotificationDto fromEntity(Notification n, boolean isRead, Instant readAt) {
         if (n == null) return null;
         return NotificationDto.builder()
                 .id(n.getId())
@@ -33,10 +41,14 @@ public class NotificationDto {
                 .targetAudience(n.getTargetAudience())
                 .targetClassId(n.getTargetClass() != null ? n.getTargetClass().getId() : null)
                 .targetClassName(n.getTargetClass() != null ? n.getTargetClass().getName() : null)
+                .targetUserId(n.getTargetUser() != null ? n.getTargetUser().getId() : null)
+                .targetUserName(n.getTargetUser() != null ? n.getTargetUser().getFullName() : null)
                 .priority(n.getPriority())
                 .createdById(n.getCreatedBy() != null ? n.getCreatedBy().getId() : null)
                 .createdByName(n.getCreatedBy() != null ? n.getCreatedBy().getFullName() : null)
                 .createdAt(n.getCreatedAt())
+                .isRead(isRead)
+                .readAt(readAt)
                 .build();
     }
 }

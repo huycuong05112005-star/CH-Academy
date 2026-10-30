@@ -25,6 +25,7 @@ public class FinanceController {
 
     private final FinanceService financeService;
     private final UserRepository userRepository;
+    private final vn.chacademy.common.audit.service.AuditService auditService;
 
     @GetMapping("/overview")
     @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'CENTER_ADMIN', 'ACCOUNTANT')")
@@ -94,7 +95,8 @@ public class FinanceController {
     @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'CENTER_ADMIN', 'ACCOUNTANT')")
     public ResponseEntity<ApiResponse<PaymentDto>> recordPayment(
             @Valid @RequestBody RecordPaymentRequest request,
-            @AuthenticationPrincipal UserDetails userDetails
+            @AuthenticationPrincipal UserDetails userDetails,
+            jakarta.servlet.http.HttpServletRequest httpRequest
     ) {
         Long staffId = null;
         if (userDetails != null) {
@@ -103,6 +105,10 @@ public class FinanceController {
                     .orElse(null);
         }
         PaymentDto payment = financeService.recordPayment(request, staffId);
+        String username = userDetails != null ? userDetails.getUsername() : "ACCOUNTANT";
+        String ip = httpRequest != null ? httpRequest.getRemoteAddr() : "127.0.0.1";
+        auditService.recordAction(username, "ACCOUNTANT", "PAYMENT_RECORD", "PAYMENT", payment.getId().toString(),
+                "Thu học phí mã " + payment.getPaymentCode() + " số tiền " + payment.getAmount() + " VND", ip);
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success("Ghi nhận thanh toán thành công", payment));
     }
 
@@ -110,7 +116,8 @@ public class FinanceController {
     @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'CENTER_ADMIN', 'ACCOUNTANT')")
     public ResponseEntity<ApiResponse<RefundDto>> processRefund(
             @Valid @RequestBody ProcessRefundRequest request,
-            @AuthenticationPrincipal UserDetails userDetails
+            @AuthenticationPrincipal UserDetails userDetails,
+            jakarta.servlet.http.HttpServletRequest httpRequest
     ) {
         Long staffId = null;
         if (userDetails != null) {
@@ -119,6 +126,10 @@ public class FinanceController {
                     .orElse(null);
         }
         RefundDto refund = financeService.processRefund(request, staffId);
+        String username = userDetails != null ? userDetails.getUsername() : "ACCOUNTANT";
+        String ip = httpRequest != null ? httpRequest.getRemoteAddr() : "127.0.0.1";
+        auditService.recordAction(username, "ACCOUNTANT", "REFUND_PROCESS", "REFUND", refund.getId().toString(),
+                "Hoàn phí mã " + refund.getRefundCode() + " số tiền " + refund.getAmount() + " VND", ip);
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success("Xử lý hoàn tiền thành công", refund));
     }
 }

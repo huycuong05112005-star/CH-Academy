@@ -1,11 +1,15 @@
 package vn.chacademy.common.exception;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -46,8 +50,15 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<ApiResponse<Void>> handleAccessDenied(AccessDeniedException ex) {
-        log.warn("Từ chối truy cập: {}", ex.getMessage());
+    public ResponseEntity<ApiResponse<Void>> handleAccessDenied(AccessDeniedException ex, HttpServletRequest request) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        boolean isAnonymous = auth == null || auth instanceof AnonymousAuthenticationToken || !auth.isAuthenticated();
+        if (isAnonymous) {
+            log.warn("Chưa đăng nhập hoặc phiên hết hạn truy cập URI: {} {}", request.getMethod(), request.getRequestURI());
+            ApiResponse<Void> response = ApiResponse.error("Phiên đăng nhập đã hết hạn hoặc chưa xác thực. Vui lòng đăng nhập lại.", "UNAUTHORIZED");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+        }
+        log.warn("Từ chối truy cập URI: {} {} bởi user: {} - {}", request.getMethod(), request.getRequestURI(), auth.getName(), ex.getMessage());
         ApiResponse<Void> response = ApiResponse.error("Bạn không có quyền thực hiện thao tác này", "FORBIDDEN");
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
     }
@@ -57,6 +68,13 @@ public class GlobalExceptionHandler {
         log.warn("Tài nguyên không tìm thấy: {}", ex.getResourcePath());
         ApiResponse<Void> response = ApiResponse.error("Đường dẫn hoặc tài nguyên không tồn tại", "NOT_FOUND");
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    }
+
+    @ExceptionHandler({IllegalStateException.class, IllegalArgumentException.class})
+    public ResponseEntity<ApiResponse<Void>> handleBadRequestException(RuntimeException ex) {
+        log.warn("Yêu cầu không hợp lệ hoặc trạng thái sai: {}", ex.getMessage());
+        ApiResponse<Void> response = ApiResponse.error(ex.getMessage(), "BAD_REQUEST");
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 
     @ExceptionHandler(Exception.class)

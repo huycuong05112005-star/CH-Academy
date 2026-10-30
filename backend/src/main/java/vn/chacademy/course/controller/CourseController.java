@@ -24,6 +24,7 @@ import java.util.Map;
 public class CourseController {
 
     private final CourseService courseService;
+    private final vn.chacademy.common.audit.service.AuditService auditService;
 
     @GetMapping
     @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'CENTER_ADMIN', 'ACADEMIC_STAFF', 'ADMISSIONS_STAFF', 'TEACHER')")
@@ -52,8 +53,15 @@ public class CourseController {
 
     @PostMapping
     @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'CENTER_ADMIN', 'ACADEMIC_STAFF')")
-    public ResponseEntity<ApiResponse<CourseDto>> createCourse(@Valid @RequestBody CreateCourseRequest request) {
+    public ResponseEntity<ApiResponse<CourseDto>> createCourse(
+            @org.springframework.security.core.annotation.AuthenticationPrincipal org.springframework.security.core.userdetails.UserDetails userDetails,
+            jakarta.servlet.http.HttpServletRequest httpRequest,
+            @Valid @RequestBody CreateCourseRequest request) {
         CourseDto created = courseService.createCourse(request);
+        String username = userDetails != null ? userDetails.getUsername() : "ADMIN";
+        String ip = httpRequest != null ? httpRequest.getRemoteAddr() : "127.0.0.1";
+        auditService.recordAction(username, "ACADEMIC_STAFF", "COURSE_CREATE", "COURSE", created.getId().toString(),
+                "Tạo mới khóa học: " + created.getName() + " (" + created.getCode() + ")", ip);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success("Tạo khóa học thành công", created));
     }
@@ -62,8 +70,14 @@ public class CourseController {
     @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'CENTER_ADMIN', 'ACADEMIC_STAFF')")
     public ResponseEntity<ApiResponse<CourseDto>> updateCourse(
             @PathVariable Long id,
+            @org.springframework.security.core.annotation.AuthenticationPrincipal org.springframework.security.core.userdetails.UserDetails userDetails,
+            jakarta.servlet.http.HttpServletRequest httpRequest,
             @Valid @RequestBody UpdateCourseRequest request) {
         CourseDto updated = courseService.updateCourse(id, request);
+        String username = userDetails != null ? userDetails.getUsername() : "ADMIN";
+        String ip = httpRequest != null ? httpRequest.getRemoteAddr() : "127.0.0.1";
+        auditService.recordAction(username, "ACADEMIC_STAFF", "COURSE_UPDATE", "COURSE", id.toString(),
+                "Cập nhật khóa học: " + updated.getName() + " (" + updated.getCode() + ")", ip);
         return ResponseEntity.ok(ApiResponse.success("Cập nhật khóa học thành công", updated));
     }
 
@@ -71,16 +85,29 @@ public class CourseController {
     @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'CENTER_ADMIN', 'ACADEMIC_STAFF')")
     public ResponseEntity<ApiResponse<CourseDto>> updateCourseStatus(
             @PathVariable Long id,
+            @org.springframework.security.core.annotation.AuthenticationPrincipal org.springframework.security.core.userdetails.UserDetails userDetails,
+            jakarta.servlet.http.HttpServletRequest httpRequest,
             @RequestBody Map<String, String> body) {
         String status = body.get("status");
         CourseDto updated = courseService.updateCourseStatus(id, status);
+        String username = userDetails != null ? userDetails.getUsername() : "ADMIN";
+        String ip = httpRequest != null ? httpRequest.getRemoteAddr() : "127.0.0.1";
+        auditService.recordAction(username, "ACADEMIC_STAFF", "COURSE_UPDATE", "COURSE", id.toString(),
+                "Chuyển trạng thái khóa học ID " + id + " sang " + status, ip);
         return ResponseEntity.ok(ApiResponse.success("Cập nhật trạng thái khóa học thành công", updated));
     }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'CENTER_ADMIN')")
-    public ResponseEntity<ApiResponse<Void>> deleteCourse(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<Void>> deleteCourse(
+            @PathVariable Long id,
+            @org.springframework.security.core.annotation.AuthenticationPrincipal org.springframework.security.core.userdetails.UserDetails userDetails,
+            jakarta.servlet.http.HttpServletRequest httpRequest) {
         courseService.deleteCourse(id);
+        String username = userDetails != null ? userDetails.getUsername() : "ADMIN";
+        String ip = httpRequest != null ? httpRequest.getRemoteAddr() : "127.0.0.1";
+        auditService.recordAction(username, "SUPER_ADMIN", "COURSE_DELETE", "COURSE", id.toString(),
+                "Lưu trữ khóa học ID " + id, ip);
         return ResponseEntity.ok(ApiResponse.success("Lưu trữ khóa học thành công", null));
     }
 }

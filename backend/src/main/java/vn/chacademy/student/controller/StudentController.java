@@ -25,6 +25,7 @@ import java.util.Map;
 public class StudentController {
 
     private final StudentService studentService;
+    private final vn.chacademy.common.audit.service.AuditService auditService;
 
     @GetMapping("/stats")
     @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'CENTER_ADMIN', 'ACADEMIC_STAFF', 'ADMISSIONS_STAFF', 'ACCOUNTANT', 'TEACHER')")
@@ -58,8 +59,15 @@ public class StudentController {
 
     @PostMapping
     @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'CENTER_ADMIN', 'ACADEMIC_STAFF', 'ADMISSIONS_STAFF')")
-    public ResponseEntity<ApiResponse<StudentDto>> createStudent(@Valid @RequestBody CreateStudentRequest request) {
+    public ResponseEntity<ApiResponse<StudentDto>> createStudent(
+            @org.springframework.security.core.annotation.AuthenticationPrincipal org.springframework.security.core.userdetails.UserDetails userDetails,
+            jakarta.servlet.http.HttpServletRequest httpRequest,
+            @Valid @RequestBody CreateStudentRequest request) {
         StudentDto created = studentService.createStudent(request);
+        String username = userDetails != null ? userDetails.getUsername() : "STAFF";
+        String ip = httpRequest != null ? httpRequest.getRemoteAddr() : "127.0.0.1";
+        auditService.recordAction(username, "ADMISSIONS_STAFF", "STUDENT_CREATE", "STUDENT", created.getId().toString(),
+                "Tạo mới hồ sơ học viên: " + created.getFullName() + " (" + created.getStudentCode() + ")", ip);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success("Tạo hồ sơ học viên thành công", created));
     }
@@ -68,8 +76,14 @@ public class StudentController {
     @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'CENTER_ADMIN', 'ACADEMIC_STAFF', 'ADMISSIONS_STAFF')")
     public ResponseEntity<ApiResponse<StudentDto>> updateStudent(
             @PathVariable Long id,
+            @org.springframework.security.core.annotation.AuthenticationPrincipal org.springframework.security.core.userdetails.UserDetails userDetails,
+            jakarta.servlet.http.HttpServletRequest httpRequest,
             @Valid @RequestBody UpdateStudentRequest request) {
         StudentDto updated = studentService.updateStudent(id, request);
+        String username = userDetails != null ? userDetails.getUsername() : "STAFF";
+        String ip = httpRequest != null ? httpRequest.getRemoteAddr() : "127.0.0.1";
+        auditService.recordAction(username, "ADMISSIONS_STAFF", "STUDENT_UPDATE", "STUDENT", id.toString(),
+                "Cập nhật hồ sơ học viên: " + updated.getFullName(), ip);
         return ResponseEntity.ok(ApiResponse.success("Cập nhật hồ sơ học viên thành công", updated));
     }
 
@@ -77,9 +91,15 @@ public class StudentController {
     @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'CENTER_ADMIN', 'ACADEMIC_STAFF')")
     public ResponseEntity<ApiResponse<StudentDto>> updateStudentStatus(
             @PathVariable Long id,
+            @org.springframework.security.core.annotation.AuthenticationPrincipal org.springframework.security.core.userdetails.UserDetails userDetails,
+            jakarta.servlet.http.HttpServletRequest httpRequest,
             @RequestBody Map<String, String> body) {
         String status = body.get("status");
         StudentDto updated = studentService.updateStudentStatus(id, status);
+        String username = userDetails != null ? userDetails.getUsername() : "STAFF";
+        String ip = httpRequest != null ? httpRequest.getRemoteAddr() : "127.0.0.1";
+        auditService.recordAction(username, "ACADEMIC_STAFF", "STUDENT_UPDATE", "STUDENT", id.toString(),
+                "Đổi trạng thái học viên ID " + id + " thành " + status, ip);
         return ResponseEntity.ok(ApiResponse.success("Cập nhật trạng thái học viên thành công", updated));
     }
 
@@ -87,9 +107,15 @@ public class StudentController {
     @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'CENTER_ADMIN', 'ACADEMIC_STAFF', 'ADMISSIONS_STAFF')")
     public ResponseEntity<ApiResponse<vn.chacademy.student.dto.AccountProvisionResponse>> provisionAccount(
             @PathVariable Long id,
+            @org.springframework.security.core.annotation.AuthenticationPrincipal org.springframework.security.core.userdetails.UserDetails userDetails,
+            jakarta.servlet.http.HttpServletRequest httpRequest,
             @RequestBody(required = false) Map<String, String> body) {
         String customPassword = body != null ? body.get("password") : null;
         vn.chacademy.student.dto.AccountProvisionResponse res = studentService.provisionAccount(id, customPassword);
+        String username = userDetails != null ? userDetails.getUsername() : "STAFF";
+        String ip = httpRequest != null ? httpRequest.getRemoteAddr() : "127.0.0.1";
+        auditService.recordAction(username, "ADMISSIONS_STAFF", "ACCOUNT_PROVISION", "STUDENT", id.toString(),
+                "Cấp tài khoản đăng nhập cho học viên ID " + id + " (username: " + res.getUsername() + ")", ip);
         return ResponseEntity.ok(ApiResponse.success(res.getMessage(), res));
     }
 
@@ -98,19 +124,31 @@ public class StudentController {
     public ResponseEntity<ApiResponse<StudentDto>> enrollAndPay(
             @PathVariable Long id,
             @Valid @RequestBody vn.chacademy.student.dto.EnrollAndPayRequest request,
-            @org.springframework.security.core.annotation.AuthenticationPrincipal org.springframework.security.core.userdetails.UserDetails userDetails) {
+            @org.springframework.security.core.annotation.AuthenticationPrincipal org.springframework.security.core.userdetails.UserDetails userDetails,
+            jakarta.servlet.http.HttpServletRequest httpRequest) {
         Long staffId = null;
         if (userDetails != null) {
             staffId = studentService.getStaffIdByUsername(userDetails.getUsername());
         }
         StudentDto res = studentService.enrollAndPay(id, request, staffId);
+        String username = userDetails != null ? userDetails.getUsername() : "STAFF";
+        String ip = httpRequest != null ? httpRequest.getRemoteAddr() : "127.0.0.1";
+        auditService.recordAction(username, "ACCOUNTANT", "ENROLL_AND_PAY", "STUDENT", id.toString(),
+                "Ghi danh lớp ID " + request.getClassId() + " và ghi nhận tài chính học viên ID " + id, ip);
         return ResponseEntity.ok(ApiResponse.success("Ghi danh, sinh học phí & cập nhật tài khoản thành công", res));
     }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'CENTER_ADMIN')")
-    public ResponseEntity<ApiResponse<Void>> deleteStudent(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<Void>> deleteStudent(
+            @PathVariable Long id,
+            @org.springframework.security.core.annotation.AuthenticationPrincipal org.springframework.security.core.userdetails.UserDetails userDetails,
+            jakarta.servlet.http.HttpServletRequest httpRequest) {
         studentService.deleteStudent(id);
+        String username = userDetails != null ? userDetails.getUsername() : "ADMIN";
+        String ip = httpRequest != null ? httpRequest.getRemoteAddr() : "127.0.0.1";
+        auditService.recordAction(username, "SUPER_ADMIN", "STUDENT_DELETE", "STUDENT", id.toString(),
+                "Lưu trữ hồ sơ học viên ID " + id, ip);
         return ResponseEntity.ok(ApiResponse.success("Lưu trữ hồ sơ học viên thành công", null));
     }
 }

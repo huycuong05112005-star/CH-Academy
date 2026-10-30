@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { MemoryRouter } from 'react-router-dom'
 import { StudentListPage } from '../pages/admin/students/StudentListPage'
 import { studentsApi } from '../api/students'
 
@@ -86,7 +87,11 @@ describe('StudentListPage Component', () => {
   })
 
   it('hiển thị tiêu đề và danh sách học viên cùng người giám hộ liên kết', async () => {
-    render(<StudentListPage />)
+    render(
+      <MemoryRouter>
+        <StudentListPage />
+      </MemoryRouter>
+    )
 
     expect(screen.getByText('Quản lý Học viên & Người giám hộ')).toBeInTheDocument()
 
@@ -98,7 +103,11 @@ describe('StudentListPage Component', () => {
   })
 
   it('mở modal thêm học viên mới khi nhấn nút', async () => {
-    render(<StudentListPage />)
+    render(
+      <MemoryRouter>
+        <StudentListPage />
+      </MemoryRouter>
+    )
 
     const addButton = screen.getByRole('button', { name: /Thêm học viên mới/i })
     fireEvent.click(addButton)
@@ -108,7 +117,11 @@ describe('StudentListPage Component', () => {
   })
 
   it('lọc danh sách học viên khi tìm kiếm theo từ khóa', async () => {
-    render(<StudentListPage />)
+    render(
+      <MemoryRouter>
+        <StudentListPage />
+      </MemoryRouter>
+    )
 
     const searchInput = screen.getByPlaceholderText(/Tìm theo mã học viên/i)
     fireEvent.change(searchInput, { target: { value: 'HV2024' } })

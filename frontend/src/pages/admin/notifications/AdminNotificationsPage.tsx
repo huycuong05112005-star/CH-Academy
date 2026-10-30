@@ -4,19 +4,37 @@ import { classesApi } from '../../../api/classes'
 import type { NotificationItem } from '../../../types/notification'
 import type { SessionMaterial } from '../../../types/teacher'
 import type { ClassItem } from '../../../types/class'
+import { NotificationDetailModal } from '../../../components/ui/NotificationDetailModal'
 import {
   Send,
   Trash2,
   ExternalLink,
   AlertTriangle,
-  CheckCircle2
+  CheckCircle2,
+  ChevronRight
 } from 'lucide-react'
 
 export const AdminNotificationsPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'send' | 'history' | 'teacher_activity'>('send')
   const [notifications, setNotifications] = useState<NotificationItem[]>([])
+  const [selectedNotification, setSelectedNotification] = useState<NotificationItem | null>(null)
+  const unreadCount = notifications.filter((n) => !n.isRead).length
   const [teacherMaterials, setTeacherMaterials] = useState<SessionMaterial[]>([])
   const [classList, setClassList] = useState<ClassItem[]>([])
+
+  const handleViewNotificationDetail = async (notif: NotificationItem) => {
+    setSelectedNotification(notif)
+    if (!notif.isRead) {
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === notif.id ? { ...n, isRead: true } : n))
+      )
+      try {
+        await notificationsApi.markAsRead(notif.id)
+      } catch (err) {
+        console.error('Failed to mark notification read', err)
+      }
+    }
+  }
 
   // Form State
   const [title, setTitle] = useState<string>('')
@@ -170,13 +188,20 @@ export const AdminNotificationsPage: React.FC = () => {
           </button>
           <button
             onClick={() => setActiveTab('history')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
               activeTab === 'history'
                 ? 'bg-white dark:bg-[#151F31] text-[#142B4A] dark:text-[#38BDF8] shadow-sm'
                 : 'text-slate-600 dark:text-[#A6B4C8] hover:text-slate-900 dark:hover:text-white'
             }`}
           >
-            Lịch sử ({notifications.length})
+            <span>Lịch sử</span>
+            {unreadCount > 0 ? (
+              <span className="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-rose-500 text-white shadow-2xs">
+                {unreadCount > 99 ? '99+' : unreadCount}
+              </span>
+            ) : (
+              <span className="text-[11px] opacity-60">({notifications.length})</span>
+            )}
           </button>
           <button
             onClick={() => setActiveTab('teacher_activity')}
@@ -326,7 +351,8 @@ export const AdminNotificationsPage: React.FC = () => {
               {notifications.map((n) => (
                 <div
                   key={n.id}
-                  className="hover-lift p-6 rounded-2xl bg-white dark:bg-[#151F31] border border-slate-200/80 dark:border-[#2A3A50] shadow-sm flex flex-col justify-between space-y-4 group transition-all duration-200"
+                  onClick={() => handleViewNotificationDetail(n)}
+                  className="hover-lift p-6 rounded-2xl bg-white dark:bg-[#151F31] border border-slate-200/80 dark:border-[#2A3A50] shadow-sm flex flex-col justify-between space-y-4 group transition-all duration-200 cursor-pointer select-none"
                 >
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
@@ -351,7 +377,11 @@ export const AdminNotificationsPage: React.FC = () => {
                         )}
                       </div>
                       <button
-                        onClick={() => handleDeleteNotification(n.id)}
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleDeleteNotification(n.id)
+                        }}
                         className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition"
                         title="Xóa thông báo"
                       >
@@ -359,17 +389,20 @@ export const AdminNotificationsPage: React.FC = () => {
                       </button>
                     </div>
 
-                    <h4 className="text-base font-bold text-slate-900 dark:text-[#E8EEF7] tracking-tight leading-snug">
+                    <h4 className="text-base font-bold text-slate-900 dark:text-[#E8EEF7] tracking-tight leading-snug group-hover:text-blue-600 dark:group-hover:text-[#38BDF8] transition-colors">
                       {n.title}
                     </h4>
-                    <p className="text-sm text-slate-600 dark:text-[#A6B4C8] whitespace-pre-line leading-relaxed">
+                    <p className="text-sm text-slate-600 dark:text-[#A6B4C8] whitespace-pre-line leading-relaxed line-clamp-3">
                       {n.content}
                     </p>
                   </div>
 
                   <div className="pt-3 border-t border-slate-100 dark:border-[#2A3A50] flex items-center justify-between text-xs text-slate-500 dark:text-[#8899A6]">
                     <span>Gửi bởi: <strong className="text-slate-700 dark:text-slate-300">{n.createdByName || 'Quản trị viên Hệ thống'}</strong></span>
-                    <span className="font-mono tabular-nums">{formatDate(n.createdAt)}</span>
+                    <span className="text-xs font-semibold text-blue-600 dark:text-[#38BDF8] flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
+                      <span>Xem toàn văn</span>
+                      <ChevronRight size={13} />
+                    </span>
                   </div>
                 </div>
               ))}
@@ -447,6 +480,13 @@ export const AdminNotificationsPage: React.FC = () => {
           )}
         </div>
       )}
+
+      {/* Detail Notification Modal */}
+      <NotificationDetailModal
+        notification={selectedNotification}
+        isOpen={Boolean(selectedNotification)}
+        onClose={() => setSelectedNotification(null)}
+      />
     </div>
   )
 }

@@ -1,8 +1,11 @@
 import { apiClient, type ApiResponse } from './client'
 import type { PageResponse } from '../types/course'
-import type { ClassItem, Teacher, Enrollment, CreateClassRequest, CreateEnrollmentRequest } from '../types/class'
+import type { ClassItem, Teacher, Enrollment, CreateClassRequest, CreateEnrollmentRequest, ClassSessionItem } from '../types/class'
 
 export const classesApi = {
+  getClassSessions: async (classId: number): Promise<ApiResponse<ClassSessionItem[]>> => {
+    return apiClient.get<ClassSessionItem[]>(`/classes/${classId}/sessions`)
+  },
   searchClasses: async (params?: {
     keyword?: string;
     status?: string;

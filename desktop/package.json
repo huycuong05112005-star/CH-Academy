@@ -1,0 +1,21 @@
+{
+  "name": "ch-academy-desktop",
+  "version": "2.4.0",
+  "description": "CH Academy Desktop Native Client (Windows)",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --dev"
+  },
+  "keywords": [
+    "ch-academy",
+    "desktop",
+    "electron",
+    "glassmorphism"
+  ],
+  "author": "CH Academy Team",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^24.22.1"
+  }
+}

@@ -88,4 +88,77 @@ public class TeacherPortalDto {
         private String status;
         private List<SessionMaterialDto> materials;
     }
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class TeacherActionItemDto {
+        private String id;
+        private String type; // ATTENDANCE, EXAM_REVIEW, GRADING, GENERAL
+        private String title;
+        private String description;
+        private String linkUrl;
+        private String priority; // HIGH, MEDIUM, LOW
+        private String badge;
+    }
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class TeacherDashboardSummaryDto {
+        private int totalClasses;
+        private int totalStudents;
+        private int todaySessionsCount;
+        private int upcomingSessionsCount;
+        private int unmarkedAttendanceCount;
+        private int draftExamsCount;
+        private int pendingReviewExamsCount;
+        private int approvedExamsCount;
+        private int changesRequestedExamsCount;
+        private int publishedExamsCount;
+        private int pendingGradingCount;
+        private List<TeacherActionItemDto> actionItems;
+        private List<TeacherSessionDto> todaySessions;
+        private List<TeacherSessionDto> upcomingSessions;
+    }
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class StudentExamResultSummaryDto {
+        private Long studentId;
+        private String studentCode;
+        private String fullName;
+        private String email;
+        private String status; // NOT_STARTED, IN_PROGRESS, SUBMITTED, GRADED
+        private java.math.BigDecimal score;
+        private java.math.BigDecimal maxScore;
+        private Boolean isPassed;
+        private Integer attemptCount;
+        private java.time.Instant submittedAt;
+    }
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class ClassExamResultDto {
+        private Long examId;
+        private String examTitle;
+        private String examCode;
+        private Long classId;
+        private String className;
+        private Integer durationMinutes;
+        private java.math.BigDecimal totalPoints;
+        private int totalStudents;
+        private int completedCount;
+        private int inProgressCount;
+        private int unattemptedCount;
+        private Double averageScore;
+        private Double passRate;
+        private List<StudentExamResultSummaryDto> studentResults;
+    }
 }

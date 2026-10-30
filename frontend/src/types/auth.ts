@@ -7,6 +7,8 @@ export interface User {
   status: 'ACTIVE' | 'INACTIVE' | 'LOCKED'
   avatarUrl?: string
   lastLoginAt?: string
+  lastPasswordChangedAt?: string
+  mustChangePassword?: boolean
   roles: string[]
   permissions: string[]
 }
@@ -29,6 +31,8 @@ export interface AuthContextType {
   isLoading: boolean
   login: (payload: LoginPayload) => Promise<User>
   logout: () => void
+  updateUser: (updatedUser: User) => void
+  refreshUser: () => Promise<void>
   hasRole: (role: string) => boolean
   hasAnyRole: (roles: string[]) => boolean
   hasPermission: (permission: string) => boolean

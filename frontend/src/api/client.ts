@@ -33,8 +33,8 @@ export interface ApiResponse<T> {
   success: boolean
   message: string
   data: T
-  errorCode?: string
-  errors?: Record<string, string>
+  errorCode?: string | null
+  errors?: Record<string, string> | null
   timestamp?: string
 }
 
@@ -43,7 +43,7 @@ export interface HealthResponse {
   service: string
   version: string
   timestamp: string
-  message: string
+  message?: string
 }
 
 /**
@@ -71,6 +71,12 @@ export async function apiFetch<T>(endpoint: string, options?: RequestInit): Prom
   })
 
   if (!response.ok) {
+    if ((response.status === 401 || (response.status === 403 && !token)) && !endpoint.includes('/auth/login')) {
+      setAuthToken(null)
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('ch_academy_auth_unauthorized'))
+      }
+    }
     let errorMessage = `API Error ${response.status}: ${response.statusText}`
     try {
       const errJson = await response.json()
@@ -108,6 +114,15 @@ export const apiClient = {
       body: (typeof FormData !== 'undefined' && body instanceof FormData) ? body : (body ? JSON.stringify(body) : undefined),
     }),
   delete: <T>(endpoint: string) => apiFetch<ApiResponse<T>>(endpoint, { method: 'DELETE' }),
+  getBlob: async (endpoint: string): Promise<Blob> => {
+    const url = `${API_BASE_URL}${endpoint}`
+    const token = getAuthToken()
+    const headers: Record<string, string> = {}
+    if (token) headers['Authorization'] = `Bearer ${token}`
+    const response = await fetch(url, { headers })
+    if (!response.ok) throw new Error(`Download error: ${response.status}`)
+    return response.blob()
+  },
 }
 
 export { API_BASE_URL }

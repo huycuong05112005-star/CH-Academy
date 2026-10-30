@@ -15,4 +15,7 @@ public interface SessionMaterialRepository extends JpaRepository<SessionMaterial
 
     @EntityGraph(attributePaths = {"session", "uploadedBy"})
     List<SessionMaterial> findBySessionClassEntityIdOrderByCreatedAtDesc(Long classId);
+
+    @EntityGraph(attributePaths = {"session", "uploadedBy"})
+    List<SessionMaterial> findAllByOrderByCreatedAtDesc();
 }

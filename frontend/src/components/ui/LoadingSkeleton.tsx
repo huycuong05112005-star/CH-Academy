@@ -36,3 +36,17 @@ export const CardSkeleton: React.FC = () => {
     </div>
   )
 }
+
+export const PageLoadingFallback: React.FC = () => {
+  return (
+    <div className="min-h-[60vh] flex flex-col items-center justify-center p-8 text-center animate-fade-in">
+      <div className="relative w-12 h-12 mb-3">
+        <div className="w-12 h-12 rounded-2xl border-3 border-blue-600/20 dark:border-sky-400/20 border-t-blue-600 dark:border-t-sky-400 animate-spin" />
+      </div>
+      <div className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+        Đang khởi tạo giao diện...
+      </div>
+    </div>
+  )
+}
+

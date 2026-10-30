@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { MemoryRouter } from 'react-router-dom'
 import { ClassListPage } from '../pages/admin/classes/ClassListPage'
 import { classesApi } from '../api/classes'
 import { coursesApi } from '../api/courses'
@@ -135,7 +136,11 @@ describe('ClassListPage Component', () => {
   })
 
   it('hiển thị tiêu đề và bảng lớp học kèm lịch định kỳ', async () => {
-    render(<ClassListPage />)
+    render(
+      <MemoryRouter>
+        <ClassListPage />
+      </MemoryRouter>
+    )
 
     expect(screen.getByText('Lớp học & Lịch học')).toBeInTheDocument()
 
@@ -147,7 +152,11 @@ describe('ClassListPage Component', () => {
   })
 
   it('mở modal tạo lớp học mới khi click nút Tạo lớp học mới', async () => {
-    render(<ClassListPage />)
+    render(
+      <MemoryRouter>
+        <ClassListPage />
+      </MemoryRouter>
+    )
 
     const addButton = screen.getByRole('button', { name: /Tạo lớp học mới/i })
     fireEvent.click(addButton)
@@ -157,7 +166,11 @@ describe('ClassListPage Component', () => {
   })
 
   it('tìm kiếm lớp học khi nhập từ khóa', async () => {
-    render(<ClassListPage />)
+    render(
+      <MemoryRouter>
+        <ClassListPage />
+      </MemoryRouter>
+    )
 
     const searchInput = screen.getByPlaceholderText(/Tìm theo mã lớp, tên lớp, phòng/i)
     fireEvent.change(searchInput, { target: { value: 'CLS-ENG' } })

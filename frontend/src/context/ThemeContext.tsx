@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState, useMemo } from 'react'
 
-export type Theme = 'light' | 'dark' | 'system'
-export type ResolvedTheme = 'light' | 'dark'
+export type Theme = 'light' | 'dark' | 'glass' | 'transparent' | 'system'
+export type ResolvedTheme = 'light' | 'dark' | 'glass'
 
 interface ThemeContextType {
   theme: Theme
@@ -17,13 +17,13 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [theme, setThemeState] = useState<Theme>(() => {
     try {
       const stored = localStorage.getItem(THEME_STORAGE_KEY)
-      if (stored === 'light' || stored === 'dark' || stored === 'system') {
-        return stored
+      if (stored === 'light' || stored === 'dark' || stored === 'glass' || stored === 'transparent' || stored === 'system') {
+        return (stored === 'transparent' ? 'glass' : stored) as Theme
       }
     } catch {
       // Ignore localStorage errors
     }
-    return 'light' // Default is Light as specified in PHẦN C
+    return 'light'
   })
 
   const [systemIsDark, setSystemIsDark] = useState<boolean>(() => {
@@ -49,17 +49,24 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     if (theme === 'system') {
       return systemIsDark ? 'dark' : 'light'
     }
+    if (theme === 'glass' || theme === 'transparent') {
+      return 'glass'
+    }
     return theme
   }, [theme, systemIsDark])
 
   // Apply to DOM
   useEffect(() => {
     const root = document.documentElement
+    root.classList.remove('dark', 'light', 'glass', 'theme-glass', 'transparent')
     if (resolvedTheme === 'dark') {
       root.classList.add('dark')
       root.setAttribute('data-theme', 'dark')
+    } else if (resolvedTheme === 'glass') {
+      root.classList.add('dark', 'glass', 'theme-glass')
+      root.setAttribute('data-theme', 'glass')
     } else {
-      root.classList.remove('dark')
+      root.classList.add('light')
       root.setAttribute('data-theme', 'light')
     }
   }, [resolvedTheme])

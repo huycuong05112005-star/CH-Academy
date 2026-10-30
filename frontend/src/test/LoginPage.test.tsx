@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, act } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { BrowserRouter } from 'react-router-dom'
 import { AuthProvider } from '../context/AuthContext'
@@ -39,7 +39,9 @@ describe('LoginPage Component', () => {
     expect(screen.getByRole('heading', { name: /CH Academy/i })).not.toBeNull()
     expect(screen.getByLabelText(/Tên đăng nhập/i)).not.toBeNull()
     expect(screen.getByPlaceholderText(/Nhập mật khẩu/i)).not.toBeNull()
-    expect(screen.getByRole('button', { name: /Đăng nhập/i })).not.toBeNull()
+    expect(screen.getByRole('button', { name: /Đăng nhập hệ thống/i })).not.toBeNull()
+    expect(screen.getByRole('button', { name: /Đăng nhập bằng Google/i })).not.toBeNull()
+    expect(screen.getByRole('button', { name: /Đăng nhập bằng Facebook/i })).not.toBeNull()
   })
 
   it('hiển thị lỗi khi bấm đăng nhập với form trống', async () => {
@@ -53,7 +55,7 @@ describe('LoginPage Component', () => {
       </BrowserRouter>
     )
 
-    const submitBtn = screen.getByRole('button', { name: /Đăng nhập/i })
+    const submitBtn = screen.getByRole('button', { name: /Đăng nhập hệ thống/i })
     await user.click(submitBtn)
 
     const alert = await screen.findByRole('alert')
@@ -94,7 +96,7 @@ describe('LoginPage Component', () => {
 
     const usernameInput = screen.getByLabelText(/Tên đăng nhập/i)
     const passwordInput = screen.getByPlaceholderText(/Nhập mật khẩu/i)
-    const submitBtn = screen.getByRole('button', { name: /Đăng nhập/i })
+    const submitBtn = screen.getByRole('button', { name: /Đăng nhập hệ thống/i })
 
     await user.type(usernameInput, 'admin')
     await user.type(passwordInput, 'Admin@123456')
@@ -104,6 +106,51 @@ describe('LoginPage Component', () => {
       expect(authApi.login).toHaveBeenCalledWith({
         username: 'admin',
         password: 'Admin@123456',
+      })
+    })
+  })
+
+  it('ngăn chặn gửi lặp request khi click liên tục', async () => {
+    const user = userEvent.setup()
+    let resolveLogin: (val: any) => void = () => {}
+    const loginPromise = new Promise((resolve) => {
+      resolveLogin = resolve
+    })
+
+    vi.mocked(authApi.login).mockReturnValue(loginPromise as any)
+
+    render(
+      <BrowserRouter>
+        <AuthProvider>
+          <LoginPage />
+        </AuthProvider>
+      </BrowserRouter>
+    )
+
+    const usernameInput = screen.getByLabelText(/Tên đăng nhập/i)
+    const passwordInput = screen.getByPlaceholderText(/Nhập mật khẩu/i)
+    const submitBtn = screen.getByRole('button', { name: /Đăng nhập hệ thống/i })
+
+    await user.type(usernameInput, 'admin')
+    await user.type(passwordInput, 'Admin@123456')
+
+    // Click lần 1
+    await user.click(submitBtn)
+    // Click liên tục lần 2
+    await user.click(submitBtn)
+
+    expect(authApi.login).toHaveBeenCalledTimes(1)
+
+    // Giải phóng promise
+    await act(async () => {
+      resolveLogin({
+        success: true,
+        message: 'OK',
+        data: {
+          accessToken: 'mock_token',
+          tokenType: 'Bearer',
+          user: { id: 1, roles: ['SUPER_ADMIN'] },
+        },
       })
     })
   })
