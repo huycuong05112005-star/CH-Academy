@@ -50,3 +50,4 @@ Trong Tab **"Tài liệu & Chunking"**, Quản trị viên có thể bấm trự
 ## 3. CƠ CHẾ TÁI LẬP CHỈ MỤC (RE-INDEXING)
 1. **Re-index tài liệu đơn lẻ:** Khi tài liệu bị cập nhật nội dung hoặc đổi phiên bản, hệ thống xóa các chunks cũ trong `ai_kb_chunks`, phân đoạn lại và cập nhật vector mới mà không làm gián đoạn các tài liệu khác.
 2. **Re-index toàn bộ Kho tri thức:** Quản trị viên có thể kích hoạt tái lập chỉ mục toàn bộ các tài liệu trong kho chỉ với 1 cú click, tự động đồng bộ lại toàn bộ vector embedding.
+

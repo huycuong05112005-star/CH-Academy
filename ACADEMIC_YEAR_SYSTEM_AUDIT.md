@@ -54,3 +54,4 @@ CREATE INDEX IF NOT EXISTS idx_academic_years_is_current ON academic_years(is_cu
 - Tạo service `academicYearApi` trong `frontend/src/api/academicYear.ts`.
 - Cập nhật thanh công cụ nhanh `DesktopWorkspaceBar.tsx` tự động tải danh sách năm học từ database, loại bỏ hoàn toàn hardcode.
 - Cập nhật `DashboardPage.tsx` tự động đồng bộ theo danh sách năm học từ backend và hỗ trợ lọc chỉ số theo từng năm học linh hoạt.
+

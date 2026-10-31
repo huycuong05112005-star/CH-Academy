@@ -31,7 +31,7 @@ import { Tilt3DCard } from '../../components/3d/Tilt3DCard'
 import { CyberOrb3D } from '../../components/3d/CyberOrb3D'
 
 export const DashboardPage: React.FC = () => {
-  const { user } = useAuth()
+  const { user, logout } = useAuth()
   const { settings } = useSettings()
 
   const [stats, setStats] = useState<DashboardStats | null>(null)
@@ -265,6 +265,40 @@ export const DashboardPage: React.FC = () => {
           </div>
         </Link>
       </div>
+
+      {/* Error or Permission Alert Banner */}
+      {statsError && (
+        <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-300 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-md animate-in fade-in">
+          <div className="flex items-start sm:items-center gap-3">
+            <AlertCircle className="w-5 h-5 text-rose-400 shrink-0 mt-0.5 sm:mt-0" />
+            <div>
+              <p className="font-bold text-rose-200 text-sm">Không thể tải dữ liệu chỉ số năm học: {statsError}</p>
+              <p className="text-xs text-rose-300/80 mt-0.5">
+                Nếu bạn vừa thử đăng nhập tài khoản Học viên hoặc Giảng viên, phiên làm việc có thể chưa được đồng bộ. Vui lòng thử lại hoặc đăng nhập lại tài khoản Quản trị viên.
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
+            <button
+              type="button"
+              onClick={() => fetchStats()}
+              className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition cursor-pointer"
+            >
+              Thử lại
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                logout()
+                window.location.href = '/login'
+              }}
+              className="px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold transition cursor-pointer shadow-sm"
+            >
+              Đăng nhập lại Admin
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* 3. Standardized 4 Core KPI Stat Cards with Academic Year Context */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">

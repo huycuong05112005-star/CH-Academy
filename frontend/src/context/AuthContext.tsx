@@ -54,9 +54,38 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
     window.addEventListener('ch_academy_auth_unauthorized', handleUnauthorized)
 
+    // Đồng bộ trạng thái xác thực giữa các Tab trình duyệt (chống xung đột token Đăng nhập chéo)
+    const handleStorageChange = async (event: StorageEvent) => {
+      if (event.key === 'ch_academy_token') {
+        const newToken = event.newValue
+        if (!newToken) {
+          setTokenState(null)
+          setUser(null)
+        } else if (newToken !== token) {
+          try {
+            const res = await authApi.getMe()
+            if (res.success && res.data) {
+              setTokenState(newToken)
+              setUser(res.data)
+            } else {
+              setAuthToken(null)
+              setTokenState(null)
+              setUser(null)
+            }
+          } catch {
+            setAuthToken(null)
+            setTokenState(null)
+            setUser(null)
+          }
+        }
+      }
+    }
+    window.addEventListener('storage', handleStorageChange)
+
     return () => {
       isCurrent = false
       window.removeEventListener('ch_academy_auth_unauthorized', handleUnauthorized)
+      window.removeEventListener('storage', handleStorageChange)
     }
   }, [])
 

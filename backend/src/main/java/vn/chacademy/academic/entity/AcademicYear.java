@@ -51,3 +51,4 @@ public class AcademicYear {
         this.updatedAt = Instant.now();
     }
 }
+

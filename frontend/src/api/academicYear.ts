@@ -34,3 +34,4 @@ export const academicYearApi = {
   setCurrent: (id: number): Promise<ApiResponse<AcademicYearItem>> =>
     apiClient.put<AcademicYearItem>(`/academic-years/${id}/set-current`, {})
 }
+

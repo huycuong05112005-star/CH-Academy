@@ -55,3 +55,4 @@
 6. **`ScoringServiceTest`, `AttendanceControllerTest`, `StudentControllerTest` & các module khác (24 tests):**
    - Tính điểm bài thi, đồng bộ điểm danh, sinh mã học viên tự động.
    - Trạng thái: **PASSED (24/24)**
+

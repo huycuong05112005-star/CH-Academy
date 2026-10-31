@@ -33,3 +33,4 @@ Trước khi khắc phục:
   - **Bộ chọn AI Agent** tiếp nhận tin nhắn từ Zalo.
   - **Công cụ Kiểm tra kết nối (Test Webhook Ping):** Cho phép Quản trị viên gửi request giả lập kiểm tra endpoint ngay lập tức mà không cần chờ Zalo.
   - Cảnh báo rõ ràng các trường thông tin còn thiếu kèm hướng dẫn cấu hình chi tiết tại `developers.zalo.me`.
+

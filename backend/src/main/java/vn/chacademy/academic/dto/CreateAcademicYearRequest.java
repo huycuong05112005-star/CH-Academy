@@ -27,3 +27,4 @@ public class CreateAcademicYearRequest {
     private Boolean isCurrent;
     private String status;
 }
+

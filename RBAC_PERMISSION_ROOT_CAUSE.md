@@ -50,3 +50,4 @@ Trong `GenAiChatService.java`, bổ sung cơ chế nhận diện vai trò Quản
 
 ### 3.3. Kết quả kiểm thử
 Đã kiểm thử mở Hội thoại #23 bằng tài khoản Quản trị viên: Modal hiển thị toàn bộ nội dung tin nhắn, độ trễ và thông tin khách hàng mà không còn bất kỳ thông báo lỗi 403 nào.
+

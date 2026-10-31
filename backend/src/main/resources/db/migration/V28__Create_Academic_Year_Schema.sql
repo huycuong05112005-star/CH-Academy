@@ -30,3 +30,4 @@ VALUES
     ('2030-2031', 'Năm học 2030 - 2031', '2030-09-01', '2031-06-30', false, 'UPCOMING'),
     ('2031-2032', 'Năm học 2031 - 2032', '2031-09-01', '2032-06-30', false, 'UPCOMING')
 ON CONFLICT (code) DO NOTHING;
+

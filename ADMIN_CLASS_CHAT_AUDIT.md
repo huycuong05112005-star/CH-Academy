@@ -45,3 +45,4 @@ Quản trị viên là người giám sát và điều hành toàn bộ các l�
    - Thiết kế giao diện thông báo riêng biệt cho Quản trị viên: *"Hiện chưa có nhóm lớp học nào trên hệ thống hoặc danh sách đang đồng bộ."*
    - Bổ sung nút **"Tải lại danh sách" (Refresh)** trực tiếp trên giao diện để Quản trị viên chủ động kích hoạt đồng bộ.
    - Khi có nhiều lớp học, Header hiển thị Dropdown danh sách nhóm lớp kèm mã lớp, tên giảng viên phụ trách và số lượng tin nhắn chưa đọc.
+

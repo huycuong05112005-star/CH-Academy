@@ -64,3 +64,4 @@ Quản trị viên có thể bấm **"Xem Chunks"** trên từng tài liệu đ�
 3. Vị trí phân đoạn trong văn bản gốc.
 4. Trạng thái lập chỉ mục Vector: `Vectorized: 1536 dims (PostgreSQL pgvector)`.
 5. Đoạn trích dẫn thực tế để đảm bảo chất lượng nội dung trước khi đưa vào phục vụ RAG.
+

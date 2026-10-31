@@ -65,3 +65,4 @@ flowchart TD
 
 ## 4. KẾT LUẬN & ĐÁNH GIÁ MỞ RỘNG
 Hệ thống AI Platform hiện tại đã vận hành độc lập, chuyên biệt, đạt chuẩn Enterprise về bảo mật phân quyền (RBAC), quy trình RAG xử lý tài liệu minh bạch và khả năng đàm thoại Voice AI hai chiều ổn định.
+

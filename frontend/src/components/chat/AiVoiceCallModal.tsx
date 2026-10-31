@@ -663,7 +663,17 @@ export const AiVoiceCallModal: React.FC<AiVoiceCallProps> = ({
     }
   }, [isOpen, callStatus, isMuted])
 
-  // 10. Lifecycle mở/đóng Modal cuộc gọi
+  // Giữ tham chiếu ổn định để không re-run lifecycle effect làm đứt kết nối
+  const speakAiResponseRef = useRef<(text: string, preSplitSentences?: string[]) => void>(() => {})
+  speakAiResponseRef.current = speakAiResponse
+
+  const initAudioVisualizerRef = useRef<() => Promise<boolean>>(async () => false)
+  initAudioVisualizerRef.current = initAudioVisualizer
+
+  const portalRef = useRef<AiVoiceCallProps['portal']>(portal)
+  portalRef.current = portal
+
+  // 10. Lifecycle mở/đóng Modal cuộc gọi (Chỉ kích hoạt duy nhất khi isOpen thay đổi)
   useEffect(() => {
     isComponentMounted.current = true
 
@@ -678,13 +688,14 @@ export const AiVoiceCallModal: React.FC<AiVoiceCallProps> = ({
       setTextInput('')
       addDebugLog('Khởi tạo phiên Voice AI CH Academy...')
 
+      const currentPortal = portalRef.current
       // Lời chào mở đầu chuyên biệt theo cổng
       const greeting =
-        portal === 'PUBLIC'
+        currentPortal === 'PUBLIC'
           ? 'Xin chào quý khách! Tôi là Chuyên viên Tư vấn Tuyển sinh AI của CH Academy. Tôi có thể hỗ trợ quý khách tìm hiểu khóa học, học phí hay lịch khai giảng nào ạ?'
-          : portal === 'TEACHER'
+          : currentPortal === 'TEACHER'
           ? 'Kính chào thầy cô! Tôi là Trợ lý Giảng dạy AI. Tôi sẵn sàng hỗ trợ thầy cô soạn giáo án, tạo câu hỏi trắc nghiệm hoặc tra cứu tài liệu bài giảng.'
-          : portal === 'ADMIN'
+          : currentPortal === 'ADMIN'
           ? 'Chào Quản trị viên! Tôi là Trợ lý Quản trị & Vận hành. Tôi có thể hỗ trợ bạn tra cứu số liệu học viên, tỷ lệ chuyên cần và báo cáo toàn trung tâm.'
           : 'Chào bạn! Tôi là AI Gia sư đồng hành học tập. Bạn muốn hướng dẫn giải bài tập, giải thích kiến thức hay ôn luyện chủ đề nào hôm nay?'
 
@@ -699,10 +710,10 @@ export const AiVoiceCallModal: React.FC<AiVoiceCallProps> = ({
         } catch {}
       }
       setCallStatus('SPEAKING')
-      speakAiResponse(greeting)
+      speakAiResponseRef.current(greeting)
 
       // 2. Khởi tạo Microphone song song (không làm chậm phản hồi ban đầu)
-      initAudioVisualizer().then((ok) => {
+      initAudioVisualizerRef.current().then((ok) => {
         if (!isComponentMounted.current) return
         if (ok) {
           addDebugLog('Microphone và Web Audio đã sẵn sàng')
@@ -746,7 +757,7 @@ export const AiVoiceCallModal: React.FC<AiVoiceCallProps> = ({
         cancelAnimationFrame(animationFrameRef.current)
       }
     }
-  }, [isOpen, initAudioVisualizer, portal, speakAiResponse])
+  }, [isOpen])
 
   // 11. Bật / Tắt Microphone
   const toggleMute = () => {
