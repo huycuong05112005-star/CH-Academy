@@ -119,7 +119,7 @@ export const StudentListPage: React.FC = () => {
   }
 
   const copyAccountInfo = (student: Student) => {
-    const text = `Tài khoản: ${student.username}\nMật khẩu: ${student.rawPassword || 'Chưa cập nhật'}`
+    const text = `Tài khoản: ${student.username}\nMật khẩu: (Đã mã hóa BCrypt an toàn - sử dụng nút Cấp lại nếu cần)`
     navigator.clipboard.writeText(text)
     setCopiedAccountMap(prev => ({ ...prev, [student.id]: true }))
     setTimeout(() => {
@@ -138,7 +138,7 @@ export const StudentListPage: React.FC = () => {
       'Đối tượng',
       'Trạng thái',
       'Tên đăng nhập',
-      'Mật khẩu khởi tạo',
+      'Trạng thái bảo mật',
       'Ngày tạo'
     ]
     const rows = students.map(s => [
@@ -151,7 +151,7 @@ export const StudentListPage: React.FC = () => {
       s.targetType === 'KID' ? 'Trẻ em / Thiếu nhi' : 'Người lớn',
       s.status === 'ACTIVE' ? 'Đang học' : s.status === 'GRADUATED' ? 'Đã tốt nghiệp' : s.status === 'DROPPED' ? 'Đã nghỉ' : 'Tạm dừng',
       s.username || 'Chưa cấp',
-      s.rawPassword || 'Chưa cấp',
+      s.username ? 'Mã hóa BCrypt an toàn' : 'Chưa cấp',
       s.createdAt ? s.createdAt.substring(0, 10) : ''
     ])
     exportToCsv('Danh_sach_hoc_vien', headers, rows)
@@ -855,18 +855,11 @@ export const StudentListPage: React.FC = () => {
                             <div className="flex items-center gap-1.5 text-[11px] font-mono text-slate-600 dark:text-[#A6B4C8]">
                               <span className="text-slate-400 text-[10px]">MK:</span>
                               <span className="font-semibold text-slate-800 dark:text-slate-200">
-                                {showPasswordMap[student.id]
-                                  ? (student.rawPassword || 'Chưa lưu MK cũ')
-                                  : '••••••••'}
+                                ••••••••
                               </span>
-                              <button
-                                type="button"
-                                onClick={() => toggleShowPassword(student.id)}
-                                className="p-0.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition"
-                                title={showPasswordMap[student.id] ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
-                              >
-                                {showPasswordMap[student.id] ? <EyeOff size={12} /> : <Eye size={12} />}
-                              </button>
+                              <span className="text-[9px] px-1 py-0.5 rounded bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300">
+                                BCrypt
+                              </span>
                             </div>
 
                             <button
@@ -1731,22 +1724,15 @@ export const StudentListPage: React.FC = () => {
                       <div className="bg-white dark:bg-[#151F31] p-3 rounded-xl border border-blue-100 dark:border-blue-900/60 flex items-center justify-between">
                         <div>
                           <div className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
-                            Mật khẩu hiện tại
+                            Mật khẩu tài khoản
                           </div>
                           <div className="text-sm font-mono font-bold text-slate-900 dark:text-white mt-0.5">
-                            {showPasswordMap[detailStudent.id]
-                              ? (detailStudent.rawPassword || 'Chưa lưu MK cũ')
-                              : '••••••••••••'}
+                            ••••••••••••
                           </div>
                         </div>
-                        <button
-                          type="button"
-                          onClick={() => toggleShowPassword(detailStudent.id)}
-                          className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-[#1C293D] transition"
-                          title={showPasswordMap[detailStudent.id] ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
-                        >
-                          {showPasswordMap[detailStudent.id] ? <EyeOff size={16} /> : <Eye size={16} />}
-                        </button>
+                        <span className="text-xs px-2 py-1 rounded bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 font-semibold">
+                          Bảo mật BCrypt
+                        </span>
                       </div>
                     </div>
 

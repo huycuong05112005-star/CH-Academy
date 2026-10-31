@@ -2,12 +2,16 @@ package vn.chacademy.chat.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import vn.chacademy.chat.dto.AiChatRequest;
 import vn.chacademy.chat.dto.AiChatResponse;
 import vn.chacademy.chat.service.GenAiChatService;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.util.Map;
 
 @RestController
@@ -17,6 +21,9 @@ import java.util.Map;
 public class ZaloWebhookController {
 
     private final GenAiChatService genAiChatService;
+
+    @Value("${zalo.webhook.secret:}")
+    private String webhookSecret;
 
     @GetMapping
     public ResponseEntity<String> verifyWebhook(
@@ -30,8 +37,17 @@ public class ZaloWebhookController {
     @PostMapping
     public ResponseEntity<Map<String, Object>> handleZaloEvent(
             @RequestBody(required = false) Map<String, Object> payload,
-            @RequestHeader(value = "X-Zalo-Signature", required = false) String signature) {
+            @RequestHeader(value = "X-Zalo-Signature", required = false) String signature,
+            @RequestHeader(value = "X-Zalo-Timestamp", required = false) String timestamp) {
         log.info("[Zalo Webhook] Nhận sự kiện webhook: payload={}", payload);
+
+        if (webhookSecret != null && !webhookSecret.isBlank()) {
+            if (signature == null || signature.isBlank()) {
+                log.warn("[Zalo Webhook] Từ chối request vì thiếu chữ ký X-Zalo-Signature");
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body(Map.of("error", 403, "message", "Missing X-Zalo-Signature"));
+            }
+        }
 
         if (payload == null) {
             return ResponseEntity.ok(Map.of("error", 0, "message", "Empty payload"));

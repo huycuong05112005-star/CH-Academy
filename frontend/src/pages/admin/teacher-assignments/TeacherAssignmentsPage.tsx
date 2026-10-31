@@ -102,7 +102,7 @@ export const TeacherAssignmentsPage: React.FC = () => {
   }
 
   const handleCopyAccount = (teacher: TeacherAdminItem) => {
-    const text = `Tài khoản: ${teacher.username || 'gv.' + teacher.teacherCode.toLowerCase()}\nMật khẩu: ${teacher.rawPassword || 'Teacher@123456'}`
+    const text = `Tài khoản: ${teacher.username || 'gv.' + teacher.teacherCode.toLowerCase()}\nMật khẩu: (Đã mã hóa BCrypt an toàn - liên hệ quản trị nếu cần đặt lại)`
     navigator.clipboard.writeText(text)
     setCopiedMap(prev => ({ ...prev, [teacher.id]: true }))
     setTimeout(() => {
@@ -209,7 +209,7 @@ export const TeacherAssignmentsPage: React.FC = () => {
       t.email || 'Chưa cập nhật',
       t.specialization || 'Chưa cập nhật',
       t.username || `gv.${t.teacherCode.toLowerCase()}`,
-      t.rawPassword || 'Teacher@123456',
+      'Mã hóa BCrypt an toàn',
       t.status === 'ACTIVE' ? 'Hoạt động' : 'Tạm dừng'
     ])
     exportToCsv('Danh_sach_giang_vien', headers, rows)
@@ -476,10 +476,8 @@ export const TeacherAssignmentsPage: React.FC = () => {
                     </tr>
                   ) : (
                     filteredTeachers.map(t => {
-                      const isPwdVisible = showPasswordMap[t.id]
                       const isCopied = copiedMap[t.id]
                       const displayUsername = t.username || `gv.${t.teacherCode.toLowerCase()}`
-                      const displayPassword = t.rawPassword || 'Teacher@123456'
 
                       return (
                         <tr key={t.id} className="hover:bg-slate-50/60 dark:hover:bg-[#1E293B]/40 transition">
@@ -514,16 +512,9 @@ export const TeacherAssignmentsPage: React.FC = () => {
                           </td>
                           <td className="py-3 px-4">
                             <div className="flex items-center gap-1.5">
-                              <span className="font-mono text-xs px-2.5 py-1 rounded-lg bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-300 font-semibold">
-                                {isPwdVisible ? displayPassword : '••••••••••••'}
+                              <span className="font-mono text-xs px-2 py-0.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 font-semibold">
+                                Mã hóa BCrypt
                               </span>
-                              <button
-                                onClick={() => togglePassword(t.id)}
-                                title={isPwdVisible ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
-                                className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition"
-                              >
-                                {isPwdVisible ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-                              </button>
                             </div>
                           </td>
                           <td className="py-3 px-4">

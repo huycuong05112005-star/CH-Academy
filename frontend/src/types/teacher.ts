@@ -95,7 +95,6 @@ export interface TeacherAdminItem {
   id: number
   userId?: number
   username?: string
-  rawPassword?: string
   teacherCode: string
   fullName: string
   email?: string

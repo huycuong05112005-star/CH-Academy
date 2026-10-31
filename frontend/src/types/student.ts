@@ -37,7 +37,6 @@ export interface Student {
   // Automated course, tuition & account metadata
   hasUserAccount?: boolean
   username?: string
-  rawPassword?: string
   enrolledCourseName?: string
   enrolledClassName?: string
   totalTuition?: number

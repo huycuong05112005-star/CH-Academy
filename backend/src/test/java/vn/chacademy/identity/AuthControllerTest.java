@@ -96,9 +96,22 @@ class AuthControllerTest {
     }
 
     @Test
+    @DisplayName("POST /api/v1/auth/login - Chống dò quét tài khoản: user không tồn tại cũng trả về 401 BAD_CREDENTIALS")
+    void login_Failure_NonExistentUser_ReturnsSame401() throws Exception {
+        LoginRequest request = new LoginRequest("completely_nonexistent_user", "AnyPassword123");
+
+        mockMvc.perform(post("/api/v1/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.errorCode").value("BAD_CREDENTIALS"));
+    }
+
+    @Test
     @DisplayName("GET /api/v1/auth/me - Truy cập thất bại khi chưa gửi JWT")
     void getMe_WithoutToken_ReturnsUnauthorizedOrForbidden() throws Exception {
         mockMvc.perform(get("/api/v1/auth/me"))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized());
     }
 }

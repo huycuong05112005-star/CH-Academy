@@ -16,7 +16,6 @@ public class TeacherDto {
     private Long id;
     private Long userId;
     private String username;
-    private String rawPassword;
     private String teacherCode;
     private String fullName;
     private String email;
@@ -32,7 +31,6 @@ public class TeacherDto {
                 .id(t.getId())
                 .userId(t.getUser() != null ? t.getUser().getId() : null)
                 .username(t.getUser() != null ? t.getUser().getUsername() : null)
-                .rawPassword(t.getUser() != null ? t.getUser().getRawPassword() : null)
                 .teacherCode(t.getTeacherCode())
                 .fullName(t.getFullName())
                 .email(t.getEmail())

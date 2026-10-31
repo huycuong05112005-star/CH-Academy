@@ -90,7 +90,6 @@ public class AcademicService {
                 newUser.setFullName(request.getFullName().trim());
                 newUser.setPhone(request.getPhone() != null ? request.getPhone().trim() : null);
                 newUser.setPasswordHash(passwordEncoder.encode(defaultPassword));
-                newUser.setRawPassword(defaultPassword);
                 newUser.setStatus("ACTIVE");
                 newUser.setRoles(roles);
 

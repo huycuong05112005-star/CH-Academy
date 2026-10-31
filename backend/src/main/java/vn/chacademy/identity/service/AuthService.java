@@ -70,8 +70,9 @@ public class AuthService {
 
     @Transactional
     public LoginResponse login(LoginRequest request) {
+        // Chống dò quét tài khoản (Account Enumeration): Ném BadCredentialsException như nhau khi user không tồn tại hoặc sai pass
         User user = userRepository.findByUsername(request.getUsername())
-                .orElseThrow(() -> new ResourceNotFoundException("Người dùng", "username", request.getUsername()));
+                .orElseThrow(() -> new org.springframework.security.authentication.BadCredentialsException("Tên đăng nhập hoặc mật khẩu không chính xác"));
 
         if ("LOCKED".equalsIgnoreCase(user.getStatus())) {
             auditService.recordAction(user, "LOGIN_LOCKED_ATTEMPT", "USER", user.getId().toString(),
@@ -79,12 +80,27 @@ public class AuthService {
             throw new BadRequestException("Tài khoản của bạn đã bị khóa bảo mật. Vui lòng liên hệ Quản trị viên để được hỗ trợ.", "ACCOUNT_LOCKED");
         }
 
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.getUsername(),
-                        request.getPassword()
-                )
-        );
+        Authentication authentication;
+        try {
+            authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            request.getUsername(),
+                            request.getPassword()
+                    )
+            );
+        } catch (org.springframework.security.core.AuthenticationException ex) {
+            // Tăng số lần đăng nhập sai & tự động khóa sau 5 lần
+            int attempts = (user.getFailedLoginAttempts() != null ? user.getFailedLoginAttempts() : 0) + 1;
+            user.setFailedLoginAttempts(attempts);
+            if (attempts >= 5) {
+                user.setStatus("LOCKED");
+                user.setLockedAt(Instant.now());
+                auditService.recordAction(user, "ACCOUNT_AUTO_LOCKED", "USER", user.getId().toString(),
+                        "Tài khoản bị tự động khóa do đăng nhập sai 5 lần liên tiếp", null);
+            }
+            userRepository.save(user);
+            throw new org.springframework.security.authentication.BadCredentialsException("Tên đăng nhập hoặc mật khẩu không chính xác");
+        }
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwt = tokenProvider.generateToken(authentication);
@@ -195,7 +211,6 @@ public class AuthService {
 
         // 4. Update password
         user.setPasswordHash(passwordEncoder.encode(newPassword));
-        user.setRawPassword(null);
         user.setLastPasswordChangedAt(Instant.now());
         user.setMustChangePassword(false);
         user.setPasswordResetSource("USER_SELF");

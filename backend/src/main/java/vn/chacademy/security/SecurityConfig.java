@@ -57,6 +57,25 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .headers(headers -> headers
+                        .frameOptions(org.springframework.security.config.annotation.web.configurers.HeadersConfigurer.FrameOptionsConfig::deny)
+                        .contentTypeOptions(org.springframework.security.config.Customizer.withDefaults())
+                        .contentSecurityPolicy(csp -> csp.policyDirectives(
+                                "default-src 'self'; " +
+                                "script-src 'self' 'unsafe-inline' 'unsafe-eval'; " +
+                                "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
+                                "font-src 'self' https://fonts.gstatic.com data:; " +
+                                "img-src 'self' data: https: blob:; " +
+                                "connect-src 'self' http://localhost:* https://openrouter.ai https://generativelanguage.googleapis.com; " +
+                                "media-src 'self' blob:; " +
+                                "object-src 'none'; " +
+                                "base-uri 'self'; " +
+                                "form-action 'self'; " +
+                                "frame-ancestors 'none'"
+                        ))
+                        .referrerPolicy(ref -> ref.policy(org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN))
+                        .permissionsPolicy(perms -> perms.policy("camera=(), microphone=(self), geolocation=(), payment=()"))
+                )
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint((request, response, authException) -> {
                             response.setContentType("application/json;charset=UTF-8");
@@ -66,7 +85,7 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(auth -> auth
                         // Public endpoints
-                        .requestMatchers("/api/v1/health", "/api/v1/actuator/**").permitAll()
+                        .requestMatchers("/api/v1/health", "/api/v1/actuator/health").permitAll()
                         .requestMatchers("/api/v1/auth/login", "/api/v1/auth/oauth/**").permitAll()
                         .requestMatchers("/api/v1/public/**").permitAll()
                         .requestMatchers("/api/v1/chat/ai/public/**").permitAll()
@@ -76,6 +95,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/files/download/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/course-categories/active").permitAll()
                         .requestMatchers("/error").permitAll()
+                        // Actuator quản trị mở rộng yêu cầu quyền SUPER_ADMIN
+                        .requestMatchers("/api/v1/actuator/**").hasRole("SUPER_ADMIN")
                         // Mọi endpoint khác đều yêu cầu xác thực
                         .anyRequest().authenticated()
                 );

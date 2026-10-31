@@ -70,13 +70,18 @@ public class FileStorageService {
             throw new BadRequestException("Định dạng file ." + extension + " không được hỗ trợ. Các định dạng cho phép: PDF, Word, Excel, PowerPoint, Zip, Ảnh, Video.");
         }
 
+        validateMagicBytes(file, extension);
+
         // Generate unique stored file name
         String uniquePrefix = UUID.randomUUID().toString().substring(0, 8);
         String safeName = originalFilename.replaceAll("[^a-zA-Z0-9.\\-_]", "_");
         String storedFilename = uniquePrefix + "_" + safeName;
 
         try {
-            Path targetLocation = this.fileStorageLocation.resolve(storedFilename);
+            Path targetLocation = this.fileStorageLocation.resolve(storedFilename).normalize();
+            if (!targetLocation.startsWith(this.fileStorageLocation)) {
+                throw new BadRequestException("Đường dẫn lưu trữ file không hợp lệ: " + storedFilename);
+            }
             Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
 
             String formattedSize = formatFileSize(file.getSize());
@@ -97,10 +102,13 @@ public class FileStorageService {
 
     public Resource loadFileAsResource(String filename) {
         try {
-            if (filename.contains("..")) {
+            if (filename == null || filename.contains("..") || filename.contains("/") || filename.contains("\\")) {
                 throw new BadRequestException("Tên file không hợp lệ");
             }
             Path filePath = this.fileStorageLocation.resolve(filename).normalize();
+            if (!filePath.startsWith(this.fileStorageLocation)) {
+                throw new BadRequestException("Truy cập file ngoài phạm vi lưu trữ bị từ chối");
+            }
             Resource resource = new UrlResource(filePath.toUri());
 
             if (resource.exists() && resource.isReadable()) {
@@ -110,6 +118,38 @@ public class FileStorageService {
             }
         } catch (MalformedURLException ex) {
             throw new ResourceNotFoundException("Không tìm thấy file: " + filename);
+        }
+    }
+
+    private void validateMagicBytes(MultipartFile file, String extension) {
+        try (java.io.InputStream is = file.getInputStream()) {
+            byte[] header = new byte[8];
+            int read = is.read(header);
+            if (read < 4) return;
+
+            if ("pdf".equals(extension)) {
+                if (header[0] != 0x25 || header[1] != 0x50 || header[2] != 0x44 || header[3] != 0x46) {
+                    throw new BadRequestException("Nội dung file không đúng định dạng PDF hợp lệ");
+                }
+            } else if ("png".equals(extension)) {
+                if ((header[0] & 0xFF) != 0x89 || header[1] != 0x50 || header[2] != 0x4E || header[3] != 0x47) {
+                    throw new BadRequestException("Nội dung file không đúng định dạng PNG hợp lệ");
+                }
+            } else if ("jpg".equals(extension) || "jpeg".equals(extension)) {
+                if ((header[0] & 0xFF) != 0xFF || (header[1] & 0xFF) != 0xD8 || (header[2] & 0xFF) != 0xFF) {
+                    throw new BadRequestException("Nội dung file không đúng định dạng JPG/JPEG hợp lệ");
+                }
+            } else if ("gif".equals(extension)) {
+                if (header[0] != 0x47 || header[1] != 0x49 || header[2] != 0x46 || header[3] != 0x38) {
+                    throw new BadRequestException("Nội dung file không đúng định dạng GIF hợp lệ");
+                }
+            } else if (Arrays.asList("zip", "docx", "xlsx", "pptx").contains(extension)) {
+                if (header[0] != 0x50 || header[1] != 0x4B) {
+                    throw new BadRequestException("Nội dung file không đúng cấu trúc nén/Office hợp lệ");
+                }
+            }
+        } catch (IOException e) {
+            log.warn("Không thể kiểm tra signature file: {}", e.getMessage());
         }
     }
 
