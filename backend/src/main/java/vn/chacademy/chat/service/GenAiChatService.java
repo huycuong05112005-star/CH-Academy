@@ -47,6 +47,7 @@ public class GenAiChatService {
     private final TeacherRepository teacherRepository;
     private final EnrollmentRepository enrollmentRepository;
     private final ClassRepository classRepository;
+    private final vn.chacademy.course.repository.CourseRepository courseRepository;
     private final ReceivableRepository receivableRepository;
     private final ObjectMapper objectMapper;
 
@@ -356,11 +357,30 @@ public class GenAiChatService {
         StringBuilder sb = new StringBuilder();
 
         if ("PUBLIC".equals(portal)) {
-            sb.append("CÁC KHÓA HỌC HIỆN TẠI TẠI CH ACADEMY:\n");
-            sb.append("- Khóa Tiếng Anh Trẻ em Toàn diện (KID-ENG-01): Dành cho bé từ 6-12 tuổi, học phí 3.500.000 VNĐ (3 tháng, 24 buổi).\n");
-            sb.append("- Khóa Tiếng Anh Giao tiếp Doanh nghiệp & Công sở (PRO-ENG-02): Dành cho người đi làm, học phí 4.800.000 VNĐ (4 tháng, 32 buổi).\n");
-            sb.append("- Luyện thi IELTS Cấp tốc mục tiêu 6.5+: Học phí 6.500.000 VNĐ, cam kết chuẩn đầu ra.\n");
-            sb.append("ƯU ĐÃI: Giảm 10% khi đăng ký nhóm từ 2 học viên.\n");
+            sb.append("DANH MỤC KHÓA HỌC CHÍNH THỨC TẠI CH ACADEMY (Dữ liệu từ hệ thống đào tạo):\n");
+            List<vn.chacademy.course.entity.Course> courses = courseRepository.findAll();
+            for (var c : courses) {
+                if ("ACTIVE".equalsIgnoreCase(c.getStatus())) {
+                    sb.append("- ").append(c.getName()).append(" (Mã: ").append(c.getCode()).append("): ")
+                      .append("Học phí niêm yết: ").append(String.format("%,.0f", c.getDefaultTuitionFee())).append(" VNĐ, ")
+                      .append("thời lượng: ").append(c.getDurationHours()).append(" giờ, ")
+                      .append("đối tượng: ").append(c.getTargetAudience()).append(".\n")
+                      .append("  Mục tiêu đào tạo: ").append(c.getLearningOutcomes() != null ? c.getLearningOutcomes() : "Chuẩn kiến thức & kỹ năng ứng dụng").append("\n");
+                }
+            }
+
+            sb.append("\nCÁC LỚP ĐANG TUYỂN SINH & LỊCH KHAI GIẢNG GẦN NHẤT:\n");
+            List<ClassEntity> openClasses = classRepository.findAll();
+            for (var cl : openClasses) {
+                if ("OPEN_FOR_ENROLLMENT".equalsIgnoreCase(cl.getStatus()) || "ACTIVE".equalsIgnoreCase(cl.getStatus())) {
+                    sb.append("- Lớp ").append(cl.getName()).append(" (").append(cl.getCode()).append("): Khai giảng ")
+                      .append(cl.getStartDate()).append(" tại phòng ").append(cl.getRoom() != null ? cl.getRoom() : "Trực tiếp/Online").append("\n");
+                }
+            }
+            sb.append("\nQUY TẮC BẮT BUỘC:\n");
+            sb.append("- Chỉ tư vấn dựa trên danh mục khóa học và lớp học có thật nêu trên.\n");
+            sb.append("- Nếu người dùng hỏi khóa học không có trong danh mục, PHẢI nêu rõ CH Academy hiện chưa mở khóa này và mời để lại số điện thoại để chuyên viên tư vấn hỗ trợ xếp lớp.\n");
+            sb.append("- Khi khách hàng có nhu cầu đăng ký, hãy hướng dẫn khách để lại số điện thoại hoặc bấm nút 'Tư vấn ngay' trên khung chat để được ghi nhận vào hệ thống.\n");
             return sb.toString();
         }
 
@@ -472,19 +492,34 @@ public class GenAiChatService {
         String lower = question.toLowerCase();
 
         if ("PUBLIC".equals(portal)) {
-            if (lower.contains("khóa học") || lower.contains("học phí") || lower.contains("giá")) {
-                citations.add(AiChatResponse.SourceCitation.builder()
-                        .documentName("Bang_Gia_Va_Chuong_Trinh_Dao_Tao_2026.pdf")
-                        .section("Biểu phí tiêu chuẩn năm 2026")
-                        .snippet("Khóa Tiếng Anh Trẻ em: 3.500.000 VNĐ; Khóa Giao tiếp Công sở: 4.800.000 VNĐ; IELTS: 6.500.000 VNĐ.")
-                        .build());
-                return "Chào bạn! Hiện tại CH Academy đang đào tạo các khóa học trọng điểm sau:\n\n" +
-                        "1. **Tiếng Anh Trẻ em Toàn diện (KID-ENG-01)**: Học phí 3.500.000 VNĐ (3 tháng, 24 buổi).\n" +
-                        "2. **Tiếng Anh Giao tiếp Doanh nghiệp & Công sở (PRO-ENG-02)**: Học phí 4.800.000 VNĐ (4 tháng, 32 buổi).\n" +
-                        "3. **Luyện thi IELTS Cấp tốc 6.5+**: Học phí 6.500.000 VNĐ (cam kết đầu ra).\n\n" +
-                        "Trung tâm đang có ưu đãi giảm 10% khi đăng ký theo nhóm. Bạn muốn đăng ký tìm hiểu khóa học nào để mình hỗ trợ xếp lịch kiểm tra đầu vào miễn phí nhé?";
+            if (lower.contains("tiếng nhật") || lower.contains("tiếng hàn") || lower.contains("tiếng trung") || lower.contains("tiếng pháp") || lower.contains("nấu ăn")) {
+                return "Hiện tại CH Academy chưa có chương trình này trong danh mục đào tạo chính thức (trung tâm hiện chuyên sâu các chương trình Tiếng Anh từ trẻ em đến người đi làm, Luyện thi IELTS chuẩn quốc tế và Lập trình cơ bản). Bạn có thể để lại số điện thoại hoặc nhấn 'Tư vấn ngay' nếu cần tư vấn lộ trình học phù hợp nhất nhé!";
             }
-            return "Chào bạn! Tôi là Chuyên viên Tư vấn Tuyển sinh AI của CH Academy. Tôi có thể hỗ trợ bạn tìm hiểu về các khóa học tiếng Anh, lịch khai giảng, học phí và chính sách ưu đãi. Bạn đang quan tâm đến chương trình học nào ạ?";
+
+            if (lower.contains("khóa học") || lower.contains("học phí") || lower.contains("giá") || lower.contains("lớp") || lower.contains("khai giảng")) {
+                List<vn.chacademy.course.entity.Course> courses = courseRepository.findAll();
+                StringBuilder resp = new StringBuilder("Chào bạn! Dưới đây là danh mục các khóa học và học phí chính thức đang được đào tạo tại CH Academy:\n\n");
+                for (var c : courses) {
+                    if ("ACTIVE".equalsIgnoreCase(c.getStatus())) {
+                        resp.append("• **").append(c.getName()).append("** (").append(c.getCode()).append("): ")
+                            .append(String.format("%,.0f", c.getDefaultTuitionFee())).append(" VNĐ - ")
+                            .append(c.getDurationHours()).append(" giờ học (Đối tượng: ").append(c.getTargetAudience()).append(")\n");
+                    }
+                }
+                resp.append("\nBạn có thể nhấn vào nút **'Tư vấn ngay'** ở trên hoặc nhắn trực tiếp Số điện thoại tại đây để chuyên viên tuyển sinh của CH Academy liên hệ hỗ trợ xếp lịch kiểm tra trình độ miễn phí nhé!");
+                citations.add(AiChatResponse.SourceCitation.builder()
+                        .documentName("Hệ thống Đào tạo CH Academy")
+                        .section("Biểu phí & Khóa học niêm yết 2026")
+                        .snippet("Dữ liệu tra cứu trực tiếp từ Cơ sở dữ liệu đào tạo trung tâm")
+                        .build());
+                return resp.toString();
+            }
+
+            if (lower.contains("đăng ký") || lower.contains("tư vấn") || lower.contains("liên hệ") || lower.contains("sdt") || lower.contains("số điện thoại")) {
+                return "Cảm ơn bạn đã quan tâm! Bạn có thể nhấn vào nút **'Tư vấn ngay'** ở góc trên khung chat hoặc nhắn trực tiếp Họ tên và Số điện thoại tại đây. Tôi sẽ chuyển thông tin ngay cho Ban Tuyển sinh CH Academy để liên hệ hỗ trợ bạn sớm nhất!";
+            }
+
+            return "Chào bạn! Tôi là Chuyên viên Tư vấn Tuyển sinh AI của CH Academy. Tôi có thể hỗ trợ bạn tra cứu khóa học chính thức, biểu phí, lịch khai giảng và tiếp nhận đăng ký tư vấn. Bạn đang quan tâm đến khóa học nào ạ?";
         }
 
         if (lower.contains("lớp") || lower.contains("học phần") || lower.contains("môn")) {

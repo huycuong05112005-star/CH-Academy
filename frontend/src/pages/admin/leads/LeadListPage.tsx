@@ -310,6 +310,9 @@ export const LeadListPage: React.FC = () => {
 
   const getSourceBadge = (source: string) => {
     switch (source) {
+      case 'AI_CHATBOT':
+      case 'AI_WEBSITE':
+        return <span className="text-xs bg-purple-50 text-purple-700 px-2 py-0.5 rounded border border-purple-200 font-semibold inline-flex items-center gap-1">🤖 Trợ lý AI</span>
       case 'WEBSITE':
         return <span className="text-xs bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded border border-indigo-200">Website</span>
       case 'FACEBOOK':
@@ -466,6 +469,7 @@ export const LeadListPage: React.FC = () => {
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#142B4A]"
             >
               <option value="">Tất cả nguồn</option>
+              <option value="AI_CHATBOT">Trợ lý AI (Website & Chat)</option>
               <option value="WEBSITE">Website công khai</option>
               <option value="FACEBOOK">Facebook Fanpage</option>
               <option value="HOTLINE">Hotline trung tâm</option>

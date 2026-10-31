@@ -17,6 +17,7 @@ public class AiLeadDto {
     private String phone;
     private String courseInterest;
     private String note;
+    private Long leadId;
     private String status;
     private Instant createdAt;
 
@@ -28,6 +29,7 @@ public class AiLeadDto {
                 .phone(lead.getPhone())
                 .courseInterest(lead.getCourseInterest())
                 .note(lead.getNote())
+                .leadId(lead.getLeadId())
                 .status(lead.getStatus())
                 .createdAt(lead.getCreatedAt())
                 .build();

@@ -18,9 +18,9 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/v1/admin/ai")
+@RequestMapping({"/api/v1/admin/ai", "/api/v1/admin/ai-studio"})
 @RequiredArgsConstructor
-@PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
+@PreAuthorize("hasAnyRole('SUPER_ADMIN', 'CENTER_ADMIN', 'ADMIN') or hasAuthority('ai:manage')")
 public class AiStudioAdminController {
 
     private final AiStudioService aiStudioService;
@@ -100,6 +100,21 @@ public class AiStudioAdminController {
     public ResponseEntity<ApiResponse<String>> deleteDocument(@PathVariable Long id) {
         aiStudioService.deleteDocument(id);
         return ResponseEntity.ok(ApiResponse.success("Đã xóa tài liệu", "DELETED"));
+    }
+
+    @GetMapping("/documents/{id}")
+    public ResponseEntity<ApiResponse<AiKbDocumentDto>> getDocumentDetail(@PathVariable Long id) {
+        return ResponseEntity.ok(ApiResponse.success(aiStudioService.getDocumentDetail(id)));
+    }
+
+    @GetMapping("/documents/{id}/chunks")
+    public ResponseEntity<ApiResponse<List<AiKbChunkDto>>> getDocumentChunks(@PathVariable Long id) {
+        return ResponseEntity.ok(ApiResponse.success(aiStudioService.getDocumentChunks(id)));
+    }
+
+    @PostMapping("/documents/{id}/reindex")
+    public ResponseEntity<ApiResponse<AiKbDocumentDto>> reindexDocument(@PathVariable Long id) {
+        return ResponseEntity.ok(ApiResponse.success("Đã kích hoạt xử lý lại tài liệu", aiStudioService.reindexDocument(id)));
     }
 
     // ==========================================

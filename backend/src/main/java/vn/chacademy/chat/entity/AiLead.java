@@ -34,6 +34,9 @@ public class AiLead {
     @Column(name = "note", columnDefinition = "TEXT")
     private String note;
 
+    @Column(name = "lead_id")
+    private Long leadId;
+
     @Column(name = "status", nullable = false, length = 50)
     @Builder.Default
     private String status = "NEW"; // NEW, CONTACTED, CONVERTED

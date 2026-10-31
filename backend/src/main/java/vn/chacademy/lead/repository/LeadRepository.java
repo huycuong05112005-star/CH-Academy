@@ -17,6 +17,8 @@ public interface LeadRepository extends JpaRepository<Lead, Long> {
     @EntityGraph(attributePaths = {"targetCourse", "assignedStaff", "convertedStudent"})
     Optional<Lead> findByLeadCode(String leadCode);
 
+    Optional<Lead> findByPhone(String phone);
+
     @EntityGraph(attributePaths = {"targetCourse", "assignedStaff", "convertedStudent"})
     @Query("SELECT l FROM Lead l WHERE " +
            "(cast(:keyword as string) IS NULL OR " +

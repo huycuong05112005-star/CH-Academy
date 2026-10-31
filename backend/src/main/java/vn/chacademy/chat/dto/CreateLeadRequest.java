@@ -17,6 +17,7 @@ public class CreateLeadRequest {
     @NotBlank(message = "Số điện thoại không được để trống")
     private String phone;
 
+    private String email;
     private String courseInterest;
     private String note;
 }

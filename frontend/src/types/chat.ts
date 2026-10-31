@@ -75,6 +75,10 @@ export interface AiAgentItem {
   status: 'DRAFT' | 'PUBLISHED' | 'PAUSED'
   temperature: number
   maxTokens: number
+  topP?: number
+  isPublished?: boolean
+  welcomeMessage?: string
+  quickPrompts?: string
   version: number
   settingsJson?: string
   knowledgeBaseIds: number[]

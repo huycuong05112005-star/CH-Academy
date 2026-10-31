@@ -49,16 +49,46 @@ export const aiChatApi = {
     const q = portal ? `?portal=${encodeURIComponent(portal)}` : ''
     return apiClient.get<AiMessageItem[]>(`/chat/ai/conversations/${conversationId}/messages${q}`)
   },
+  getAiMessages: (conversationId: number, portal?: string): Promise<ApiResponse<AiMessageItem[]>> => {
+    const q = portal ? `?portal=${encodeURIComponent(portal)}` : ''
+    return apiClient.get<AiMessageItem[]>(`/chat/ai/conversations/${conversationId}/messages${q}`)
+  },
 
   ask: (data: {
-    question: string
+    question?: string
+    message?: string
     conversationId?: number
     portal?: string
     channel?: string
     agentCode?: string
     sessionId?: string
   }): Promise<ApiResponse<AiChatResponseData>> =>
-    apiClient.post<AiChatResponseData>('/chat/ai/ask', data),
+    apiClient.post<AiChatResponseData>('/chat/ai/ask', {
+      question: data.question || data.message || '',
+      conversationId: data.conversationId,
+      portal: data.portal,
+      channel: data.channel,
+      agentCode: data.agentCode,
+      sessionId: data.sessionId
+    }),
+
+  askAi: (data: {
+    question?: string
+    message?: string
+    conversationId?: number
+    portal?: string
+    channel?: string
+    agentCode?: string
+    sessionId?: string
+  }): Promise<ApiResponse<AiChatResponseData>> =>
+    apiClient.post<AiChatResponseData>('/chat/ai/ask', {
+      question: data.question || data.message || '',
+      conversationId: data.conversationId,
+      portal: data.portal,
+      channel: data.channel,
+      agentCode: data.agentCode,
+      sessionId: data.sessionId
+    }),
 
   requestHandoff: (conversationId: number, portal?: string): Promise<ApiResponse<string>> => {
     const q = portal ? `?portal=${encodeURIComponent(portal)}` : ''
@@ -73,13 +103,38 @@ export const aiChatApi = {
     apiClient.get<AiMessageItem[]>(`/chat/ai/public/conversations/${conversationId}/messages?sessionId=${encodeURIComponent(sessionId)}`),
 
   askPublic: (data: {
-    question: string
+    question?: string
+    message?: string
     conversationId?: number
     sessionId: string
     guestName?: string
     guestPhone?: string
+    agentCode?: string
   }): Promise<ApiResponse<AiChatResponseData>> =>
-    apiClient.post<AiChatResponseData>('/chat/ai/public/ask', data),
+    apiClient.post<AiChatResponseData>('/chat/ai/public/ask', {
+      question: data.question || data.message || '',
+      conversationId: data.conversationId,
+      sessionId: data.sessionId,
+      guestName: data.guestName,
+      guestPhone: data.guestPhone
+    }),
+
+  askPublicAi: (data: {
+    question?: string
+    message?: string
+    conversationId?: number
+    sessionId: string
+    guestName?: string
+    guestPhone?: string
+    agentCode?: string
+  }): Promise<ApiResponse<AiChatResponseData>> =>
+    apiClient.post<AiChatResponseData>('/chat/ai/public/ask', {
+      question: data.question || data.message || '',
+      conversationId: data.conversationId,
+      sessionId: data.sessionId,
+      guestName: data.guestName,
+      guestPhone: data.guestPhone
+    }),
 
   submitLead: (data: {
     conversationId?: number
@@ -133,6 +188,15 @@ export const aiStudioApi = {
 
   deleteDocument: (docId: number): Promise<ApiResponse<string>> =>
     apiClient.delete<string>(`/admin/ai/documents/${docId}`),
+
+  getDocumentDetail: (docId: number): Promise<ApiResponse<AiKbDocumentItem>> =>
+    apiClient.get<AiKbDocumentItem>(`/admin/ai/documents/${docId}`),
+
+  getDocumentChunks: (docId: number): Promise<ApiResponse<Array<{ id: number; chunkIndex: number; content: string }>>> =>
+    apiClient.get<Array<{ id: number; chunkIndex: number; content: string }>>(`/admin/ai/documents/${docId}/chunks`),
+
+  reindexDocument: (docId: number): Promise<ApiResponse<AiKbDocumentItem>> =>
+    apiClient.post<AiKbDocumentItem>(`/admin/ai/documents/${docId}/reindex`, {}),
 
   // Flows
   getFlows: (): Promise<ApiResponse<AiFlowItem[]>> =>

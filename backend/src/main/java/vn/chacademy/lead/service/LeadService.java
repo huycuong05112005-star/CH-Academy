@@ -43,7 +43,7 @@ public class LeadService {
     private final vn.chacademy.student.service.StudentService studentService;
 
     private static final Set<String> VALID_STATUSES = Set.of("NEW", "CONTACTED", "CONSULTING", "APPOINTMENT", "CONVERTED", "LOST");
-    private static final Set<String> VALID_SOURCES = Set.of("WEBSITE", "FACEBOOK", "REFERRAL", "WALK_IN", "HOTLINE", "OTHER");
+    private static final Set<String> VALID_SOURCES = Set.of("WEBSITE", "FACEBOOK", "REFERRAL", "WALK_IN", "HOTLINE", "OTHER", "AI_CHATBOT", "AI_WEBSITE");
     private static final AtomicLong CODE_COUNTER = new AtomicLong(System.currentTimeMillis() % 1000000);
 
     @Transactional(readOnly = true)

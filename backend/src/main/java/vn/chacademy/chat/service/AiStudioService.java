@@ -34,6 +34,9 @@ public class AiStudioService {
     private final AiLeadRepository leadRepository;
     private final AiChannelConfigRepository channelConfigRepository;
     private final AiConversationRepository conversationRepository;
+    private final vn.chacademy.lead.repository.LeadRepository crmLeadRepository;
+    private final vn.chacademy.lead.repository.LeadActivityRepository crmLeadActivityRepository;
+    private final vn.chacademy.course.repository.CourseRepository courseRepository;
     private final ObjectMapper objectMapper;
 
     // ==========================================
@@ -207,7 +210,8 @@ public class AiStudioService {
 
         // Trích xuất nội dung văn bản từ tệp upload
         String content = "";
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8))) {
+        try (java.io.InputStream is = file.getInputStream();
+             BufferedReader reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
             content = reader.lines().collect(Collectors.joining("\n"));
         } catch (Exception ex) {
             log.warn("Không thể đọc trực tiếp UTF-8 dạng văn bản: {}", ex.getMessage());
@@ -240,6 +244,38 @@ public class AiStudioService {
             throw new ResourceNotFoundException("Không tìm thấy tài liệu ID: " + documentId);
         }
         documentRepository.deleteById(documentId);
+    }
+
+    @Transactional(readOnly = true)
+    public AiKbDocumentDto getDocumentDetail(Long documentId) {
+        AiKbDocument doc = documentRepository.findById(documentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy tài liệu ID: " + documentId));
+        return AiKbDocumentDto.fromEntity(doc);
+    }
+
+    @Transactional(readOnly = true)
+    public List<AiKbChunkDto> getDocumentChunks(Long documentId) {
+        if (!documentRepository.existsById(documentId)) {
+            throw new ResourceNotFoundException("Không tìm thấy tài liệu ID: " + documentId);
+        }
+        return chunkRepository.findByDocumentIdOrderByChunkIndexAsc(documentId).stream()
+                .map(AiKbChunkDto::fromEntity)
+                .toList();
+    }
+
+    @Transactional
+    public AiKbDocumentDto reindexDocument(Long documentId) {
+        AiKbDocument doc = documentRepository.findById(documentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy tài liệu ID: " + documentId));
+        List<AiKbChunk> oldChunks = chunkRepository.findByDocumentIdOrderByChunkIndexAsc(documentId);
+        chunkRepository.deleteAll(oldChunks);
+
+        doc.setStatus("PROCESSING");
+        doc.setUpdatedAt(Instant.now());
+        doc = documentRepository.save(doc);
+
+        processDocumentChunks(doc, doc.getRawContent());
+        return AiKbDocumentDto.fromEntity(doc);
     }
 
     private void processDocumentChunks(AiKbDocument doc, String text) {
@@ -394,17 +430,80 @@ public class AiStudioService {
             conv = conversationRepository.findById(req.getConversationId()).orElse(null);
         }
 
+        String trimmedPhone = req.getPhone() != null ? req.getPhone().trim() : "";
+        String trimmedName = req.getFullName() != null ? req.getFullName().trim() : "Khách hàng ẩn danh";
+
         AiLead lead = AiLead.builder()
                 .conversation(conv)
-                .fullName(req.getFullName().trim())
-                .phone(req.getPhone().trim())
+                .fullName(trimmedName)
+                .phone(trimmedPhone)
                 .courseInterest(req.getCourseInterest())
                 .note(req.getNote())
                 .status("NEW")
                 .createdAt(Instant.now())
                 .build();
 
-        return AiLeadDto.fromEntity(leadRepository.save(lead));
+        lead = leadRepository.save(lead);
+
+        // Đồng bộ trực tiếp vào CRM Tuyển sinh (bảng leads và lead_activities)
+        try {
+            Optional<vn.chacademy.lead.entity.Lead> existingOpt = crmLeadRepository.findByPhone(trimmedPhone);
+            vn.chacademy.lead.entity.Lead crmLead;
+            if (existingOpt.isPresent()) {
+                crmLead = existingOpt.get();
+                String updatedNotes = (crmLead.getNotes() != null ? crmLead.getNotes() + "\n" : "") +
+                        "[" + Instant.now() + "] Đăng ký bổ sung qua Trợ lý Tuyển sinh AI. Khóa quan tâm: " +
+                        (req.getCourseInterest() != null ? req.getCourseInterest() : "Tất cả") +
+                        (req.getNote() != null ? " - " + req.getNote() : "");
+                crmLead.setNotes(updatedNotes);
+                crmLead = crmLeadRepository.save(crmLead);
+            } else {
+                vn.chacademy.course.entity.Course targetCourse = null;
+                if (req.getCourseInterest() != null && !req.getCourseInterest().isBlank()) {
+                    String interest = req.getCourseInterest().toLowerCase();
+                    targetCourse = courseRepository.findAll().stream()
+                            .filter(c -> interest.contains(c.getName().toLowerCase()) ||
+                                         c.getName().toLowerCase().contains(interest) ||
+                                         c.getCode().equalsIgnoreCase(req.getCourseInterest().trim()))
+                            .findFirst().orElse(null);
+                }
+
+                String leadCode = "LEAD-AI-" + (System.currentTimeMillis() % 1000000);
+                crmLead = vn.chacademy.lead.entity.Lead.builder()
+                        .leadCode(leadCode)
+                        .fullName(trimmedName)
+                        .phone(trimmedPhone)
+                        .email(req.getEmail())
+                        .source("AI_CHATBOT")
+                        .status("NEW")
+                        .targetCourse(targetCourse)
+                        .notes("Đăng ký tư vấn tự động qua Trợ lý Tuyển sinh AI CH Academy.\nKhóa học quan tâm: " +
+                                (req.getCourseInterest() != null ? req.getCourseInterest() : "Chưa xác định") +
+                                (req.getNote() != null ? "\nGhi chú: " + req.getNote() : ""))
+                        .createdAt(Instant.now())
+                        .updatedAt(Instant.now())
+                        .build();
+                crmLead = crmLeadRepository.save(crmLead);
+            }
+
+            // Ghi nhận lịch sử hoạt động vào CRM lead_activities
+            vn.chacademy.lead.entity.LeadActivity activity = vn.chacademy.lead.entity.LeadActivity.builder()
+                    .lead(crmLead)
+                    .actionType("MESSAGE")
+                    .content("Khách hàng đã tương tác với Trợ lý AI và gửi yêu cầu tư vấn khóa: " +
+                            (req.getCourseInterest() != null ? req.getCourseInterest() : "Tất cả các khóa"))
+                    .activityTime(Instant.now())
+                    .createdAt(Instant.now())
+                    .build();
+            crmLeadActivityRepository.save(activity);
+
+            lead.setLeadId(crmLead.getId());
+            lead = leadRepository.save(lead);
+        } catch (Exception ex) {
+            log.error("Lỗi đồng bộ CRM Lead từ Chat AI: {}", ex.getMessage(), ex);
+        }
+
+        return AiLeadDto.fromEntity(lead);
     }
 
     @Transactional

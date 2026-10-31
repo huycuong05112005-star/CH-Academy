@@ -16,9 +16,11 @@ import {
   MicOff,
   Volume2,
   UserCheck,
-  AlertCircle
+  AlertCircle,
+  PhoneCall
 } from 'lucide-react'
 import { classChatApi, aiChatApi } from '../../api/chat'
+import { AiVoiceCallModal } from './AiVoiceCallModal'
 import type {
   ChatConversationItem,
   ChatMessageItem,
@@ -81,6 +83,7 @@ export const FloatingChatWidget: React.FC = () => {
 
   // Lead capture state cho khách công khai
   const [showLeadModal, setShowLeadModal] = useState(false)
+  const [showVoiceCall, setShowVoiceCall] = useState(false)
   const [leadName, setLeadName] = useState('')
   const [leadPhone, setLeadPhone] = useState('')
   const [leadCourse, setLeadCourse] = useState('Tiếng Anh Giao tiếp')
@@ -586,6 +589,19 @@ export const FloatingChatWidget: React.FC = () => {
             </div>
 
             <div className="flex items-center gap-1 shrink-0 text-white/90">
+              {/* Nút Gọi điện trực tiếp với AI (Voice AI) */}
+              {activeTab === 'ai' && (
+                <button
+                  type="button"
+                  onClick={() => setShowVoiceCall(true)}
+                  title="Gọi điện thoại trực tiếp với AI (Voice AI)"
+                  className="p-1.5 rounded-lg hover:bg-emerald-500 text-emerald-950 bg-emerald-400 font-bold text-[11px] transition px-2.5 flex items-center gap-1 shadow-sm"
+                >
+                  <PhoneCall className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Gọi AI</span>
+                </button>
+              )}
+
               {/* Nút chuyển giao nhân viên (Human Handoff) */}
               {activeTab === 'ai' && (
                 <button
@@ -995,6 +1011,43 @@ export const FloatingChatWidget: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* MODAL CUỘC GỌI VOICE AI */}
+      <AiVoiceCallModal
+        isOpen={showVoiceCall}
+        onClose={() => setShowVoiceCall(false)}
+        agentName={agentMetadata.title}
+        agentRole={agentMetadata.badge}
+        agentCode={
+          currentPortal === 'STUDENT'
+            ? 'AGENT_STUDENT_TUTOR'
+            : currentPortal === 'TEACHER'
+            ? 'AGENT_TEACHER_ASSISTANT'
+            : currentPortal === 'ADMIN'
+            ? 'AGENT_ADMIN_ASSISTANT'
+            : 'AGENT_ADMISSIONS'
+        }
+        portal={currentPortal}
+        conversationId={aiConvId}
+        guestSessionId={guestSessionId}
+        onMessageLogged={(userSpeech, aiReply) => {
+          setAiTurns((prev) => [
+            ...prev,
+            {
+              id: 'voice_u_' + Date.now(),
+              role: 'user',
+              content: userSpeech,
+              createdAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            },
+            {
+              id: 'voice_a_' + Date.now(),
+              role: 'assistant',
+              content: aiReply,
+              createdAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            }
+          ])
+        }}
+      />
     </>
   )
 }

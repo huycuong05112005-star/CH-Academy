@@ -27,9 +27,16 @@ import {
   ArrowRight,
   Shield,
   PhoneCall,
-  UserCheck
+  UserCheck,
+  Eye,
+  RefreshCw,
+  Sliders,
+  MessageSquare,
+  Save,
+  AlertCircle
 } from 'lucide-react'
 import { aiStudioApi, aiChatApi } from '../../api/chat'
+import { AiVoiceCallModal } from '../../components/chat/AiVoiceCallModal'
 import type {
   AiAgentItem,
   AiKnowledgeBaseItem,
@@ -59,7 +66,30 @@ export const AiStudioPage: React.FC = () => {
 
   // Modal State cho Agent
   const [agentModalOpen, setAgentModalOpen] = useState(false)
+  const [agentModalTab, setAgentModalTab] = useState<'general' | 'model' | 'prompt' | 'kbs'>('general')
   const [editingAgent, setEditingAgent] = useState<Partial<AiAgentItem> | null>(null)
+
+  // Toast notifications
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null)
+  const showToast = useCallback((message: string, type: 'success' | 'error' | 'info' = 'info') => {
+    setToast({ message, type })
+    setTimeout(() => setToast(null), 4000)
+  }, [])
+
+  // Document Chunk Inspection State
+  const [selectedDoc, setSelectedDoc] = useState<AiKbDocumentItem | null>(null)
+  const [docChunks, setDocChunks] = useState<Array<{ id: number; chunkIndex: number; content: string }>>([])
+  const [viewingDocModal, setViewingDocModal] = useState(false)
+  const [loadingDocDetail, setLoadingDocDetail] = useState(false)
+
+  // Conversation Message Inspection State
+  const [selectedConv, setSelectedConv] = useState<AiConversationItem | null>(null)
+  const [convMessages, setConvMessages] = useState<AiMessageItem[]>([])
+  const [viewingConvModal, setViewingConvModal] = useState(false)
+  const [loadingConv, setLoadingConv] = useState(false)
+
+  // Playground Voice Call State
+  const [playVoiceOpen, setPlayVoiceOpen] = useState(false)
 
   // Modal State cho Kho tri thức
   const [kbModalOpen, setKbModalOpen] = useState(false)
@@ -144,36 +174,43 @@ export const AiStudioPage: React.FC = () => {
   // Agent Operations
   const handleSaveAgent = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!editingAgent || !editingAgent.name) return
+    if (!editingAgent || !editingAgent.name?.trim()) {
+      showToast('Vui lòng nhập Tên Agent', 'error')
+      return
+    }
     try {
       if (editingAgent.id) {
         await aiStudioApi.updateAgent(editingAgent.id, editingAgent)
+        showToast(`Đã cập nhật Agent "${editingAgent.name}" thành công!`, 'success')
       } else {
         await aiStudioApi.createAgent(editingAgent)
+        showToast(`Đã khởi tạo Agent "${editingAgent.name}" thành công!`, 'success')
       }
       setAgentModalOpen(false)
       loadStudioData()
     } catch (err: unknown) {
-      alert(err instanceof Error ? err.message : 'Lỗi lưu Agent')
+      showToast(err instanceof Error ? err.message : 'Lỗi lưu Agent', 'error')
     }
   }
 
   const handleCloneAgent = async (id: number) => {
     try {
       await aiStudioApi.cloneAgent(id)
+      showToast('Đã nhân bản AI Agent thành công!', 'success')
       loadStudioData()
     } catch (err: unknown) {
-      alert(err instanceof Error ? err.message : 'Lỗi nhân bản Agent')
+      showToast(err instanceof Error ? err.message : 'Lỗi nhân bản Agent', 'error')
     }
   }
 
   const handleDeleteAgent = async (id: number) => {
-    if (!confirm('Bạn có chắc muốn xóa Agent này?')) return
+    if (!confirm('Bạn có chắc muốn xóa Agent này khỏi hệ thống?')) return
     try {
       await aiStudioApi.deleteAgent(id)
+      showToast('Đã xóa AI Agent thành công', 'info')
       loadStudioData()
     } catch (err: unknown) {
-      alert(err instanceof Error ? err.message : 'Lỗi xóa Agent')
+      showToast(err instanceof Error ? err.message : 'Lỗi xóa Agent', 'error')
     }
   }
 
@@ -187,12 +224,13 @@ export const AiStudioPage: React.FC = () => {
         code: newKbCode.trim() || undefined,
         accessLevel: newKbAccess
       })
+      showToast('Đã tạo Kho tri thức mới thành công!', 'success')
       setKbModalOpen(false)
       setNewKbName('')
       setNewKbCode('')
       loadStudioData()
     } catch (err: unknown) {
-      alert(err instanceof Error ? err.message : 'Lỗi tạo Kho tri thức')
+      showToast(err instanceof Error ? err.message : 'Lỗi tạo Kho tri thức', 'error')
     }
   }
 
@@ -206,13 +244,57 @@ export const AiStudioPage: React.FC = () => {
       formData.append('file', uploadFile)
       formData.append('name', uploadFile.name)
       await aiStudioApi.uploadDocument(uploadKbId, formData)
+      showToast(`Đã tải lên và lập chỉ mục "${uploadFile.name}" thành công!`, 'success')
       setUploadFile(null)
       loadDocuments(uploadKbId)
       loadStudioData()
     } catch (err: unknown) {
-      alert(err instanceof Error ? err.message : 'Lỗi tải lên tài liệu')
+      showToast(err instanceof Error ? err.message : 'Lỗi tải lên tài liệu', 'error')
     } finally {
       setUploading(false)
+    }
+  }
+
+  // Document Details & Chunk Inspection
+  const handleViewDocumentDetail = async (doc: AiKbDocumentItem) => {
+    setSelectedDoc(doc)
+    setViewingDocModal(true)
+    setLoadingDocDetail(true)
+    try {
+      const [detailRes, chunksRes] = await Promise.all([
+        aiStudioApi.getDocumentDetail(doc.id).catch(() => ({ success: false, data: doc })),
+        aiStudioApi.getDocumentChunks(doc.id).catch(() => ({ success: false, data: [] }))
+      ])
+      if (detailRes.success && detailRes.data) setSelectedDoc(detailRes.data)
+      if (chunksRes.success && chunksRes.data) setDocChunks(chunksRes.data)
+    } finally {
+      setLoadingDocDetail(false)
+    }
+  }
+
+  const handleReindexDocument = async (docId: number) => {
+    try {
+      await aiStudioApi.reindexDocument(docId)
+      showToast('Đã kích hoạt xử lý lại tài liệu và phân đoạn!', 'success')
+      if (uploadKbId) loadDocuments(uploadKbId)
+      loadStudioData()
+    } catch (err: unknown) {
+      showToast(err instanceof Error ? err.message : 'Lỗi re-index tài liệu', 'error')
+    }
+  }
+
+  // Conversation Inspection
+  const handleViewConversation = async (conv: AiConversationItem) => {
+    setSelectedConv(conv)
+    setViewingConvModal(true)
+    setLoadingConv(true)
+    try {
+      const res = await aiChatApi.getAiMessages(conv.id, conv.portal)
+      if (res.success && res.data) setConvMessages(res.data)
+    } catch (err: unknown) {
+      showToast(err instanceof Error ? err.message : 'Lỗi tải tin nhắn hội thoại', 'error')
+    } finally {
+      setLoadingConv(false)
     }
   }
 
@@ -670,19 +752,40 @@ export const AiStudioPage: React.FC = () => {
                           </div>
                         </div>
 
-                        <button
-                          type="button"
-                          onClick={async () => {
-                            if (confirm('Xóa tài liệu này khỏi kho tri thức?')) {
-                              await aiStudioApi.deleteDocument(d.id)
-                              if (uploadKbId) loadDocuments(uploadKbId)
-                              loadStudioData()
-                            }
-                          }}
-                          className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 transition"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
+                        <div className="flex items-center gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => handleViewDocumentDetail(d)}
+                            className="p-1.5 rounded-lg text-slate-500 hover:text-indigo-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition flex items-center gap-1 text-xs font-semibold px-2"
+                            title="Xem trước nội dung trích xuất & phân đoạn chunks"
+                          >
+                            <Eye className="w-3.5 h-3.5" />
+                            <span className="hidden sm:inline">Xem Chunks</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleReindexDocument(d.id)}
+                            className="p-1.5 rounded-lg text-slate-500 hover:text-emerald-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+                            title="Xử lý lại và tái phân đoạn tài liệu"
+                          >
+                            <RefreshCw className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={async () => {
+                              if (confirm('Xóa tài liệu này khỏi kho tri thức?')) {
+                                await aiStudioApi.deleteDocument(d.id)
+                                showToast('Đã xóa tài liệu khỏi kho tri thức', 'info')
+                                if (uploadKbId) loadDocuments(uploadKbId)
+                                loadStudioData()
+                              }
+                            }}
+                            className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 transition"
+                            title="Xóa tài liệu"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -837,13 +940,23 @@ export const AiStudioPage: React.FC = () => {
                 ))}
               </select>
             </div>
-            <button
-              type="button"
-              onClick={() => setPlayMessages([])}
-              className="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-white"
-            >
-              Làm mới hội thoại
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setPlayVoiceOpen(true)}
+                className="px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs flex items-center gap-1.5 shadow transition cursor-pointer"
+              >
+                <PhoneCall className="w-3.5 h-3.5" />
+                <span>Thử thoại với Agent</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setPlayMessages([])}
+                className="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-white px-2 py-1 cursor-pointer"
+              >
+                Làm mới hội thoại
+              </button>
+            </div>
           </div>
 
           <div className="flex-1 overflow-y-auto p-4 space-y-3 min-h-0">
@@ -930,10 +1043,11 @@ export const AiStudioPage: React.FC = () => {
                   </div>
                   <button
                     type="button"
-                    onClick={() => alert(`Xem chi tiết tin nhắn hội thoại #${c.id}`)}
-                    className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-200"
+                    onClick={() => handleViewConversation(c)}
+                    className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-xs font-bold text-slate-700 dark:text-slate-300 transition cursor-pointer flex items-center gap-1"
                   >
-                    Xem chi tiết
+                    <Eye className="w-3.5 h-3.5" />
+                    <span>Xem tin nhắn</span>
                   </button>
                 </div>
               ))}
@@ -963,88 +1077,494 @@ export const AiStudioPage: React.FC = () => {
         </div>
       )}
 
-      {/* MODAL TẠO / SỬA AGENT */}
+      {/* MODAL CẤU HÌNH AGENT ĐA TAB CHUYÊN NGHIỆP */}
       {agentModalOpen && editingAgent && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="w-full max-w-lg rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl p-6 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-base font-bold text-slate-900 dark:text-white">
-                {editingAgent.id ? 'Cấu hình Agent' : 'Tạo AI Agent mới'}
-              </h3>
+          <div className="w-full max-w-2xl rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl p-6 max-h-[92vh] overflow-y-auto flex flex-col">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold">
+                  <Bot className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+                    {editingAgent.id ? `Cấu hình: ${editingAgent.name}` : 'Thiết kế AI Agent mới'}
+                  </h3>
+                  <p className="text-[11px] text-slate-400">Kiến trúc Agent phân quyền đa nhiệm theo chuẩn Nexva</p>
+                </div>
+              </div>
               <button
                 type="button"
                 onClick={() => setAgentModalOpen(false)}
-                className="text-slate-400 hover:text-slate-600"
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-white p-1 rounded-lg cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <form onSubmit={handleSaveAgent} className="space-y-4 text-xs">
-              <div>
-                <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">Tên Agent:</label>
-                <input
-                  type="text"
-                  required
-                  value={editingAgent.name || ''}
-                  onChange={(e) => setEditingAgent({ ...editingAgent, name: e.target.value })}
-                  placeholder="Ví dụ: Trợ giảng AI Tiếng Anh"
-                  className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800"
-                />
-              </div>
+            {/* Sub-tabs switcher */}
+            <div className="flex items-center gap-1 border-b border-slate-200 dark:border-slate-800 my-4 text-xs font-bold">
+              <button
+                type="button"
+                onClick={() => setAgentModalTab('general')}
+                className={`px-3 py-2 border-b-2 transition cursor-pointer ${
+                  agentModalTab === 'general'
+                    ? 'border-indigo-600 text-indigo-600 dark:text-indigo-400'
+                    : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-300'
+                }`}
+              >
+                1. Thông tin chung
+              </button>
+              <button
+                type="button"
+                onClick={() => setAgentModalTab('model')}
+                className={`px-3 py-2 border-b-2 transition cursor-pointer ${
+                  agentModalTab === 'model'
+                    ? 'border-indigo-600 text-indigo-600 dark:text-indigo-400'
+                    : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-300'
+                }`}
+              >
+                2. Model & Tham số
+              </button>
+              <button
+                type="button"
+                onClick={() => setAgentModalTab('prompt')}
+                className={`px-3 py-2 border-b-2 transition cursor-pointer ${
+                  agentModalTab === 'prompt'
+                    ? 'border-indigo-600 text-indigo-600 dark:text-indigo-400'
+                    : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-300'
+                }`}
+              >
+                3. System Prompt & Hành vi
+              </button>
+              <button
+                type="button"
+                onClick={() => setAgentModalTab('kbs')}
+                className={`px-3 py-2 border-b-2 transition cursor-pointer ${
+                  agentModalTab === 'kbs'
+                    ? 'border-indigo-600 text-indigo-600 dark:text-indigo-400'
+                    : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-300'
+                }`}
+              >
+                4. Kho tri thức ({editingAgent.knowledgeBaseIds?.length || 0})
+              </button>
+            </div>
 
-              <div>
-                <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">Mã Agent (Code):</label>
-                <input
-                  type="text"
-                  value={editingAgent.code || ''}
-                  onChange={(e) => setEditingAgent({ ...editingAgent, code: e.target.value })}
-                  placeholder="AGENT_CUSTOM"
-                  className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-mono"
-                />
-              </div>
+            <form onSubmit={handleSaveAgent} className="space-y-4 text-xs flex-1">
+              {/* TAB 1: GENERAL */}
+              {agentModalTab === 'general' && (
+                <div className="space-y-3">
+                  <div>
+                    <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">Tên Agent (*):</label>
+                    <input
+                      type="text"
+                      required
+                      value={editingAgent.name || ''}
+                      onChange={(e) => setEditingAgent({ ...editingAgent, name: e.target.value })}
+                      placeholder="Ví dụ: Trợ giảng AI Tiếng Anh"
+                      className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-semibold"
+                    />
+                  </div>
 
-              <div>
-                <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">Vai trò phục vụ (Portal):</label>
-                <select
-                  value={editingAgent.roleTarget || 'PUBLIC'}
-                  onChange={(e) => setEditingAgent({ ...editingAgent, roleTarget: e.target.value as any })}
-                  className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-bold"
-                >
-                  <option value="PUBLIC">PUBLIC (Website công khai)</option>
-                  <option value="STUDENT">STUDENT (Cổng Học viên)</option>
-                  <option value="TEACHER">TEACHER (Cổng Giảng viên)</option>
-                  <option value="ADMIN">ADMIN (Cổng Quản trị)</option>
-                </select>
-              </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">Mã Agent (Code):</label>
+                      <input
+                        type="text"
+                        value={editingAgent.code || ''}
+                        onChange={(e) => setEditingAgent({ ...editingAgent, code: e.target.value.toUpperCase() })}
+                        placeholder="AGENT_CUSTOM"
+                        className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-mono"
+                      />
+                    </div>
+                    <div>
+                      <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">Cổng phục vụ (Portal):</label>
+                      <select
+                        value={editingAgent.roleTarget || 'PUBLIC'}
+                        onChange={(e) => setEditingAgent({ ...editingAgent, roleTarget: e.target.value as any })}
+                        className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-bold"
+                      >
+                        <option value="PUBLIC">PUBLIC (Website công khai / Khách vãng lai)</option>
+                        <option value="STUDENT">STUDENT (Cổng Học viên - Tra cứu lớp, điểm thi)</option>
+                        <option value="TEACHER">TEACHER (Cổng Giảng viên - Trợ giảng soạn đề, giáo án)</option>
+                        <option value="ADMIN">ADMIN (Cổng Quản trị - Tổng hợp số liệu, vận hành)</option>
+                      </select>
+                    </div>
+                  </div>
 
-              <div>
-                <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">System Prompt:</label>
-                <textarea
-                  rows={4}
-                  value={editingAgent.systemPrompt || ''}
-                  onChange={(e) => setEditingAgent({ ...editingAgent, systemPrompt: e.target.value })}
-                  placeholder="Quy tắc ứng xử và phong cách trả lời của Agent..."
-                  className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800"
-                />
-              </div>
+                  <div>
+                    <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">Mô tả chức năng:</label>
+                    <textarea
+                      rows={2}
+                      value={editingAgent.description || ''}
+                      onChange={(e) => setEditingAgent({ ...editingAgent, description: e.target.value })}
+                      placeholder="Mô tả tóm tắt nhiệm vụ của Agent..."
+                      className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800"
+                    />
+                  </div>
 
-              <div className="flex justify-end gap-2 pt-2">
+                  <div className="flex items-center gap-2 pt-1">
+                    <input
+                      type="checkbox"
+                      id="isPublished"
+                      checked={editingAgent.isPublished ?? true}
+                      onChange={(e) => setEditingAgent({ ...editingAgent, isPublished: e.target.checked })}
+                      className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 w-4 h-4 cursor-pointer"
+                    />
+                    <label htmlFor="isPublished" className="font-semibold text-slate-700 dark:text-slate-300 cursor-pointer">
+                      Kích hoạt và xuất bản Agent vào hệ thống
+                    </label>
+                  </div>
+                </div>
+              )}
+
+              {/* TAB 2: MODEL & LIMITS */}
+              {agentModalTab === 'model' && (
+                <div className="space-y-4">
+                  <div>
+                    <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">Mô hình AI (LLM Engine):</label>
+                    <select
+                      value={editingAgent.model || 'google/gemini-2.5-flash'}
+                      onChange={(e) => setEditingAgent({ ...editingAgent, model: e.target.value })}
+                      className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-mono font-bold"
+                    >
+                      <option value="google/gemini-2.5-flash">google/gemini-2.5-flash (Khuyên dùng - Nhanh, chuẩn xác)</option>
+                      <option value="google/gemini-2.5-pro">google/gemini-2.5-pro (Tư duy sâu, giải toán, viết luận)</option>
+                      <option value="anthropic/claude-3-5-sonnet">anthropic/claude-3-5-sonnet (Hỗ trợ qua gateway mở rộng)</option>
+                    </select>
+                  </div>
+
+                  <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="font-bold text-slate-700 dark:text-slate-300">Độ sáng tạo (Temperature):</span>
+                      <span className="font-mono font-bold text-indigo-600">{editingAgent.temperature ?? 0.2}</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="0"
+                      max="1"
+                      step="0.05"
+                      value={editingAgent.temperature ?? 0.2}
+                      onChange={(e) => setEditingAgent({ ...editingAgent, temperature: parseFloat(e.target.value) })}
+                      className="w-full accent-indigo-600 cursor-pointer"
+                    />
+                    <p className="text-[11px] text-slate-400">0.0 - 0.3: Trả lời chuẩn xác thực tế giáo dục; 0.7 - 1.0: Sáng tạo nội dung.</p>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">Max Output Tokens:</label>
+                      <input
+                        type="number"
+                        min="256"
+                        max="8192"
+                        step="128"
+                        value={editingAgent.maxTokens || 2048}
+                        onChange={(e) => setEditingAgent({ ...editingAgent, maxTokens: parseInt(e.target.value) || 2048 })}
+                        className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-mono"
+                      />
+                    </div>
+                    <div>
+                      <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">Top-P Sampling:</label>
+                      <input
+                        type="number"
+                        min="0.1"
+                        max="1"
+                        step="0.05"
+                        value={editingAgent.topP ?? 0.9}
+                        onChange={(e) => setEditingAgent({ ...editingAgent, topP: parseFloat(e.target.value) || 0.9 })}
+                        className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-mono"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="p-3 rounded-xl bg-emerald-50/60 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-900/40 text-emerald-800 dark:text-emerald-300 flex items-start gap-2">
+                    <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5 text-emerald-600" />
+                    <span className="text-[11px] font-medium leading-relaxed">
+                      Cơ chế <strong>Chống ảo giác (Anti-Hallucination)</strong> luôn kích hoạt: Agent chỉ phản hồi các khóa học, học phí và lịch học có thật trong CSDL PostgreSQL của trung tâm.
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {/* TAB 3: PROMPT & BEHAVIOR */}
+              {agentModalTab === 'prompt' && (
+                <div className="space-y-3">
+                  <div>
+                    <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">System Prompt (*):</label>
+                    <textarea
+                      rows={5}
+                      required
+                      value={editingAgent.systemPrompt || ''}
+                      onChange={(e) => setEditingAgent({ ...editingAgent, systemPrompt: e.target.value })}
+                      placeholder="Bạn là chuyên viên tư vấn trung tâm ngoại ngữ CH Academy. Giọng điệu lịch sự, chu đáo, tư vấn rõ ràng..."
+                      className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-mono text-[11px] leading-relaxed"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">Lời chào mở đầu (Welcome Message):</label>
+                    <input
+                      type="text"
+                      value={editingAgent.welcomeMessage || ''}
+                      onChange={(e) => setEditingAgent({ ...editingAgent, welcomeMessage: e.target.value })}
+                      placeholder="Xin chào! Tôi có thể giúp gì cho việc học tập hoặc tra cứu thông tin của bạn hôm nay?"
+                      className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">Gợi ý câu hỏi nhanh (Quick Prompts):</label>
+                    <textarea
+                      rows={2}
+                      value={editingAgent.quickPrompts || ''}
+                      onChange={(e) => setEditingAgent({ ...editingAgent, quickPrompts: e.target.value })}
+                      placeholder="Tư vấn khóa giao tiếp; Lịch khai giảng mới nhất; Học phí luyện thi IELTS"
+                      className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-[11px]"
+                    />
+                    <span className="text-[10px] text-slate-400 mt-1 block">Phân cách các câu gợi ý bằng dấu chấm phẩy (;)</span>
+                  </div>
+                </div>
+              )}
+
+              {/* TAB 4: KNOWLEDGE BASES */}
+              {agentModalTab === 'kbs' && (
+                <div className="space-y-3">
+                  <div className="text-slate-600 dark:text-slate-300 font-semibold text-[11px]">
+                    Chọn các Kho tri thức mà Agent này có thẩm quyền tra cứu dữ liệu (RAG):
+                  </div>
+                  {kbs.length === 0 ? (
+                    <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800 text-center text-slate-400">
+                      Chưa có Kho tri thức nào. Hãy tạo ở Tab "Kho tri thức".
+                    </div>
+                  ) : (
+                    <div className="space-y-2 max-h-56 overflow-y-auto">
+                      {kbs.map((kb) => {
+                        const checked = (editingAgent.knowledgeBaseIds || []).includes(kb.id)
+                        return (
+                          <label
+                            key={kb.id}
+                            className={`flex items-center justify-between p-3 rounded-xl border cursor-pointer transition ${
+                              checked
+                                ? 'border-indigo-500 bg-indigo-50/50 dark:bg-indigo-950/30'
+                                : 'border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800'
+                            }`}
+                          >
+                            <div className="flex items-center gap-2">
+                              <input
+                                type="checkbox"
+                                checked={checked}
+                                onChange={(e) => {
+                                  const cur = editingAgent.knowledgeBaseIds || []
+                                  if (e.target.checked) {
+                                    setEditingAgent({ ...editingAgent, knowledgeBaseIds: [...cur, kb.id] })
+                                  } else {
+                                    setEditingAgent({ ...editingAgent, knowledgeBaseIds: cur.filter((id) => id !== kb.id) })
+                                  }
+                                }}
+                                className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 w-4 h-4"
+                              />
+                              <div>
+                                <span className="font-bold text-slate-900 dark:text-white">{kb.name}</span>
+                                <span className="text-[10px] text-slate-400 ml-2 font-mono">({kb.code})</span>
+                              </div>
+                            </div>
+                            <span className="px-2 py-0.5 rounded text-[10px] font-extrabold bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300">
+                              {kb.accessLevel}
+                            </span>
+                          </label>
+                        )
+                      })}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              <div className="flex justify-end gap-2 pt-4 border-t border-slate-200 dark:border-slate-800">
                 <button
                   type="button"
                   onClick={() => setAgentModalOpen(false)}
-                  className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 font-bold"
+                  className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold cursor-pointer"
                 >
                   Hủy
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold shadow"
+                  className="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold shadow cursor-pointer flex items-center gap-1.5"
                 >
-                  Lưu cấu hình
+                  <Save className="w-3.5 h-3.5" />
+                  <span>Lưu cấu hình Agent</span>
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL XEM TRƯỚC VĂN BẢN VÀ CHUNKS RAG */}
+      {viewingDocModal && selectedDoc && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="w-full max-w-3xl rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl p-6 max-h-[90vh] overflow-hidden flex flex-col">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
+              <div className="flex items-center gap-2">
+                <FileText className="w-5 h-5 text-indigo-500" />
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                    <span>{selectedDoc.name}</span>
+                    <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-indigo-100 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300">
+                      {selectedDoc.fileType} • {(selectedDoc.fileSize / 1024).toFixed(1)} KB
+                    </span>
+                  </h3>
+                  <p className="text-[11px] text-slate-400">Trích xuất nội dung văn bản & các phân đoạn Vector RAG</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setViewingDocModal(false)}
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-white p-1 rounded-lg cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto py-4 space-y-4">
+              {loadingDocDetail ? (
+                <div className="py-12 text-center text-xs text-slate-400 animate-pulse">
+                  Đang tải chi tiết phân đoạn từ máy chủ...
+                </div>
+              ) : (
+                <>
+                  {/* Chunks List */}
+                  <div>
+                    <h4 className="text-xs font-bold text-slate-800 dark:text-white uppercase mb-2 flex items-center gap-1.5">
+                      <Layers className="w-3.5 h-3.5 text-indigo-500" />
+                      <span>Danh sách Chunks Vector ({docChunks.length} đoạn)</span>
+                    </h4>
+                    {docChunks.length === 0 ? (
+                      <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800 text-xs text-slate-400 text-center">
+                        Tài liệu chưa được phân chia thành chunks hoặc nội dung ngắn.
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        {docChunks.map((chunk, idx) => (
+                          <div
+                            key={chunk.id || idx}
+                            className="p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/40 text-xs"
+                          >
+                            <div className="flex items-center justify-between text-[10px] font-bold text-slate-400 mb-1">
+                              <span className="text-indigo-600 dark:text-indigo-400">Chunk #{chunk.chunkIndex ?? idx + 1}</span>
+                              <span>Độ dài: {chunk.content?.length || 0} ký tự</span>
+                            </div>
+                            <div className="text-slate-700 dark:text-slate-300 whitespace-pre-line leading-relaxed font-sans">
+                              {chunk.content}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Raw Content Fallback */}
+                  {selectedDoc.rawContent && (
+                    <div className="pt-2">
+                      <h4 className="text-xs font-bold text-slate-800 dark:text-white uppercase mb-2">
+                        Nội dung gốc trích xuất (Raw Text):
+                      </h4>
+                      <div className="p-3 rounded-xl bg-slate-100 dark:bg-slate-800/80 font-mono text-[11px] text-slate-600 dark:text-slate-300 max-h-48 overflow-y-auto whitespace-pre-line leading-relaxed">
+                        {selectedDoc.rawContent}
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+
+            <div className="pt-3 border-t border-slate-200 dark:border-slate-800 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setViewingDocModal(false)}
+                className="px-4 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-xs font-bold text-slate-700 dark:text-slate-300 cursor-pointer"
+              >
+                Đóng
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL XEM CHI TIẾT TIN NHẮN HỘI THOẠI */}
+      {viewingConvModal && selectedConv && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="w-full max-w-2xl rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl p-6 max-h-[90vh] overflow-hidden flex flex-col">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
+              <div className="flex items-center gap-2">
+                <MessageSquare className="w-5 h-5 text-indigo-500" />
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                    <span>Hội thoại #{selectedConv.id}</span>
+                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-100 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300">
+                      {selectedConv.portal}
+                    </span>
+                    <span className="text-xs text-slate-400 font-normal">{selectedConv.title}</span>
+                  </h3>
+                  <p className="text-[11px] text-slate-400">
+                    Kênh: {selectedConv.channel} • Cập nhật: {new Date(selectedConv.updatedAt).toLocaleString('vi-VN')}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setViewingConvModal(false)}
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-white p-1 rounded-lg cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto py-4 space-y-3">
+              {loadingConv ? (
+                <div className="py-12 text-center text-xs text-slate-400 animate-pulse">
+                  Đang tải tin nhắn...
+                </div>
+              ) : convMessages.length === 0 ? (
+                <div className="py-12 text-center text-xs text-slate-400">
+                  Không có tin nhắn nào trong hội thoại này.
+                </div>
+              ) : (
+                convMessages.map((m) => {
+                  const isUser = m.role === 'user'
+                  return (
+                    <div
+                      key={m.id}
+                      className={`flex flex-col ${isUser ? 'items-end' : 'items-start'}`}
+                    >
+                      <div
+                        className={`max-w-[85%] px-4 py-3 rounded-2xl text-xs leading-relaxed ${
+                          isUser
+                            ? 'bg-indigo-600 text-white rounded-br-none'
+                            : 'bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 rounded-bl-none'
+                        }`}
+                      >
+                        <div className="font-bold text-[10px] mb-1 opacity-70">
+                          {isUser ? 'Người dùng' : 'Trợ lý AI'} • {m.createdAt ? new Date(m.createdAt).toLocaleTimeString('vi-VN') : ''}
+                        </div>
+                        <div className="whitespace-pre-line">{m.content}</div>
+                      </div>
+                    </div>
+                  )
+                })
+              )}
+            </div>
+
+            <div className="pt-3 border-t border-slate-200 dark:border-slate-800 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setViewingConvModal(false)}
+                className="px-4 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-xs font-bold text-slate-700 dark:text-slate-300 cursor-pointer"
+              >
+                Đóng
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -1072,7 +1592,7 @@ export const AiStudioPage: React.FC = () => {
                 <input
                   type="text"
                   value={newKbCode}
-                  onChange={(e) => setNewKbCode(e.target.value)}
+                  onChange={(e) => setNewKbCode(e.target.value.toUpperCase())}
                   placeholder="KB_IELTS"
                   className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-mono"
                 />
@@ -1083,7 +1603,7 @@ export const AiStudioPage: React.FC = () => {
                 <select
                   value={newKbAccess}
                   onChange={(e) => setNewKbAccess(e.target.value as any)}
-                  className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800"
+                  className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-bold"
                 >
                   <option value="PUBLIC">PUBLIC (Công khai cho khách)</option>
                   <option value="INTERNAL">INTERNAL (Học viên & Nội bộ)</option>
@@ -1096,19 +1616,53 @@ export const AiStudioPage: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setKbModalOpen(false)}
-                  className="px-3 py-1.5 rounded-xl bg-slate-100 font-bold"
+                  className="px-3 py-1.5 rounded-xl bg-slate-100 font-bold cursor-pointer"
                 >
                   Hủy
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-1.5 rounded-xl bg-indigo-600 text-white font-bold shadow"
+                  className="px-4 py-1.5 rounded-xl bg-indigo-600 text-white font-bold shadow cursor-pointer"
                 >
                   Tạo Kho tri thức
                 </button>
               </div>
             </form>
           </div>
+        </div>
+      )}
+
+      {/* AI VOICE CALL MODAL CHO PLAYGROUND */}
+      <AiVoiceCallModal
+        isOpen={playVoiceOpen}
+        onClose={() => setPlayVoiceOpen(false)}
+        portal={
+          playAgentCode.includes('STUDENT')
+            ? 'STUDENT'
+            : playAgentCode.includes('TEACHER')
+            ? 'TEACHER'
+            : playAgentCode.includes('ADMIN')
+            ? 'ADMIN'
+            : 'PUBLIC'
+        }
+        agentName={agents.find((a) => a.code === playAgentCode)?.name || 'Trợ lý AI CH Academy'}
+      />
+
+      {/* FLOATING TOAST NOTIFICATION */}
+      {toast && (
+        <div
+          className={`fixed bottom-6 right-6 z-[9999] px-4 py-3 rounded-2xl shadow-2xl border text-xs font-bold flex items-center gap-2 animate-in slide-in-from-bottom duration-200 ${
+            toast.type === 'success'
+              ? 'bg-emerald-600 text-white border-emerald-500'
+              : toast.type === 'error'
+              ? 'bg-rose-600 text-white border-rose-500'
+              : 'bg-slate-900 text-white border-slate-700'
+          }`}
+        >
+          {toast.type === 'success' && <CheckCircle2 className="w-4 h-4 shrink-0" />}
+          {toast.type === 'error' && <AlertCircle className="w-4 h-4 shrink-0" />}
+          {toast.type === 'info' && <Sparkles className="w-4 h-4 shrink-0" />}
+          <span>{toast.message}</span>
         </div>
       )}
     </div>
