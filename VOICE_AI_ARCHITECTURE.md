@@ -1,7 +1,7 @@
 # KIẾN TRÚC REAL-TIME VOICE AI CONVERSATION — CH ACADEMY
 
 **Tài liệu thiết kế:** Kiến trúc Giao tiếp Giọng nói Bán Song công với Auto Barge-In  
-**Tham chiếu thực tế:** NEXVA Voice Engine & Web Audio API  
+**Tiêu chuẩn kỹ thuật:** CH Academy Realtime Voice Engine & Web Audio API  
 **Cập nhật:** 31/10/2026  
 
 ---

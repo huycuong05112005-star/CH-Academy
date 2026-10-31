@@ -87,3 +87,4 @@
 2. **Tắt/Mở Micro (Mute/Unmute):** Bấm nút "Tắt Mic" ➔ Mức Decibels chuyển về -60dB, STT dừng lại an toàn. Bấm "Bật Mic" ➔ STT khởi động lại bình thường.
 3. **Tắt/Mở Loa (Speaker):** Bấm "Tắt Loa" ➔ AI trả lời bằng chữ trên màn hình mà không phát tiếng. Bấm "Bật Loa" ➔ Âm thanh được kích hoạt trở lại.
 * **Kết luận:** **PASSED**.
+

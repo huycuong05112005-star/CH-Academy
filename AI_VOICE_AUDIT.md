@@ -36,7 +36,7 @@ Cuộc gọi được quản lý qua 5 trạng thái tuần tự:
 
 ## 3. PHÂN HỆ QUẢN TRỊ CUỘC GỌI TRONG AI STUDIO (`tab: calls`)
 
-Nhằm đồng bộ với kiến trúc NEXVA AI, CH Academy đã bổ sung một phân hệ độc lập dành riêng cho Voice AI tại tab thứ 9 (`calls`) trong `AiStudioPage.tsx`:
+Nhằm hoàn thiện nền tảng AI độc lập, CH Academy đã bổ sung một phân hệ chuyên biệt dành riêng cho Voice AI tại tab thứ 9 (`calls`) trong `AiStudioPage.tsx`:
 
 ### 3.1. Bảng dữ liệu Cuộc gọi Hệ thống
 - Hiển thị danh sách các phiên gọi từ bảng `call_sessions` gồm: Mã phiên (`session_code`), Người gọi (`user_id`), Agent phụ trách, Cổng (`portal`), Thời lượng (`duration_seconds`), Trạng thái (`COMPLETED`), Ngày gọi và Trích đoạn hội thoại.
@@ -77,6 +77,6 @@ CREATE TABLE IF NOT EXISTS call_sessions (
 ## 5. ĐÁNH GIÁ TÍNH KHẢ THI TỔNG ĐÀI TELEPHONY & TIẾNG VIỆT (TTS/STT)
 
 1. **Khả thi trên trình duyệt:** Sử dụng `webkitSpeechRecognition` / Web Speech API cho STT tiếng Việt và Web Speech Synthesis cho TTS có độ trễ cực thấp (0ms network round-trip), hoạt động hoàn hảo trên Google Chrome/Edge.
-2. **Khả thi triển khai TTS tiếng Việt chuyên sâu:** Có thể kết nối microservice Python FastAPI (như mô hình `nexva/tts`) hoặc FPT.AI / Viettel AI qua REST API để có giọng đọc biểu cảm chuẩn ba miền Bắc - Trung - Nam.
+2. **Khả thi triển khai TTS tiếng Việt chuyên sâu:** Có thể kết nối microservice Python FastAPI TTS hoặc FPT.AI / Viettel AI qua REST API để có giọng đọc biểu cảm chuẩn ba miền Bắc - Trung - Nam.
 3. **Khả thi kết nối Tổng đài SIP/VoIP:** Sẵn sàng tích hợp qua giao thức WebRTC SIP Client (như SIP.js hoặc JsSIP) với tổng đài Asterisk của trung tâm để thực hiện cuộc gọi ra ngoài mạng di động thực tế.
 

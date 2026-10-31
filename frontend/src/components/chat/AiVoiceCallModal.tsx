@@ -131,7 +131,7 @@ export const AiVoiceCallModal: React.FC<AiVoiceCallProps> = ({
   // 1. Quản lý thời lượng cuộc gọi
   useEffect(() => {
     let timer: ReturnType<typeof setInterval> | null = null
-    if (isOpen && callStatus !== 'ERROR' && callStatus !== 'CONNECTING' && callStatus !== 'ENDED') {
+    if (isOpen && callStatus !== 'ENDED') {
       timer = setInterval(() => {
         setCallDuration((prev) => prev + 1)
       }, 1000)
@@ -385,7 +385,7 @@ export const AiVoiceCallModal: React.FC<AiVoiceCallProps> = ({
     try {
       const recognition = new SpeechRecognition()
       recognition.lang = 'vi-VN'
-      recognition.continuous = false // Từng lượt tự nhiên như Nexva
+      recognition.continuous = false // Từng lượt tự nhiên (Turn-based endpointing)
       recognition.interimResults = true
       recognition.maxAlternatives = 1
 
@@ -470,14 +470,15 @@ export const AiVoiceCallModal: React.FC<AiVoiceCallProps> = ({
   // 8. Khởi tạo Microphone & Web Audio Analyser (Xác nhận tín hiệu thực tế)
   const initAudioVisualizer = useCallback(async () => {
     if (!navigator.mediaDevices?.getUserMedia) {
-      setErrorMessage('Trình duyệt hoặc môi trường này chưa hỗ trợ getUserMedia.')
-      setCallStatus('ERROR')
+      setMicNotice('Trình duyệt hoặc môi trường này chưa hỗ trợ getUserMedia. Bạn có thể gõ câu hỏi phía dưới.')
       return false
     }
 
     try {
       addDebugLog('Đang yêu cầu quyền truy cập Microphone...')
-      const stream = await navigator.mediaDevices.getUserMedia({
+      
+      // Bọc promise getUserMedia trong timeout 3s để không bao giờ bị đơ giao diện
+      const getMediaPromise = navigator.mediaDevices.getUserMedia({
         audio: {
           echoCancellation: true,
           noiseSuppression: true,
@@ -485,6 +486,11 @@ export const AiVoiceCallModal: React.FC<AiVoiceCallProps> = ({
           sampleRate: 48000
         }
       })
+      const timeoutPromise = new Promise<MediaStream>((_, reject) =>
+        setTimeout(() => reject(new Error('Yêu cầu Microphone hết hạn thời gian (Timeout)')), 3000)
+      )
+
+      const stream = await Promise.race([getMediaPromise, timeoutPromise])
       micStreamRef.current = stream
 
       const track = stream.getAudioTracks()[0]
@@ -498,7 +504,9 @@ export const AiVoiceCallModal: React.FC<AiVoiceCallProps> = ({
         (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext
       const audioCtx = new AudioContextClass()
       if (audioCtx.state === 'suspended') {
-        await audioCtx.resume()
+        try {
+          await audioCtx.resume()
+        } catch {}
       }
       audioContextRef.current = audioCtx
 
@@ -511,12 +519,13 @@ export const AiVoiceCallModal: React.FC<AiVoiceCallProps> = ({
       source.connect(analyser)
 
       setMicNotice(null)
+      setErrorMessage(null)
       return true
     } catch (err: unknown) {
       console.warn('Lỗi truy cập Micro:', err)
       const eText = err instanceof Error ? err.message : String(err)
-      setErrorMessage(
-        'Không thể thu âm từ Microphone. Vui lòng cấp quyền cho trang web hoặc chọn đúng thiết bị micro.'
+      setMicNotice(
+        'Chưa nhận được tín hiệu Microphone. Bạn có thể nhấn "Thử lại", cho phép quyền micro hoặc gõ câu hỏi trực tiếp.'
       )
       addDebugLog(`[Lỗi Micro]: ${eText}`)
       return false
@@ -640,11 +649,24 @@ export const AiVoiceCallModal: React.FC<AiVoiceCallProps> = ({
       const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       setRecentTranscripts([{ role: 'assistant', text: greeting, time: timeStr }])
 
-      // Khởi tạo Microphone
-      initAudioVisualizer().then(() => {
+      // 1. Phục hồi Web SpeechSynthesis và lập tức phát lời chào mở đầu
+      if ('speechSynthesis' in window) {
+        try {
+          window.speechSynthesis.cancel()
+          window.speechSynthesis.resume()
+        } catch {}
+      }
+      setCallStatus('SPEAKING')
+      speakAiResponse(greeting)
+
+      // 2. Khởi tạo Microphone song song (không làm chậm phản hồi ban đầu)
+      initAudioVisualizer().then((ok) => {
         if (!isComponentMounted.current) return
-        setCallStatus('SPEAKING')
-        speakAiResponse(greeting)
+        if (ok) {
+          addDebugLog('Microphone và Web Audio đã sẵn sàng')
+        } else {
+          addDebugLog('Chưa nhận tín hiệu micro, sẵn sàng gõ câu hỏi hoặc thử lại')
+        }
       })
     } else {
       // Dọn dẹp tài nguyên

@@ -48,7 +48,7 @@ Người dùng gặp 5 triệu chứng nghiêm trọng:
 
 ### 2.4. Khối văn bản TTS quá dài gây dừng phát âm (Chromium 15s Bug)
 * **Cơ chế lỗi:** Trình duyệt Chromium có lỗi cố hữu (Chromium Issue 679437): nếu một chuỗi văn bản dài trên 200 ký tự được gửi vào `speechSynthesis.speak()`, hệ thống âm thanh nội bộ của trình duyệt sẽ tự động pause sau 15 giây mà không bắn lỗi.
-* **Giải pháp tham chiếu từ Nexva:** Nexva sử dụng module `speech-split.ts` để phân cắt câu thành các phân đoạn tự nhiên (theo dấu câu tiếng Việt `. , ! ? …`) và nạp vào hàng đợi phát nối tiếp (Queue). CH Academy trước đây đã truyền toàn bộ đoạn văn bản hàng trăm chữ vào một lần gọi duy nhất.
+* **Giải pháp khắc phục độc lập:** CH Academy xây dựng module tách câu chuẩn tiếng Việt (`splitVietnameseSentences`) để phân cắt câu thành các phân đoạn tự nhiên (theo dấu câu tiếng Việt `. , ! ? …`) và nạp vào hàng đợi phát nối tiếp (Queue). CH Academy trước đây đã truyền toàn bộ đoạn văn bản hàng trăm chữ vào một lần gọi duy nhất.
 
 ### 2.5. Lỗi thiếu Timeout trong RestTemplate Backend
 * **Vị trí file:** `backend/src/main/java/vn/chacademy/chat/service/GenAiChatService.java`
@@ -69,3 +69,4 @@ Người dùng gặp 5 triệu chứng nghiêm trọng:
 | **Continuous Turn-taking** | Sau khi AI trả lời không tự động kích hoạt lượt nghe mới | Sự kiện `onend` của câu TTS cuối cùng tự động gọi `startListening()` sau 200ms | Đã khắc phục triệt để |
 | **AI Backend Latency** | Không có timeout trên HTTP client gọi LLM | Thiết lập `connectTimeout = 3000ms`, `readTimeout = 8000ms`, tự động chuyển fallback engine | Đã khắc phục triệt để |
 | **Debug & Giám sát** | Thiếu công cụ chẩn đoán tín hiệu và độ trễ | Bổ sung Bảng điều khiển Debug Voice Panel hiển thị chi tiết dB, STT, AI latency, TTFA | Đã khắc phục triệt để |
+

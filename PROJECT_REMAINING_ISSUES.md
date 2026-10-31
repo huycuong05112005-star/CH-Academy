@@ -19,5 +19,5 @@
 1. **Tích hợp Chat Nhóm theo lớp học (Class-Based Group Chat):**
    - Tự động đồng bộ thành viên vào nhóm chat khi ghi danh hoặc phân công giảng viên.
 2. **Tích hợp Gen AI Chat Box:**
-   - Kế thừa kiến trúc từ dự án tham chiếu Nexva, tích hợp trực tiếp vào backend Spring Boot với ngữ cảnh động theo vai trò (Admin, Giảng viên, Học viên).
+   - Xây dựng kiến trúc AI Engine độc lập, tích hợp trực tiếp vào backend Spring Boot với ngữ cảnh động theo vai trò (Admin, Giảng viên, Học viên).
 

@@ -7,7 +7,7 @@
 
 ## I. KIẾN TRÚC RAG (RETRIEVAL-AUGMENTED GENERATION)
 
-Nhằm đảm bảo phản hồi của AI chính xác 100%, không bịa đặt hoặc gây ảo giác (Hallucination), CH Academy thiết kế quy trình xử lý tài liệu đa định dạng tương tự cơ chế `kb-worker` của NEXVA:
+Nhằm đảm bảo phản hồi của AI chính xác 100%, không bịa đặt hoặc gây ảo giác (Hallucination), CH Academy thiết kế quy trình xử lý tài liệu đa định dạng với pipeline kiến trúc chuyên biệt độc lập:
 
 ```text
 Tài liệu (PDF / DOCX / XLSX / TXT / URL)

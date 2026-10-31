@@ -886,7 +886,7 @@ export const AiStudioPage: React.FC = () => {
                   <span>Kịch bản Trò chuyện Kéo thả (Flow Script Builder)</span>
                 </h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                  Được biên dịch thành hướng dẫn từng bước (B1, B2...) kết hợp cơ chế Tool Calling của Nexva.
+                  Được biên dịch thành hướng dẫn từng bước (B1, B2...) kết hợp cơ chế Function & Tool Calling thông minh.
                 </p>
               </div>
 
@@ -1370,7 +1370,7 @@ export const AiStudioPage: React.FC = () => {
                   <h3 className="text-sm font-bold text-slate-900 dark:text-white">
                     {editingAgent.id ? `Cấu hình: ${editingAgent.name}` : 'Thiết kế AI Agent mới'}
                   </h3>
-                  <p className="text-[11px] text-slate-400">Kiến trúc Agent phân quyền đa nhiệm theo chuẩn Nexva</p>
+                  <p className="text-[11px] text-slate-400">Kiến trúc Agent phân quyền đa nhiệm chuyên sâu của CH Academy</p>
                 </div>
               </div>
               <button

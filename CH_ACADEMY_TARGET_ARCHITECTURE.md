@@ -25,7 +25,7 @@ graph TD
     end
 
     subgraph RealtimeAndAIServices [Realtime & AI Services (FastAPI / Node SSE)]
-        NexvaEngine["Nexva GenAI Gateway & RAG Pipeline"]
+        AiGatewayEngine["CH Academy GenAI Gateway & RAG Pipeline"]
         VoiceRuntime["Realtime Voice Engine (VAD + WebRTC/WebSocket + FastPitch/EdgeTTS)"]
         ChatBroker["Chat & Presence Broker (WebSocket / Redis PubSub)"]
     end
@@ -59,7 +59,7 @@ graph TD
    - Không chia sẻ session state giữa các cổng.
    - Tin nhắn và thông báo chưa đọc được tính toán độc lập theo từng tài khoản thực tế (`user_id`).
 
-3. **Cơ chế Streaming Thời gian thực theo Mô hình Nexva:**
+3. **Cơ chế Streaming Thời gian thực Tiên tiến (Streaming Pipeline):**
    - Sử dụng `SentenceBuffer` để chia nhỏ văn bản từ LLM theo từng câu hoàn chỉnh.
    - Phát âm thanh dạng stream giúp giảm độ trễ giọng nói (Time-to-First-Audio) xuống dưới 400ms.
 

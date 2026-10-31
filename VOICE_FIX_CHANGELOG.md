@@ -59,3 +59,4 @@
 * **Backend Build:** Maven compile ➔ `BUILD SUCCESS` (0 lỗi).
 * **Frontend Build:** Vite build ➔ Hoàn thành trong `2.26s` (0 lỗi TypeScript).
 * **Frontend Test Suite:** 15 test suites, 60/60 tests `PASSED`.
+

@@ -2,7 +2,7 @@
 
 **Dự án:** CH Academy — Multi-Portal Education & AI Platform  
 **Vị trí:** `E:\CA_NHAN\CH_Academy`  
-**Dự án đối chiếu:** NEXVA (`E:\CACMONTRENLOP\nexva`)  
+**Kiến trúc:** Nền tảng Độc lập Chuẩn Doanh nghiệp (Enterprise Independent Architecture)  
 **Ngày hoàn thành:** 31/10/2026  
 **Trạng thái hệ thống:** SẴN SÀNG VẬN HÀNH (PRODUCTION READY)  
 
@@ -30,7 +30,7 @@
 
 ## II. DANH MỤC 12 BÁO CÁO KỸ THUẬT ĐÃ ĐƯỢC THIẾT LẬP
 
-1. [`NEXVA_SOURCE_ANALYSIS.md`](file:///e:/CA_NHAN/CH_Academy/NEXVA_SOURCE_ANALYSIS.md) — Phân tích chi tiết mã nguồn NEXVA tại `E:\CACMONTRENLOP\nexva`.
+1. [`AI_BENCHMARK_ANALYSIS.md`](file:///e:/CA_NHAN/CH_Academy/AI_BENCHMARK_ANALYSIS.md) — Báo cáo phân tích tiêu chuẩn kiến trúc AI và lộ trình độc lập.
 2. [`CHAT_ROUTING_AUDIT.md`](file:///e:/CA_NHAN/CH_Academy/CHAT_ROUTING_AUDIT.md) — Kiểm toán phân luồng Chat Widget và AI Agent theo 4 cổng.
 3. [`MULTI_COURSE_CHAT_REPORT.md`](file:///e:/CA_NHAN/CH_Academy/MULTI_COURSE_CHAT_REPORT.md) — Báo cáo kiến trúc và kiểm thử Chat nhóm lớp đa khóa học.
 4. [`AI_AGENT_ARCHITECTURE.md`](file:///e:/CA_NHAN/CH_Academy/AI_AGENT_ARCHITECTURE.md) — Kiến trúc hệ sinh thái 4 AI Agent cốt lõi và Studio quản trị.

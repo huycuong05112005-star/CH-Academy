@@ -110,3 +110,4 @@ sequenceDiagram
   * Sau 200ms, hàm `startListening()` tự động được gọi, kích hoạt Micro và STT sẵn sàng đón nhận câu hỏi tiếp theo của người dùng.
   * Người dùng có thể tiếp tục nói mà không cần phải chạm vào bất kỳ nút bấm nào trên màn hình.
   * Trường hợp người dùng muốn ngắt lời khi AI đang nói, chỉ cần bấm nhẹ vào quả cầu Orb hoặc nút *"Chạm để ngắt lời AI và nói tiếp"*, hàng đợi TTS sẽ lập tức bị hủy và chuyển ngay sang trạng thái lắng nghe.
+

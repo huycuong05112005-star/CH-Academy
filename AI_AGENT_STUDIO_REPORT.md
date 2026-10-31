@@ -42,7 +42,7 @@ Trang **AI Agent Studio** là trung tâm chỉ huy độc lập được tích h
 * Hiển thị trạng thái tài liệu, kích thước tệp, số lượng chunks và nút xóa tài liệu an toàn.
 
 ### Tab 5: Kịch bản hội thoại (Conversation Flow Builder)
-* Thiết kế trực quan các bước hội thoại đánh số (`B1` đến `B7`) lấy cảm hứng từ cấu trúc của Nexva:
+* Thiết kế trực quan các bước hội thoại đánh số (`B1` đến `B7`) theo chuẩn kiến trúc độc lập của CH Academy:
   * `B1 - Bắt đầu (start)`: Kích hoạt khi có tin nhắn mới.
   * `B2 - Lời chào (message)`: Lời chào tự động thân thiện.
   * `B3 - Khảo sát (question)`: Xác định nhu cầu khóa học của học viên/khách hàng.

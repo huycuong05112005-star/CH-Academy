@@ -52,3 +52,4 @@
 * **Kiểm tra phát âm:** Câu dài hơn 300 từ (giới thiệu tổng quan trung tâm CH Academy và chính sách ưu đãi học phí) được đọc trọn vẹn 100%, không bị dừng sau 15 giây.
 * **Thời gian trễ phát âm thanh đầu tiên:** 180ms - 310ms.
 * **Thao tác ngắt lời:** Dừng ngay lập tức khi người dùng click, không để lại âm thanh dư thừa trong bộ đệm.
+

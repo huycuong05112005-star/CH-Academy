@@ -52,3 +52,4 @@ Các mốc thời gian đo đạc thực tế:
 ### 3.3. Phân đoạn câu trước (Sentence Pre-splitting) tại Backend
 * Backend tự động phân cắt câu trả lời thành mảng `sentences` dựa trên cấu trúc ngữ pháp và dấu câu tiếng Việt (`. , ! ? …`) trước khi trả về cho Frontend.
 * Frontend chỉ việc lấy câu đầu tiên phát ra Loa ngay lập tức (Time-to-First-Audio đạt mức kỷ lục 180ms - 310ms), trong lúc đó các câu tiếp theo được xếp vào hàng đợi chờ phát nối tiếp.
+

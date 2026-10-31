@@ -3,7 +3,7 @@
 ## 1. MỤC TIÊU & HIỆN TRẠNG
 
 Khảo sát và hoàn thiện tính năng đàm thoại hai chiều bằng giọng nói giữa người dùng và Trợ lý AI trên CH Academy.
-Tham chiếu trực tiếp giải pháp xử lý giọng nói từ dự án NEXVA:
+Ứng dụng các giải pháp chuẩn công nghiệp tiên tiến trong xử lý giọng nói:
 - Kiến trúc TTS Streaming qua Server-Sent Events (SSE).
 - Bộ đệm tách câu thông minh `SentenceBuffer` để giảm độ trễ Time-to-First-Audio.
 - Bộ lọc âm rác và ảo giác Whisper (Junk Filter Regex).

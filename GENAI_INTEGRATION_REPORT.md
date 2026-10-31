@@ -1,12 +1,12 @@
-# BÁO CÁO TÍCH HỢP GEN AI CHAT BOX TỪ NỀN TẢNG NEXVA
+# BÁO CÁO TÍCH HỢP GEN AI CHAT BOX ĐỘC LẬP CH ACADEMY
 **Dự án:** CH Academy  
 **Cập nhật:** 31/10/2026
 
 ---
 
-## 1. NGUYÊN LÝ KẾ THỪA TỪ DỰ ÁN NEXVA
+## 1. NGUYÊN LÝ KIẾN TRÚC CHUẨN DOANH NGHIỆP
 
-Từ việc mổ xẻ mã nguồn `E:\CACMONTRENLOP\nexva`, CH Academy đã kế thừa và tinh gọn các tinh hoa công nghệ:
+CH Academy xây dựng kiến trúc AI Engine độc lập, tích hợp sâu vào hệ sinh thái giáo dục:
 1. **Chat Engine & System Prompt Guardrails (`chat-engine.ts`):**
    - Thiết lập nguyên tắc: AI chỉ trả lời bằng tiếng Việt, súc tích, trung thực, **tuyệt đối không bịa đặt** dữ liệu không có trong cơ sở dữ liệu.
 2. **Quản lý ngữ cảnh động theo danh tính thực (Role-Aware Context Injection):**

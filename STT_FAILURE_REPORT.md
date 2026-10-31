@@ -63,3 +63,4 @@ Trước khi khắc phục, người dùng phản ánh:
   * *"Lớp luyện thi IELTS của trung tâm khai giảng khi nào?"* ➔ Nhận dạng chính xác.
 * **Thời gian chốt câu (STT Latency):** Trung bình 750ms - 900ms sau khi người dùng dứt câu nói.
 * **Tỷ lệ thất thoát transcript:** 0% (Không còn hiện tượng nói xong bị rơi mất câu).
+
