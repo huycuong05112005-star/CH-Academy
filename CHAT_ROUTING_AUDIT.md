@@ -64,3 +64,4 @@ Thay vì dùng 1 widget dùng chung và ẩn/hiện bằng CSS, CH Academy đã 
 - [`PortalChatLauncher.tsx`](file:///e:/CA_NHAN/CH_Academy/frontend/src/components/chat/PortalChatLauncher.tsx) điều hướng theo URL.
 
 Kết quả kiểm thử Vitest: `src/test/FloatingChatWidget.test.tsx` 5/5 bài test PASS 100%.
+

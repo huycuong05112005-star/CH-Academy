@@ -9,11 +9,9 @@ import {
   AlertCircle,
   Radio,
   Clock,
-  ShieldCheck,
   X,
-  User,
-  GraduationCap,
-  MessageSquare
+  Send,
+  RotateCcw
 } from 'lucide-react'
 import { aiChatApi } from '../../api/chat'
 
@@ -56,8 +54,10 @@ export const AiVoiceCallModal: React.FC<AiVoiceCallProps> = ({
   const [speakerEnabled, setSpeakerEnabled] = useState(true)
   const [callDuration, setCallDuration] = useState(0)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [micNotice, setMicNotice] = useState<string | null>(null)
   const [userTranscript, setUserTranscript] = useState('')
   const [aiSpeechSubtitles, setAiSpeechSubtitles] = useState('')
+  const [textInput, setTextInput] = useState('')
   const [recentTranscripts, setRecentTranscripts] = useState<
     Array<{ role: 'user' | 'assistant'; text: string; time: string }>
   >([])
@@ -161,7 +161,6 @@ export const AiVoiceCallModal: React.FC<AiVoiceCallProps> = ({
         utterance.onend = () => {
           if (isComponentMounted.current) {
             setCallStatus(isMuted ? 'MUTED' : 'LISTENING')
-            // Khởi động lại nhận diện giọng nói khi AI nói xong
             if (recognitionRef.current && !isMuted) {
               setTimeout(() => {
                 try {
@@ -248,8 +247,96 @@ export const AiVoiceCallModal: React.FC<AiVoiceCallProps> = ({
     [portal, guestSessionId, agentCode, conversationId, onMessageLogged, speakAiResponse, isMuted]
   )
 
-  // 5. Khởi tạo Web Audio Analyser, True Oscilloscope & VAD Barge-In
+  // 5. Khởi tạo Speech Recognition (STT tiếng Việt)
+  const initSpeechRecognition = useCallback(() => {
+    const SpeechRecognition =
+      (window as unknown as { SpeechRecognition?: any; webkitSpeechRecognition?: any })
+        .SpeechRecognition ||
+      (window as unknown as { webkitSpeechRecognition?: any }).webkitSpeechRecognition
+
+    if (!SpeechRecognition) {
+      setMicNotice(
+        'Trình duyệt chưa hỗ trợ Web Speech API trực tiếp. Bạn vẫn có thể nghe AI nói và nhập văn bản bên dưới.'
+      )
+      return
+    }
+
+    try {
+      const recognition = new SpeechRecognition()
+      recognition.lang = 'vi-VN'
+      recognition.continuous = false
+      recognition.interimResults = true
+      recognition.maxAlternatives = 1
+
+      recognition.onstart = () => {
+        if (isComponentMounted.current && !isMuted) {
+          setCallStatus('LISTENING')
+        }
+      }
+
+      recognition.onresult = (event: any) => {
+        let finalStr = ''
+        let interimStr = ''
+
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          const transcript = event.results[i][0].transcript
+          if (event.results[i].isFinal) {
+            finalStr += transcript
+          } else {
+            interimStr += transcript
+          }
+        }
+
+        const display = finalStr || interimStr
+        setUserTranscript(display)
+
+        if (finalStr.trim()) {
+          processUserSpeech(finalStr.trim())
+        }
+      }
+
+      recognition.onerror = (event: any) => {
+        if (event.error !== 'no-speech') {
+          console.warn('Speech recognition notice:', event.error)
+        }
+        if (event.error === 'not-allowed') {
+          setMicNotice('Microphone chưa được cấp quyền trên trình duyệt. Bạn có thể gõ câu hỏi phía dưới.')
+        }
+      }
+
+      recognition.onend = () => {
+        if (
+          isComponentMounted.current &&
+          !isMuted &&
+          !window.speechSynthesis?.speaking &&
+          callStatus !== 'PROCESSING' &&
+          callStatus !== 'ERROR' &&
+          callStatus !== 'ENDED'
+        ) {
+          setTimeout(() => {
+            try {
+              recognition.start()
+            } catch {}
+          }, 150)
+        }
+      }
+
+      recognitionRef.current = recognition
+      try {
+        recognition.start()
+      } catch {}
+    } catch (err) {
+      console.warn('Init SpeechRecognition error:', err)
+    }
+  }, [isMuted, callStatus, processUserSpeech])
+
+  // 6. Khởi tạo Web Audio Analyser & Canvas Visualizer
   const initAudioVisualizer = useCallback(async () => {
+    if (!navigator.mediaDevices?.getUserMedia) {
+      setMicNotice('Thiết bị không hỗ trợ ghi âm trực tiếp.')
+      return false
+    }
+
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: {
@@ -264,6 +351,9 @@ export const AiVoiceCallModal: React.FC<AiVoiceCallProps> = ({
         window.AudioContext ||
         (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext
       const audioCtx = new AudioContextClass()
+      if (audioCtx.state === 'suspended') {
+        await audioCtx.resume()
+      }
       audioContextRef.current = audioCtx
 
       const analyser = audioCtx.createAnalyser()
@@ -273,164 +363,110 @@ export const AiVoiceCallModal: React.FC<AiVoiceCallProps> = ({
 
       const source = audioCtx.createMediaStreamSource(stream)
       source.connect(analyser)
+      setMicNotice(null)
+      return true
+    } catch (err: unknown) {
+      console.warn('Microphone permission or access error:', err)
+      setMicNotice(
+        'Microphone chưa được cấp quyền (Nhấp vào icon micro để thử lại hoặc nhập câu hỏi bên dưới)'
+      )
+      return false
+    }
+  }, [])
 
-      // Vẽ sóng âm thanh thực tế trên Canvas
+  // 7. Vòng lặp vẽ Sóng âm thanh Canvas (Lively Visualizer)
+  useEffect(() => {
+    if (!isOpen) return
+
+    let animId: number
+    let wavePhase = 0
+
+    const renderLoop = () => {
       const canvas = canvasRef.current
       if (canvas) {
         const ctx = canvas.getContext('2d')
-        const bufferLength = analyser.frequencyBinCount
-        const dataArray = new Uint8Array(bufferLength)
-        const timeArray = new Float32Array(analyser.fftSize)
+        if (ctx) {
+          ctx.clearRect(0, 0, canvas.width, canvas.height)
+          const bufferLength = analyserRef.current ? analyserRef.current.frequencyBinCount : 32
+          const dataArray = new Uint8Array(bufferLength)
 
-        const drawVisualizer = () => {
-          if (!isComponentMounted.current) return
-          animationFrameRef.current = requestAnimationFrame(drawVisualizer)
+          if (analyserRef.current && micStreamRef.current?.active && !isMuted) {
+            analyserRef.current.getByteFrequencyData(dataArray)
 
-          analyser.getByteFrequencyData(dataArray)
-          analyser.getFloatTimeDomainData(timeArray)
+            // VAD Auto Barge-In
+            let sum = 0
+            for (let i = 0; i < bufferLength; i++) {
+              sum += dataArray[i]
+            }
+            const avg = sum / bufferLength
+            setMicLevel(avg / 255)
 
-          // Tính RMS năng lượng âm thanh thực tế
-          let sum = 0
-          for (let i = 0; i < timeArray.length; i++) {
-            sum += timeArray[i] * timeArray[i]
-          }
-          const rms = Math.sqrt(sum / timeArray.length)
-          setMicLevel(rms)
-
-          // VAD Auto Barge-In: Nếu AI đang nói mà người dùng cất giọng (RMS > 0.045 liên tục)
-          if (rms > 0.045 && !isMuted) {
-            vadCounterRef.current += 1
-            if (vadCounterRef.current >= 4) {
-              if (window.speechSynthesis?.speaking) {
+            if (avg > 25 && callStatus === 'SPEAKING') {
+              vadCounterRef.current += 1
+              if (vadCounterRef.current >= 4) {
                 interruptAi()
+                vadCounterRef.current = 0
               }
-              vadCounterRef.current = 0
+            } else {
+              vadCounterRef.current = Math.max(0, vadCounterRef.current - 1)
             }
           } else {
-            vadCounterRef.current = Math.max(0, vadCounterRef.current - 1)
-          }
-
-          if (ctx) {
-            ctx.clearRect(0, 0, canvas.width, canvas.height)
-
-            // Vẽ Waveform thanh tần số
-            const barWidth = (canvas.width / bufferLength) * 2.2
-            let x = 0
-
+            // Sóng giả lập khi AI đang nói hoặc chờ mic
+            wavePhase += 0.08
             for (let i = 0; i < bufferLength; i++) {
-              const barHeight = Math.max(3, (dataArray[i] / 255) * canvas.height * 0.9)
-
-              const gradient = ctx.createLinearGradient(0, canvas.height, 0, 0)
-              gradient.addColorStop(0, '#6366f1')
-              gradient.addColorStop(0.5, '#38bdf8')
-              gradient.addColorStop(1, '#10b981')
-
-              ctx.fillStyle = gradient
-              ctx.beginPath()
-              ctx.roundRect(x, canvas.height - barHeight, barWidth - 2, barHeight, [3, 3, 0, 0])
-              ctx.fill()
-
-              x += barWidth
+              if (callStatus === 'SPEAKING') {
+                dataArray[i] = Math.floor(60 + Math.sin(wavePhase + i * 0.4) * 45 + Math.random() * 20)
+              } else if (callStatus === 'PROCESSING') {
+                dataArray[i] = Math.floor(40 + Math.sin(wavePhase * 1.5 + i * 0.6) * 30)
+              } else {
+                dataArray[i] = Math.floor(18 + Math.sin(wavePhase + i * 0.3) * 10)
+              }
             }
           }
-        }
-        drawVisualizer()
-      }
 
-      return true
-    } catch (err: unknown) {
-      console.warn('Microphone permission denied or unavailable:', err)
-      setErrorMessage(
-        'Không thể truy cập Microphone. Vui lòng nhấn "Cho phép" ở thanh địa chỉ trình duyệt để kích hoạt trò chuyện bằng giọng nói với AI.'
-      )
-      setCallStatus('ERROR')
-      return false
-    }
-  }, [interruptAi, isMuted])
+          // Vẽ thanh biểu đồ sóng âm thanh Gradient
+          const barWidth = (canvas.width / bufferLength) * 1.8
+          let x = 0
 
-  // 6. Khởi tạo Speech Recognition (STT tiếng Việt chuẩn xác)
-  const initSpeechRecognition = useCallback(() => {
-    const SpeechRecognition =
-      (window as unknown as { SpeechRecognition?: any; webkitSpeechRecognition?: any })
-        .SpeechRecognition ||
-      (window as unknown as { webkitSpeechRecognition?: any }).webkitSpeechRecognition
+          for (let i = 0; i < bufferLength; i++) {
+            const barHeight = Math.max(4, (dataArray[i] / 255) * canvas.height * 0.9)
 
-    if (!SpeechRecognition) {
-      setErrorMessage(
-        'Trình duyệt này chưa tích hợp Web Speech API. Bạn vui lòng sử dụng Google Chrome, Microsoft Edge hoặc Safari để trò chuyện giọng nói.'
-      )
-      setCallStatus('ERROR')
-      return
-    }
+            const gradient = ctx.createLinearGradient(0, canvas.height, 0, 0)
+            if (callStatus === 'SPEAKING') {
+              gradient.addColorStop(0, '#10b981')
+              gradient.addColorStop(0.5, '#06b6d4')
+              gradient.addColorStop(1, '#3b82f6')
+            } else if (callStatus === 'PROCESSING') {
+              gradient.addColorStop(0, '#6366f1')
+              gradient.addColorStop(0.5, '#a855f7')
+              gradient.addColorStop(1, '#ec4899')
+            } else {
+              gradient.addColorStop(0, '#4f46e5')
+              gradient.addColorStop(0.6, '#38bdf8')
+              gradient.addColorStop(1, '#34d399')
+            }
 
-    const recognition = new SpeechRecognition()
-    recognition.lang = 'vi-VN'
-    recognition.continuous = false
-    recognition.interimResults = true
-    recognition.maxAlternatives = 1
+            ctx.fillStyle = gradient
+            ctx.beginPath()
+            ctx.roundRect(x, canvas.height - barHeight, Math.max(2, barWidth - 2), barHeight, [2, 2, 0, 0])
+            ctx.fill()
 
-    recognition.onstart = () => {
-      if (isComponentMounted.current && !isMuted) {
-        setCallStatus('LISTENING')
-      }
-    }
-
-    recognition.onresult = (event: any) => {
-      let finalStr = ''
-      let interimStr = ''
-
-      for (let i = event.resultIndex; i < event.results.length; i++) {
-        const transcript = event.results[i][0].transcript
-        if (event.results[i].isFinal) {
-          finalStr += transcript
-        } else {
-          interimStr += transcript
+            x += barWidth
+          }
         }
       }
-
-      const display = finalStr || interimStr
-      setUserTranscript(display)
-
-      if (finalStr.trim()) {
-        processUserSpeech(finalStr.trim())
-      }
+      animId = requestAnimationFrame(renderLoop)
     }
 
-    recognition.onerror = (event: any) => {
-      if (event.error !== 'no-speech') {
-        console.warn('Speech recognition warning:', event.error)
-      }
-      if (event.error === 'not-allowed') {
-        setErrorMessage('Quyền truy cập Microphone đã bị chặn trên trình duyệt.')
-        setCallStatus('ERROR')
-      }
+    animId = requestAnimationFrame(renderLoop)
+    animationFrameRef.current = animId
+
+    return () => {
+      cancelAnimationFrame(animId)
     }
+  }, [isOpen, callStatus, isMuted, interruptAi])
 
-    recognition.onend = () => {
-      // Tự động lắng nghe tiếp nếu đang không trong trạng thái SPEAKING, PROCESSING, MUTED
-      if (
-        isComponentMounted.current &&
-        !isMuted &&
-        !window.speechSynthesis?.speaking &&
-        callStatus !== 'PROCESSING' &&
-        callStatus !== 'ERROR' &&
-        callStatus !== 'ENDED'
-      ) {
-        setTimeout(() => {
-          try {
-            recognition.start()
-          } catch {}
-        }, 150)
-      }
-    }
-
-    recognitionRef.current = recognition
-    try {
-      recognition.start()
-    } catch {}
-  }, [isMuted, callStatus, processUserSpeech])
-
-  // 7. Lifecycle khi mở/đóng Modal cuộc gọi
+  // 8. Lifecycle khi mở/đóng Modal cuộc gọi
   useEffect(() => {
     isComponentMounted.current = true
 
@@ -438,32 +474,39 @@ export const AiVoiceCallModal: React.FC<AiVoiceCallProps> = ({
       setCallStatus('CONNECTING')
       setCallDuration(0)
       setErrorMessage(null)
+      setMicNotice(null)
       setUserTranscript('')
       setAiSpeechSubtitles('')
-      setRecentTranscripts([])
       setIsMuted(false)
       setSpeakerEnabled(true)
+      setTextInput('')
 
-      initAudioVisualizer().then((ok) => {
-        if (ok && isComponentMounted.current) {
-          initSpeechRecognition()
-          // Lời chào mở đầu phù hợp với từng Portal
-          const greeting =
-            portal === 'PUBLIC'
-              ? 'Xin chào quý khách! Tôi là Chuyên viên Tư vấn Tuyển sinh AI của CH Academy. Tôi có thể hỗ trợ quý khách tìm hiểu khóa học, học phí hay lịch khai giảng nào ạ?'
-              : portal === 'TEACHER'
-              ? 'Kính chào thầy cô! Tôi là Trợ lý Giảng dạy AI. Tôi sẵn sàng hỗ trợ thầy cô soạn giáo án, tạo câu hỏi trắc nghiệm hoặc tra cứu tài liệu bài giảng.'
-              : portal === 'ADMIN'
-              ? 'Chào Quản trị viên! Tôi là Trợ lý Quản trị & Vận hành. Tôi có thể hỗ trợ bạn tra cứu số liệu học viên, tỷ lệ chuyên cần và báo cáo toàn trung tâm.'
-              : 'Chào bạn! Tôi là AI Gia sư đồng hành học tập. Bạn muốn hướng dẫn giải bài tập, giải thích kiến thức hay ôn luyện chủ đề nào hôm nay?'
+      // 8.1. Thiết lập lời chào ngay lập tức (KHÔNG BAO GIỜ ĐỂ KHUNG LỊCH SỬ TRỐNG)
+      const greeting =
+        portal === 'PUBLIC'
+          ? 'Xin chào quý khách! Tôi là Chuyên viên Tư vấn Tuyển sinh AI của CH Academy. Tôi có thể hỗ trợ quý khách tìm hiểu khóa học, học phí hay lịch khai giảng nào ạ?'
+          : portal === 'TEACHER'
+          ? 'Kính chào thầy cô! Tôi là Trợ lý Giảng dạy AI. Tôi sẵn sàng hỗ trợ thầy cô soạn giáo án, tạo câu hỏi trắc nghiệm hoặc tra cứu tài liệu bài giảng.'
+          : portal === 'ADMIN'
+          ? 'Chào Quản trị viên! Tôi là Trợ lý Quản trị & Vận hành. Tôi có thể hỗ trợ bạn tra cứu số liệu học viên, tỷ lệ chuyên cần và báo cáo toàn trung tâm.'
+          : 'Chào bạn! Tôi là AI Gia sư đồng hành học tập. Bạn muốn hướng dẫn giải bài tập, giải thích kiến thức hay ôn luyện chủ đề nào hôm nay?'
 
-          const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-          setRecentTranscripts([{ role: 'assistant', text: greeting, time: timeStr }])
-          speakAiResponse(greeting)
-        }
+      const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      setRecentTranscripts([{ role: 'assistant', text: greeting, time: timeStr }])
+
+      // 8.2. Kết nối Audio & Microphone song song (Timeout bảo đảm không bao giờ treo)
+      const connectPromise = initAudioVisualizer()
+      const timeoutPromise = new Promise<boolean>((resolve) => setTimeout(() => resolve(false), 2000))
+
+      Promise.race([connectPromise, timeoutPromise]).then((ok) => {
+        if (!isComponentMounted.current) return
+
+        setCallStatus('LISTENING')
+        initSpeechRecognition()
+        speakAiResponse(greeting)
       })
     } else {
-      // Giải phóng tài nguyên khi đóng modal
+      // Teardown khi đóng
       if (recognitionRef.current) {
         try {
           recognitionRef.current.onend = null
@@ -508,15 +551,21 @@ export const AiVoiceCallModal: React.FC<AiVoiceCallProps> = ({
     }
   }, [isOpen, initAudioVisualizer, initSpeechRecognition, portal, speakAiResponse])
 
-  // 8. Bật / Tắt Microphone (Thực tế)
+  // 9. Bật / Tắt Microphone
   const toggleMute = () => {
+    if (audioContextRef.current?.state === 'suspended') {
+      audioContextRef.current.resume().catch(() => {})
+    }
+
     if (isMuted) {
       setIsMuted(false)
       setCallStatus('LISTENING')
       if (micStreamRef.current) {
         micStreamRef.current.getAudioTracks().forEach((t) => (t.enabled = true))
       }
-      if (recognitionRef.current) {
+      if (!micStreamRef.current?.active) {
+        initAudioVisualizer().then(() => initSpeechRecognition())
+      } else if (recognitionRef.current) {
         try {
           recognitionRef.current.start()
         } catch {}
@@ -535,7 +584,7 @@ export const AiVoiceCallModal: React.FC<AiVoiceCallProps> = ({
     }
   }
 
-  // 9. Bật / Tắt Loa (Speaker Output)
+  // 10. Bật / Tắt Loa (Speaker Output)
   const toggleSpeaker = () => {
     if (speakerEnabled) {
       setSpeakerEnabled(false)
@@ -547,7 +596,16 @@ export const AiVoiceCallModal: React.FC<AiVoiceCallProps> = ({
     }
   }
 
-  // 10. Kết thúc cuộc gọi
+  // 11. Xử lý gửi văn bản trực tiếp trong modal Voice
+  const handleManualSend = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!textInput.trim() || callStatus === 'PROCESSING') return
+    const text = textInput.trim()
+    setTextInput('')
+    processUserSpeech(text)
+  }
+
+  // 12. Kết thúc cuộc gọi
   const handleEndCall = () => {
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel()
@@ -561,7 +619,6 @@ export const AiVoiceCallModal: React.FC<AiVoiceCallProps> = ({
 
   if (!isOpen) return null
 
-  // Tính scale phóng đại của Quả cầu năng lượng Orb dựa trên micLevel
   const orbScale = 1 + Math.min(0.28, micLevel * 3.5)
 
   return (
@@ -657,7 +714,7 @@ export const AiVoiceCallModal: React.FC<AiVoiceCallProps> = ({
                   ? 'Microphone đang tắt'
                   : callStatus === 'CONNECTING'
                   ? 'Đang kết nối...'
-                  : 'Lỗi thiết bị'}
+                  : 'Sẵn sàng'}
               </span>
             </div>
           </div>
@@ -668,52 +725,67 @@ export const AiVoiceCallModal: React.FC<AiVoiceCallProps> = ({
               <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-start gap-2.5">
                 <AlertCircle className="w-5 h-5 text-rose-400 shrink-0 mt-0.5" />
                 <div>
-                  <p className="font-semibold mb-1">Không thể khởi tạo cuộc gọi Voice:</p>
+                  <p className="font-semibold mb-1">Thông báo kết nối:</p>
                   <p className="leading-relaxed">{errorMessage}</p>
                 </div>
               </div>
-            ) : (
-              <>
-                {/* 1. Canvas Visualizer sóng âm thanh thực tế */}
-                <div className="w-full h-14 rounded-2xl bg-slate-950/70 border border-slate-800 flex items-center justify-center p-1.5 overflow-hidden shadow-inner shrink-0">
-                  <canvas ref={canvasRef} width={420} height={50} className="w-full h-full" />
+            ) : null}
+
+            {micNotice ? (
+              <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-200 text-xs flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2 min-w-0">
+                  <AlertCircle className="w-4 h-4 text-amber-400 shrink-0" />
+                  <p className="truncate text-[11px]">{micNotice}</p>
                 </div>
+                <button
+                  type="button"
+                  onClick={() => initAudioVisualizer().then(() => initSpeechRecognition())}
+                  className="px-2 py-1 rounded bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 font-bold text-[10px] whitespace-nowrap cursor-pointer flex items-center gap-1"
+                >
+                  <RotateCcw className="w-3 h-3" />
+                  Thử lại
+                </button>
+              </div>
+            ) : null}
 
-                {/* 2. Khu vực Lịch sử hội thoại đầy đủ (Không bao giờ trống) */}
-                <div className="flex-1 overflow-y-auto rounded-2xl bg-slate-800/30 border border-slate-800/80 p-3 space-y-2 text-xs min-h-[140px] max-h-[220px]">
-                  {recentTranscripts.map((t, idx) => (
-                    <div
-                      key={idx}
-                      className={`p-2.5 rounded-xl leading-relaxed ${
-                        t.role === 'user'
-                          ? 'bg-indigo-950/70 border border-indigo-500/30 text-indigo-100 ml-4'
-                          : 'bg-slate-900/90 border border-slate-700/60 text-slate-200 mr-4'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between text-[10px] font-bold mb-1 opacity-80">
-                        <span className={t.role === 'user' ? 'text-indigo-300' : 'text-emerald-400'}>
-                          {t.role === 'user' ? 'Bạn' : agentName}
-                        </span>
-                        <span className="font-mono text-slate-400">{t.time}</span>
-                      </div>
-                      <p className="text-xs">{t.text}</p>
-                    </div>
-                  ))}
+            {/* 1. Canvas Visualizer sóng âm thanh linh hoạt */}
+            <div className="w-full h-14 rounded-2xl bg-slate-950/70 border border-slate-800 flex items-center justify-center p-1.5 overflow-hidden shadow-inner shrink-0">
+              <canvas ref={canvasRef} width={420} height={50} className="w-full h-full" />
+            </div>
 
-                  {/* Lời đang nói thời gian thực (Interim Speech Preview) */}
-                  {userTranscript && (
-                    <div className="p-2.5 rounded-xl bg-indigo-950/90 border border-indigo-400/50 text-indigo-200 ml-4 animate-in fade-in">
-                      <span className="font-bold text-indigo-300 text-[10px] block mb-0.5">
-                        Bạn đang nói...
-                      </span>
-                      <p className="italic">{userTranscript}</p>
-                    </div>
-                  )}
-
-                  <div ref={transcriptEndRef} />
+            {/* 2. Khu vực Lịch sử hội thoại đầy đủ (Không bao giờ trống) */}
+            <div className="flex-1 overflow-y-auto rounded-2xl bg-slate-800/30 border border-slate-800/80 p-3 space-y-2 text-xs min-h-[140px] max-h-[220px]">
+              {recentTranscripts.map((t, idx) => (
+                <div
+                  key={idx}
+                  className={`p-2.5 rounded-xl leading-relaxed ${
+                    t.role === 'user'
+                      ? 'bg-indigo-950/70 border border-indigo-500/30 text-indigo-100 ml-4'
+                      : 'bg-slate-900/90 border border-slate-700/60 text-slate-200 mr-4'
+                  }`}
+                >
+                  <div className="flex items-center justify-between text-[10px] font-bold mb-1 opacity-80">
+                    <span className={t.role === 'user' ? 'text-indigo-300' : 'text-emerald-400'}>
+                      {t.role === 'user' ? 'Bạn' : agentName}
+                    </span>
+                    <span className="font-mono text-slate-400">{t.time}</span>
+                  </div>
+                  <p className="text-xs">{t.text}</p>
                 </div>
-              </>
-            )}
+              ))}
+
+              {/* Lời đang nói thời gian thực (Interim Speech Preview) */}
+              {userTranscript && (
+                <div className="p-2.5 rounded-xl bg-indigo-950/90 border border-indigo-400/50 text-indigo-200 ml-4 animate-in fade-in">
+                  <span className="font-bold text-indigo-300 text-[10px] block mb-0.5">
+                    Bạn đang nói...
+                  </span>
+                  <p className="italic">{userTranscript}</p>
+                </div>
+              )}
+
+              <div ref={transcriptEndRef} />
+            </div>
 
             {/* Nút ngắt lời nổi bật khi AI đang nói */}
             {callStatus === 'SPEAKING' && (
@@ -728,6 +800,26 @@ export const AiVoiceCallModal: React.FC<AiVoiceCallProps> = ({
                 </button>
               </div>
             )}
+
+            {/* Fallback Text Input (Nhập văn bản khi không tiện bật Mic) */}
+            <form onSubmit={handleManualSend} className="flex items-center gap-2 shrink-0">
+              <input
+                type="text"
+                value={textInput}
+                onChange={(e) => setTextInput(e.target.value)}
+                placeholder={isMuted ? 'Micro đang tắt — Gõ câu hỏi để AI trả lời giọng nói...' : 'Nói qua mic hoặc gõ câu hỏi vào đây...'}
+                className="flex-1 px-3 py-2 rounded-xl bg-slate-800/80 border border-slate-700 text-xs text-white placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+              />
+              <button
+                type="submit"
+                disabled={!textInput.trim() || callStatus === 'PROCESSING'}
+                className="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-xs font-bold text-white transition flex items-center gap-1 cursor-pointer"
+                title="Gửi câu hỏi"
+              >
+                <span>Gửi</span>
+                <Send className="w-3.5 h-3.5" />
+              </button>
+            </form>
           </div>
 
           {/* Footer Điều khiển cuộc gọi thực tế */}
@@ -778,9 +870,7 @@ export const AiVoiceCallModal: React.FC<AiVoiceCallProps> = ({
               ) : (
                 <Volume2 className="w-5 h-5 text-emerald-400" />
               )}
-              <span className="text-[10px] font-bold">
-                {speakerEnabled ? 'Loa bật' : 'Loa tắt'}
-              </span>
+              <span className="text-[10px] font-bold">{speakerEnabled ? 'Loa bật' : 'Loa tắt'}</span>
             </button>
           </div>
         </div>

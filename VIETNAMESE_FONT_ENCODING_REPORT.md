@@ -35,3 +35,4 @@ font-family: 'Plus Jakarta Sans', 'Be Vietnam Pro', system-ui, -apple-system, 'S
    Thuật toán `speakable` lọc sạch các ký tự đặc biệt (`*`, `#`, `_`, `` ` ``, `https://...`) để TTS không phát âm các ký tự lập trình gây khó chịu.
 2. **Giọng đọc tiếng Việt bản địa:**
    SpeechSynthesis tự động quét và lựa chọn voice có `lang = 'vi-VN'` (như Google Tiếng Việt, Microsoft HoaiMy, Microsoft NamMinh), cho ngữ điệu tự nhiên, chuẩn dấu hỏi/ngã.
+

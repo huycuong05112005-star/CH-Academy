@@ -27,6 +27,7 @@ import {
 } from 'lucide-react'
 import { exportToCsv } from '../../../utils/exportCsv'
 import { SessionQuestionExamModal } from '../../../components/assessment/SessionQuestionExamModal'
+import { selectClassChat } from '../../../utils/chatSync'
 
 export const ClassListPage: React.FC = () => {
   const [classes, setClasses] = useState<ClassItem[]>([])
@@ -335,6 +336,16 @@ export const ClassListPage: React.FC = () => {
   // View Mode: LIST or TIMETABLE
   const [viewMode, setViewMode] = useState<'LIST' | 'TIMETABLE'>('LIST')
   const [detailClass, setDetailClass] = useState<ClassItem | null>(null)
+
+  // Đồng bộ chọn lớp vào Widget Chat nhóm lớp
+  useEffect(() => {
+    if (detailClass?.id) {
+      selectClassChat(detailClass.id, {
+        className: detailClass.name,
+        courseName: detailClass.courseName
+      })
+    }
+  }, [detailClass])
 
   // Calculate real metrics from loaded data
   const countInProgress = classes.filter((c) => c.status === 'IN_PROGRESS').length

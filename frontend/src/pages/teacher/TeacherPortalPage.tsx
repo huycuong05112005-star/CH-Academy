@@ -48,6 +48,7 @@ import {
 import { AmbientGlow } from '../../components/ui/AmbientGlow'
 import { Tilt3DCard } from '../../components/3d/Tilt3DCard'
 import { CyberOrb3D } from '../../components/3d/CyberOrb3D'
+import { selectClassChat } from '../../utils/chatSync'
 import { LayoutDashboard } from 'lucide-react'
 import { TeacherDashboardTab } from './components/TeacherDashboardTab'
 import { TeacherExamStudioTab } from './components/TeacherExamStudioTab'
@@ -165,6 +166,7 @@ export const TeacherPortalPage: React.FC = () => {
 
   const loadClassDetail = async (classId: number) => {
     setSelectedClassId(classId)
+    selectClassChat(classId)
     try {
       const res = await teacherApi.getClassDetails(classId)
       if (res.success && res.data) {

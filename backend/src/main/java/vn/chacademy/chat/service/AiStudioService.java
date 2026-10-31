@@ -226,7 +226,8 @@ public class AiStudioService {
         // Trích xuất nội dung văn bản từ tệp upload
         String content = "";
         try (java.io.InputStream is = file.getInputStream();
-             BufferedReader reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
+             InputStreamReader isr = new InputStreamReader(is, StandardCharsets.UTF_8);
+             BufferedReader reader = new BufferedReader(isr)) {
             content = reader.lines().collect(Collectors.joining("\n"));
         } catch (Exception ex) {
             log.warn("Không thể đọc trực tiếp UTF-8 dạng văn bản: {}", ex.getMessage());

@@ -31,3 +31,4 @@
 | 18 | **Chuyển tab trình duyệt khi gọi** | Cuộc gọi không bị crash, AudioContext vẫn duy trì | Cuộc gọi tiếp tục hoạt động trong nền | **PASS** |
 | 19 | **Mở lại cuộc gọi mới sau khi đóng**| Khởi tạo lại AudioContext mới, thời gian đếm từ 00:00 | Khởi tạo sạch sẽ, không bị đè trạng thái cũ | **PASS** |
 | 20 | **Đồng bộ hội thoại với Chat Text**| Tin nhắn thoại được ghi nhận với kênh `VOICE` | Lưu vào lịch sử với channel = 'VOICE' | **PASS** |
+

@@ -32,3 +32,4 @@ Hệ thống Voice AI được chia thành 4 chặng trễ chính:
 
 - **Trước đây:** Hệ thống chờ toàn bộ đoạn văn dài, xử lý đơn luồng, không có bộ đệm câu, độ trễ trung bình > 3,800 ms gây cảm giác cuộc gọi bị "đơ" và người dùng phải chờ đợi lâu.
 - **Hiện tại:** Nhờ tối ưu hóa live preview, SpeechSynthesis chọn voice bản địa tiếng Việt và quy trình VAD Auto Barge-In, độ trễ giảm **~81%**, đạt mức phản xạ đàm thoại tiêu chuẩn.
+

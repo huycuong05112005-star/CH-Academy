@@ -28,3 +28,4 @@
 
 ### 4. Phòng chống gửi lặp (Idempotent Deduplication & Rate Limiting)
 - Mọi tin nhắn văn bản đều gửi kèm `clientMsgId`. Backend kiểm tra bảng `chat_messages` theo cặp `(conversation_id, client_msg_id)`, nếu phát hiện trùng lặp sẽ trả về bản ghi cũ mà không ghi đè hay tạo tin nhắn rác.
+

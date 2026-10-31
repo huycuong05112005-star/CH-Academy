@@ -50,3 +50,4 @@ Mọi phản hồi có sử dụng tri thức RAG đều trả về danh sách n
 ```
 
 Trên giao diện Frontend ([`MessageBubble.tsx`](file:///e:/CA_NHAN/CH_Academy/frontend/src/components/chat/MessageBubble.tsx)), các nguồn này được hiển thị thành các pill trích dẫn nguồn có thể mở rộng xem chi tiết trích đoạn, tạo niềm tin tối đa cho học viên và phụ huynh.
+

@@ -62,3 +62,4 @@ stateDiagram-v2
 ### 3. Lưu trữ & Trình bày Lịch sử Hội thoại Trực tiếp (Live Transcripts)
 - Vùng hội thoại lưu trữ toàn bộ các lượt thoại (`recentTranscripts`) với đầy đủ người nói, nội dung, mốc thời gian.
 - Hiển thị trực tiếp nội dung đang nói dở (`userTranscript` - interim speech) dưới dạng khối phát sáng để người dùng biết hệ thống đang lắng nghe chính xác từng từ.
+

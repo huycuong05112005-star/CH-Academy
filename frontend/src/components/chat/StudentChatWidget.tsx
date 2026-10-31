@@ -31,6 +31,14 @@ export const StudentChatWidget: React.FC = () => {
         })
         .catch(() => {})
     }
+
+    const handleClassSync = () => {
+      setActiveTab('group')
+    }
+    window.addEventListener('ch_academy_select_class_chat', handleClassSync)
+    return () => {
+      window.removeEventListener('ch_academy_select_class_chat', handleClassSync)
+    }
   }, [])
 
   return (

@@ -67,3 +67,4 @@ sequenceDiagram
    GET /api/v1/chat/classes/conversations/1/members
    ```
    *Kết quả thực tế:* Trả về 5 thành viên gồm Giảng viên Nguyễn Thị Minh Hạnh (`TEACHER`), các học viên (`STUDENT`) và Quản trị viên (`ADMIN`).
+

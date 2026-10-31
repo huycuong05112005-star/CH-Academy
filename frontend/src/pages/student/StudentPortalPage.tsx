@@ -48,6 +48,7 @@ import {
 import { AmbientGlow } from '../../components/ui/AmbientGlow'
 import { Tilt3DCard } from '../../components/3d/Tilt3DCard'
 import { CyberOrb3D } from '../../components/3d/CyberOrb3D'
+import { selectClassChat } from '../../utils/chatSync'
 
 export const StudentPortalPage: React.FC = () => {
   const { user, logout } = useAuth()
@@ -229,6 +230,7 @@ export const StudentPortalPage: React.FC = () => {
     setSelectedClassId(classId)
     setLoadingClassDetail(true)
     setClassDetailError(null)
+    selectClassChat(classId)
     try {
       const res = await studentsApi.getClassDetails(classId)
       if (res.success && res.data) {

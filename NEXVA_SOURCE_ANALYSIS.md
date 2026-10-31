@@ -57,3 +57,4 @@ NEXVA sử dụng `analyser.getFloatTimeDomainData` để tính RMS năng lượ
 
 ### 3. Cơ chế ngắt lời tự động (Auto Barge-In)
 Khi AI đang phát âm thanh (`SPEAKING`), nếu người dùng bắt đầu nói (vocal energy vượt ngưỡng liên tục trong 4 frames) hoặc bấm quả cầu Orb, hệ thống lập tức hủy phát âm thanh (`speechSynthesis.cancel()`), chuyển trạng thái sang `LISTENING` và thu nhận câu hỏi mới.
+
