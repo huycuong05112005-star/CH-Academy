@@ -113,6 +113,7 @@ public class GenAiChatService {
 
     @Transactional
     public AiChatResponse askAi(AiChatRequest request, User user) {
+        long startTime = System.currentTimeMillis();
         String question = request.getQuestion() != null ? request.getQuestion().trim() : "";
         if (question.isEmpty()) {
             throw new BadRequestException("Câu hỏi không được để trống");
@@ -215,9 +216,14 @@ public class GenAiChatService {
         conversation.setUpdatedAt(Instant.now());
         conversationRepository.save(conversation);
 
+        long latencyMs = System.currentTimeMillis() - startTime;
+        List<String> audioSentences = splitVietnameseSentences(answer);
+
         return AiChatResponse.builder()
                 .conversationId(conversation.getId())
                 .answer(answer)
+                .latencyMs(latencyMs)
+                .sentences(audioSentences)
                 .sources(citations)
                 .build();
     }
@@ -424,7 +430,10 @@ public class GenAiChatService {
 
     private String callOpenRouterLlm(String question, String systemPrompt, String context, List<AiChatResponse.SourceCitation> citations) {
         try {
-            RestTemplate restTemplate = new RestTemplate();
+            org.springframework.http.client.SimpleClientHttpRequestFactory factory = new org.springframework.http.client.SimpleClientHttpRequestFactory();
+            factory.setConnectTimeout(3000);
+            factory.setReadTimeout(8000);
+            RestTemplate restTemplate = new RestTemplate(factory);
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             headers.setBearerAuth(openRouterKey);
@@ -457,7 +466,7 @@ public class GenAiChatService {
                         Object messageObj = firstChoice.get("message");
                         if (messageObj instanceof Map<?, ?> message) {
                             citations.add(AiChatResponse.SourceCitation.builder()
-                                    .documentName("Mô hình AI: " + aiModel)
+                                     .documentName("Mô hình AI: " + aiModel)
                                     .section("OpenRouter Engine")
                                     .snippet("Sinh câu trả lời từ LLM kết hợp dữ liệu ngữ cảnh CH Academy")
                                     .build());
@@ -470,6 +479,42 @@ public class GenAiChatService {
             log.warn("Lỗi gọi OpenRouter API: {}. Sử dụng engine nội bộ.", ex.getMessage());
         }
         return generateContextualAnswer(question, context, "PORTAL", null, citations);
+    }
+
+    public List<String> splitVietnameseSentences(String text) {
+        if (text == null || text.isBlank()) return List.of();
+        String clean = text
+                .replaceAll("https?://\\S+", "")
+                .replaceAll("[*#_`>|~]+", " ")
+                .replaceAll("\\s+", " ")
+                .trim();
+
+        String[] parts = clean.split("(?<=[.!?…])\\s+|(?<=\\n+)");
+        List<String> list = new ArrayList<>();
+        for (String p : parts) {
+            String s = p.trim();
+            if (!s.isEmpty()) {
+                list.add(s);
+            }
+        }
+        if (list.isEmpty() && !clean.isEmpty()) {
+            list.add(clean);
+        }
+        return list;
+    }
+
+    public Map<String, Object> getVoiceDiagnostics() {
+        Map<String, Object> diag = new HashMap<>();
+        diag.put("status", "UP");
+        diag.put("timestamp", Instant.now().toString());
+        diag.put("model", aiModel);
+        diag.put("openRouterConfigured", (openRouterKey != null && !openRouterKey.isBlank()));
+        diag.put("sttEngines", List.of("WEB_SPEECH_API", "MEDIA_RECORDER_VAD"));
+        diag.put("ttsEngines", List.of("WEB_SPEECH_SYNTHESIS", "SENTENCE_STREAMING"));
+        diag.put("language", "vi-VN");
+        diag.put("fallbackEngine", "ContextualRuleEngine");
+        diag.put("latencyTargetMs", 1500);
+        return diag;
     }
 
     private String generateContextualAnswer(String question, String context, String portal, User user, List<AiChatResponse.SourceCitation> citations) {

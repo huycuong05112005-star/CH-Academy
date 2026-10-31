@@ -48,6 +48,18 @@ export const classChatApi = {
 // ==========================================
 
 export const aiChatApi = {
+  getVoiceDiagnostics: (): Promise<ApiResponse<{
+    status: string
+    timestamp: string
+    model: string
+    openRouterConfigured: boolean
+    sttEngines: string[]
+    ttsEngines: string[]
+    language: string
+    fallbackEngine: string
+    latencyTargetMs: number
+  }>> => apiClient.get('/chat/ai/voice/diagnostics'),
+
   getPortalConfig: (portal?: string): Promise<ApiResponse<PortalConfigDto>> => {
     const q = portal ? `?portal=${encodeURIComponent(portal)}` : ''
     return apiClient.get<PortalConfigDto>(`/chat/ai/portal-config${q}`)

@@ -13,6 +13,9 @@ import java.util.List;
 public class AiChatResponse {
     private Long conversationId;
     private String answer;
+    private Long latencyMs;
+    @Builder.Default
+    private List<String> sentences = new ArrayList<>();
     @Builder.Default
     private List<SourceCitation> sources = new ArrayList<>();
 

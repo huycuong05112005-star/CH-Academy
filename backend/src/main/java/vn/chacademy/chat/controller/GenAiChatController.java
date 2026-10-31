@@ -46,6 +46,11 @@ public class GenAiChatController {
         return ResponseEntity.ok(ApiResponse.success(config));
     }
 
+    @GetMapping("/voice/diagnostics")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> getVoiceDiagnostics() {
+        return ResponseEntity.ok(ApiResponse.success("Kiểm tra Voice AI Runtime thành công", genAiChatService.getVoiceDiagnostics()));
+    }
+
     // ==========================================
     // 1. CỔNG XÁC THỰC (AUTHENTICATED PORTALS)
     // ==========================================

@@ -73,6 +73,8 @@ export interface AiChatSourceCitation {
 export interface AiChatResponseData {
   conversationId: number
   answer: string
+  latencyMs?: number
+  sentences?: string[]
   sources: AiChatSourceCitation[]
 }
 

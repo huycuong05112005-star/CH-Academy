@@ -5,7 +5,7 @@
  */
 export const selectClassChat = (
   classId: number,
-  options?: { courseId?: number; className?: string; courseName?: string }
+  options?: { courseId?: number; className?: string | null; courseName?: string | null }
 ) => {
   if (typeof window !== 'undefined') {
     window.dispatchEvent(
