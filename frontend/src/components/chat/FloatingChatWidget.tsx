@@ -246,7 +246,11 @@ export const FloatingChatWidget: React.FC = () => {
   useEffect(() => {
     if (selectedConvId) {
       loadMessages(selectedConvId)
+      setConversations((prev) =>
+        prev.map((c) => (c.id === selectedConvId ? { ...c, unreadCount: 0 } : c))
+      )
       classChatApi.markAsRead(selectedConvId).catch(() => {})
+      window.dispatchEvent(new CustomEvent('ch-chat-unread-updated', { detail: { convId: selectedConvId } }))
     }
   }, [selectedConvId, loadMessages])
 
@@ -352,12 +356,20 @@ export const FloatingChatWidget: React.FC = () => {
     e.preventDefault()
     if (!selectedConvId || !inputMessage.trim() || sendingMsg) return
     const text = inputMessage.trim()
+    const clientMsgId = 'msg_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9)
     setInputMessage('')
     setSendingMsg(true)
     try {
-      const res = await classChatApi.sendMessage(selectedConvId, { content: text })
+      const res = await classChatApi.sendMessage(selectedConvId, { content: text, clientMsgId })
       if (res.success && res.data) {
         setMessages((prev) => [...prev, res.data])
+        setConversations((prev) =>
+          prev.map((c) =>
+            c.id === selectedConvId
+              ? { ...c, lastMessage: 'Bạn: ' + text, lastMessageAt: new Date().toISOString(), unreadCount: 0 }
+              : c
+          )
+        )
         scrollToBottom()
       }
     } catch (err: unknown) {
@@ -692,14 +704,24 @@ export const FloatingChatWidget: React.FC = () => {
                     <button
                       key={c.id}
                       type="button"
-                      onClick={() => setSelectedConvId(c.id)}
-                      className={`px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition border ${
+                      onClick={() => {
+                        setSelectedConvId(c.id)
+                        setConversations((prev) =>
+                          prev.map((item) => (item.id === c.id ? { ...item, unreadCount: 0 } : item))
+                        )
+                      }}
+                      className={`px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition border inline-flex items-center gap-1.5 ${
                         selectedConvId === c.id
                           ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm'
                           : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700'
                       }`}
                     >
-                      {c.className || c.title}
+                      <span>{c.className || c.title}</span>
+                      {(c.unreadCount || 0) > 0 && (
+                        <span className="px-1.5 py-0.2 rounded-full text-[10px] font-black bg-rose-500 text-white">
+                          {c.unreadCount}
+                        </span>
+                      )}
                     </button>
                   ))}
                 </div>

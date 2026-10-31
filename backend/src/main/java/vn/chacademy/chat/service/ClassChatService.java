@@ -58,8 +58,13 @@ public class ClassChatService {
         for (ChatConversation c : conversations) {
             int members = memberRepository.countByConversationId(c.getId());
             Optional<ChatMember> myMember = memberRepository.findByConversationIdAndUserId(c.getId(), user.getId());
-            Long lastRead = myMember.map(ChatMember::getLastReadMessageId).orElse(null);
-            long unread = messageRepository.countUnreadMessages(c.getId(), lastRead);
+            long unread = 0;
+            if (myMember.isPresent()) {
+                Long lastRead = myMember.get().getLastReadMessageId();
+                unread = messageRepository.countUnreadMessagesExcludingSender(c.getId(), lastRead, user.getId());
+            } else if (isAdmin) {
+                unread = 0; // Quản trị viên chưa gia nhập nhóm hiển thị 0 để không bị rác
+            }
 
             Optional<ChatMessage> lastMsgOpt = messageRepository.findFirstByConversationIdOrderByCreatedAtDesc(c.getId());
             String lastMsg = lastMsgOpt.map(m -> m.getSender().getFullName() + ": " + m.getContent()).orElse("Chưa có tin nhắn nào");
@@ -68,6 +73,13 @@ public class ClassChatService {
             result.add(ChatConversationDto.fromEntity(c, unread, lastMsg, lastTime, members));
         }
         return result;
+    }
+
+    @Transactional(readOnly = true)
+    public long getTotalUnreadCount(User user) {
+        if (user == null) return 0;
+        List<ChatConversationDto> list = getUserConversations(user);
+        return list.stream().mapToLong(ChatConversationDto::getUnreadCount).sum();
     }
 
     @Transactional(readOnly = true)
@@ -85,6 +97,14 @@ public class ClassChatService {
 
         verifyMembership(conversationId, sender);
 
+        // Chống gửi tin nhắn trùng lặp (Idempotent deduplication)
+        if (request.getClientMsgId() != null && !request.getClientMsgId().isBlank()) {
+            Optional<ChatMessage> existing = messageRepository.findByConversationIdAndClientMsgId(conversationId, request.getClientMsgId().trim());
+            if (existing.isPresent()) {
+                return ChatMessageDto.fromEntity(existing.get());
+            }
+        }
+
         ChatMessage message = ChatMessage.builder()
                 .conversation(conversation)
                 .sender(sender)
@@ -92,18 +112,27 @@ public class ClassChatService {
                 .content(request.getContent().trim())
                 .attachmentUrl(request.getAttachmentUrl())
                 .attachmentName(request.getAttachmentName())
+                .clientMsgId(request.getClientMsgId() != null ? request.getClientMsgId().trim() : null)
                 .isPinned(false)
                 .createdAt(Instant.now())
                 .build();
 
         ChatMessage saved = messageRepository.save(message);
 
-        // Cập nhật lastReadMessageId cho người gửi
-        memberRepository.findByConversationIdAndUserId(conversationId, sender.getId())
-                .ifPresent(m -> {
-                    m.setLastReadMessageId(saved.getId());
-                    memberRepository.save(m);
-                });
+        // Cập nhật lastReadMessageId và lastReadAt cho người gửi
+        boolean isAdmin = sender.getRoles() != null && sender.getRoles().stream()
+                .anyMatch(r -> r.getId() != null && (r.getId().contains("ADMIN") || r.getId().equals("SUPER_ADMIN")));
+
+        ChatMember member = memberRepository.findByConversationIdAndUserId(conversationId, sender.getId())
+                .orElseGet(() -> memberRepository.save(ChatMember.builder()
+                        .conversation(conversation)
+                        .user(sender)
+                        .role(isAdmin ? "ADMIN" : "MEMBER")
+                        .joinedAt(Instant.now())
+                        .build()));
+        member.setLastReadMessageId(saved.getId());
+        member.setLastReadAt(Instant.now());
+        memberRepository.save(member);
 
         conversation.setUpdatedAt(Instant.now());
         conversationRepository.save(conversation);
@@ -114,13 +143,23 @@ public class ClassChatService {
     @Transactional
     public void markAsRead(Long conversationId, User user) {
         if (user == null) return;
+        ChatConversation conversation = conversationRepository.findById(conversationId).orElse(null);
+        if (conversation == null) return;
+
         messageRepository.findFirstByConversationIdOrderByCreatedAtDesc(conversationId)
                 .ifPresent(lastMsg -> {
-                    memberRepository.findByConversationIdAndUserId(conversationId, user.getId())
-                            .ifPresent(m -> {
-                                m.setLastReadMessageId(lastMsg.getId());
-                                memberRepository.save(m);
-                            });
+                    boolean isAdmin = user.getRoles() != null && user.getRoles().stream()
+                            .anyMatch(r -> r.getId() != null && (r.getId().contains("ADMIN") || r.getId().equals("SUPER_ADMIN")));
+                    ChatMember member = memberRepository.findByConversationIdAndUserId(conversationId, user.getId())
+                            .orElseGet(() -> memberRepository.save(ChatMember.builder()
+                                    .conversation(conversation)
+                                    .user(user)
+                                    .role(isAdmin ? "ADMIN" : "MEMBER")
+                                    .joinedAt(Instant.now())
+                                    .build()));
+                    member.setLastReadMessageId(lastMsg.getId());
+                    member.setLastReadAt(Instant.now());
+                    memberRepository.save(member);
                 });
     }
 

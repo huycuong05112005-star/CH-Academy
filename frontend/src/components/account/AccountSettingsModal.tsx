@@ -172,9 +172,9 @@ export const AccountSettingsModal: React.FC<AccountSettingsModalProps> = ({
       />
 
       {/* Center Wrapper: ensures dialog stays centered and top content is never cut off on short screens */}
-      <div className="flex min-h-full items-center justify-center p-3 sm:p-4 text-center">
+      <div className="flex min-h-full items-start justify-center p-3 sm:p-6 text-center">
         <div
-          className="relative w-full max-w-2xl bg-white dark:bg-[#151F31] rounded-2xl shadow-2xl border border-slate-200 dark:border-[#2A3A50] overflow-hidden flex flex-col max-h-[calc(100vh-2.5rem)] text-left [data-theme=glass]_&:bg-[#0B1528]/85 [data-theme=glass]_&:border-white/20 [data-theme=glass]_&:backdrop-blur-2xl animate-in zoom-in-95 duration-150"
+          className="relative w-full max-w-2xl bg-white dark:bg-[#151F31] rounded-2xl shadow-2xl border border-slate-200 dark:border-[#2A3A50] overflow-hidden flex flex-col max-h-[calc(100vh-3rem)] text-left my-auto [data-theme=glass]_&:bg-[#0B1528]/85 [data-theme=glass]_&:border-white/20 [data-theme=glass]_&:backdrop-blur-2xl animate-in zoom-in-95 duration-150"
           role="dialog"
           aria-modal="true"
           aria-labelledby="account-settings-title"

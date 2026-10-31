@@ -22,12 +22,15 @@ export const classChatApi = {
   getMyConversations: (): Promise<ApiResponse<ChatConversationItem[]>> =>
     apiClient.get<ChatConversationItem[]>('/chat/classes/conversations'),
 
+  getTotalUnreadCount: (): Promise<ApiResponse<number>> =>
+    apiClient.get<number>('/chat/classes/unread-count'),
+
   getMessages: (conversationId: number): Promise<ApiResponse<ChatMessageItem[]>> =>
     apiClient.get<ChatMessageItem[]>(`/chat/classes/conversations/${conversationId}/messages`),
 
   sendMessage: (
     conversationId: number,
-    data: { content: string; messageType?: string; attachmentUrl?: string; attachmentName?: string }
+    data: { content: string; messageType?: string; attachmentUrl?: string; attachmentName?: string; clientMsgId?: string }
   ): Promise<ApiResponse<ChatMessageItem>> =>
     apiClient.post<ChatMessageItem>(`/chat/classes/conversations/${conversationId}/messages`, data),
 

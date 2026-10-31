@@ -41,6 +41,14 @@ public class ClassChatController {
         return ResponseEntity.ok(ApiResponse.success(list));
     }
 
+    @GetMapping("/unread-count")
+    public ResponseEntity<ApiResponse<Long>> getTotalUnreadCount(
+            @AuthenticationPrincipal UserDetails userDetails) {
+        User user = getAuthenticatedUser(userDetails);
+        long count = classChatService.getTotalUnreadCount(user);
+        return ResponseEntity.ok(ApiResponse.success(count));
+    }
+
     @GetMapping("/conversations/{id}/messages")
     public ResponseEntity<ApiResponse<List<ChatMessageDto>>> getMessages(
             @PathVariable Long id,

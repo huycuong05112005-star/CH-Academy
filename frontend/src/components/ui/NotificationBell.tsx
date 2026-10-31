@@ -126,7 +126,7 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({
         </button>
 
         {isOpen && (
-          <div className="absolute right-0 mt-2 w-80 sm:w-96 rounded-2xl border border-slate-200 dark:border-[#2A3A50] bg-white dark:bg-[#101B2D] shadow-2xl py-3 z-50 overflow-hidden flex flex-col max-h-[min(500px,calc(100vh-5rem))] animate-in fade-in zoom-in-95 duration-150 [data-theme=glass]_&:bg-[#0B1528]/95 [data-theme=glass]_&:border-white/20 [data-theme=glass]_&:backdrop-blur-2xl">
+          <div className="absolute right-0 mt-2 w-80 sm:w-96 rounded-2xl border border-slate-200 dark:border-[#2A3A50] bg-white dark:bg-[#101B2D] shadow-2xl py-3 z-50 overflow-hidden flex flex-col max-h-[min(460px,calc(100vh-5rem))] animate-in fade-in zoom-in-95 duration-150 [data-theme=glass]_&:bg-[#0B1528]/95 [data-theme=glass]_&:border-white/20 [data-theme=glass]_&:backdrop-blur-2xl">
             <div className="px-4 pb-2.5 border-b border-slate-100 dark:border-[#2A3A50] flex items-center justify-between shrink-0">
               <div className="flex items-center gap-1.5">
                 <span className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-[#E8EEF7]">

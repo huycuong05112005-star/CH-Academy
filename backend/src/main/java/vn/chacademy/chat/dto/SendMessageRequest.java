@@ -17,5 +17,6 @@ public class SendMessageRequest {
 
     private String attachmentUrl;
     private String attachmentName;
+    private String clientMsgId;
 }
 

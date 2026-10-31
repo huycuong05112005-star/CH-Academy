@@ -40,6 +40,9 @@ public class ChatMessage {
     @Column(name = "attachment_name", length = 255)
     private String attachmentName;
 
+    @Column(name = "client_msg_id", length = 100)
+    private String clientMsgId;
+
     @Column(name = "is_pinned")
     @Builder.Default
     private Boolean isPinned = false;

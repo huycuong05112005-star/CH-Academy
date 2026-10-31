@@ -203,7 +203,7 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({
         {/* Dropdown Popover */}
         {isOpen && (
           <div
-            className="absolute right-0 top-full mt-2 w-[calc(100vw-1.5rem)] max-w-xs sm:w-80 sm:max-w-none rounded-2xl bg-white dark:bg-[#151F31] border border-slate-200 dark:border-[#2A3A50] shadow-2xl z-50 overflow-hidden flex flex-col max-h-[min(560px,calc(100vh-5rem))] animate-in fade-in zoom-in-95 duration-150 [data-theme=glass]_&:bg-[#0B1528]/95 [data-theme=glass]_&:border-white/20 [data-theme=glass]_&:backdrop-blur-2xl"
+            className="absolute right-0 top-full mt-2 w-[calc(100vw-1.5rem)] max-w-xs sm:w-80 sm:max-w-none rounded-2xl bg-white dark:bg-[#151F31] border border-slate-200 dark:border-[#2A3A50] shadow-2xl z-50 overflow-hidden flex flex-col max-h-[min(480px,calc(100vh-5rem))] animate-in fade-in zoom-in-95 duration-150 [data-theme=glass]_&:bg-[#0B1528]/95 [data-theme=glass]_&:border-white/20 [data-theme=glass]_&:backdrop-blur-2xl"
             role="menu"
             aria-orientation="vertical"
           >

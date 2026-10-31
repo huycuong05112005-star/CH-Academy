@@ -91,9 +91,9 @@ export const NotificationDetailModal: React.FC<NotificationDetailModalProps> = (
       />
 
       {/* Center Wrapper: ensures modal is vertically centered on tall viewports, and starts from top on short viewports without cutting off */}
-      <div className="flex min-h-full items-center justify-center p-3 sm:p-4 text-center">
+      <div className="flex min-h-full items-start justify-center p-3 sm:p-6 text-center">
         <div
-          className="relative w-full max-w-lg bg-white dark:bg-[#111C2E] border border-slate-200 dark:border-[#2A3A50] rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[calc(100vh-2.5rem)] text-left animate-in zoom-in-95 duration-150 [data-theme=glass]_&:bg-[#0B1528]/95 [data-theme=glass]_&:border-white/20 [data-theme=glass]_&:backdrop-blur-2xl"
+          className="relative w-full max-w-lg bg-white dark:bg-[#111C2E] border border-slate-200 dark:border-[#2A3A50] rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[calc(100vh-3rem)] text-left my-auto animate-in zoom-in-95 duration-150 [data-theme=glass]_&:bg-[#0B1528]/95 [data-theme=glass]_&:border-white/20 [data-theme=glass]_&:backdrop-blur-2xl"
           role="dialog"
           aria-modal="true"
           onClick={(e) => e.stopPropagation()}

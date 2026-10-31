@@ -292,12 +292,12 @@ public class ExamService {
                 .createdAt(Instant.now())
                 .build());
 
-        // Gửi thông báo đến Quản trị viên
+        // Gửi thông báo đến Quản trị viên & Cán bộ khảo thí
         try {
             notificationRepository.save(vn.chacademy.notification.entity.Notification.builder()
                     .title("Đề thi mới chờ duyệt: " + saved.getTitle())
                     .content("Giảng viên " + (actor != null ? actor.getFullName() : "") + " đã gửi đề thi [" + saved.getCode() + "] (" + saved.getExamQuestions().size() + " câu hỏi) chờ phê duyệt.")
-                    .targetAudience("ALL")
+                    .targetAudience("TEACHERS")
                     .priority("HIGH")
                     .createdBy(actor)
                     .build());

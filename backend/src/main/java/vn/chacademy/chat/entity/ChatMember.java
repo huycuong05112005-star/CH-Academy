@@ -38,5 +38,8 @@ public class ChatMember {
 
     @Column(name = "last_read_message_id")
     private Long lastReadMessageId;
+
+    @Column(name = "last_read_at")
+    private Instant lastReadAt;
 }
 

@@ -434,8 +434,9 @@ export const AiVoiceCallModal: React.FC<AiVoiceCallProps> = ({
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="relative w-full max-w-lg bg-gradient-to-b from-slate-900 to-slate-950 border border-slate-700/60 rounded-3xl shadow-2xl overflow-hidden flex flex-col text-white">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200">
+      <div className="flex min-h-full items-start justify-center p-3 sm:p-4 text-center">
+        <div className="relative w-full max-w-lg bg-gradient-to-b from-slate-900 to-slate-950 border border-slate-700/60 rounded-3xl shadow-2xl overflow-hidden flex flex-col text-white text-left my-auto max-h-[calc(100vh-2rem)]">
         {/* Nút đóng góc trên */}
         <button
           onClick={handleEndCall}
@@ -617,5 +618,6 @@ export const AiVoiceCallModal: React.FC<AiVoiceCallProps> = ({
         </div>
       </div>
     </div>
+  </div>
   )
 }

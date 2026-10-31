@@ -1595,9 +1595,9 @@ export const StudentPortalPage: React.FC = () => {
             onClick={() => setShowQrModal(false)}
             aria-hidden="true"
           />
-          <div className="flex min-h-full items-center justify-center p-4 text-center">
+          <div className="flex min-h-full items-start justify-center p-4 text-center">
             <div
-              className="bg-white dark:bg-[#151F31] rounded-3xl border border-slate-200 dark:border-[#2A3A50] max-w-sm w-full p-6 text-center shadow-2xl relative text-left animate-in zoom-in-95 duration-150"
+              className="bg-white dark:bg-[#151F31] rounded-3xl border border-slate-200 dark:border-[#2A3A50] max-w-sm w-full p-6 text-center shadow-2xl relative text-left my-auto animate-in zoom-in-95 duration-150"
               onClick={(e) => e.stopPropagation()}
             >
               <h3 className="text-base font-bold text-[#142B4A] dark:text-[#E8EEF7] mb-1 text-center">
