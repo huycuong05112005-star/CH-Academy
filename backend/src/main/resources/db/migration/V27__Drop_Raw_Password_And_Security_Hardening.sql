@@ -7,3 +7,4 @@ UPDATE users SET raw_password = NULL WHERE raw_password IS NOT NULL;
 
 -- 2. Xóa cột raw_password khỏi bảng users
 ALTER TABLE users DROP COLUMN IF EXISTS raw_password;
+

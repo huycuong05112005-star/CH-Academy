@@ -1,29 +1,31 @@
-# BÁO CÁO BẢO MẬT: 21. BẢO MẬT HẠ TẦNG DOCKER VÀ MÔI TRƯỜNG PRODUCTION
+# 21. DOCKER & PRODUCTION SECURITY Security Report
 
-**Dự án:** CH Academy  
-**Phân loại rủi ro:** P0 - Critical (CWE-200 / CWE-284)  
-**Tiêu chuẩn đối chiếu:** CIS Docker Benchmark v1.6.0
+## Status: PASS (ĐÃ CÔ LẬP CỔNG DOCKER & THIẾT LẬP CHECKLIST TRIỂN KHAI)
 
----
+## Findings
+1. **Docker Compose:**
+   - Dịch vụ CSDL PostgreSQL được cấu hình trong `docker-compose.yml`.
+   - Trước khi sửa: Cổng 5432 bị mở ra tất cả các interface mạng.
+   - Sau khi sửa: Cổng 5432 được ràng buộc chặt chẽ vào `127.0.0.1`.
+2. **Cấu hình Spring Boot Production:**
+   - Chỉ mở cổng HTTP 8088 cho backend và 5173 cho frontend.
+   - Actuator nhạy cảm đã được bảo vệ bằng Spring Security yêu cầu quyền quản trị viên cao nhất.
 
-## 1. LỖ HỔNG PHÁT HIỆN TRƯỚC KHI GIA CỐ
-- Trong file `docker-compose.yml`, dịch vụ cơ sở dữ liệu PostgreSQL được cấu hình mở cổng công khai:
-  ```yaml
-  ports:
-    - "${POSTGRES_PORT:-5432}:5432"
-  ```
-  Khi triển khai trên máy chủ Linux/Cloud có IP tĩnh, Docker sẽ tự động bind cổng này vào `0.0.0.0:5432`, phơi bày cổng cơ sở dữ liệu ra toàn bộ mạng Internet công cộng!
+## What's at risk
+- Lộ cổng quản trị hoặc cơ sở dữ liệu khi triển khai lên máy chủ VPS/Cloud công cộng.
 
-## 2. BIỆN PHÁP KHẮC PHỤC TRIỆT ĐỂ
-- Cập nhật cấu hình cổng trong `docker-compose.yml` ràng buộc nghiêm ngặt vào loopback adapter nội bộ:
-  ```yaml
-  ports:
-    - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
-  ```
-  Ngăn chặn hoàn toàn truy cập trực tiếp từ Internet vào CSDL PostgreSQL. Mọi kết nối bắt buộc phải đi qua backend hoặc SSH tunnel có xác thực.
+## What's already secure
+- Database chạy trong mạng nội bộ Docker bridge network `ch_academy_network`.
+- Có healthcheck tự động giám sát trạng thái CSDL (`pg_isready`).
 
-## 3. THIẾT LẬP PRODUCTION SECURITY CHECKLIST
-1. Chạy container với tài nguyên giới hạn (CPU, RAM).
-2. Không lưu trữ mật khẩu root mặc định trong compose file khi triển khai thực tế.
-3. Giám sát các tiến trình container và tự động khởi động lại khi có sự cố (`restart: unless-stopped`).
-- Trạng thái: **ĐÃ GIA CỐ VÀ KHẮC PHỤC (PASS)**.
+## Recommendations
+- Khi đưa vào môi trường Production chính thức:
+  1. Đổi mật khẩu database `POSTGRES_PASSWORD` thành chuỗi ngẫu nhiên dài từ 24 ký tự trở lên.
+  2. Bật HTTPS / SSL thông qua Nginx Reverse Proxy hoặc Cloudflare CDN.
+  3. Bật HSTS trên Nginx để bắt buộc toàn bộ kết nối đi qua HTTPS.
+
+## Remediation Implemented
+- Đã chỉnh sửa `docker-compose.yml` cố định cổng vào `127.0.0.1:${POSTGRES_PORT:-5432}:5432`.
+
+## Verification Results
+- Container `ch_academy_postgres` khởi động khỏe mạnh (healthy) và chỉ chấp nhận kết nối nội bộ.

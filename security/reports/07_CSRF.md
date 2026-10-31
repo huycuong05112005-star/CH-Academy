@@ -1,16 +1,28 @@
-# BÁO CÁO BẢO MẬT: 07. BẢO VỆ PHÒNG CHỐNG TẤN CÔNG CSRF
+# 07. CSRF (CROSS-SITE REQUEST FORGERY) Security Report
 
-**Dự án:** CH Academy  
-**Phân loại rủi ro:** P2 - Medium (CWE-352)  
-**Tiêu chuẩn đối chiếu:** OWASP Top 10 A01:2021 – Broken Access Control
+## Status: PASS (KIẾN TRÚC STATELESS JWT REST API)
 
----
+## Findings
+1. **Cơ chế xác thực ứng dụng:**
+   - CH Academy xây dựng theo kiến trúc hiện đại: Single Page Application (SPA React) tách biệt hoàn toàn với Spring Boot REST API.
+   - Xác thực người dùng dựa trên Bearer Token (JWT) được truyền trong HTTP Request Header:
+     `Authorization: Bearer <token>`
+   - Hệ thống không sử dụng Cookie của trình duyệt để tự động xác thực các yêu cầu API thay đổi dữ liệu (POST, PUT, DELETE, PATCH).
+2. **Cấu hình Spring Security:**
+   - Trong `SecurityConfig.java`: `csrf(AbstractHttpConfigurer::disable)` được cấu hình có chủ đích, hoàn toàn phù hợp với chuẩn bảo mật REST API Stateless.
 
-## 1. PHÂN TÍCH KIẾN TRÚC
-- CH Academy là ứng dụng Single Page Application (SPA React) giao tiếp với Spring Boot REST API thông qua cơ chế Bearer Token (JWT) trong tiêu đề `Authorization: Bearer <token>`.
-- Client không sử dụng Cookie dựa trên trình duyệt để tự động xác thực request API.
+## What's at risk
+- Tấn công CSRF chỉ có thể xảy ra khi trình duyệt tự động gửi kèm cookie phiên đăng nhập khi người dùng bấm vào liên kết trên trang web độc hại của kẻ tấn công. Do CH Academy không xác thực qua cookie tự động, nguy cơ này hoàn toàn bị loại trừ.
 
-## 2. KẾT LUẬN & ĐÁNH GIÁ
-- Vì không sử dụng xác thực cookie tự động gửi kèm bởi trình duyệt cho các REST API nhạy cảm, hệ thống miễn nhiễm với tấn công Cross-Site Request Forgery (CSRF).
-- Spring Security cấu hình `csrf.disable()` là phù hợp với kiến trúc Stateless REST API kết hợp với CORS nghiêm ngặt.
-- Trạng thái: **AN TOÀN (PASS)**.
+## What's already secure
+- Mọi API thay đổi trạng thái đều bắt buộc phải có tiêu đề `Authorization` hợp lệ mà mã JavaScript độc hại từ trang web khác không thể tự động đính kèm do chính sách Same-Origin Policy (SOP).
+
+## Recommendations
+- Tiếp tục duy trì việc truyền token qua tiêu đề `Authorization`.
+- Không chuyển đổi cơ chế xác thực sang Cookie trừ khi triển khai đầy đủ cờ `SameSite=Strict`, `HttpOnly`, `Secure` và CSRF Token kép.
+
+## Remediation Implemented
+- Đã thẩm tra kiến trúc và xác nhận tính an toàn của mô hình Bearer Token.
+
+## Verification Results
+- Vibe Check Scanner: `INFO - No cookies set on the landing page` (Hệ thống không phụ thuộc vào cookie phiên).
