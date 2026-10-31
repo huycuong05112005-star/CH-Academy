@@ -298,3 +298,4 @@ export const PublicAdmissionChatWidget: React.FC = () => {
     </>
   )
 }
+

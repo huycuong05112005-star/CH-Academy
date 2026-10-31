@@ -34,3 +34,4 @@ public class PortalConfigDto {
         private boolean hasDirectHandoff;
     }
 }
+

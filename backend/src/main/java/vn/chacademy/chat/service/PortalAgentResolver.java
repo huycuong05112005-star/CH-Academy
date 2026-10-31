@@ -166,7 +166,7 @@ public class PortalAgentResolver {
                     .badgeColor("bg-purple-100 text-purple-700 dark:bg-purple-900/60 dark:text-purple-300")
                     .welcomeMessage("Chào Quản trị viên! Tôi có thể hỗ trợ tra cứu số liệu học viên, doanh thu, lớp học và báo cáo toàn trung tâm.")
                     .features(PortalConfigDto.PortalFeatures.builder()
-                            .hasGroupChat(false)
+                            .hasGroupChat(true)
                             .hasVoiceCall(false)
                             .hasTutoringMode(false)
                             .hasLeadCapture(false)
@@ -217,3 +217,4 @@ public class PortalAgentResolver {
         return user.getRoles().stream().anyMatch(r -> r.getId() != null && r.getId().contains(roleName));
     }
 }
+
