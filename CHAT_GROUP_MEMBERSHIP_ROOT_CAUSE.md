@@ -52,3 +52,4 @@ Phương thức `syncClassGroup(Long classId)` cũ chỉ thực hiện tìm họ
 
 ## 3. Kết luận
 Lỗi không nằm ở CSS hay hiển thị bề mặt mà là do **sự thiếu đồng bộ giữa trạng thái ghi danh (`Enrollment.status = 'ENROLLED'`) và quyền thành viên phòng chat (`ChatMember`)**, kết hợp với việc Backend tin cậy danh sách `chat_members` tĩnh thay vì kiểm tra thực tế theo JWT Security Principal.
+

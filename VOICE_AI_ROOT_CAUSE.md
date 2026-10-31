@@ -46,3 +46,4 @@ Người dùng phản ánh:
 
 ### 2.5. Hiện tượng treo ở trạng thái "Đang kết nối..."
 - Khi mở modal, hệ thống chờ đợi sự kiện `utterance.onstart` để đổi trạng thái sang `SPEAKING`. Trên một số trình duyệt (khi danh sách giọng nói `window.speechSynthesis.getVoices()` chưa tải xong trong lần đầu mở trang), sự kiện `onstart` không kích hoạt kịp thời, khiến trạng thái giữ nguyên là `CONNECTING` kèm đồng hồ đếm 00:00.
+

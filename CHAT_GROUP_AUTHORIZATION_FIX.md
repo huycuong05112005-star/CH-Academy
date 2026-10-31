@@ -70,3 +70,4 @@ if (user.getRoles().stream().anyMatch(r -> r.getId().equals("STUDENT"))) {
    - Hiển thị thông báo sạch: *"Chưa có nhóm lớp học — Bạn chưa được ghi danh vào lớp học nào đang hoạt động."*
 4. **Đồng bộ sự kiện chọn khóa học / lớp học:**
    - Khi học viên click vào một lớp cụ thể từ trang *Lớp học của tôi*, sự kiện `ch_academy_select_class_chat` được phát ra và `GroupChatPanel` tự động chuyển đúng sang nhóm lớp tương ứng.
+

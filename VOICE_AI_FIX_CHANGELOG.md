@@ -36,3 +36,4 @@
 - **Frontend Vite Build:** `built in 1.79s` với 0 lỗi TypeScript hay cú pháp.
 - **Dịch vụ Spring Boot Backend:** Đang hoạt động trên cổng `8088` (Tomcat started).
 - **Dịch vụ Frontend Dev:** Đang hoạt động trên cổng `5173`.
+

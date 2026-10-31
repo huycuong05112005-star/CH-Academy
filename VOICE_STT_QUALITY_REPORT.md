@@ -38,3 +38,4 @@
 > - **Web Audio API & Analyser Node:** `TESTED & VERIFIED` (Tính toán RMS, dB scale, render Canvas sóng âm thanh đạt chuẩn).
 > - **STT Text Pipeline & Endpointing:** `TESTED & VERIFIED` (Xác thực xử lý văn bản, chốt câu sau 1600ms, gửi payload JSON chuẩn sang Backend).
 > - **Microphone thật trên trình duyệt người dùng:** Đã thử nghiệm trên Google Chrome / Microsoft Edge với microphone tích hợp: Nhận diện tiếng Việt chuẩn, không còn hiện tượng nuốt chữ hay ngắt câu sớm.
+

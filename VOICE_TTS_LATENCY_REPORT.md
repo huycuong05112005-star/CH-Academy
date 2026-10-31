@@ -43,3 +43,4 @@ Thực hiện đo lường chu kỳ hội thoại qua endpoint chẩn đoán `/a
   Nếu sau 8 giây mà trình duyệt bỏ rơi sự kiện `onend` (do cửa sổ bị ẩn tab hoặc treo audio thread), bộ đếm an toàn sẽ tự động kích hoạt câu tiếp theo hoặc trả hệ thống về trạng thái `LISTENING`, đảm bảo giao diện không bao giờ bị đứng ở trạng thái phát âm.
 - **Auto Barge-in phản hồi trong 80ms:**
   Khi người dùng cất tiếng nói trong lúc AI đang nói, Web Audio Analyser phát hiện năng lượng vượt ngưỡng (RMS > 0.055) và gọi `window.speechSynthesis.cancel()`, chuyển micro sang trạng thái nghe lập tức mà người dùng không cần chạm màn hình.
+

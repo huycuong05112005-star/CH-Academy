@@ -69,3 +69,4 @@ Phương thức kiểm thử `testMultiTurnConversationRetention()` trong `Class
 - Lượt 2: Gửi câu hỏi *"Cho mình thêm một ví dụ khác dễ hiểu hơn đi bạn"* kèm `conversationId` của lượt 1.
 - Kết quả: `res2.getConversationId()` trùng khớp với lượt 1; nội dung câu trả lời `res2.getAnswer()` chứa các từ khóa ngữ cảnh về ví dụ thì hiện tại đơn (`ví dụ`, `plays`, `goes`, `she`, `he`).
 - **Khẳng định:** Hệ thống duy trì ngữ cảnh đàm thoại hoàn hảo qua nhiều lượt liên tiếp.
+

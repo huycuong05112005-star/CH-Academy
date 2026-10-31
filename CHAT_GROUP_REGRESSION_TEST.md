@@ -36,3 +36,4 @@
 
 ## 3. Kết luận
 Toàn bộ các lỗ hổng về phân quyền nhóm chat đã được bịt kín hoàn toàn từ tầng cơ sở dữ liệu, Service layer đến giao diện người dùng. Không còn hiện tượng học viên nhìn thấy hoặc đọc được tin nhắn của các nhóm chat mà mình không theo học.
+
