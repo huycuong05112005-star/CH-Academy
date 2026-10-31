@@ -75,9 +75,24 @@ public class GenAiChatService {
         if (user == null) {
             throw new AccessDeniedException("Chưa xác thực người dùng");
         }
-        String validatedPortal = portalAgentResolver.determineEffectivePortal(portal, user);
-        AiConversation conv = conversationRepository.findByIdAndUserIdAndPortal(conversationId, user.getId(), validatedPortal)
-                .orElseThrow(() -> new AccessDeniedException("Hội thoại không tồn tại hoặc không thuộc cổng " + validatedPortal + " của bạn"));
+
+        boolean isAdmin = user.getRoles() != null && user.getRoles().stream()
+                .anyMatch(r -> r.getId() != null && (
+                        r.getId().contains("ADMIN") ||
+                        r.getId().equals("SUPER_ADMIN") ||
+                        r.getId().equals("CENTER_ADMIN") ||
+                        r.getId().equals("ACADEMIC_STAFF")
+                ));
+
+        AiConversation conv;
+        if (isAdmin) {
+            conv = conversationRepository.findById(conversationId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy cuộc hội thoại #" + conversationId));
+        } else {
+            String validatedPortal = portalAgentResolver.determineEffectivePortal(portal, user);
+            conv = conversationRepository.findByIdAndUserIdAndPortal(conversationId, user.getId(), validatedPortal)
+                    .orElseThrow(() -> new AccessDeniedException("Hội thoại không tồn tại hoặc không thuộc cổng " + validatedPortal + " của bạn"));
+        }
 
         return messageRepository.findByConversationIdOrderByCreatedAtAsc(conv.getId()).stream()
                 .map(AiMessageDto::fromEntity)

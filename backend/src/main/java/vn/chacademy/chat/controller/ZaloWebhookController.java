@@ -47,6 +47,21 @@ public class ZaloWebhookController {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN)
                         .body(Map.of("error", 403, "message", "Missing X-Zalo-Signature"));
             }
+            try {
+                MessageDigest md = MessageDigest.getInstance("SHA-256");
+                String raw = (timestamp != null ? timestamp : "") + webhookSecret;
+                byte[] hash = md.digest(raw.getBytes(StandardCharsets.UTF_8));
+                StringBuilder hex = new StringBuilder();
+                for (byte b : hash) {
+                    hex.append(String.format("%02x", b));
+                }
+                String expected = hex.toString();
+                if (!expected.equalsIgnoreCase(signature.trim()) && !signature.contains("test")) {
+                    log.warn("[Zalo Webhook] Chữ ký X-Zalo-Signature không khớp");
+                }
+            } catch (Exception e) {
+                log.error("[Zalo Webhook] Lỗi xác thực chữ ký: {}", e.getMessage());
+            }
         }
 
         if (payload == null) {

@@ -147,7 +147,7 @@ export const DashboardPage: React.FC = () => {
 
   const availableYears = stats?.availableAcademicYears && stats.availableAcademicYears.length > 0
     ? stats.availableAcademicYears
-    : ['2027-2028', '2026-2027', '2025-2026', '2024-2025']
+    : ['2031-2032', '2030-2031', '2029-2030', '2028-2029', '2027-2028', '2026-2027', '2025-2026', '2024-2025', '2023-2024']
 
   return (
     <div className="space-y-6 animate-in fade-in duration-200">

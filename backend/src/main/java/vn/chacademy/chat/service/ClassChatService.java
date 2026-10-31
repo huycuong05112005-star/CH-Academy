@@ -40,17 +40,26 @@ public class ClassChatService {
     private final EnrollmentRepository enrollmentRepository;
     private final TeacherAssignmentRepository teacherAssignmentRepository;
 
+    public boolean isAdministrativeRole(User user) {
+        if (user == null || user.getRoles() == null) return false;
+        return user.getRoles().stream().anyMatch(r -> r.getId() != null && (
+                r.getId().contains("ADMIN") ||
+                r.getId().equals("SUPER_ADMIN") ||
+                r.getId().equals("CENTER_ADMIN") ||
+                r.getId().equals("ACADEMIC_STAFF")
+        ));
+    }
+
     @Transactional(readOnly = true)
     public List<ChatConversationDto> getUserConversations(User user) {
         return getUserConversations(user, null);
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public List<ChatConversationDto> getUserConversations(User user, String portal) {
         if (user == null) return List.of();
 
-        boolean isAdminRole = user.getRoles() != null && user.getRoles().stream()
-                .anyMatch(r -> r.getId() != null && (r.getId().contains("ADMIN") || r.getId().equals("SUPER_ADMIN")));
+        boolean isAdminRole = isAdministrativeRole(user);
 
         String effectivePortal = portal != null ? portal.trim().toUpperCase() : null;
         if (effectivePortal == null) {
@@ -69,7 +78,20 @@ public class ClassChatService {
             if (!isAdminRole) {
                 throw new AccessDeniedException("Bạn không có quyền quản trị để giám sát toàn bộ nhóm chat");
             }
-            conversations = conversationRepository.findAll();
+            // Đảm bảo tất cả lớp học đang hoạt động đều đã có nhóm chat tương ứng
+            List<ClassEntity> allClasses = classRepository.findAll();
+            for (ClassEntity cls : allClasses) {
+                if (cls.getId() != null && conversationRepository.findByClassEntityId(cls.getId()).isEmpty()) {
+                    try {
+                        syncClassGroup(cls.getId());
+                    } catch (Exception ex) {
+                        log.warn("Không thể đồng bộ nhóm chat cho lớp {}: {}", cls.getId(), ex.getMessage());
+                    }
+                }
+            }
+            conversations = conversationRepository.findAll().stream()
+                    .sorted(Comparator.comparing(ChatConversation::getUpdatedAt, Comparator.nullsLast(Comparator.reverseOrder())))
+                    .toList();
         } else if ("TEACHER".equals(effectivePortal)) {
             // Giảng viên: chỉ lấy những lớp được phân công giảng dạy (primary hoặc active assignment)
             Set<Long> teacherClassIds = new HashSet<>();
@@ -221,8 +243,7 @@ public class ClassChatService {
 
         messageRepository.findFirstByConversationIdOrderByCreatedAtDesc(conversationId)
                 .ifPresent(lastMsg -> {
-                    boolean isAdmin = user.getRoles() != null && user.getRoles().stream()
-                            .anyMatch(r -> r.getId() != null && (r.getId().contains("ADMIN") || r.getId().equals("SUPER_ADMIN")));
+                    boolean isAdmin = isAdministrativeRole(user);
                     ChatMember member = memberRepository.findByConversationIdAndUserId(conversationId, user.getId())
                             .orElseGet(() -> memberRepository.save(ChatMember.builder()
                                     .conversation(conversation)
@@ -316,9 +337,12 @@ public class ClassChatService {
         if (user == null) {
             throw new AccessDeniedException("Chưa xác thực người dùng");
         }
-        boolean isAdmin = user.getRoles() != null && user.getRoles().stream()
-                .anyMatch(r -> r.getId() != null && (r.getId().contains("ADMIN") || r.getId().equals("SUPER_ADMIN")));
+        boolean isAdmin = isAdministrativeRole(user);
         if (isAdmin) {
+            ChatConversation conv = conversationRepository.findById(conversationId).orElse(null);
+            if (conv != null) {
+                addMemberIfNotExists(conv, user, "ADMIN");
+            }
             return; // Quản trị viên có toàn quyền kiểm soát & hỗ trợ nhóm
         }
 

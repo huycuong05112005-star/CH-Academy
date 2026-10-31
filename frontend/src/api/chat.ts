@@ -225,6 +225,9 @@ export const aiStudioApi = {
   reindexDocument: (docId: number): Promise<ApiResponse<AiKbDocumentItem>> =>
     apiClient.post<AiKbDocumentItem>(`/admin/ai/documents/${docId}/reindex`, {}),
 
+  reindexKb: (kbId: number): Promise<ApiResponse<{ message: string }>> =>
+    apiClient.post<{ message: string }>(`/admin/ai/knowledge-bases/${kbId}/reindex`, {}),
+
   // Flows
   getFlows: (): Promise<ApiResponse<AiFlowItem[]>> =>
     apiClient.get<AiFlowItem[]>('/admin/ai/flows'),

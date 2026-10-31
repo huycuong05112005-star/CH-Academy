@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import {
   LayoutDashboard,
@@ -13,6 +13,7 @@ import {
   UserCheck,
   UserPlus
 } from 'lucide-react'
+import { academicYearApi, type AcademicYearItem } from '../../api/academicYear'
 
 interface DesktopWorkspaceBarProps {
   onOpenCommandPalette: () => void
@@ -23,8 +24,32 @@ export const DesktopWorkspaceBar: React.FC<DesktopWorkspaceBarProps> = ({
   onOpenCommandPalette,
   onRefreshData
 }) => {
-  const [activeYear, setActiveYear] = useState('2025-2026')
+  const [activeYear, setActiveYear] = useState('2026-2027')
+  const [years, setYears] = useState<AcademicYearItem[]>([])
   const location = useLocation()
+
+  useEffect(() => {
+    academicYearApi.getAll()
+      .then((res) => {
+        if (res.success && res.data && res.data.length > 0) {
+          setYears(res.data)
+          const current = res.data.find((y) => y.isCurrent)
+          if (current) setActiveYear(current.code)
+        }
+      })
+      .catch(() => {
+        // Fallback danh sách dài hạn nếu API chưa sẵn sàng
+        setYears([
+          { id: 1, code: '2026-2027', name: 'Năm học 2026 - 2027', startDate: '2026-09-01', endDate: '2027-06-30', isCurrent: true, status: 'ACTIVE' },
+          { id: 2, code: '2027-2028', name: 'Năm học 2027 - 2028', startDate: '2027-09-01', endDate: '2028-06-30', isCurrent: false, status: 'UPCOMING' },
+          { id: 3, code: '2028-2029', name: 'Năm học 2028 - 2029', startDate: '2028-09-01', endDate: '2029-06-30', isCurrent: false, status: 'UPCOMING' },
+          { id: 4, code: '2029-2030', name: 'Năm học 2029 - 2030', startDate: '2029-09-01', endDate: '2030-06-30', isCurrent: false, status: 'UPCOMING' },
+          { id: 5, code: '2030-2031', name: 'Năm học 2030 - 2031', startDate: '2030-09-01', endDate: '2031-06-30', isCurrent: false, status: 'UPCOMING' },
+          { id: 6, code: '2025-2026', name: 'Năm học 2025 - 2026', startDate: '2025-09-01', endDate: '2026-06-30', isCurrent: false, status: 'ACTIVE' },
+          { id: 7, code: '2024-2025', name: 'Năm học 2024 - 2025', startDate: '2024-09-01', endDate: '2025-06-30', isCurrent: false, status: 'COMPLETED' }
+        ])
+      })
+  }, [])
 
   const workspaceTabs = [
     { label: 'Tổng quan', path: '/admin/dashboard', icon: LayoutDashboard },
@@ -84,9 +109,11 @@ export const DesktopWorkspaceBar: React.FC<DesktopWorkspaceBarProps> = ({
             onChange={(e) => setActiveYear(e.target.value)}
             className="bg-transparent font-bold text-sky-600 dark:text-sky-400 outline-none cursor-pointer text-[11px]"
           >
-            <option value="2025-2026" className="dark:bg-slate-900 text-slate-800 dark:text-white">2025 - 2026</option>
-            <option value="2024-2025" className="dark:bg-slate-900 text-slate-800 dark:text-white">2024 - 2025</option>
-            <option value="2023-2024" className="dark:bg-slate-900 text-slate-800 dark:text-white">2023 - 2024</option>
+            {years.map((y) => (
+              <option key={y.code} value={y.code} className="dark:bg-slate-900 text-slate-800 dark:text-white">
+                {y.name || y.code} {y.isCurrent ? '(Hiện tại)' : ''}
+              </option>
+            ))}
           </select>
         </div>
 

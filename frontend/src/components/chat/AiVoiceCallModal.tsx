@@ -208,7 +208,9 @@ export const AiVoiceCallModal: React.FC<AiVoiceCallProps> = ({
         setTtsVoiceName(viVoice.name)
       }
 
+      let hasStarted = false
       utterance.onstart = () => {
+        hasStarted = true
         if (!isSpeakingRef.current) {
           isSpeakingRef.current = true
           setCallStatus('SPEAKING')
@@ -222,19 +224,32 @@ export const AiVoiceCallModal: React.FC<AiVoiceCallProps> = ({
         }
       }
 
-      // Fallback timer nếu trình duyệt bỏ rơi sự kiện onend/onerror
+      // Fallback 1: Nếu trình duyệt không khởi chạy TTS trong 1.5s, tự động chuyển sang lắng nghe Micro
+      const startTimeoutTimer = setTimeout(() => {
+        if (!hasStarted && currentUtteranceRef.current === utterance) {
+          addDebugLog('SpeechSynthesis không khởi chạy trong 1.5s, chuyển sang chế độ lắng nghe Micro')
+          isSpeakingRef.current = false
+          setCallStatus(isMuted ? 'MUTED' : 'LISTENING')
+          startListening()
+        }
+      }, 1500)
+
+      // Fallback 2: Nếu trình duyệt bỏ rơi sự kiện onend/onerror
       const safetyEndTimer = setTimeout(() => {
-        if (currentUtteranceRef.current === utterance && isSpeakingRef.current && !window.speechSynthesis.speaking) {
+        clearTimeout(startTimeoutTimer)
+        if (currentUtteranceRef.current === utterance) {
           playNextTtsSentence()
         }
-      }, 8000)
+      }, 6000)
 
       utterance.onend = () => {
+        clearTimeout(startTimeoutTimer)
         clearTimeout(safetyEndTimer)
         playNextTtsSentence()
       }
 
       utterance.onerror = (err) => {
+        clearTimeout(startTimeoutTimer)
         clearTimeout(safetyEndTimer)
         console.warn('TTS utterance error:', err)
         playNextTtsSentence()

@@ -225,8 +225,21 @@ export const GroupChatPanel: React.FC<GroupChatPanelProps> = ({ onUnreadChange, 
           Chưa có nhóm lớp học
         </h4>
         <p className="text-xs text-slate-500 dark:text-slate-400 max-w-xs leading-relaxed">
-          Bạn chưa được ghi danh hoặc phân công vào lớp học nào đang hoạt động. Khi có lớp học mới, nhóm trao đổi sẽ tự động xuất hiện tại đây.
+          {portal === 'ADMIN'
+            ? 'Hiện chưa có nhóm lớp học nào trên hệ thống hoặc danh sách đang đồng bộ. Quản trị viên có thể nhấn nút tải lại bên dưới để cập nhật.'
+            : 'Bạn chưa được ghi danh hoặc phân công vào lớp học nào đang hoạt động. Khi có lớp học mới, nhóm trao đổi sẽ tự động xuất hiện tại đây.'}
         </p>
+        <button
+          type="button"
+          onClick={() => {
+            setLoadingConv(true)
+            loadConversations(true)
+          }}
+          className="mt-4 px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer shadow-xs"
+        >
+          <RefreshCw className="w-3.5 h-3.5" />
+          <span>Tải lại danh sách</span>
+        </button>
       </div>
     )
   }

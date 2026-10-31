@@ -16,7 +16,6 @@ import vn.chacademy.chat.dto.AiChatResponse;
 import vn.chacademy.chat.dto.ChatConversationDto;
 import vn.chacademy.chat.entity.AiAgent;
 import vn.chacademy.chat.repository.AiAgentRepository;
-import vn.chacademy.chat.repository.ChatConversationRepository;
 import vn.chacademy.chat.service.ClassChatService;
 import vn.chacademy.chat.service.GenAiChatService;
 import vn.chacademy.course.entity.Course;
@@ -72,9 +71,6 @@ public class ClassChatAuthorizationAndVoiceAiTest {
 
     @Autowired
     private EnrollmentRepository enrollmentRepository;
-
-    @Autowired
-    private ChatConversationRepository chatConversationRepository;
 
     private User studentUser;
 

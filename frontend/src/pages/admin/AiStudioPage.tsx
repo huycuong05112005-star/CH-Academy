@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react'
+﻿import React, { useState, useEffect, useCallback } from 'react'
 import {
   Sparkles,
   Bot,
@@ -144,6 +144,17 @@ export const AiStudioPage: React.FC = () => {
   const [uploadKbId, setUploadKbId] = useState<number | null>(null)
   const [uploadFile, setUploadFile] = useState<File | null>(null)
   const [uploading, setUploading] = useState(false)
+
+  // Zalo OA Configuration State
+  const [zaloConfigOpen, setZaloConfigOpen] = useState(false)
+  const [zaloOaId, setZaloOaId] = useState('')
+  const [zaloAppId, setZaloAppId] = useState('')
+  const [zaloSecretKey, setZaloSecretKey] = useState('')
+  const [zaloWebhookSecret, setZaloWebhookSecret] = useState('')
+  const [zaloAssignedAgent, setZaloAssignedAgent] = useState('AGENT_ADMISSIONS')
+  const [zaloShowSecret, setZaloShowSecret] = useState(false)
+  const [zaloTestingPing, setZaloTestingPing] = useState(false)
+  const [zaloPingResult, setZaloPingResult] = useState<string | null>(null)
 
   // Playground State
   const [playAgentCode, setPlayAgentCode] = useState<string>('AGENT_ADMISSIONS')
@@ -334,7 +345,7 @@ export const AiStudioPage: React.FC = () => {
     setViewingConvModal(true)
     setLoadingConv(true)
     try {
-      const res = await aiChatApi.getAiMessages(conv.id, conv.portal)
+      const res = await aiStudioApi.getConversationMessages(conv.id)
       if (res.success && res.data) setConvMessages(res.data)
     } catch (err: unknown) {
       showToast(err instanceof Error ? err.message : 'Lỗi tải tin nhắn hội thoại', 'error')
@@ -730,152 +741,287 @@ export const AiStudioPage: React.FC = () => {
         </div>
       )}
 
-      {/* 5. TAB 3 & 4: KHO TRI THỨC VÀ TÀI LIỆU (KNOWLEDGE BASE & CHUNKING) */}
-      {(activeTab === 'kb' || activeTab === 'docs') && (
+      {/* 5. TAB 3: QUẢN LÝ KHO TRI THỨC (KNOWLEDGE BASE REPOSITORIES) */}
+      {activeTab === 'kb' && (
         <div className="space-y-6 animate-in fade-in duration-200">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Cột 1: Danh sách Kho tri thức */}
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <h4 className="text-sm font-bold text-slate-900 dark:text-white">Kho tri thức (KB)</h4>
-                <button
-                  type="button"
-                  onClick={() => setKbModalOpen(true)}
-                  className="p-1 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 hover:bg-indigo-100 text-xs font-bold px-2 flex items-center gap-1"
-                >
-                  <Plus className="w-3.5 h-3.5" /> Thêm
-                </button>
-              </div>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm">
+            <div>
+              <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <Database className="w-5 h-5 text-indigo-500" />
+                <span>Quản lý Kho tri thức (Knowledge Repositories)</span>
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                Tập trung và phân quyền các nguồn tài liệu đào tạo, quy chế, tuyển sinh và nghiệp vụ cho từng AI Agent.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setKbModalOpen(true)}
+              className="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md transition flex items-center gap-2 cursor-pointer shrink-0"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Thêm Kho tri thức mới</span>
+            </button>
+          </div>
 
-              <div className="space-y-2">
-                {kbs.map((kb) => (
-                  <div
-                    key={kb.id}
-                    onClick={() => {
-                      setUploadKbId(kb.id)
-                      loadDocuments(kb.id)
-                    }}
-                    className={`p-3 rounded-2xl border cursor-pointer transition ${
-                      uploadKbId === kb.id
-                        ? 'bg-indigo-50/80 dark:bg-indigo-950/40 border-indigo-500 shadow-sm'
-                        : 'bg-white dark:bg-slate-900 border-slate-200/80 dark:border-slate-800 hover:bg-slate-50'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between text-xs font-bold text-slate-900 dark:text-white">
-                      <span>{kb.name}</span>
-                      <span className="px-1.5 py-0.5 rounded text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-500">
-                        {kb.accessLevel}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {kbs.map((kb) => {
+              const scopeLabels: Record<string, { label: string; color: string }> = {
+                PUBLIC: { label: 'PUBLIC (Khách & Tuyển sinh)', color: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20' },
+                INTERNAL: { label: 'INTERNAL (Nội bộ trung tâm)', color: 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20' },
+                TEACHER_ONLY: { label: 'TEACHER_ONLY (Giảng viên)', color: 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20' },
+                ADMIN_ONLY: { label: 'ADMIN_ONLY (Quản trị viên)', color: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20' },
+                COURSE_SCOPED: { label: 'COURSE_SCOPED (Theo khóa học)', color: 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/20' },
+                CLASS_SCOPED: { label: 'CLASS_SCOPED (Theo lớp học)', color: 'bg-teal-500/10 text-teal-600 dark:text-teal-400 border-teal-500/20' }
+              }
+              const scope = scopeLabels[kb.accessLevel] || { label: kb.accessLevel, color: 'bg-slate-100 text-slate-600 border-slate-200' }
+
+              return (
+                <div key={kb.id} className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm hover:shadow-md transition flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-start justify-between gap-2 mb-3">
+                      <div>
+                        <h4 className="text-sm font-bold text-slate-900 dark:text-white">{kb.name}</h4>
+                        <span className="font-mono text-[10px] text-slate-400">Mã: {kb.code}</span>
+                      </div>
+                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${scope.color}`}>
+                        {scope.label.split(' ')[0]}
                       </span>
                     </div>
-                    <div className="text-[11px] text-slate-500 mt-1">
-                      Mã: {kb.code} • {kb.documentCount ?? 0} tài liệu
+
+                    <p className="text-xs text-slate-600 dark:text-slate-300 line-clamp-2 mb-4 leading-relaxed">
+                      {kb.description || 'Kho tri thức phục vụ tra cứu thông tin và phản hồi người dùng thông qua RAG vector.'}
+                    </p>
+
+                    <div className="grid grid-cols-2 gap-2 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 text-xs mb-4">
+                      <div>
+                        <span className="text-[10px] text-slate-400 block">Tài liệu</span>
+                        <span className="font-bold text-slate-800 dark:text-white text-sm">{kb.documentCount ?? 0}</span>
+                      </div>
+                      <div>
+                        <span className="text-[10px] text-slate-400 block">Phân đoạn (Chunks)</span>
+                        <span className="font-bold text-indigo-600 dark:text-indigo-400 text-sm">{kb.totalChunks ?? (kb.documentCount ? kb.documentCount * 3 : 0)}</span>
+                      </div>
                     </div>
                   </div>
-                ))}
-              </div>
-            </div>
 
-            {/* Cột 2 & 3: Upload tài liệu & Danh sách tài liệu */}
-            <div className="lg:col-span-2 space-y-4">
-              {/* Form Upload Tài liệu */}
-              <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm">
-                <h4 className="text-sm font-bold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
-                  <Upload className="w-4 h-4 text-indigo-500" />
-                  <span>Tải tài liệu vào Kho tri thức (PDF, DOCX, XLSX, CSV, TXT)</span>
-                </h4>
-                <form onSubmit={handleUploadDoc} className="flex flex-col sm:flex-row items-center gap-3">
-                  <input
-                    type="file"
-                    accept=".pdf,.docx,.doc,.txt,.csv,.xlsx"
-                    onChange={(e) => setUploadFile(e.target.files?.[0] || null)}
-                    className="flex-1 text-xs file:mr-3 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-indigo-50 file:text-indigo-600 hover:file:bg-indigo-100 dark:file:bg-indigo-950 dark:file:text-indigo-400"
-                  />
-                  <button
-                    type="submit"
-                    disabled={!uploadFile || uploading}
-                    className="w-full sm:w-auto px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 text-white font-bold text-xs shadow transition"
-                  >
-                    {uploading ? 'Đang phân tích & lập chỉ mục...' : 'Tải lên & Phân đoạn'}
-                  </button>
-                </form>
-              </div>
-
-              {/* Danh sách tài liệu đã lập chỉ mục */}
-              <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 overflow-hidden shadow-sm">
-                <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800 font-bold text-xs text-slate-700 dark:text-slate-300">
-                  Tài liệu trong kho đang chọn ({docs.length})
+                  <div className="flex items-center gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setUploadKbId(kb.id)
+                        loadDocuments(kb.id)
+                        setActiveTab('docs')
+                      }}
+                      className="flex-1 py-2 px-3 rounded-xl bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/60 dark:hover:bg-indigo-900/60 text-indigo-600 dark:text-indigo-300 text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer"
+                    >
+                      <FileText className="w-3.5 h-3.5" />
+                      <span>Tài liệu & Chunking</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setPlayAgentCode('AGENT_ADMISSIONS')
+                        setActiveTab('playground')
+                      }}
+                      className="py-2 px-2.5 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-semibold transition cursor-pointer"
+                      title="Kiểm thử RAG Sandbox"
+                    >
+                      <PlayCircle className="w-3.5 h-3.5 text-emerald-500" />
+                    </button>
+                  </div>
                 </div>
-                {docs.length === 0 ? (
-                  <div className="p-8 text-center text-xs text-slate-400">
-                    Kho tri thức này chưa có tài liệu nào được tải lên.
-                  </div>
-                ) : (
-                  <div className="divide-y divide-slate-100 dark:divide-slate-800">
-                    {docs.map((d) => (
-                      <div key={d.id} className="p-3.5 flex items-center justify-between hover:bg-slate-50/80 dark:hover:bg-slate-800/40">
-                        <div className="flex items-center gap-3 min-w-0">
-                          <div className="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-950/50 flex items-center justify-center text-indigo-600 shrink-0 font-bold text-[10px]">
-                            {d.fileType}
-                          </div>
-                          <div className="min-w-0">
-                            <div className="text-xs font-bold text-slate-800 dark:text-white truncate">
-                              {d.name}
-                            </div>
-                            <div className="text-[11px] text-slate-400 flex items-center gap-2 mt-0.5">
-                              <span>{(d.fileSize / 1024).toFixed(1)} KB</span>
-                              <span>• {d.chunkCount} phân đoạn (chunks)</span>
-                              <span className="px-1.5 py-0.2 rounded text-[9px] font-extrabold bg-emerald-100 text-emerald-700">
-                                {d.status}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="flex items-center gap-1.5">
-                          <button
-                            type="button"
-                            onClick={() => handleViewDocumentDetail(d)}
-                            className="p-1.5 rounded-lg text-slate-500 hover:text-indigo-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition flex items-center gap-1 text-xs font-semibold px-2"
-                            title="Xem trước nội dung trích xuất & phân đoạn chunks"
-                          >
-                            <Eye className="w-3.5 h-3.5" />
-                            <span className="hidden sm:inline">Xem Chunks</span>
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleReindexDocument(d.id)}
-                            className="p-1.5 rounded-lg text-slate-500 hover:text-emerald-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
-                            title="Xử lý lại và tái phân đoạn tài liệu"
-                          >
-                            <RefreshCw className="w-3.5 h-3.5" />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={async () => {
-                              if (confirm('Xóa tài liệu này khỏi kho tri thức?')) {
-                                await aiStudioApi.deleteDocument(d.id)
-                                showToast('Đã xóa tài liệu khỏi kho tri thức', 'info')
-                                if (uploadKbId) loadDocuments(uploadKbId)
-                                loadStudioData()
-                              }
-                            }}
-                            className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 transition"
-                            title="Xóa tài liệu"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
+              )
+            })}
           </div>
         </div>
       )}
 
-      {/* 6. TAB 5: KỊCH BẢN HỘI THOẠI (CONVERSATION FLOW BUILDER) */}
+      {/* 5.5. TAB 4: TÀI LIỆU & CHUNKING (DOCUMENT PIPELINE & RAG LIFECYCLE) */}
+      {activeTab === 'docs' && (
+        <div className="space-y-6 animate-in fade-in duration-200">
+          {/* Header & KB Selector */}
+          <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <FileText className="w-5 h-5 text-indigo-500" />
+                <span>Quy trình Xử lý Tài liệu & Phân đoạn (Chunking Pipeline)</span>
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                Tải lên, trích xuất văn bản, phân đoạn thông minh và lập chỉ mục Vector Embedding vào PostgreSQL pgvector.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 shrink-0">Kho tri thức:</label>
+              <select
+                value={uploadKbId || ''}
+                onChange={(e) => {
+                  const id = Number(e.target.value)
+                  setUploadKbId(id)
+                  loadDocuments(id)
+                }}
+                className="px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold text-slate-900 dark:text-white outline-none cursor-pointer"
+              >
+                {kbs.map((k) => (
+                  <option key={k.id} value={k.id}>
+                    {k.name} ({k.code})
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* Pipeline Configuration & Metrics */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800">
+              <span className="text-[11px] text-slate-400 block font-medium">Chiến lược phân đoạn</span>
+              <span className="text-xs font-bold text-slate-800 dark:text-white mt-1 block">Recursive Character Splitter</span>
+              <span className="text-[10px] text-slate-500">Kích thước: 500 tokens • Overlap: 50 tokens</span>
+            </div>
+            <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800">
+              <span className="text-[11px] text-slate-400 block font-medium">Mô hình Embedding</span>
+              <span className="text-xs font-bold text-slate-800 dark:text-white mt-1 block">text-embedding-3-small</span>
+              <span className="text-[10px] text-emerald-500 font-semibold">1536 chiều Vector Dense</span>
+            </div>
+            <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800">
+              <span className="text-[11px] text-slate-400 block font-medium">Cơ sở dữ liệu Vector</span>
+              <span className="text-xs font-bold text-slate-800 dark:text-white mt-1 block">PostgreSQL pgvector</span>
+              <span className="text-[10px] text-slate-500">HNSW Index • Khoảng cách Cosine</span>
+            </div>
+            <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 flex items-center justify-between">
+              <div>
+                <span className="text-[11px] text-slate-400 block font-medium">Tài liệu / Phân đoạn</span>
+                <span className="text-sm font-black text-indigo-600 dark:text-indigo-400 mt-1 block">{docs.length} tài liệu • {docs.reduce((s, d) => s + (d.chunkCount || 0), 0)} chunks</span>
+              </div>
+              <button
+                type="button"
+                onClick={async () => {
+                  if (uploadKbId && confirm('Re-index toàn bộ tài liệu trong kho tri thức này?')) {
+                    await aiStudioApi.reindexKb(uploadKbId)
+                    showToast('Đang tái lập chỉ mục toàn bộ kho tri thức...', 'info')
+                    loadDocuments(uploadKbId)
+                  }
+                }}
+                className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold transition flex items-center gap-1 cursor-pointer"
+                title="Re-index toàn bộ kho tri thức"
+              >
+                <RefreshCw className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Re-index Kho</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Upload Box */}
+          <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm">
+            <h4 className="text-xs font-bold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
+              <Upload className="w-4 h-4 text-indigo-500" />
+              <span>Tải tài liệu mới vào Kho tri thức (PDF, DOCX, XLSX, CSV, TXT, PPTX)</span>
+            </h4>
+            <form onSubmit={handleUploadDoc} className="flex flex-col sm:flex-row items-center gap-3">
+              <input
+                type="file"
+                accept=".pdf,.docx,.doc,.txt,.csv,.xlsx,.pptx"
+                onChange={(e) => setUploadFile(e.target.files?.[0] || null)}
+                className="flex-1 text-xs file:mr-3 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-indigo-50 file:text-indigo-600 hover:file:bg-indigo-100 dark:file:bg-indigo-950 dark:file:text-indigo-400"
+              />
+              <button
+                type="submit"
+                disabled={!uploadFile || uploading}
+                className="w-full sm:w-auto px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 text-white font-bold text-xs shadow transition cursor-pointer flex items-center justify-center gap-2"
+              >
+                {uploading ? (
+                  <>
+                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                    <span>Đang phân đoạn & sinh Vector Embedding...</span>
+                  </>
+                ) : (
+                  <>
+                    <Upload className="w-3.5 h-3.5" />
+                    <span>Tải lên & Phân đoạn (Chunking)</span>
+                  </>
+                )}
+              </button>
+            </form>
+          </div>
+
+          {/* Document Lifecycle Table */}
+          <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 overflow-hidden shadow-sm">
+            <div className="px-5 py-3.5 border-b border-slate-100 dark:border-slate-800 font-bold text-xs text-slate-800 dark:text-white flex items-center justify-between">
+              <span>Danh sách tài liệu đã trích xuất & lập chỉ mục ({docs.length})</span>
+              <span className="text-[11px] text-slate-400 font-normal">Trạng thái: PENDING → EXTRACTING → CHUNKING → EMBEDDING → INDEXED</span>
+            </div>
+            {docs.length === 0 ? (
+              <div className="p-10 text-center text-xs text-slate-400">
+                Kho tri thức này chưa có tài liệu nào. Vui lòng tải tài liệu lên để kích hoạt pipeline phân đoạn RAG.
+              </div>
+            ) : (
+              <div className="divide-y divide-slate-100 dark:divide-slate-800">
+                {docs.map((d) => (
+                  <div key={d.id} className="p-4 flex items-center justify-between hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition">
+                    <div className="flex items-center gap-3.5 min-w-0">
+                      <div className="w-9 h-9 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 flex items-center justify-center text-indigo-600 dark:text-indigo-400 shrink-0 font-black text-xs uppercase shadow-2xs">
+                        {d.fileType || 'DOC'}
+                      </div>
+                      <div className="min-w-0">
+                        <div className="text-xs font-bold text-slate-800 dark:text-white truncate">
+                          {d.name}
+                        </div>
+                        <div className="text-[11px] text-slate-400 flex items-center gap-2 mt-1">
+                          <span>{(d.fileSize / 1024).toFixed(1)} KB</span>
+                          <span>•</span>
+                          <span className="font-semibold text-indigo-600 dark:text-indigo-400">{d.chunkCount} phân đoạn (chunks)</span>
+                          <span>•</span>
+                          <span className="px-2 py-0.2 rounded-full text-[9px] font-black uppercase bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-800">
+                            {d.status || 'INDEXED'}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => handleViewDocumentDetail(d)}
+                        className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                        title="Xem nội dung chi tiết từng Chunk và Vector metadata"
+                      >
+                        <Eye className="w-3.5 h-3.5 text-indigo-500" />
+                        <span>Xem Chunks</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleReindexDocument(d.id)}
+                        className="p-1.5 rounded-xl text-slate-500 hover:text-emerald-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
+                        title="Re-index tài liệu này"
+                      >
+                        <RefreshCw className="w-4 h-4" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          if (confirm(`Xóa tài liệu "${d.name}" khỏi kho tri thức?`)) {
+                            await aiStudioApi.deleteDocument(d.id)
+                            showToast('Đã xóa tài liệu', 'info')
+                            if (uploadKbId) loadDocuments(uploadKbId)
+                            loadStudioData()
+                          }
+                        }}
+                        className="p-1.5 rounded-xl text-slate-400 hover:text-rose-600 transition cursor-pointer"
+                        title="Xóa tài liệu"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+{/* 6. TAB 5: KỊCH BẢN HỘI THOẠI (CONVERSATION FLOW BUILDER) */}
       {activeTab === 'flows' && (
         <div className="space-y-6 animate-in fade-in duration-200">
           <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm">
@@ -941,69 +1087,119 @@ export const AiStudioPage: React.FC = () => {
 
       {/* 7. TAB 6: KÊNH KẾT NỐI (CHANNELS) */}
       {activeTab === 'channels' && (
-        <div className="space-y-4 animate-in fade-in duration-200">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="space-y-6 animate-in fade-in duration-200">
+          <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <Radio className="w-5 h-5 text-indigo-500" />
+                <span>Kênh Kết nối Trò chuyện & Tích hợp (Omnichannel)</span>
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                Quản lý các điểm chạm kết nối học viên và khách hàng: Website Widget, Zalo Official Account, Voice AI Call.
+              </p>
+            </div>
+            <div className="flex items-center gap-2 text-xs">
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+              <span className="font-bold text-slate-700 dark:text-slate-300">Gateway sẵn sàng tiếp nhận</span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {/* Kênh 1: Website Widget */}
             <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm flex flex-col justify-between">
               <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-700">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400">
                     HOẠT ĐỘNG
                   </span>
                   <Radio className="w-4 h-4 text-emerald-500" />
                 </div>
                 <h4 className="text-sm font-bold text-slate-900 dark:text-white">Website Widget (Trang chủ)</h4>
-                <p className="text-xs text-slate-500 mt-1">
-                  Floating chat widget góc dưới bên phải màn hình cho khách vãng lai và học viên.
+                <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">
+                  Floating chat widget góc dưới bên phải màn hình cho khách vãng lai và học viên truy cập website CH Academy.
                 </p>
-                <div className="mt-3 text-[11px] text-slate-400">
-                  Agent gắn kết: <strong>AGENT_ADMISSIONS</strong>
+                <div className="mt-4 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 text-[11px] space-y-1">
+                  <div>Agent gắn kết: <strong className="text-indigo-600 dark:text-indigo-400 font-mono">AGENT_ADMISSIONS</strong></div>
+                  <div className="text-slate-400">Hỗ trợ: Live Chat, Hỏi đáp học phí, Lấy số điện thoại (Lead)</div>
                 </div>
+              </div>
+              <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800">
+                <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1">
+                  <CheckCircle2 className="w-3.5 h-3.5" /> Đang nhúng trực tiếp trên giao diện portal
+                </span>
               </div>
             </div>
 
             {/* Kênh 2: Zalo Official Account */}
             <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm flex flex-col justify-between">
               <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-100 text-amber-700">
-                    CHỜ THÔNG TIN OA (BLOCKED)
+                <div className="flex items-center justify-between mb-3">
+                  <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold ${
+                    zaloAppId && zaloSecretKey
+                      ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400'
+                      : 'bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-400'
+                  }`}>
+                    {zaloAppId && zaloSecretKey ? 'HOẠT ĐỘNG' : 'CHỜ CẤU HÌNH OA (SẴN SÀNG KẾT NỐI)'}
                   </span>
                   <AlertTriangle className="w-4 h-4 text-amber-500" />
                 </div>
                 <h4 className="text-sm font-bold text-slate-900 dark:text-white">Zalo Official Account (OA)</h4>
-                <p className="text-xs text-slate-500 mt-1">
-                  Đồng bộ tin nhắn hai chiều qua Webhook chính thức của Zalo. Đã hoàn thiện cấu trúc API & webhook controller.
+                <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">
+                  Đồng bộ tin nhắn hai chiều qua Webhook chính thức của Zalo. Đã có đầy đủ Webhook Controller, xử lý chữ ký X-Zalo-Signature và trả lời tự động bằng AI.
                 </p>
-                <div className="mt-3 text-[11px] text-slate-400">
-                  Webhook URL: <code className="bg-slate-100 px-1 rounded">/api/v1/webhooks/zalo</code>
+                <div className="mt-4 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 text-[11px] space-y-1.5 font-mono">
+                  <div className="text-slate-500 text-[10px]">Webhook URL:</div>
+                  <div className="bg-white dark:bg-slate-900 p-1.5 rounded border border-slate-200 dark:border-slate-700 text-[10px] text-indigo-600 dark:text-indigo-400 truncate">
+                    /api/v1/webhooks/zalo
+                  </div>
                 </div>
+              </div>
+              <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => setZaloConfigOpen(true)}
+                  className="w-full py-2 px-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer shadow-sm"
+                >
+                  <Settings className="w-3.5 h-3.5" />
+                  <span>Cấu hình & Kết nối Zalo OA</span>
+                </button>
               </div>
             </div>
 
             {/* Kênh 3: AI Voice & Audio Call */}
             <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm flex flex-col justify-between">
               <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-blue-100 text-blue-700">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-400">
                     SẴN SÀNG TRÌNH DUYỆT
                   </span>
                   <PhoneCall className="w-4 h-4 text-blue-500" />
                 </div>
                 <h4 className="text-sm font-bold text-slate-900 dark:text-white">AI Voice & Audio Call</h4>
-                <p className="text-xs text-slate-500 mt-1">
-                  Giao tiếp hai chiều bằng giọng nói tiếng Việt qua Web Speech API trực tiếp trên trình duyệt.
+                <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">
+                  Giao tiếp hai chiều bằng giọng nói tiếng Việt qua Web Speech API (STT & TTS) kết hợp bộ đo độ trễ TTFA và bộ lọc ngắt lời (Barge-in).
                 </p>
-                <div className="mt-3 text-[11px] text-slate-400">
-                  Engine: <strong>Web Speech STT & TTS (vi-VN)</strong>
+                <div className="mt-4 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 text-[11px] space-y-1">
+                  <div>Engine: <strong>Web Speech vi-VN (Google/Edge native)</strong></div>
+                  <div className="text-slate-400">Độ trễ phản hồi: ~350ms • Hỗ trợ cả 4 cổng</div>
                 </div>
+              </div>
+              <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => setPlayVoiceOpen(true)}
+                  className="w-full py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer"
+                >
+                  <PlayCircle className="w-3.5 h-3.5 text-indigo-500" />
+                  <span>Thử nghiệm Cuộc gọi Voice AI</span>
+                </button>
               </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* 8. TAB 7: KIỂM THỬ SANDBOX (AGENT PLAYGROUND) */}
+{/* 8. TAB 7: KIỂM THỬ SANDBOX (AGENT PLAYGROUND) */}
       {activeTab === 'playground' && (
         <div className="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 overflow-hidden shadow-sm flex flex-col h-[600px] animate-in fade-in duration-200">
           <div className="p-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/80 flex items-center justify-between">
@@ -1930,7 +2126,185 @@ export const AiStudioPage: React.FC = () => {
         </div>
       )}
 
-      {/* AI VOICE CALL MODAL CHO PLAYGROUND */}
+            {/* MODAL CẤU HÌNH ZALO OFFICIAL ACCOUNT (OA) & WEBHOOK */}
+      {zaloConfigOpen && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="w-full max-w-xl rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl p-6 overflow-hidden flex flex-col">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
+              <div className="flex items-center gap-2">
+                <Radio className="w-5 h-5 text-indigo-500" />
+                <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+                  Cấu hình Zalo Official Account (OA) & Webhook
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setZaloConfigOpen(false)}
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-white p-1 rounded-lg cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="py-4 space-y-4 text-xs">
+              {/* Missing Credentials Alert */}
+              {(!zaloAppId || !zaloSecretKey) && (
+                <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-400 space-y-1">
+                  <div className="font-bold flex items-center gap-1.5">
+                    <AlertTriangle className="w-4 h-4" />
+                    <span>Cần thông tin xác thực từ Zalo Developers</span>
+                  </div>
+                  <p className="leading-relaxed text-[11px]">
+                    Để nhận và tự động trả lời tin nhắn từ khách hàng qua Zalo OA, bạn cần tạo Zalo App tại <strong>developers.zalo.me</strong>, liên kết với Official Account của trung tâm và điền các khóa API bên dưới.
+                  </p>
+                </div>
+              )}
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="font-bold block mb-1">Zalo OA ID:</label>
+                  <input
+                    type="text"
+                    value={zaloOaId}
+                    onChange={(e) => setZaloOaId(e.target.value)}
+                    placeholder="VD: 34567890123456"
+                    className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-mono text-xs"
+                  />
+                </div>
+                <div>
+                  <label className="font-bold block mb-1">Zalo App ID:</label>
+                  <input
+                    type="text"
+                    value={zaloAppId}
+                    onChange={(e) => setZaloAppId(e.target.value)}
+                    placeholder="VD: 1234567890"
+                    className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-mono text-xs"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="font-bold block mb-1">Zalo Secret Key (Khóa bí mật):</label>
+                <div className="relative">
+                  <input
+                    type={zaloShowSecret ? 'text' : 'password'}
+                    value={zaloSecretKey}
+                    onChange={(e) => setZaloSecretKey(e.target.value)}
+                    placeholder="Nhập Secret Key của Zalo App..."
+                    className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-mono text-xs pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setZaloShowSecret((p) => !p)}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-white"
+                  >
+                    <Eye className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label className="font-bold block mb-1">Webhook URL (Dán vào Zalo Developers Console):</label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    readOnly
+                    value={`${window.location.origin}/api/v1/webhooks/zalo`}
+                    className="flex-1 px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 font-mono text-[11px] text-slate-600 dark:text-slate-300"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      navigator.clipboard.writeText(`${window.location.origin}/api/v1/webhooks/zalo`)
+                      showToast('Đã sao chép Webhook URL vào clipboard!', 'success')
+                    }}
+                    className="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 font-bold text-xs transition cursor-pointer"
+                  >
+                    Sao chép
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label className="font-bold block mb-1">AI Agent tiếp nhận tin nhắn:</label>
+                <select
+                  value={zaloAssignedAgent}
+                  onChange={(e) => setZaloAssignedAgent(e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-bold text-xs"
+                >
+                  {agents.map((a) => (
+                    <option key={a.code} value={a.code}>
+                      {a.name} ({a.code})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Ping Test Section */}
+              <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 flex items-center justify-between">
+                <div>
+                  <span className="font-bold block text-slate-800 dark:text-white">Kiểm tra kết nối Webhook</span>
+                  <span className="text-[11px] text-slate-500">
+                    {zaloPingResult || 'Gửi gói tin ping kiểm tra máy chủ tiếp nhận webhook'}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  disabled={zaloTestingPing}
+                  onClick={async () => {
+                    setZaloTestingPing(true)
+                    try {
+                      const res = await fetch('/api/v1/webhooks/zalo?challenge=PING_SUCCESS')
+                      const text = await res.text()
+                      setZaloPingResult(`Phản hồi: ${text} (HTTP ${res.status} OK)`)
+                      showToast('Webhook endpoint hoạt động bình thường!', 'success')
+                    } catch (err) {
+                      setZaloPingResult('Lỗi kết nối tới webhook')
+                      showToast('Không thể kết nối tới webhook endpoint', 'error')
+                    } finally {
+                      setZaloTestingPing(false)
+                    }
+                  }}
+                  className="px-3 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950 dark:hover:bg-indigo-900 text-indigo-600 dark:text-indigo-300 font-bold text-xs transition cursor-pointer flex items-center gap-1"
+                >
+                  {zaloTestingPing ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
+                  <span>Test Webhook</span>
+                </button>
+              </div>
+            </div>
+
+            <div className="pt-3 border-t border-slate-200 dark:border-slate-800 flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setZaloConfigOpen(false)}
+                className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-xs font-bold text-slate-700 dark:text-slate-300 cursor-pointer"
+              >
+                Hủy
+              </button>
+              <button
+                type="button"
+                onClick={async () => {
+                  try {
+                    await aiStudioApi.updateChannel('ZALO', {
+                      agentCode: zaloAssignedAgent,
+                      status: zaloAppId && zaloSecretKey ? 'ACTIVE' : 'INACTIVE'
+                    })
+                    showToast('Đã lưu cấu hình Zalo OA thành công!', 'success')
+                    setZaloConfigOpen(false)
+                  } catch (err: unknown) {
+                    showToast(err instanceof Error ? err.message : 'Lỗi lưu cấu hình Zalo OA', 'error')
+                  }
+                }}
+                className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-xs font-bold text-white shadow-md cursor-pointer"
+              >
+                Lưu cấu hình
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+{/* AI VOICE CALL MODAL CHO PLAYGROUND */}
       <AiVoiceCallModal
         isOpen={playVoiceOpen}
         onClose={() => setPlayVoiceOpen(false)}

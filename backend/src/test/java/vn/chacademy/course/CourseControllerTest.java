@@ -90,7 +90,7 @@ class CourseControllerTest {
     void searchCourses_Unauthorized() throws Exception {
         mockMvc.perform(get("/api/v1/courses")
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized());
     }
 
     @Test

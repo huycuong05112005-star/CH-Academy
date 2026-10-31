@@ -94,6 +94,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/webhooks/**").permitAll()
                         .requestMatchers("/api/v1/files/download/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/course-categories/active").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/academic-years/**").permitAll()
                         .requestMatchers("/error").permitAll()
                         // Actuator quản trị mở rộng yêu cầu quyền SUPER_ADMIN
                         .requestMatchers("/api/v1/actuator/**").hasRole("SUPER_ADMIN")

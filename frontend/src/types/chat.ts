@@ -110,6 +110,7 @@ export interface AiKnowledgeBaseItem {
   description?: string
   accessLevel: 'PUBLIC' | 'INTERNAL' | 'TEACHER_ONLY' | 'ADMIN_ONLY'
   documentCount: number
+  totalChunks?: number
   createdAt: string
   updatedAt: string
 }
@@ -169,6 +170,8 @@ export interface AiChannelConfigItem {
   channelType: 'WEBSITE' | 'PORTAL_STUDENT' | 'PORTAL_TEACHER' | 'PORTAL_ADMIN' | 'ZALO_OA' | 'VOICE'
   agentId?: number | null
   agentName?: string | null
+  agentCode?: string
+  status?: string
   isActive: boolean
   configJson?: string
   createdAt: string

@@ -109,7 +109,7 @@ class AuthControllerTest {
     }
 
     @Test
-    @DisplayName("GET /api/v1/auth/me - Truy cập thất bại khi chưa gửi JWT")
+    @DisplayName("GET /api/v1/auth/me - Truy cap that bai khi chua gui JWT")
     void getMe_WithoutToken_ReturnsUnauthorizedOrForbidden() throws Exception {
         mockMvc.perform(get("/api/v1/auth/me"))
                 .andExpect(status().isUnauthorized());

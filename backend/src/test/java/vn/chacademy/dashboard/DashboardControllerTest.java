@@ -45,7 +45,7 @@ class DashboardControllerTest {
     void getDashboardStats_Unauthorized() throws Exception {
         mockMvc.perform(get("/api/v1/dashboard/stats")
                 .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized());
     }
 
     @Test

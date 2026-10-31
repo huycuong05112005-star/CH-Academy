@@ -33,6 +33,7 @@ public class DashboardService {
     private final LeadRepository leadRepository;
     private final ReceivableRepository receivableRepository;
     private final ClassSessionRepository classSessionRepository;
+    private final vn.chacademy.academic.repository.AcademicYearRepository academicYearRepository;
 
     private static final ZoneId VIETNAM_ZONE = ZoneId.of("Asia/Ho_Chi_Minh");
 
@@ -72,13 +73,13 @@ public class DashboardService {
         Instant academicStartInstant = academicStartDate.atStartOfDay(VIETNAM_ZONE).toInstant();
         Instant academicEndInstant = academicEndDate.plusDays(1).atStartOfDay(VIETNAM_ZONE).toInstant();
 
-        // 2. Available Academic Years list
+        // 2. Available Academic Years list từ Database động (vượt qua giới hạn 2028)
         Set<String> yearSet = new TreeSet<>(Comparator.reverseOrder());
-        yearSet.add("2026-2027");
-        yearSet.add("2025-2026");
-        yearSet.add("2024-2025");
-        yearSet.add("2027-2028");
+        academicYearRepository.findAll().forEach(y -> yearSet.add(y.getCode()));
         yearSet.addAll(classRepository.findDistinctAcademicYears());
+        if (yearSet.isEmpty()) {
+            yearSet.addAll(List.of("2023-2024", "2024-2025", "2025-2026", "2026-2027", "2027-2028", "2028-2029", "2029-2030", "2030-2031", "2031-2032"));
+        }
         List<String> availableYears = new ArrayList<>(yearSet);
 
         // 3. Center Lifetime Totals (Toàn hệ thống)
