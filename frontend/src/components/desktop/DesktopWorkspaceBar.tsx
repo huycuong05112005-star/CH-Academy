@@ -24,17 +24,39 @@ export const DesktopWorkspaceBar: React.FC<DesktopWorkspaceBarProps> = ({
   onOpenCommandPalette,
   onRefreshData
 }) => {
-  const [activeYear, setActiveYear] = useState('2026-2027')
+  const ACADEMIC_YEAR_STORAGE_KEY = 'ch_academy_selected_academic_year'
+
+  const [activeYear, setActiveYear] = useState<string>(() => {
+    try {
+      return localStorage.getItem(ACADEMIC_YEAR_STORAGE_KEY) || '2026-2027'
+    } catch {
+      return '2026-2027'
+    }
+  })
   const [years, setYears] = useState<AcademicYearItem[]>([])
   const location = useLocation()
 
   useEffect(() => {
+    const handleSync = (e: Event) => {
+      const customEvent = e as CustomEvent<{ year?: string }>
+      if (customEvent.detail?.year) {
+        setActiveYear(customEvent.detail.year)
+      }
+    }
+    window.addEventListener('ch_academy_academic_year_changed', handleSync)
+
     academicYearApi.getAll()
       .then((res) => {
         if (res.success && res.data && res.data.length > 0) {
           setYears(res.data)
-          const current = res.data.find((y) => y.isCurrent)
-          if (current) setActiveYear(current.code)
+          const stored = localStorage.getItem(ACADEMIC_YEAR_STORAGE_KEY)
+          if (!stored) {
+            const current = res.data.find((y) => y.isCurrent)
+            if (current) {
+              setActiveYear(current.code)
+              localStorage.setItem(ACADEMIC_YEAR_STORAGE_KEY, current.code)
+            }
+          }
         }
       })
       .catch(() => {
@@ -49,7 +71,19 @@ export const DesktopWorkspaceBar: React.FC<DesktopWorkspaceBarProps> = ({
           { id: 7, code: '2024-2025', name: 'Năm học 2024 - 2025', startDate: '2024-09-01', endDate: '2025-06-30', isCurrent: false, status: 'COMPLETED' }
         ])
       })
+
+    return () => {
+      window.removeEventListener('ch_academy_academic_year_changed', handleSync)
+    }
   }, [])
+
+  const handleYearChange = (newYear: string) => {
+    setActiveYear(newYear)
+    try {
+      localStorage.setItem(ACADEMIC_YEAR_STORAGE_KEY, newYear)
+      window.dispatchEvent(new CustomEvent('ch_academy_academic_year_changed', { detail: { year: newYear } }))
+    } catch {}
+  }
 
   const workspaceTabs = [
     { label: 'Tổng quan', path: '/admin/dashboard', icon: LayoutDashboard },
@@ -106,7 +140,7 @@ export const DesktopWorkspaceBar: React.FC<DesktopWorkspaceBarProps> = ({
           <span className="text-slate-400">Năm học:</span>
           <select
             value={activeYear}
-            onChange={(e) => setActiveYear(e.target.value)}
+            onChange={(e) => handleYearChange(e.target.value)}
             className="bg-transparent font-bold text-sky-600 dark:text-sky-400 outline-none cursor-pointer text-[11px]"
           >
             {years.map((y) => (

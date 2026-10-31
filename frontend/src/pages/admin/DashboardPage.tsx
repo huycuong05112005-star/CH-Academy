@@ -34,11 +34,21 @@ export const DashboardPage: React.FC = () => {
   const { user, logout } = useAuth()
   const { settings } = useSettings()
 
+  const ACADEMIC_YEAR_STORAGE_KEY = 'ch_academy_selected_academic_year'
+
   const [stats, setStats] = useState<DashboardStats | null>(null)
   const [statsLoading, setStatsLoading] = useState<boolean>(true)
   const [statsError, setStatsError] = useState<string | null>(null)
   const [searchParams, setSearchParams] = useSearchParams()
-  const [selectedAcademicYear, setSelectedAcademicYear] = useState<string>(() => searchParams.get('year') || '2026-2027')
+  const [selectedAcademicYear, setSelectedAcademicYear] = useState<string>(() => {
+    const urlYear = searchParams.get('year')
+    if (urlYear) return urlYear
+    try {
+      const saved = localStorage.getItem(ACADEMIC_YEAR_STORAGE_KEY)
+      if (saved) return saved
+    } catch {}
+    return '2026-2027'
+  })
   const [sessionFilter, setSessionFilter] = useState<'ALL' | 'TODAY' | 'UPCOMING'>('ALL')
 
   const fetchStats = async (yearToFetch?: string) => {
@@ -50,6 +60,9 @@ export const DashboardPage: React.FC = () => {
       setStats(data)
       if (data.academicYear && data.academicYear !== selectedAcademicYear) {
         setSelectedAcademicYear(data.academicYear)
+        try {
+          localStorage.setItem(ACADEMIC_YEAR_STORAGE_KEY, data.academicYear)
+        } catch {}
       }
     } catch (err: unknown) {
       const errorMsg = err instanceof Error ? err.message : 'Không thể tải thống kê bảng điều khiển'
@@ -60,16 +73,40 @@ export const DashboardPage: React.FC = () => {
   }
 
   useEffect(() => {
-    const yr = searchParams.get('year') || selectedAcademicYear
-    if (yr !== selectedAcademicYear) {
-      setSelectedAcademicYear(yr)
+    const handleYearSync = (e: Event) => {
+      const customEvent = e as CustomEvent<{ year?: string }>
+      const targetYear = customEvent.detail?.year
+      if (targetYear && targetYear !== selectedAcademicYear) {
+        setSelectedAcademicYear(targetYear)
+        fetchStats(targetYear)
+      }
     }
-    fetchStats(yr)
+    window.addEventListener('ch_academy_academic_year_changed', handleYearSync)
+
+    let yr = searchParams.get('year')
+    if (!yr) {
+      try {
+        yr = localStorage.getItem(ACADEMIC_YEAR_STORAGE_KEY)
+      } catch {}
+    }
+    const finalYear = yr || selectedAcademicYear || '2026-2027'
+    if (finalYear !== selectedAcademicYear) {
+      setSelectedAcademicYear(finalYear)
+    }
+    fetchStats(finalYear)
+
+    return () => {
+      window.removeEventListener('ch_academy_academic_year_changed', handleYearSync)
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams])
 
   const handleYearChange = (newYear: string) => {
     setSelectedAcademicYear(newYear)
+    try {
+      localStorage.setItem(ACADEMIC_YEAR_STORAGE_KEY, newYear)
+      window.dispatchEvent(new CustomEvent('ch_academy_academic_year_changed', { detail: { year: newYear } }))
+    } catch {}
     setSearchParams((prev) => {
       const updated = new URLSearchParams(prev)
       updated.set('year', newYear)

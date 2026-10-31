@@ -48,7 +48,18 @@
 
 ---
 
-## 2. CÔNG NGHỆ VÀ KHUNG PHÁT TRIỂN
+## 2. HỆ THỐNG TÀI LIỆU KỸ THUẬT CHUYÊN SÂU (MASTER DOCUMENTATION)
+
+Để đảm bảo tài liệu được tinh gọn, rõ ràng và dễ tra cứu, toàn bộ tài liệu kỹ thuật của dự án đã được chuẩn hóa thành 4 tài liệu chủ đạo:
+
+1. 🎙️ [DOCS_VOICE_AI_MASTER.md](file:///e:/CA_NHAN/CH_Academy/DOCS_VOICE_AI_MASTER.md): Toàn bộ kiến trúc Real-time Voice AI, nhận diện STT tiếng Việt, phát TTS phân đoạn câu, bộ đệm an toàn dual fallback và tối ưu độ trễ đàm thoại 2 chiều.
+2. 🤖 [DOCS_AI_PLATFORM_MASTER.md](file:///e:/CA_NHAN/CH_Academy/DOCS_AI_PLATFORM_MASTER.md): Trung tâm AI Studio, quản lý Agent, Kho tri thức (KB) vs Tài liệu Chunking, Inspector Modal, tích hợp Zalo OA Webhook HMAC-SHA256 và Lead Capture.
+3. 💬 [DOCS_CLASS_CHAT_MASTER.md](file:///e:/CA_NHAN/CH_Academy/DOCS_CLASS_CHAT_MASTER.md): Kiến trúc Chat nhóm lớp học, cơ chế phân quyền tham gia theo Enrollment, bộ chuyển lớp (Class Switcher) và đồng bộ tự động theo khóa học.
+4. 🛡️ [DOCS_SYSTEM_AUDIT_MASTER.md](file:///e:/CA_NHAN/CH_Academy/DOCS_SYSTEM_AUDIT_MASTER.md): Kiểm toán bảo mật hệ thống, RBAC 8 vai trò, hệ thống quản trị năm học động (Flyway V28), chống xung đột session đa tab và ma trận kiểm thử E2E.
+
+---
+
+## 3. CÔNG NGHỆ VÀ KHUNG PHÁT TRIỂN
 
 | Thành phần | Công nghệ chính | Phiên bản |
 |---|---|---|
