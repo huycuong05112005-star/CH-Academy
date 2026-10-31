@@ -119,3 +119,4 @@ nexva/
 ## 5. KẾT LUẬN & ĐỊNH HƯỚNG BẢO TRÌ
 
 Kiến trúc CH Academy đã kế thừa trọn vẹn những điểm mạnh nhất của NEXVA (thiết kế luồng, cơ chế RAG, thu thập Lead, đa kênh, Voice streaming) đồng thời bảo toàn và phát huy tối đa nền tảng cốt lõi của CH Academy (Spring Boot doanh nghiệp, cơ sở dữ liệu quan hệ chặt chẽ, phân quyền RBAC và hệ sinh thái nghiệp vụ giáo dục chuẩn mực). Hệ thống đảm bảo tính độc lập module, khả năng mở rộng không giới hạn và tính bảo mật tuyệt đối.
+

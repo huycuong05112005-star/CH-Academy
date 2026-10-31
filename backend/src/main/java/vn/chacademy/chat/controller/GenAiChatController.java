@@ -25,11 +25,25 @@ public class GenAiChatController {
     private final GenAiChatService genAiChatService;
     private final AiStudioService aiStudioService;
     private final UserRepository userRepository;
+    private final vn.chacademy.chat.service.PortalAgentResolver portalAgentResolver;
 
     private User getAuthenticatedUser(UserDetails userDetails) {
         if (userDetails == null) return null;
         return userRepository.findByUsername(userDetails.getUsername())
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy thông tin tài khoản"));
+    }
+
+    // ==========================================
+    // 0. CẤU HÌNH VÀ RESOLVE AGENT THEO PORTAL
+    // ==========================================
+
+    @GetMapping("/portal-config")
+    public ResponseEntity<ApiResponse<PortalConfigDto>> getPortalConfig(
+            @RequestParam(required = false) String portal,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        User user = (userDetails != null) ? userRepository.findByUsername(userDetails.getUsername()).orElse(null) : null;
+        PortalConfigDto config = portalAgentResolver.getPortalConfig(portal, user);
+        return ResponseEntity.ok(ApiResponse.success(config));
     }
 
     // ==========================================

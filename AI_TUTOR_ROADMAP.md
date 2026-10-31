@@ -84,3 +84,4 @@ Ngoài ra, học sinh được cung cấp sẵn các thẻ gợi ý câu hỏi t
 - **Giai đoạn 1 (Hiện tại):** Tích hợp công thức Toán học, 6 bước sư phạm và toggle chế độ học tập. *(Đã hoàn thành)*.
 - **Giai đoạn 2 (Q1/2027):** Kết nối trực tiếp với điểm số và bài thi của học sinh trên hệ thống CH Academy, tự động đề xuất lộ trình ôn tập cá nhân hóa (Adaptive Learning).
 - **Giai đoạn 3 (Q2/2027):** Trợ giảng chấm bài luận tiếng Anh theo tiêu chí IELTS 4 kỹ năng (Task Achievement, Coherence & Cohesion, Lexical Resource, Grammatical Accuracy).
+

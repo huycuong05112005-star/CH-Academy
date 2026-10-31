@@ -86,3 +86,4 @@ Hệ thống cơ sở dữ liệu AI đã được hoàn thiện và chuẩn hó
 3. **Lỗi Tiếng Việt (Mojibake):** Toàn bộ dữ liệu bảng `ai_agents`, `leads`, `ai_leads` đã được cập nhật UTF-8 chuẩn xác qua Flyway V26 và câu lệnh bảo trì.
 4. **Lỗi Thu thập Lead:** Tự động bắt số điện thoại và tên trong mọi tin nhắn gửi lên AI Tư vấn Tuyển sinh, lưu lập tức vào CSDL CRM và hiển thị trên trang Quản lý Tuyển sinh.
 5. **Cú pháp & Cảnh báo Compile:** Toàn bộ 275 tệp nguồn Java compile thành công 100% với 0 lỗi cú pháp.
+

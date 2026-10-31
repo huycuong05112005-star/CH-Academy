@@ -117,3 +117,4 @@ Mỗi Agent được định nghĩa rõ ràng về phạm vi hoạt động (`sc
 - **Giai đoạn 1 (Hiện tại - Q4/2026):** Hoàn thiện 11 module AI Studio, sửa dứt điểm lỗi điều hướng và Mojibake, kích hoạt đồng bộ Lead tự động, tích hợp Rich Markdown & Math. (ĐÃ HOÀN THÀNH).
 - **Giai đoạn 2 (Q1/2027):** Triển khai pgvector trên PostgreSQL container để tối ưu tìm kiếm ngữ nghĩa sâu (Semantic Embedding).
 - **Giai đoạn 3 (Q2/2027):** Kết nối dịch vụ tổng đài VoIP (Asterisk/FreePBX hoặc Zalo Call API) để Agent Tuyển sinh có thể tự động gọi điện tư vấn theo danh sách Lead mới.
+

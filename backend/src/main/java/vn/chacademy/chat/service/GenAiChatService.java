@@ -51,6 +51,7 @@ public class GenAiChatService {
     private final vn.chacademy.course.repository.CourseRepository courseRepository;
     private final ReceivableRepository receivableRepository;
     private final ObjectMapper objectMapper;
+    private final PortalAgentResolver portalAgentResolver;
 
     @Value("${app.ai.openrouter-key:${OPENROUTER_API_KEY:}}")
     private String openRouterKey;
@@ -65,7 +66,7 @@ public class GenAiChatService {
     @Transactional(readOnly = true)
     public List<AiConversationDto> getUserConversations(User user, String portal) {
         if (user == null) return List.of();
-        String validatedPortal = normalizeAndValidatePortal(portal, user);
+        String validatedPortal = portalAgentResolver.determineEffectivePortal(portal, user);
         return conversationRepository.findByUserIdAndPortalOrderByUpdatedAtDesc(user.getId(), validatedPortal).stream()
                 .map(AiConversationDto::fromEntity)
                 .toList();
@@ -76,7 +77,7 @@ public class GenAiChatService {
         if (user == null) {
             throw new AccessDeniedException("Chưa xác thực người dùng");
         }
-        String validatedPortal = normalizeAndValidatePortal(portal, user);
+        String validatedPortal = portalAgentResolver.determineEffectivePortal(portal, user);
         AiConversation conv = conversationRepository.findByIdAndUserIdAndPortal(conversationId, user.getId(), validatedPortal)
                 .orElseThrow(() -> new AccessDeniedException("Hội thoại không tồn tại hoặc không thuộc cổng " + validatedPortal + " của bạn"));
 
@@ -118,9 +119,10 @@ public class GenAiChatService {
         }
 
         boolean isPublic = (user == null);
-        String portal = isPublic ? "PUBLIC" : normalizeAndValidatePortal(request.getPortal(), user);
+        String portal = portalAgentResolver.determineEffectivePortal(request.getPortal(), user);
+        AiAgent resolvedAgent = portalAgentResolver.resolveAgent(portal, user);
         String channel = request.getChannel() != null ? request.getChannel().toUpperCase() : (isPublic ? "WEBSITE" : "PORTAL");
-        String agentCode = resolveAgentCodeForPortal(portal);
+        String agentCode = resolvedAgent.getCode();
 
         // 1. Xác định hoặc tạo mới hội thoại
         AiConversation conversation;
@@ -195,7 +197,9 @@ public class GenAiChatService {
         String dynamicContext = buildDynamicContext(user, portal);
 
         // 6. Lấy cấu hình System Prompt của Agent tương ứng
-        String systemPrompt = getAgentSystemPrompt(agentCode, portal);
+        String systemPrompt = (resolvedAgent.getSystemPrompt() != null && !resolvedAgent.getSystemPrompt().isBlank())
+                ? resolvedAgent.getSystemPrompt()
+                : "Bạn là " + resolvedAgent.getName() + " của CH Academy.";
 
         // 7. Sinh câu trả lời (LLM OpenRouter hoặc Engine tri thức cục bộ)
         String answer;
@@ -222,7 +226,8 @@ public class GenAiChatService {
     public void markHandoff(Long conversationId, User user, String portal) {
         AiConversation conv;
         if (user != null) {
-            conv = conversationRepository.findByIdAndUserIdAndPortal(conversationId, user.getId(), portal)
+            String validatedPortal = portalAgentResolver.determineEffectivePortal(portal, user);
+            conv = conversationRepository.findByIdAndUserIdAndPortal(conversationId, user.getId(), validatedPortal)
                     .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy hội thoại"));
         } else {
             conv = conversationRepository.findById(conversationId)
@@ -236,56 +241,6 @@ public class GenAiChatService {
     // ========================================================
     // 3. TIỆN ÍCH KIỂM TRA PHÂN QUYỀN & CHỐNG RÒ RỈ DỮ LIỆU
     // ========================================================
-
-    private String normalizeAndValidatePortal(String portal, User user) {
-        if (portal == null || portal.isBlank()) {
-            return resolvePrimaryPortal(user);
-        }
-        String p = portal.toUpperCase().trim();
-        if ("ADMIN".equals(p)) {
-            if (!hasRole(user, "ADMIN") && !hasRole(user, "SUPER_ADMIN")) {
-                throw new AccessDeniedException("Tài khoản của bạn không có quyền truy cập không gian hội thoại Admin");
-            }
-            return "ADMIN";
-        } else if ("TEACHER".equals(p)) {
-            if (!hasRole(user, "TEACHER") && !hasRole(user, "ADMIN") && !hasRole(user, "SUPER_ADMIN")) {
-                throw new AccessDeniedException("Tài khoản của bạn không có quyền truy cập không gian hội thoại Giảng viên");
-            }
-            return "TEACHER";
-        } else if ("STUDENT".equals(p)) {
-            return "STUDENT";
-        } else if ("PUBLIC".equals(p)) {
-            return "PUBLIC";
-        }
-        return resolvePrimaryPortal(user);
-    }
-
-    private boolean hasRole(User user, String roleName) {
-        if (user == null || user.getRoles() == null) return false;
-        return user.getRoles().stream().anyMatch(r -> r.getId() != null && r.getId().contains(roleName));
-    }
-
-    private String resolvePrimaryPortal(User user) {
-        if (user == null) return "PUBLIC";
-        if (hasRole(user, "ADMIN") || hasRole(user, "SUPER_ADMIN")) return "ADMIN";
-        if (hasRole(user, "TEACHER")) return "TEACHER";
-        return "STUDENT";
-    }
-
-    private String resolveAgentCodeForPortal(String portal) {
-        return switch (portal) {
-            case "ADMIN" -> "AGENT_ADMIN_ASSISTANT";
-            case "TEACHER" -> "AGENT_TEACHER_ASSISTANT";
-            case "PUBLIC" -> "AGENT_ADMISSIONS";
-            default -> "AGENT_STUDENT_TUTOR";
-        };
-    }
-
-    private String getAgentSystemPrompt(String agentCode, String portal) {
-        return agentRepository.findByCode(agentCode)
-                .map(AiAgent::getSystemPrompt)
-                .orElse("Bạn là Trợ lý AI chuyên nghiệp của CH Academy.");
-    }
 
     private boolean checkHandoffIntent(String text) {
         String lower = text.toLowerCase();

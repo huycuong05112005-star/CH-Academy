@@ -90,3 +90,4 @@ try (java.io.InputStream is = file.getInputStream();
 2. **Kiểm tra API JSON Response:**
    - Gọi `GET /api/v1/admin/ai/agents` trả về `Content-Type: application/json;charset=UTF-8`.
    - Gọi `POST /api/v1/chat/ai/public/ask` trả về câu trả lời với đầy đủ dấu tiếng Việt chuẩn mực, không còn bất kỳ ký tự dị biệt nào.
+

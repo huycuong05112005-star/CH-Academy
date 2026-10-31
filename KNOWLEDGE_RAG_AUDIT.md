@@ -74,3 +74,4 @@ Hệ thống đã thiết lập bộ quy tắc kiểm soát biên (Guardrails) n
   - Thay vào đó, AI khẳng định rõ ràng: *"Hiện tại CH Academy chưa có chương trình này trong danh mục đào tạo chính thức (trung tâm chuyên sâu các chương trình Tiếng Anh từ trẻ em đến người đi làm, Luyện thi IELTS chuẩn quốc tế và Lập trình Python). Quý khách có thể để lại số điện thoại để chuyên viên tư vấn lộ trình học phù hợp nhất."*
 - **Trường hợp yêu cầu thông tin nhạy cảm:**
   - AI từ chối tuyệt đối việc cung cấp mật khẩu, thông tin cá nhân của học viên khác hoặc dữ liệu tài chính không thuộc quyền hạn của người hỏi.
+

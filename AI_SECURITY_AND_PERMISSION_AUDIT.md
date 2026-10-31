@@ -88,3 +88,4 @@ Khi một tài khoản có nhiều vai trò (ví dụ: vừa là Giảng viên v
 3. **Quy trình Đăng xuất An toàn (`POST /api/v1/auth/logout`):**
    - Hủy bỏ token trên bộ nhớ Client.
    - Ghi nhật ký kiểm toán hành vi đăng xuất (`AuditLog`) với địa chỉ IP, thời gian và định danh tài khoản.
+

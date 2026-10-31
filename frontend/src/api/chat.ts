@@ -11,7 +11,8 @@ import type {
   AiFlowItem,
   AiLeadItem,
   AiChannelConfigItem,
-  AiAnalyticsData
+  AiAnalyticsData,
+  PortalConfigDto
 } from '../types/chat'
 
 // ==========================================
@@ -43,6 +44,11 @@ export const classChatApi = {
 // ==========================================
 
 export const aiChatApi = {
+  getPortalConfig: (portal?: string): Promise<ApiResponse<PortalConfigDto>> => {
+    const q = portal ? `?portal=${encodeURIComponent(portal)}` : ''
+    return apiClient.get<PortalConfigDto>(`/chat/ai/portal-config${q}`)
+  },
+
   getConversations: (portal?: string): Promise<ApiResponse<AiConversationItem[]>> => {
     const q = portal ? `?portal=${encodeURIComponent(portal)}` : ''
     return apiClient.get<AiConversationItem[]>(`/chat/ai/conversations${q}`)
@@ -113,13 +119,15 @@ export const aiChatApi = {
     guestName?: string
     guestPhone?: string
     agentCode?: string
+    channel?: string
   }): Promise<ApiResponse<AiChatResponseData>> =>
     apiClient.post<AiChatResponseData>('/chat/ai/public/ask', {
       question: data.question || data.message || '',
       conversationId: data.conversationId,
       sessionId: data.sessionId,
       guestName: data.guestName,
-      guestPhone: data.guestPhone
+      guestPhone: data.guestPhone,
+      channel: data.channel
     }),
 
   askPublicAi: (data: {
@@ -258,3 +266,6 @@ export const aiStudioApi = {
     ended_at?: string
   }>>> => apiClient.get('/admin/ai/calls')
 }
+
+export const chatApi = aiChatApi
+

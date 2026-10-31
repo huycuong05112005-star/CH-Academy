@@ -78,3 +78,4 @@ Hệ thống CH Academy hiện tại đã đạt trạng thái sẵn sàng vận
 3. **Cơ sở dữ liệu:** Container `ch_academy_postgres` chạy trên cổng `5432`.
 
 Toàn bộ kiến trúc và tính năng đã được chuẩn hóa theo chuẩn mực doanh nghiệp, đảm bảo tính bảo mật, hiệu năng vượt trội và trải nghiệm học tập - giảng dạy - quản trị tối ưu nhất cho người dùng của CH Academy.
+

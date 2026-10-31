@@ -101,8 +101,8 @@ describe('AI Identity & Portal Isolation Tests', () => {
       </MemoryRouter>
     )
 
-    // Nhấn mở menu chat
-    const btn = screen.getByTitle('Mở kênh liên lạc CH Academy')
+    // Nhấn mở chat giảng viên
+    const btn = screen.getByTitle(/Trợ lý Giảng dạy/i)
     fireEvent.click(btn)
 
     // Phải hiển thị Trợ lý Giảng dạy & Soạn bài
@@ -126,7 +126,7 @@ describe('AI Identity & Portal Isolation Tests', () => {
       </MemoryRouter>
     )
 
-    const btn = screen.getByTitle('Mở kênh liên lạc CH Academy')
+    const btn = screen.getByTitle(/Trợ lý Quản trị/i)
     fireEvent.click(btn)
 
     // Phải hiển thị Trợ lý Quản trị & Vận hành

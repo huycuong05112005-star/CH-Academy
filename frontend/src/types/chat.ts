@@ -173,3 +173,22 @@ export interface AiAnalyticsData {
   estimatedTokensUsed: number
   averageLatencyMs: number
 }
+
+export interface PortalConfigDto {
+  portal: 'PUBLIC' | 'STUDENT' | 'TEACHER' | 'ADMIN'
+  agentCode: string
+  agentName: string
+  roleName: string
+  welcomeMessage: string
+  badge: string
+  badgeColor: string
+  features: {
+    hasGroupChat: boolean
+    hasVoiceCall: boolean
+    hasTutoringMode: boolean
+    hasLeadCapture: boolean
+    hasDirectHandoff: boolean
+  }
+  suggestedPrompts: string[]
+}
+

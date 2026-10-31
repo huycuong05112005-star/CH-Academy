@@ -54,3 +54,4 @@ Bảng `ai_conversations` lưu trữ đồng thời cả `user_id` và `portal`:
 
 ### 3.3. Bảo vệ giao diện AI Studio (`AiStudioPage.tsx`)
 Tại Frontend, tuyến đường `/admin/ai-studio` được bảo vệ bởi thẻ `<ProtectedRoute allowedRoles={['SUPER_ADMIN', 'ADMIN', 'CENTER_ADMIN']} />`. Học viên hoặc Giảng viên khi cố ý nhập URL `/admin/ai-studio` trên thanh địa chỉ trình duyệt sẽ lập tức bị chặn và điều hướng về đúng cổng của mình.
+

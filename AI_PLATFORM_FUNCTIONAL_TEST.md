@@ -49,3 +49,4 @@ Test Files  15 passed (15)
 2. `src/test/AiStudioAndIdentityIsolation.test.tsx`: Kiểm thử 11 module điều hướng AI Studio, scrollbar ngang, gọi API danh sách Agent và cách ly định danh cổng.
 3. `src/test/LoginPage.test.tsx`: Kiểm thử điều hướng đúng cổng sau khi đăng nhập theo từng vai trò (`ADMIN`, `TEACHER`, `STUDENT`).
 4. `src/test/SecurityFlow.test.tsx`: Kiểm thử giải phóng token sạch sẽ khi đăng xuất (`POST /auth/logout`).
+

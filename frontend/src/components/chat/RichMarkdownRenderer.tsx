@@ -402,3 +402,4 @@ export const RichMarkdownRenderer: React.FC<RichMarkdownRendererProps> = ({ cont
   return <div className={`rich-markdown-container space-y-0.5 ${className}`}>{blocks}</div>
 }
 export default RichMarkdownRenderer
+

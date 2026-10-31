@@ -70,6 +70,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/auth/login", "/api/v1/auth/oauth/**").permitAll()
                         .requestMatchers("/api/v1/public/**").permitAll()
                         .requestMatchers("/api/v1/chat/ai/public/**").permitAll()
+                        .requestMatchers("/api/v1/chat/ai/portal-config").permitAll()
                         .requestMatchers("/api/v1/webhooks/**").permitAll()
                         .requestMatchers("/api/v1/files/download/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/course-categories/active").permitAll()

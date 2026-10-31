@@ -79,3 +79,4 @@ CREATE TABLE IF NOT EXISTS call_sessions (
 1. **Khả thi trên trình duyệt:** Sử dụng `webkitSpeechRecognition` / Web Speech API cho STT tiếng Việt và Web Speech Synthesis cho TTS có độ trễ cực thấp (0ms network round-trip), hoạt động hoàn hảo trên Google Chrome/Edge.
 2. **Khả thi triển khai TTS tiếng Việt chuyên sâu:** Có thể kết nối microservice Python FastAPI (như mô hình `nexva/tts`) hoặc FPT.AI / Viettel AI qua REST API để có giọng đọc biểu cảm chuẩn ba miền Bắc - Trung - Nam.
 3. **Khả thi kết nối Tổng đài SIP/VoIP:** Sẵn sàng tích hợp qua giao thức WebRTC SIP Client (như SIP.js hoặc JsSIP) với tổng đài Asterisk của trung tâm để thực hiện cuộc gọi ra ngoài mạng di động thực tế.
+
