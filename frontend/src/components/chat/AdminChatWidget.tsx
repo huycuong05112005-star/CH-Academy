@@ -5,16 +5,19 @@ import {
   X,
   Maximize2,
   Minimize2,
-  ShieldCheck
+  ShieldCheck,
+  Headphones
 } from 'lucide-react'
 import { AIConversationPanel } from './AIConversationPanel'
 import { GroupChatPanel } from './GroupChatPanel'
+import { AiVoiceCallModal } from './AiVoiceCallModal'
 import { classChatApi } from '../../api/chat'
 
 export const AdminChatWidget: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false)
   const [isExpanded, setIsExpanded] = useState(false)
   const [activeTab, setActiveTab] = useState<'ai' | 'group'>('ai') // AI QUẢN TRỊ LÀ MẶC ĐỊNH
+  const [showVoiceCall, setShowVoiceCall] = useState(false)
   const [totalUnread, setTotalUnread] = useState(0)
 
   // Tải số lượng tin nhắn chưa đọc từ các nhóm lớp
@@ -101,6 +104,16 @@ export const AdminChatWidget: React.FC = () => {
             </div>
 
             <div className="flex items-center gap-1 shrink-0">
+              {activeTab === 'ai' && (
+                <button
+                  type="button"
+                  onClick={() => setShowVoiceCall(true)}
+                  className="p-1.5 rounded-lg hover:bg-white/20 transition cursor-pointer"
+                  title="Trao đổi giọng nói với Trợ lý Quản trị"
+                >
+                  <Headphones className="w-4 h-4 text-purple-200" />
+                </button>
+              )}
               <button
                 type="button"
                 onClick={() => setIsExpanded((prev) => !prev)}
@@ -178,6 +191,16 @@ export const AdminChatWidget: React.FC = () => {
           )}
         </div>
       )}
+
+      {/* 3. MODAL CUỘC GỌI VOICE AI QUẢN TRỊ */}
+      <AiVoiceCallModal
+        isOpen={showVoiceCall}
+        onClose={() => setShowVoiceCall(false)}
+        agentName="Trợ lý Quản trị & Vận hành"
+        agentRole="Quản trị viên"
+        agentCode="AGENT_ADMIN_ASSISTANT"
+        portal="ADMIN"
+      />
     </>
   )
 }

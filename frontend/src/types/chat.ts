@@ -3,6 +3,8 @@ export interface ChatConversationItem {
   classId?: number | null
   classCode?: string | null
   className?: string | null
+  courseName?: string | null
+  teacherName?: string | null
   title: string
   type: string
   memberCount: number
@@ -10,6 +12,17 @@ export interface ChatConversationItem {
   lastMessage: string
   lastMessageTime: string
   updatedAt: string
+}
+
+export interface ChatMemberItem {
+  id: number
+  userId: number
+  username: string
+  fullName: string
+  email?: string | null
+  role: 'TEACHER' | 'STUDENT' | 'ADMIN' | string
+  avatarUrl?: string | null
+  joinedAt: string
 }
 
 export interface ChatMessageItem {

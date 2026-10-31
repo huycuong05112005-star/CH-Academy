@@ -1,72 +1,47 @@
-# KIẾN TRÚC HỆ SINH THÁI AI AGENT — CH ACADEMY
+# KIẾN TRÚC HỆ THỐNG AI AGENT ĐA PHÂN HỆ — CH ACADEMY
 
-**Dự án:** CH Academy (`E:\CA_NHAN\CH_Academy`)  
-**Tham chiếu:** Nexva Gen AI Chat Box (`E:\CACMONTRENLOP\nexva`)  
-**Phiên bản kiến trúc:** 2.0 Native Enterprise AI
-
----
-
-## 1. TỔNG QUAN KIẾN TRÚC HỆ THỐNG
-
-Hệ sinh thái AI Agent tại CH Academy được thiết kế theo mô hình **Native Enterprise Spring Boot + React + PostgreSQL**, kết hợp tri thức động từ nghiệp vụ giáo dục và tri thức tĩnh từ Kho tài liệu (RAG - Retrieval Augmented Generation).
-
-Khác với mô hình chạy Node.js / Python service độc lập làm phân mảnh quản trị và xác thực, CH Academy tích hợp toàn bộ AI Runtime trực tiếp vào lõi Spring Boot 3.3.4, kế thừa toàn diện Spring Security JWT, giao dịch ACID của PostgreSQL và phân quyền RBAC đa cổng.
-
-```mermaid
-flowchart TD
-    subgraph ClientLayer["Lớp Kênh Người dùng (Omnichannel Clients)"]
-        WebGuest["Website Khách vãng lai (Landing Page)"]
-        StudentPortal["Cổng Học viên (/portal)"]
-        TeacherPortal["Cổng Giảng viên (/teacher)"]
-        AdminPortal["Cổng Quản trị (/admin)"]
-        ZaloChannel["Zalo Official Account (OA Webhook)"]
-        VoiceClient["AI Voice & Audio Interface"]
-    end
-
-    subgraph SecurityLayer["Lớp Bảo mật & Phân tách Danh tính (Security & Isolation)"]
-        JWTFilter["JwtAuthenticationFilter & PortalValidator"]
-        SessionTracker["Guest Session Manager (Public Rate-limit)"]
-        RBAC["Phân quyền Role-Based (PUBLIC / STUDENT / TEACHER / ADMIN)"]
-    end
-
-    subgraph AIRuntime["Lớp AI Runtime & Điều phối (CH Academy AI Engine)"]
-        AgentDispatcher["Agent Dispatcher (Router theo Cổng & Kênh)"]
-        FlowEngine["Conversation Flow Engine (Dịch kịch bản theo Nexva)"]
-        ContextInjector["Dynamic Context Injector (Tra cứu DB thời gian thực)"]
-        RAGSearch["RAG Search Engine (Tìm kiếm phân đoạn tri thức Chunk)"]
-        HandoffManager["Human Handoff Coordinator (Báo tư vấn viên)"]
-        LLMAdapter["LLM Gateway Adapter (Gemini 2.5 Flash / OpenRouter)"]
-    end
-
-    subgraph StorageLayer["Lớp Cơ sở Dữ liệu & Lưu trữ (PostgreSQL 16)"]
-        AgentDB[("ai_agents & ai_flows & ai_channel_configs")]
-        KBDB[("ai_knowledge_bases & ai_kb_documents & ai_kb_chunks")]
-        ChatDB[("ai_conversations & ai_messages & ai_leads")]
-        BusinessDB[("classes, enrollments, exams, receivables, students, teachers")]
-    end
-
-    ClientLayer --> SecurityLayer
-    SecurityLayer --> AIRuntime
-    AIRuntime --> StorageLayer
-```
+**Tài liệu kỹ thuật:** AI Agent Ecosystem & Studio Architecture  
+**Phiên bản:** 2.0  
+**Ngày cập nhật:** 31/10/2026  
 
 ---
 
-## 2. 4 TRỤ CỘT AI AGENT CHUYÊN TRÁCH
+## I. MÔ THỨC QUẢN LÝ AGENT
 
-| Mã Agent | Tên Agent | Cổng phục vụ | Model LLM | Nguồn tri thức chính |
-| :--- | :--- | :--- | :--- | :--- |
-| `AGENT_ADMISSIONS` | Chuyên viên Tư vấn Tuyển sinh | Website công khai (`PUBLIC`) | Gemini 2.5 Flash | `KB_ADMISSIONS` (Bảng giá, Khóa học, Ưu đãi) |
-| `AGENT_STUDENT_TUTOR` | Trợ giảng AI Đồng hành | Cổng Học viên (`STUDENT`) | Gemini 2.5 Flash | `KB_ACADEMIC_RULES` + Lịch học, Học phí, Lớp học thực tế |
-| `AGENT_TEACHER_ASSISTANT` | Trợ lý Giảng dạy & Soạn bài | Cổng Giảng viên (`TEACHER`) | Gemini 2.5 Flash | `KB_TEACHING_GUIDES` + Lớp phụ trách, Ngân hàng đề thi |
-| `AGENT_ADMIN_ASSISTANT` | Trợ lý Quản trị & Vận hành | Cổng Quản trị (`ADMIN`) | Gemini 2.5 Flash | `KB_ADMIN_PROCEDURES` + Doanh thu, Nhân sự, Tổng quan trung tâm |
+Mỗi AI Agent trong hệ thống CH Academy là một thực thể độc lập được định nghĩa trong cơ sở dữ liệu (`ai_agents`), có chu kỳ phát triển và vận hành (Lifecycle):
+`DRAFT` ➔ `TESTING` ➔ `PUBLISHED` ➔ `ARCHIVED`.
+
+### Cấu trúc dữ liệu AI Agent:
+- `id`: Định danh khóa chính.
+- `code`: Mã định danh bất biến (`AGENT_ADMISSIONS`, `AGENT_STUDENT_TUTOR`, `AGENT_TEACHER_ASSISTANT`, `AGENT_ADMIN_ASSISTANT`).
+- `name`: Tên hiển thị người dùng.
+- `scope`: Phạm vi phục vụ (`PUBLIC_ADMISSION`, `STUDENT_TUTOR`, `TEACHER_ASSISTANT`, `ADMIN_ASSISTANT`).
+- `systemPrompt`: Kịch bản điều hướng tư duy, nguyên tắc phản hồi và phong cách sư phạm.
+- `model`: Mô hình nền tảng (Gemini 1.5 Pro / Flash, GPT-4o, Claude 3.5 Sonnet qua cấu hình runtime).
+- `temperature`: Độ sáng tạo kiểm soát từ 0.0 đến 1.0 (mặc định 0.3 cho Gia sư và Tuyển sinh để chống ảo giác).
+- `knowledgeBaseId`: Liên kết tới kho tri thức RAG riêng biệt.
+- `quotaLimit`: Định mức sử dụng token/lượt hỏi mỗi ngày.
 
 ---
 
-## 3. NGUYÊN TẮC BẢO MẬT & CHỐNG ẢO GIÁC (ANTI-HALLUCINATION)
+## II. BỐN ĐẠI DIỆN AGENT CỐT LÕI
 
-1. **Không truy vấn dữ liệu vượt quyền**: Khách vãng lai và học viên không thể tiếp cận dữ liệu nhạy cảm hay thông tin tài chính của trung tâm.
-2. **Không bịa đặt số liệu**: Mọi câu trả lời liên quan đến lịch thi, điểm số, học phí hoặc ca học đều phải dựa trên truy vấn thời gian thực từ PostgreSQL.
-3. **Trích dẫn nguồn bắt buộc (Source Citations)**: Mọi thông tin tư vấn chính sách, nội quy hoặc bảng giá đều được gắn kèm đoạn trích dẫn và tên văn bản tương ứng.
-4. **Phân tách không gian hội thoại (Identity Isolation)**: Hội thoại của cổng nào chỉ tồn tại và được phép truy cập trong phạm vi cổng đó.
+### 1. `AGENT_ADMISSIONS` (Chuyên viên Tư vấn Tuyển sinh AI)
+- **Khu vực hoạt động:** Trang chủ công khai (`PUBLIC`).
+- **Nhiệm vụ:** Tư vấn khóa học, cung cấp thông tin học phí niêm yết, lịch khai giảng.
+- **Tích hợp CRM:** Tự động phát hiện thông tin liên hệ của khách hàng (Họ tên, SĐT, Email, Nhu cầu) và đồng bộ trực tiếp vào bảng `ai_leads` để bộ phận tuyển sinh chăm sóc ngay.
 
+### 2. `AGENT_STUDENT_TUTOR` (AI Gia sư - Trợ lý Học tập)
+- **Khu vực hoạt động:** Cổng học viên (`STUDENT`).
+- **Nhiệm vụ:**
+  - Hướng dẫn giải bài tập theo **Quy trình 6 bước sư phạm Socratic** (Không đưa đáp án trực tiếp mà đặt câu hỏi gợi mở, phân tích dữ kiện, định hướng phương pháp, hỗ trợ tính toán, kiểm tra kết quả và tổng kết bài học).
+  - Kết xuất công thức Toán/Lý/Hóa dưới dạng KaTeX/LaTeX chuẩn xác (`\frac{a}{b}`, `\sqrt{x}`, `\int f(x)dx`).
+  - Hỗ trợ sửa lỗi phát âm và ngữ pháp tiếng Anh.
+
+### 3. `AGENT_TEACHER_ASSISTANT` (Trợ lý Giảng dạy & Soạn bài)
+- **Khu vực hoạt động:** Cổng giảng viên (`TEACHER`).
+- **Nhiệm vụ:** Soạn giáo án, tạo ngân hàng câu hỏi trắc nghiệm/tự luận, tóm tắt tài liệu môn học và gợi ý bài tập nâng cao/bổ trợ.
+
+### 4. `AGENT_ADMIN_ASSISTANT` (Trợ lý Quản trị & Vận hành)
+- **Khu vực hoạt động:** Cổng quản trị (`ADMIN`).
+- **Nhiệm vụ:** Báo cáo chỉ số tuyển sinh, tỷ lệ chuyên cần các lớp, tổng hợp học phí/công nợ và tình trạng hoạt động hệ thống.

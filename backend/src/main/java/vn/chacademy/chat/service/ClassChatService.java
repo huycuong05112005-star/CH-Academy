@@ -12,6 +12,7 @@ import vn.chacademy.academic.repository.ClassRepository;
 import vn.chacademy.academic.repository.EnrollmentRepository;
 import vn.chacademy.academic.repository.TeacherAssignmentRepository;
 import vn.chacademy.chat.dto.ChatConversationDto;
+import vn.chacademy.chat.dto.ChatMemberDto;
 import vn.chacademy.chat.dto.ChatMessageDto;
 import vn.chacademy.chat.dto.SendMessageRequest;
 import vn.chacademy.chat.entity.ChatConversation;
@@ -87,6 +88,14 @@ public class ClassChatService {
         verifyMembership(conversationId, user);
         return messageRepository.findByConversationIdOrderByCreatedAtAsc(conversationId).stream()
                 .map(ChatMessageDto::fromEntity)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<ChatMemberDto> getConversationMembers(Long conversationId, User user) {
+        verifyMembership(conversationId, user);
+        return memberRepository.findByConversationId(conversationId).stream()
+                .map(ChatMemberDto::fromEntity)
                 .toList();
     }
 

@@ -2,6 +2,7 @@ import { apiClient, type ApiResponse } from './client'
 import type {
   ChatConversationItem,
   ChatMessageItem,
+  ChatMemberItem,
   AiConversationItem,
   AiMessageItem,
   AiChatResponseData,
@@ -36,7 +37,10 @@ export const classChatApi = {
     apiClient.post<ChatMessageItem>(`/chat/classes/conversations/${conversationId}/messages`, data),
 
   markAsRead: (conversationId: number): Promise<ApiResponse<void>> =>
-    apiClient.post<void>(`/chat/classes/conversations/${conversationId}/read`, {})
+    apiClient.post<void>(`/chat/classes/conversations/${conversationId}/read`, {}),
+
+  getMembers: (conversationId: number): Promise<ApiResponse<ChatMemberItem[]>> =>
+    apiClient.get<ChatMemberItem[]>(`/chat/classes/conversations/${conversationId}/members`)
 }
 
 // ==========================================

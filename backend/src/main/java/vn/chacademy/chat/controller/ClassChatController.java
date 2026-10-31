@@ -8,6 +8,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import vn.chacademy.chat.dto.ChatConversationDto;
+import vn.chacademy.chat.dto.ChatMemberDto;
 import vn.chacademy.chat.dto.ChatMessageDto;
 import vn.chacademy.chat.dto.SendMessageRequest;
 import vn.chacademy.chat.service.ClassChatService;
@@ -56,6 +57,15 @@ public class ClassChatController {
         User user = getAuthenticatedUser(userDetails);
         List<ChatMessageDto> messages = classChatService.getConversationMessages(id, user);
         return ResponseEntity.ok(ApiResponse.success(messages));
+    }
+
+    @GetMapping("/conversations/{id}/members")
+    public ResponseEntity<ApiResponse<List<ChatMemberDto>>> getMembers(
+            @PathVariable Long id,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        User user = getAuthenticatedUser(userDetails);
+        List<ChatMemberDto> members = classChatService.getConversationMembers(id, user);
+        return ResponseEntity.ok(ApiResponse.success(members));
     }
 
     @PostMapping("/conversations/{id}/messages")
