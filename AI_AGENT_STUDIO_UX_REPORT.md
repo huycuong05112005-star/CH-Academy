@@ -57,3 +57,4 @@ Giao diện tạo và chỉnh sửa Agent được phân tách thành 4 tab tr�
 ### 2.5. Tích hợp AI Voice Call Modal ngay trong Agent Sandbox Playground
 - Bổ sung nút **"Thử thoại với Agent"** kế bên nút làm mới hội thoại.
 - Cho phép quản trị viên test trực tiếp khả năng nghe nói tiếng Việt hai chiều của Agent đã chọn.
+

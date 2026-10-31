@@ -31,3 +31,4 @@ ALTER TABLE leads ADD CONSTRAINT chk_lead_source CHECK (source IN ('WEBSITE', 'F
 -- 4. Bổ sung trường liên kết CRM lead_id trong bảng ai_leads nếu chưa có
 ALTER TABLE ai_leads ADD COLUMN IF NOT EXISTS lead_id BIGINT REFERENCES leads(id) ON DELETE SET NULL;
 CREATE INDEX IF NOT EXISTS idx_ai_leads_lead_id ON ai_leads(lead_id);
+

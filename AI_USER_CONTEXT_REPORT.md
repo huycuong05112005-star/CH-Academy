@@ -43,3 +43,4 @@ Trước đây hệ thống gặp lỗi nghiêm trọng: khi người dùng mở
     `GET /api/v1/chat/ai/conversations?portal=ADMIN`
   - Tiêu đề Trợ lý và lời chào tự động thay đổi tương ứng theo `agentMetadata` của cổng mới.
 - Không bao giờ xảy ra hiện tượng rò rỉ hoặc hiển thị đè tin nhắn của Giảng viên sang Quản trị viên hay Học viên.
+

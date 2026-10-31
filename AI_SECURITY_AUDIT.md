@@ -42,3 +42,4 @@
 
 ## 3. KẾT LUẬN KIỂM TOÁN AN NINH
 Toàn bộ các tiêu chuẩn an toàn thông tin theo chuẩn OWASP Top 10 for LLM Applications (Prompt Injection, Sensitive Information Disclosure, Insecure Output Handling) đã được tuân thủ nghiêm ngặt trong kiến trúc AI Platform của CH Academy.
+

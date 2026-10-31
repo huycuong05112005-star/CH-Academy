@@ -42,3 +42,4 @@
 - API Backend build thành công (`BUILD SUCCESS`).
 - Frontend build thành công bằng Vite (`✓ built in 2.03s`), 59/59 Vitest tests pass.
 - Đã kiểm thử E2E thực tế trên cơ sở dữ liệu PostgreSQL.
+

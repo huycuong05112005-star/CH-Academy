@@ -61,3 +61,4 @@ Trước đây, luồng thu thập thông tin khách hàng từ Chatbot AI trên
   - Bản ghi `leads` (CRM): ID = 9, mã `LEAD-AI-796959`, nguồn `AI_CHATBOT`, trạng thái `NEW`.
   - Ghi chú: "Đăng ký tư vấn tự động qua Trợ lý Tuyển sinh AI CH Academy. Khóa học quan tâm: Tiếng Anh Giao Tiếp Doanh Nghiệp...".
   - Kiểm tra truy vấn `GET /api/v1/leads?keyword=0988681795`: Tìm thấy đúng 1 bản ghi với đầy đủ liên kết.
+

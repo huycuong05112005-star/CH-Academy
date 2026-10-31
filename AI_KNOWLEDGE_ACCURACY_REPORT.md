@@ -48,3 +48,4 @@ Nếu câu hỏi của người dùng đề cập đến môn học không có t
    - Mỗi Chunk được đánh chỉ mục và lưu vào bảng `ai_kb_chunks`.
 3. **Trích dẫn nguồn minh bạch (Source Citations):**
    - Khi câu trả lời được hình thành từ tài liệu RAG, AI gửi kèm danh sách trích dẫn nguồn gồm: tên tài liệu (`documentName`), phân đoạn liên quan (`section`) để người dùng có thể đối chiếu.
+

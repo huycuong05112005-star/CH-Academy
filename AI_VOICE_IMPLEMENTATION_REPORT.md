@@ -43,3 +43,4 @@
 
 ## 3. KHẢ NĂNG MỞ RỘNG (FUTURE WEBRTC / LIVE API)
 Kiến trúc `AiVoiceCallModal.tsx` được module hóa hoàn toàn. Trong giai đoạn sau, khi trung tâm mở rộng lên hạ tầng WebRTC đa điểm hoặc kết nối trực tiếp với Gemini Multimodal Live API qua WebSocket, tầng visualizer và state machine của modal này sẽ được tái sử dụng 100% mà không cần viết lại giao diện.
+
