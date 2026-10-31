@@ -68,3 +68,4 @@ npm --prefix frontend run dev
   docker exec ch_academy_postgres pg_dump -U ch_academy_user -d ch_academy > backup_$(date +%Y%m%d).sql
   ```
 - **Lưu ý bảo toàn dữ liệu:** Tuyệt đối không sử dụng lệnh `docker compose down -v` vì sẽ xóa volume lưu trữ dữ liệu PostgreSQL.
+

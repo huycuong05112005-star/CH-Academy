@@ -39,7 +39,8 @@ vi.mock('../api/chat', () => ({
     createKnowledgeBase: vi.fn(),
     deleteKnowledgeBase: vi.fn(),
     uploadDocument: vi.fn(),
-    deleteDocument: vi.fn()
+    deleteDocument: vi.fn(),
+    getCalls: vi.fn()
   }
 }))
 
@@ -82,6 +83,7 @@ describe('AI Identity & Portal Isolation Tests', () => {
     vi.mocked(aiStudioApi.getLeads).mockResolvedValue({ success: true, data: [] } as any)
     vi.mocked(aiStudioApi.getChannels).mockResolvedValue({ success: true, data: [] } as any)
     vi.mocked(aiStudioApi.getAllConversations).mockResolvedValue({ success: true, data: [] } as any)
+    vi.mocked(aiStudioApi.getCalls).mockResolvedValue({ success: true, data: [] } as any)
   })
 
   it('1. Đảm bảo FloatingChatWidget hiển thị đúng Agent khi ở Cổng Giảng viên (/teacher)', async () => {

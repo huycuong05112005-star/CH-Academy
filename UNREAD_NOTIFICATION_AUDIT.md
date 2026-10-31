@@ -38,3 +38,4 @@
   - Cũ: `<div className="flex min-h-full items-center justify-center p-3 sm:p-4 text-center">`
   - Mới: `<div className="flex min-h-full items-start justify-center p-3 sm:p-6 text-center">` kết hợp `my-auto max-h-[calc(100vh-3rem)]` trên hộp thoại.
 - Giúp modal luôn nằm hoàn toàn bên trong viewport trình duyệt, không bao giờ bị tràn lên trên mép trên màn hình.
+

@@ -23,3 +23,4 @@
 ### 2.3. Chống Trùng lặp & Tấn công DoS Tin nhắn (Message Ingestion Idempotency)
 - Header / Body request hỗ trợ `clientMsgId`. Gửi trùng lặp cùng một ID không tạo ra hai bản ghi trong cơ sở dữ liệu.
 - Mọi câu hỏi gửi đến Gemini LLM đều được kiểm soát tốc độ (rate limit / debounce) và giới hạn độ dài ký tự đầu vào.
+

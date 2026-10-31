@@ -200,5 +200,10 @@ public class AiStudioAdminController {
     public ResponseEntity<ApiResponse<Map<String, Object>>> getAnalytics() {
         return ResponseEntity.ok(ApiResponse.success(aiStudioService.getAnalyticsSummary()));
     }
+
+    @GetMapping("/calls")
+    public ResponseEntity<ApiResponse<List<Map<String, Object>>>> getCallSessions() {
+        return ResponseEntity.ok(ApiResponse.success(aiStudioService.getAllCallSessions()));
+    }
 }
 

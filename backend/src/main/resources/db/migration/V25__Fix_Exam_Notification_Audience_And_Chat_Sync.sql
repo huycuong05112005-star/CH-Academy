@@ -30,3 +30,4 @@ CREATE TABLE IF NOT EXISTS call_sessions (
 
 CREATE INDEX IF NOT EXISTS idx_call_sessions_user ON call_sessions(user_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_call_sessions_portal ON call_sessions(portal, created_at DESC);
+

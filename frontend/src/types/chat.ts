@@ -70,6 +70,7 @@ export interface AiAgentItem {
   name: string
   description?: string
   roleTarget: 'PUBLIC' | 'STUDENT' | 'TEACHER' | 'ADMIN'
+  scope?: 'PUBLIC_ADMISSION' | 'STUDENT_TUTOR' | 'TEACHER_ASSISTANT' | 'ADMIN_ASSISTANT' | string
   model: string
   systemPrompt: string
   status: 'DRAFT' | 'PUBLISHED' | 'PAUSED'

@@ -28,3 +28,4 @@ Toàn bộ 15 test suite với 59 ca kiểm thử tự động đã vượt qua 
 | **Đọc tin nhắn nhóm** | `POST /api/v1/chat/classes/1/read` | Đánh dấu đã đọc, unread về 0 | Đã đọc thành công, Admin tự động đăng ký member | **PASS** |
 | **Lọc thông báo học viên** | `GET /api/v1/student/portal/notifications` | Không có thông báo "Đề thi mới chờ duyệt" | 0 thông báo duyệt đề thi hiển thị cho học sinh | **PASS** |
 | **Kiểm tra Sức khỏe Hệ thống** | `GET /api/v1/health` | Trả về status `UP` | `{"status": "UP", "service": "CH Academy Backend"}` | **PASS** |
+

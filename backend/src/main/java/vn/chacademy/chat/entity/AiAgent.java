@@ -33,6 +33,10 @@ public class AiAgent {
     @Column(name = "role_target", nullable = false, length = 50)
     private String roleTarget; // PUBLIC, STUDENT, TEACHER, ADMIN
 
+    @Column(name = "scope", length = 50)
+    @Builder.Default
+    private String scope = "STUDENT_TUTOR"; // PUBLIC_ADMISSION, STUDENT_TUTOR, TEACHER_ASSISTANT, ADMIN_ASSISTANT
+
     @Column(name = "model", nullable = false, length = 100)
     @Builder.Default
     private String model = "google/gemini-2.5-flash";

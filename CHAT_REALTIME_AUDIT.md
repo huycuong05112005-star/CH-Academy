@@ -29,3 +29,4 @@ Trước khi khắc phục:
     setConversations(prev => prev.map(c => c.id === convId ? { ...c, unreadCount: 0 } : c))
     ```
   - Đồng thời phát sự kiện nội bộ `window.dispatchEvent(new CustomEvent('ch-chat-unread-updated', ...))` giúp các component xung quanh đồng bộ số lượng unread tức thì.
+

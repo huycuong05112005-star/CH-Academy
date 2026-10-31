@@ -38,3 +38,4 @@ Cấu trúc package theo domain-driven:
 ### 2.3. Loại bỏ hoàn toàn Insecure Fallback ngầm
 - Loại bỏ toàn bộ hardcoded fallback `HV20240002` trong `StudentPortalController.java`, `AssessmentAnalyticsController.java` và `ExamAttemptService.java`.
 - Nếu tài khoản Quản trị cố tình truy cập Cổng học viên hoặc gọi API cá nhân của học sinh khi chưa được liên kết hồ sơ, backend trả về mã lỗi `400 BAD_REQUEST` hoặc `404 NOT_FOUND` với thông điệp rõ ràng, không để xảy ra hiện tượng mạo danh hay trộn lẫn dữ liệu.
+

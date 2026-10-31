@@ -21,6 +21,7 @@ import {
 } from 'lucide-react'
 import { classChatApi, aiChatApi } from '../../api/chat'
 import { AiVoiceCallModal } from './AiVoiceCallModal'
+import { RichMarkdownRenderer } from './RichMarkdownRenderer'
 import type {
   ChatConversationItem,
   ChatMessageItem,
@@ -80,6 +81,7 @@ export const FloatingChatWidget: React.FC = () => {
   const [copiedId, setCopiedId] = useState<string | null>(null)
   const [isListening, setIsListening] = useState(false)
   const [handoffStatus, setHandoffStatus] = useState<string | null>(null)
+  const [tutoringMode, setTutoringMode] = useState<'STEP_BY_STEP' | 'DETAILED'>('STEP_BY_STEP')
 
   // Lead capture state cho khách công khai
   const [showLeadModal, setShowLeadModal] = useState(false)
@@ -145,17 +147,17 @@ export const FloatingChatWidget: React.FC = () => {
         ]
       case 'STUDENT':
         return [
-          'Tôi đang học những lớp nào?',
-          'Kiểm tra học phí của tôi',
-          'Lịch học ca tiếp theo?',
-          'Quy định chuyên cần thi cuối kỳ'
+          '📐 Hướng dẫn giải bài tập theo 6 bước sư phạm',
+          '✍️ Sửa lỗi phát âm & ngữ pháp Tiếng Anh',
+          '📝 Tóm tắt kiến thức trọng tâm buổi học',
+          '🎯 Tạo 3 câu hỏi trắc nghiệm tự luyện'
         ]
       default:
         return [
-          'Các khóa học hiện tại và học phí?',
-          'Khóa Tiếng Anh Trẻ em có ưu đãi gì?',
-          'Luyện thi IELTS có cam kết đầu ra không?',
-          'Tôi muốn gặp chuyên viên tư vấn trực tiếp'
+          '🎓 Các khóa học đang tuyển sinh',
+          '💰 Biểu phí & học bổng mới nhất',
+          '📅 Lịch khai giảng gần nhất',
+          '📞 Đăng ký tư vấn trực tiếp'
         ]
     }
   }, [currentPortal])
@@ -281,18 +283,27 @@ export const FloatingChatWidget: React.FC = () => {
     setAiTurns((prev) => [...prev, userTurn])
     setAiLoading(true)
 
+    let outboundQuestion = q
+    if (currentPortal === 'STUDENT') {
+      if (tutoringMode === 'STEP_BY_STEP' && !q.includes('từng bước') && !q.includes('6 bước')) {
+        outboundQuestion = `[Chế độ: Hướng dẫn từng bước theo 6 bước sư phạm] ${q}`
+      } else if (tutoringMode === 'DETAILED' && !q.includes('chi tiết')) {
+        outboundQuestion = `[Chế độ: Giải thích chi tiết toàn diện] ${q}`
+      }
+    }
+
     try {
       let res
       if (isAuthenticated) {
         res = await aiChatApi.ask({
-          question: q,
+          question: outboundQuestion,
           conversationId: aiConvId,
           portal: currentPortal,
           channel: 'PORTAL'
         })
       } else {
         res = await aiChatApi.askPublic({
-          question: q,
+          question: outboundQuestion,
           conversationId: aiConvId,
           sessionId: guestSessionId
         })
@@ -848,7 +859,11 @@ export const FloatingChatWidget: React.FC = () => {
                               : 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200/80 dark:border-slate-700 rounded-bl-none'
                           }`}
                         >
-                          <div className="whitespace-pre-line">{turn.content}</div>
+                          {isUser ? (
+                            <div className="whitespace-pre-line">{turn.content}</div>
+                          ) : (
+                            <RichMarkdownRenderer content={turn.content} />
+                          )}
 
                           {/* Sources Citations Accordion */}
                           {turn.sources && turn.sources.length > 0 && (
@@ -904,6 +919,39 @@ export const FloatingChatWidget: React.FC = () => {
                 )}
                 <div ref={aiEndRef} />
               </div>
+
+              {/* Chế độ Gia sư Học tập (dành cho Cổng Học viên) */}
+              {currentPortal === 'STUDENT' && (
+                <div className="px-3 py-1.5 bg-slate-50 dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[11px] shrink-0">
+                  <span className="text-slate-500 dark:text-slate-400 font-medium flex items-center gap-1">
+                    <span>💡 Chế độ gia sư:</span>
+                  </span>
+                  <div className="flex items-center gap-1">
+                    <button
+                      type="button"
+                      onClick={() => setTutoringMode('STEP_BY_STEP')}
+                      className={`px-2 py-0.5 rounded-md font-semibold transition ${
+                        tutoringMode === 'STEP_BY_STEP'
+                          ? 'bg-emerald-600 text-white shadow-2xs'
+                          : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
+                      }`}
+                    >
+                      Hướng dẫn từng bước
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setTutoringMode('DETAILED')}
+                      className={`px-2 py-0.5 rounded-md font-semibold transition ${
+                        tutoringMode === 'DETAILED'
+                          ? 'bg-emerald-600 text-white shadow-2xs'
+                          : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
+                      }`}
+                    >
+                      Giải thích chi tiết
+                    </button>
+                  </div>
+                </div>
+              )}
 
               {/* AI Input Form với nút Giọng nói (Voice) */}
               <form

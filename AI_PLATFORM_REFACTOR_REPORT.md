@@ -22,3 +22,4 @@
 
 ### 2.3. Tự động Đồng bộ Khách hàng Tiềm năng (CRM Lead Ingestion)
 - Khi khách vãng lai hoặc học viên trò chuyện với Tư vấn viên AI trên Website hoặc Cổng công khai và cung cấp số điện thoại/email, hệ thống tự động bóc tách thông tin và khởi tạo Lead mới trong bảng `leads` với `lead_source = 'AI_CHAT_BOX'`.
+

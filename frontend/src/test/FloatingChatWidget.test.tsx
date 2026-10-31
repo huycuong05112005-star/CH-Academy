@@ -149,11 +149,11 @@ describe('FloatingChatWidget Component', () => {
 
     // Màn hình AI hiển thị
     await waitFor(() => {
-      expect(screen.getByText('Tôi đang học những lớp nào?')).toBeInTheDocument()
+      expect(screen.getByText(/Hướng dẫn giải bài tập theo 6 bước sư phạm/)).toBeInTheDocument()
     })
 
     // Bấm vào gợi ý câu hỏi
-    const promptPill = screen.getByText('Tôi đang học những lớp nào?')
+    const promptPill = screen.getByText(/Hướng dẫn giải bài tập theo 6 bước sư phạm/)
     fireEvent.click(promptPill)
 
     await waitFor(() => {

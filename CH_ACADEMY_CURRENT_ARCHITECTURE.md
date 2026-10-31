@@ -74,3 +74,4 @@ graph TD
   - Tích hợp Web Audio API (Realtime Analyser Canvas) và Web Speech API (STT SpeechRecognition + TTS SpeechSynthesis).
   - Chu trình trạng thái: `IDLE` $\rightarrow$ `CONNECTING` $\rightarrow$ `LISTENING` $\rightarrow$ `PROCESSING` $\rightarrow$ `SPEAKING` $\rightarrow$ `MUTED` $\rightarrow$ `ENDED`.
   - Bảng `call_sessions` lưu vết thời lượng và lịch sử cuộc gọi.
+

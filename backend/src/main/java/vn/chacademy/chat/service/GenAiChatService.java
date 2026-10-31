@@ -43,6 +43,7 @@ public class GenAiChatService {
     private final AiAgentRepository agentRepository;
     private final AiKbChunkRepository chunkRepository;
     private final AiLeadRepository leadRepository;
+    private final AiStudioService aiStudioService;
     private final StudentRepository studentRepository;
     private final TeacherRepository teacherRepository;
     private final EnrollmentRepository enrollmentRepository;
@@ -158,15 +159,15 @@ public class GenAiChatService {
                 .createdAt(Instant.now())
                 .build());
 
+        // Tự động trích xuất thông tin khách hàng / Lead từ nội dung tin nhắn nếu có số điện thoại
+        extractAndSaveLeadIfPresent(question, conversation, request.getGuestName(), request.getGuestPhone());
+
         // 3. Kiểm tra yêu cầu Human Handoff (chuyển người thật / tư vấn viên)
         List<AiChatResponse.SourceCitation> citations = new ArrayList<>();
         boolean isHandoffRequest = checkHandoffIntent(question);
         if (isHandoffRequest) {
             conversation.setStatus("WAITING_HUMAN");
             conversationRepository.save(conversation);
-
-            // Tự động thu thập Lead nếu có số điện thoại
-            extractAndSaveLeadIfPresent(question, conversation, request.getGuestName(), request.getGuestPhone());
 
             String handoffReply = "Dạ, tôi đã ghi nhận yêu cầu và chuyển tiếp cuộc trò chuyện của bạn đến chuyên viên tư vấn hỗ trợ của CH Academy. " +
                     "Chuyên viên sẽ tiếp nhận và phản hồi bạn trong thời gian sớm nhất. " +
@@ -295,25 +296,40 @@ public class GenAiChatService {
     }
 
     private void extractAndSaveLeadIfPresent(String text, AiConversation conv, String defaultName, String defaultPhone) {
-        // Tìm số điện thoại dạng 10 số (09x, 08x, 03x, 07x, 05x)
-        java.util.regex.Matcher matcher = java.util.regex.Pattern.compile("(0[3|5|7|8|9][0-9]{8})").matcher(text);
+        if (text == null) return;
+        // Chuẩn hóa và tìm số điện thoại Việt Nam dạng 10 số (hỗ trợ khoảng trắng, dấu chấm, gạch nối hoặc tiền tố quốc tế +84)
         String phone = defaultPhone;
+        java.util.regex.Matcher matcher = java.util.regex.Pattern.compile("(?:\\+84|0)[\\s.-]?(?:3[2-9]|5[689]|7[06-9]|8[1-9]|9[0-9])(?:[\\s.-]?[0-9]){7}").matcher(text);
         if (matcher.find()) {
-            phone = matcher.group(1);
+            phone = matcher.group(0).replaceAll("[\\s.-]", "");
+            if (phone.startsWith("+84")) {
+                phone = "0" + phone.substring(3);
+            }
         }
 
         if (phone != null && !phone.isBlank()) {
-            String name = (defaultName != null && !defaultName.isBlank()) ? defaultName : "Khách hàng Web";
-            if (!leadRepository.existsByPhoneAndCourseInterest(phone, "Tư vấn từ Chat AI")) {
-                leadRepository.save(AiLead.builder()
-                        .conversation(conv)
+            String name = (defaultName != null && !defaultName.isBlank()) ? defaultName : null;
+            if (name == null) {
+                java.util.regex.Matcher nameMatcher = java.util.regex.Pattern.compile("(?:tên là|mình là|em là|tôi là)\\s+([A-Za-zÀ-ỹ\\s]{2,30})", java.util.regex.Pattern.CASE_INSENSITIVE).matcher(text);
+                if (nameMatcher.find()) {
+                    name = nameMatcher.group(1).trim().replaceAll("[,.].*$", "").trim();
+                }
+            }
+            if (name == null || name.isBlank()) {
+                name = "Khách hàng Web";
+            }
+            try {
+                // Đồng bộ xuyên suốt cả bảng ai_leads và bảng CRM leads & lead_activities
+                aiStudioService.createLead(vn.chacademy.chat.dto.CreateLeadRequest.builder()
+                        .conversationId(conv != null ? conv.getId() : null)
                         .fullName(name)
                         .phone(phone)
-                        .courseInterest("Tư vấn từ Chat AI")
-                        .note("Khách hàng để lại thông tin qua hội thoại #" + conv.getId() + ": " + text)
-                        .status("NEW")
-                        .createdAt(Instant.now())
+                        .courseInterest("Tư vấn Tuyển sinh từ Chat AI")
+                        .note("Khách hàng cung cấp thông tin qua hội thoại #" + (conv != null ? conv.getId() : "N/A") + ": " + text)
                         .build());
+                log.info("Đã tự động lưu Lead mới từ Chat AI vào CRM: {} - {}", name, phone);
+            } catch (Exception e) {
+                log.warn("Không thể lưu Lead tự động từ Chat AI: {}", e.getMessage());
             }
         }
     }
@@ -411,6 +427,19 @@ public class GenAiChatService {
                 } else {
                     sb.append("HỌC PHÍ: Đã hoàn tất các khoản học phí.\n");
                 }
+
+                sb.append("\nQUY TẮC SƯ PHẠM CỦA AI GIA SƯ (INTELLIGENT TUTORING SYSTEM):\n");
+                sb.append("1. Khi học viên hỏi giải bài tập hoặc giải toán, BẮT BUỘC thực hiện quy trình hướng dẫn 6 bước sư phạm:\n");
+                sb.append("   - Bước 1: Phân tích đề bài (Xác định rõ dữ kiện cho trước và mục tiêu cần tìm/chứng minh).\n");
+                sb.append("   - Bước 2: Xác định phương pháp, kiến thức hoặc công thức toán học cần áp dụng.\n");
+                sb.append("   - Bước 3: Trình bày từng bước giải kèm theo phép biến đổi chi tiết.\n");
+                sb.append("   - Bước 4: Giải thích lý do vì sao thực hiện bước biến đổi đó để học viên hiểu bản chất.\n");
+                sb.append("   - Bước 5: Đưa ra kết luận hoặc đáp án cuối cùng.\n");
+                sb.append("   - Bước 6: Kiểm tra lại kết quả và lưu ý các lỗi sai thường gặp của học viên.\n");
+                sb.append("2. Trình bày công thức toán học rõ ràng, sử dụng ký hiệu toán học hoặc KaTeX ($...$ và $$...$$).\n");
+                sb.append("3. Khuyến khích tư duy gợi mở (Socratic tutoring), giải thích khái niệm bằng ví dụ thực tế dễ hiểu.\n");
+                sb.append("4. Hỗ trợ học tiếng Anh: phân tích ngữ pháp, dịch nghĩa, phát âm theo phiên âm IPA và sửa lỗi sai.\n");
+                sb.append("5. Chỉ hỗ trợ trong phạm vi chương trình và tài liệu các lớp học viên đang tham gia; tuyệt đối bảo mật thông tin các học viên khác.\n");
             });
         } else if ("TEACHER".equals(portal)) {
             teacherRepository.findByUserId(user.getId()).ifPresent(t -> {

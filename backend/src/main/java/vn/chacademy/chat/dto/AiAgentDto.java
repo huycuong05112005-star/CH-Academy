@@ -19,6 +19,7 @@ public class AiAgentDto {
     private String name;
     private String description;
     private String roleTarget;
+    private String scope;
     private String model;
     private String systemPrompt;
     private String status;
@@ -38,6 +39,7 @@ public class AiAgentDto {
                 .name(agent.getName())
                 .description(agent.getDescription())
                 .roleTarget(agent.getRoleTarget())
+                .scope(agent.getScope())
                 .model(agent.getModel())
                 .systemPrompt(agent.getSystemPrompt())
                 .status(agent.getStatus())

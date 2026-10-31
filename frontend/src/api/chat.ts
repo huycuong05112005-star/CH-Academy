@@ -242,5 +242,19 @@ export const aiStudioApi = {
   },
 
   getConversationMessages: (id: number): Promise<ApiResponse<AiMessageItem[]>> =>
-    apiClient.get<AiMessageItem[]>(`/admin/ai/conversations/${id}/messages`)
+    apiClient.get<AiMessageItem[]>(`/admin/ai/conversations/${id}/messages`),
+
+  // Voice AI Calls
+  getCalls: (): Promise<ApiResponse<Array<{
+    id: number
+    session_code: string
+    user_id?: number
+    agent_code: string
+    portal: string
+    duration_seconds: number
+    status: string
+    transcript?: string
+    created_at: string
+    ended_at?: string
+  }>>> => apiClient.get('/admin/ai/calls')
 }

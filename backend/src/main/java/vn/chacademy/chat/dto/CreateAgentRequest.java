@@ -23,6 +23,8 @@ public class CreateAgentRequest {
     @NotBlank(message = "Vai trò đích (roleTarget) không được để trống")
     private String roleTarget; // PUBLIC, STUDENT, TEACHER, ADMIN
 
+    private String scope; // PUBLIC_ADMISSION, STUDENT_TUTOR, TEACHER_ASSISTANT, ADMIN_ASSISTANT
+
     private String model;
     private String systemPrompt;
     private String status; // DRAFT, PUBLISHED, PAUSED

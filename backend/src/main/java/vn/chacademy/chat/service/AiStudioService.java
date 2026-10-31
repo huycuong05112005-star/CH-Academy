@@ -37,6 +37,7 @@ public class AiStudioService {
     private final vn.chacademy.lead.repository.LeadRepository crmLeadRepository;
     private final vn.chacademy.lead.repository.LeadActivityRepository crmLeadActivityRepository;
     private final vn.chacademy.course.repository.CourseRepository courseRepository;
+    private final org.springframework.jdbc.core.JdbcTemplate jdbcTemplate;
     private final ObjectMapper objectMapper;
 
     // ==========================================
@@ -69,11 +70,23 @@ public class AiStudioService {
             kbs.addAll(knowledgeBaseRepository.findAllById(req.getKnowledgeBaseIds()));
         }
 
+        String scope = req.getScope();
+        if (scope == null || scope.isBlank()) {
+            scope = switch (req.getRoleTarget().toUpperCase()) {
+                case "PUBLIC" -> "PUBLIC_ADMISSION";
+                case "STUDENT" -> "STUDENT_TUTOR";
+                case "TEACHER" -> "TEACHER_ASSISTANT";
+                case "ADMIN" -> "ADMIN_ASSISTANT";
+                default -> "STUDENT_TUTOR";
+            };
+        }
+
         AiAgent agent = AiAgent.builder()
                 .code(code)
                 .name(req.getName())
                 .description(req.getDescription())
                 .roleTarget(req.getRoleTarget().toUpperCase())
+                .scope(scope)
                 .model(req.getModel() != null ? req.getModel() : "google/gemini-2.5-flash")
                 .systemPrompt(req.getSystemPrompt() != null ? req.getSystemPrompt() : "Bạn là Trợ lý AI chuyên nghiệp của CH Academy.")
                 .status(req.getStatus() != null ? req.getStatus() : "PUBLISHED")
@@ -97,6 +110,7 @@ public class AiStudioService {
         agent.setName(req.getName());
         agent.setDescription(req.getDescription());
         if (req.getRoleTarget() != null) agent.setRoleTarget(req.getRoleTarget().toUpperCase());
+        if (req.getScope() != null) agent.setScope(req.getScope());
         if (req.getModel() != null) agent.setModel(req.getModel());
         if (req.getSystemPrompt() != null) agent.setSystemPrompt(req.getSystemPrompt());
         if (req.getStatus() != null) agent.setStatus(req.getStatus());
@@ -126,6 +140,7 @@ public class AiStudioService {
                 .name(orig.getName() + " (Bản sao)")
                 .description(orig.getDescription())
                 .roleTarget(orig.getRoleTarget())
+                .scope(orig.getScope())
                 .model(orig.getModel())
                 .systemPrompt(orig.getSystemPrompt())
                 .status("DRAFT")
@@ -572,8 +587,24 @@ public class AiStudioService {
         result.put("waitingHumanHandoff", handoffConvs.size());
         result.put("estimatedTokensUsed", totalConversations * 420);
         result.put("averageLatencyMs", 380);
-
         return result;
+    }
+
+    @Transactional(readOnly = true)
+    public List<Map<String, Object>> getAllCallSessions() {
+        return jdbcTemplate.queryForList(
+                "SELECT id, session_code, user_id, agent_code, portal, duration_seconds, status, transcript, created_at, ended_at " +
+                "FROM call_sessions ORDER BY created_at DESC LIMIT 50"
+        );
+    }
+
+    @Transactional
+    public void recordCallSession(String sessionCode, Long userId, String agentCode, String portal, int durationSeconds, String transcript) {
+        jdbcTemplate.update(
+                "INSERT INTO call_sessions (session_code, user_id, agent_code, portal, duration_seconds, status, transcript, created_at, ended_at) " +
+                "VALUES (?, ?, ?, ?, ?, 'COMPLETED', ?, NOW(), NOW())",
+                sessionCode, userId, agentCode, portal, durationSeconds, transcript
+        );
     }
 }
 

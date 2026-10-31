@@ -50,3 +50,4 @@ CREATE TABLE IF NOT EXISTS call_sessions (
 );
 ```
 Bảo đảm tính minh bạch, hỗ trợ thống kê thời lượng cuộc gọi phục vụ quản trị và đánh giá chất lượng tư vấn tuyển sinh/trợ giảng.
+
