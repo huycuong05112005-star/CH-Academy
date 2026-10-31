@@ -43,3 +43,4 @@
 1. **Băng thông & Thiết bị:** Video streaming WebRTC đòi hỏi đường truyền mạng ổn định tối thiểu 2-4 Mbps. Trên thiết bị di động cấu hình yếu có thể bị giật hình hoặc nóng máy.
 2. **Chi phí vận hành:** Nếu mở video call tự do cho khách vãng lai trên website, chi phí có thể tăng đột biến. **Khuyến nghị:** Chỉ cấp quyền Video Call cho học viên VIP, buổi luyện thi nói IELTS 1-1, hoặc phiên tư vấn tuyển sinh có đặt lịch trước.
 3. **Lộ trình:** Triển khai hoàn thiện AI Voice Web Speech API (hiện tại) $\longrightarrow$ Tích hợp Gemini Live Audio $\longrightarrow$ Thử nghiệm HeyGen Interactive Avatar cho module Luyện nói Tiếng Anh.
+

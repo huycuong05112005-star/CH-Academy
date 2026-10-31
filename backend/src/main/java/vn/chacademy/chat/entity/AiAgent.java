@@ -76,3 +76,4 @@ public class AiAgent {
     @Builder.Default
     private Instant updatedAt = Instant.now();
 }
+

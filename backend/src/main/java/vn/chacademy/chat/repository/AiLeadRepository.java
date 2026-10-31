@@ -15,3 +15,4 @@ public interface AiLeadRepository extends JpaRepository<AiLead, Long> {
 
     boolean existsByPhoneAndCourseInterest(String phone, String courseInterest);
 }
+

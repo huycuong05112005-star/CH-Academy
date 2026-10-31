@@ -71,3 +71,4 @@ useEffect(() => {
    * Học viên gửi request giả lập `portal = 'ADMIN'`: Backend trả về `403 Forbidden - Tài khoản của bạn không có quyền truy cập không gian hội thoại Admin` (**SECURITY PASS**).
    * Học viên thử đọc trộm `conversationId` của Admin: Backend trả về `403 Forbidden / Access Denied` (**SECURITY PASS**).
 3. **Kiểm thử tự động Vitest**: Suite `AiStudioAndIdentityIsolation.test.tsx` pass 100%.
+

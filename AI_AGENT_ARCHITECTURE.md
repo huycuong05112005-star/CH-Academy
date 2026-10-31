@@ -69,3 +69,4 @@ flowchart TD
 2. **Không bịa đặt số liệu**: Mọi câu trả lời liên quan đến lịch thi, điểm số, học phí hoặc ca học đều phải dựa trên truy vấn thời gian thực từ PostgreSQL.
 3. **Trích dẫn nguồn bắt buộc (Source Citations)**: Mọi thông tin tư vấn chính sách, nội quy hoặc bảng giá đều được gắn kèm đoạn trích dẫn và tên văn bản tương ứng.
 4. **Phân tách không gian hội thoại (Identity Isolation)**: Hội thoại của cổng nào chỉ tồn tại và được phép truy cập trong phạm vi cổng đó.
+

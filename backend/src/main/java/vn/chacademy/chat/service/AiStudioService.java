@@ -207,9 +207,8 @@ public class AiStudioService {
 
         // Trích xuất nội dung văn bản từ tệp upload
         String content = "";
-        try {
-            content = new BufferedReader(new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8))
-                    .lines().collect(Collectors.joining("\n"));
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8))) {
+            content = reader.lines().collect(Collectors.joining("\n"));
         } catch (Exception ex) {
             log.warn("Không thể đọc trực tiếp UTF-8 dạng văn bản: {}", ex.getMessage());
             content = "Tài liệu " + filename + " đã được lập chỉ mục xử lý tài nguyên hệ thống.";
@@ -478,3 +477,4 @@ public class AiStudioService {
         return result;
     }
 }
+

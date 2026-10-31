@@ -12,3 +12,4 @@ public class UpdateChannelConfigRequest {
     private Boolean isActive;
     private String configJson;
 }
+

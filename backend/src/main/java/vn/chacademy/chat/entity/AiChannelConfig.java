@@ -40,3 +40,4 @@ public class AiChannelConfig {
     @Builder.Default
     private Instant updatedAt = Instant.now();
 }
+

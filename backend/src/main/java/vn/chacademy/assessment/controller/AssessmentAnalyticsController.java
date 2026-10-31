@@ -57,8 +57,8 @@ public class AssessmentAnalyticsController {
         if (user == null) {
             throw new IllegalStateException("Chưa xác thực người dùng");
         }
-        Student student = studentRepository.findByUserId(user.getId()).orElse(null);
-        if (student == null) {
+        Student currentStudent = studentRepository.findByUserId(user.getId()).orElse(null);
+        if (currentStudent == null) {
             return ResponseEntity.ok(ApiResponse.success(
                     StudentAnalyticsDto.builder()
                             .totalExamsTaken(0)
@@ -68,7 +68,7 @@ public class AssessmentAnalyticsController {
                             .build()
             ));
         }
-        StudentAnalyticsDto dto = analyticsService.getStudentAnalytics(student.getId());
+        StudentAnalyticsDto dto = analyticsService.getStudentAnalytics(currentStudent.getId());
         return ResponseEntity.ok(ApiResponse.success(dto));
     }
 

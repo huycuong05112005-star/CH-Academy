@@ -12,19 +12,11 @@ import org.springframework.web.bind.annotation.*;
 import vn.chacademy.assessment.dto.AttemptResultDto;
 import vn.chacademy.assessment.dto.GradingAttemptDto;
 import vn.chacademy.assessment.dto.ManualGradeRequest;
-import vn.chacademy.assessment.entity.AttemptAnswer;
-import vn.chacademy.assessment.entity.ExamAttempt;
-import vn.chacademy.assessment.repository.AttemptAnswerRepository;
 import vn.chacademy.assessment.repository.ExamAttemptRepository;
 import vn.chacademy.assessment.service.ExamAttemptService;
 import vn.chacademy.common.dto.ApiResponse;
 import vn.chacademy.identity.entity.User;
 import vn.chacademy.identity.repository.UserRepository;
-
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.time.Instant;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/assessment/grading")
@@ -32,7 +24,6 @@ import java.util.List;
 public class GradingController {
 
     private final ExamAttemptRepository examAttemptRepository;
-    private final AttemptAnswerRepository attemptAnswerRepository;
     private final ExamAttemptService examAttemptService;
     private final UserRepository userRepository;
 

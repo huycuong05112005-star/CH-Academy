@@ -72,3 +72,4 @@ Khi người dùng gửi câu hỏi tới AI:
 3. Lấy ra tối đa 4 phân đoạn có độ tương đồng cao nhất.
 4. Đính kèm các phân đoạn này vào System Prompt gửi tới LLM.
 5. Trả về kết quả cho người dùng kèm danh sách `sources` (Tên tài liệu, Vị trí phân đoạn, Đoạn trích dẫn thực tế).
+

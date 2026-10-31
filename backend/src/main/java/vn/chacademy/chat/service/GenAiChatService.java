@@ -13,10 +13,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 import vn.chacademy.academic.entity.ClassEntity;
-import vn.chacademy.academic.entity.ClassSession;
 import vn.chacademy.academic.entity.Enrollment;
 import vn.chacademy.academic.repository.ClassRepository;
-import vn.chacademy.academic.repository.ClassSessionRepository;
 import vn.chacademy.academic.repository.EnrollmentRepository;
 import vn.chacademy.academic.repository.TeacherRepository;
 import vn.chacademy.chat.dto.AiChatRequest;
@@ -30,11 +28,9 @@ import vn.chacademy.common.exception.ResourceNotFoundException;
 import vn.chacademy.finance.entity.Receivable;
 import vn.chacademy.finance.repository.ReceivableRepository;
 import vn.chacademy.identity.entity.User;
-import vn.chacademy.student.entity.Student;
 import vn.chacademy.student.repository.StudentRepository;
 
 import java.time.Instant;
-import java.time.LocalDate;
 import java.util.*;
 
 @Service
@@ -45,14 +41,12 @@ public class GenAiChatService {
     private final AiConversationRepository conversationRepository;
     private final AiMessageRepository messageRepository;
     private final AiAgentRepository agentRepository;
-    private final AiKnowledgeBaseRepository knowledgeBaseRepository;
     private final AiKbChunkRepository chunkRepository;
     private final AiLeadRepository leadRepository;
     private final StudentRepository studentRepository;
     private final TeacherRepository teacherRepository;
     private final EnrollmentRepository enrollmentRepository;
     private final ClassRepository classRepository;
-    private final ClassSessionRepository classSessionRepository;
     private final ReceivableRepository receivableRepository;
     private final ObjectMapper objectMapper;
 
@@ -447,19 +441,25 @@ public class GenAiChatService {
             );
 
             HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
-            ResponseEntity<Map> response = restTemplate.postForEntity("https://openrouter.ai/api/v1/chat/completions", entity, Map.class);
+            @SuppressWarnings("unchecked")
+            ResponseEntity<Map<String, Object>> response = (ResponseEntity<Map<String, Object>>) (ResponseEntity<?>) restTemplate.postForEntity(
+                    "https://openrouter.ai/api/v1/chat/completions", entity, Map.class);
 
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-                List choices = (List) response.getBody().get("choices");
-                if (choices != null && !choices.isEmpty()) {
-                    Map firstChoice = (Map) choices.get(0);
-                    Map message = (Map) firstChoice.get("message");
-                    citations.add(AiChatResponse.SourceCitation.builder()
-                            .documentName("Mô hình AI: " + aiModel)
-                            .section("OpenRouter Engine")
-                            .snippet("Sinh câu trả lời từ LLM kết hợp dữ liệu ngữ cảnh CH Academy")
-                            .build());
-                    return (String) message.get("content");
+                Object choicesObj = response.getBody().get("choices");
+                if (choicesObj instanceof List<?> choices && !choices.isEmpty()) {
+                    Object firstChoiceObj = choices.get(0);
+                    if (firstChoiceObj instanceof Map<?, ?> firstChoice) {
+                        Object messageObj = firstChoice.get("message");
+                        if (messageObj instanceof Map<?, ?> message) {
+                            citations.add(AiChatResponse.SourceCitation.builder()
+                                    .documentName("Mô hình AI: " + aiModel)
+                                    .section("OpenRouter Engine")
+                                    .snippet("Sinh câu trả lời từ LLM kết hợp dữ liệu ngữ cảnh CH Academy")
+                                    .build());
+                            return String.valueOf(message.get("content"));
+                        }
+                    }
                 }
             }
         } catch (Exception ex) {

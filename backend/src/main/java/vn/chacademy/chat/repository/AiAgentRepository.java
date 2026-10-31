@@ -18,3 +18,4 @@ public interface AiAgentRepository extends JpaRepository<AiAgent, Long> {
 
     List<AiAgent> findAllByOrderByUpdatedAtDesc();
 }
+

@@ -19,3 +19,4 @@ public interface AiKbChunkRepository extends JpaRepository<AiKbChunk, Long> {
     @Query("SELECT c FROM AiKbChunk c WHERE c.document.knowledgeBase.accessLevel IN :accessLevels AND LOWER(c.content) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     List<AiKbChunk> searchByAccessLevels(@Param("accessLevels") List<String> accessLevels, @Param("keyword") String keyword);
 }
+

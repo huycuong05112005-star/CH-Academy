@@ -23,3 +23,4 @@ public class SaveFlowRequest {
     private String status; // DRAFT, PUBLISHED
     private String triggerType; // NEW_CONVERSATION, INTENT
 }
+

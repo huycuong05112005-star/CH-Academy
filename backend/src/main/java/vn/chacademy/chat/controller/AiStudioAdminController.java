@@ -12,7 +12,6 @@ import vn.chacademy.chat.entity.AiConversation;
 import vn.chacademy.chat.repository.AiConversationRepository;
 import vn.chacademy.chat.repository.AiMessageRepository;
 import vn.chacademy.chat.service.AiStudioService;
-import vn.chacademy.chat.service.GenAiChatService;
 import vn.chacademy.common.dto.ApiResponse;
 
 import java.util.List;
@@ -25,7 +24,6 @@ import java.util.Map;
 public class AiStudioAdminController {
 
     private final AiStudioService aiStudioService;
-    private final GenAiChatService genAiChatService;
     private final AiConversationRepository conversationRepository;
     private final AiMessageRepository messageRepository;
 
@@ -188,3 +186,4 @@ public class AiStudioAdminController {
         return ResponseEntity.ok(ApiResponse.success(aiStudioService.getAnalyticsSummary()));
     }
 }
+

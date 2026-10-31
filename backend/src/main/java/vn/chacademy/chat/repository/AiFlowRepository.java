@@ -18,3 +18,4 @@ public interface AiFlowRepository extends JpaRepository<AiFlow, Long> {
 
     List<AiFlow> findAllByOrderByUpdatedAtDesc();
 }
+

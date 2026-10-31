@@ -50,3 +50,4 @@ Khi người dùng cung cấp thông tin OA, các bước kích hoạt diễn ra
 3. Bật công tắc kích hoạt kênh sang `ACTIVE`.
 4. Trên Zalo Developer Portal, nhập Webhook URL: `https://chacademy.vn/api/v1/webhooks/zalo`.
 5. Hệ thống hoàn tất kết nối và sẵn sàng tự động trả lời tin nhắn của phụ huynh, học viên trên Zalo 24/7.
+

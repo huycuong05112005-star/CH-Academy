@@ -63,3 +63,4 @@ public class AiKbDocument {
     @Builder.Default
     private Instant updatedAt = Instant.now();
 }
+

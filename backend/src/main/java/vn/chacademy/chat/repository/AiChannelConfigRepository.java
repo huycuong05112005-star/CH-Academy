@@ -11,3 +11,4 @@ public interface AiChannelConfigRepository extends JpaRepository<AiChannelConfig
 
     Optional<AiChannelConfig> findByChannelType(String channelType);
 }
+

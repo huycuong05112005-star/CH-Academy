@@ -51,3 +51,4 @@ public class AiFlow {
     @Builder.Default
     private Instant updatedAt = Instant.now();
 }
+

@@ -15,3 +15,4 @@ public interface AiKbDocumentRepository extends JpaRepository<AiKbDocument, Long
 
     List<AiKbDocument> findAllByOrderByCreatedAtDesc();
 }
+

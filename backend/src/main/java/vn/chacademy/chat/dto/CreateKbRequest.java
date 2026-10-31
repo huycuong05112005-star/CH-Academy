@@ -18,3 +18,4 @@ public class CreateKbRequest {
     private String description;
     private String accessLevel; // PUBLIC, INTERNAL, TEACHER_ONLY, ADMIN_ONLY
 }
+

@@ -20,3 +20,4 @@ public class CreateLeadRequest {
     private String courseInterest;
     private String note;
 }
+

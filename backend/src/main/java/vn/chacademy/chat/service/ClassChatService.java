@@ -22,7 +22,6 @@ import vn.chacademy.chat.repository.ChatMemberRepository;
 import vn.chacademy.chat.repository.ChatMessageRepository;
 import vn.chacademy.common.exception.ResourceNotFoundException;
 import vn.chacademy.identity.entity.User;
-import vn.chacademy.identity.repository.UserRepository;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -40,7 +39,6 @@ public class ClassChatService {
     private final ClassRepository classRepository;
     private final EnrollmentRepository enrollmentRepository;
     private final TeacherAssignmentRepository teacherAssignmentRepository;
-    private final UserRepository userRepository;
 
     @Transactional(readOnly = true)
     public List<ChatConversationDto> getUserConversations(User user) {

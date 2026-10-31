@@ -45,3 +45,4 @@ public class AiKnowledgeBase {
     @Builder.Default
     private Instant updatedAt = Instant.now();
 }
+

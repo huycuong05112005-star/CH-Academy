@@ -42,8 +42,8 @@ public class GenAiChatController {
             @RequestParam(required = false) String portal,
             @AuthenticationPrincipal UserDetails userDetails) {
         User user = getAuthenticatedUser(userDetails);
-        List<AiConversationDto> list = genAiChatService.getUserConversations(user, portal);
-        return ResponseEntity.ok(ApiResponse.success(list));
+        List<AiConversationDto> userConversations = genAiChatService.getUserConversations(user, portal);
+        return ResponseEntity.ok(ApiResponse.success(userConversations));
     }
 
     @GetMapping("/conversations/{id}/messages")
@@ -53,8 +53,8 @@ public class GenAiChatController {
             @RequestParam(required = false) String portal,
             @AuthenticationPrincipal UserDetails userDetails) {
         User user = getAuthenticatedUser(userDetails);
-        List<AiMessageDto> messages = genAiChatService.getConversationMessages(id, user, portal);
-        return ResponseEntity.ok(ApiResponse.success(messages));
+        List<AiMessageDto> conversationMessages = genAiChatService.getConversationMessages(id, user, portal);
+        return ResponseEntity.ok(ApiResponse.success(conversationMessages));
     }
 
     @PostMapping("/ask")
@@ -85,16 +85,16 @@ public class GenAiChatController {
     @GetMapping("/public/conversations")
     public ResponseEntity<ApiResponse<List<AiConversationDto>>> getPublicConversations(
             @RequestParam String sessionId) {
-        List<AiConversationDto> list = genAiChatService.getPublicConversations(sessionId);
-        return ResponseEntity.ok(ApiResponse.success(list));
+        List<AiConversationDto> publicConversations = genAiChatService.getPublicConversations(sessionId);
+        return ResponseEntity.ok(ApiResponse.success(publicConversations));
     }
 
     @GetMapping("/public/conversations/{id}/messages")
     public ResponseEntity<ApiResponse<List<AiMessageDto>>> getPublicMessages(
             @PathVariable Long id,
             @RequestParam String sessionId) {
-        List<AiMessageDto> messages = genAiChatService.getPublicConversationMessages(id, sessionId);
-        return ResponseEntity.ok(ApiResponse.success(messages));
+        List<AiMessageDto> publicMessages = genAiChatService.getPublicConversationMessages(id, sessionId);
+        return ResponseEntity.ok(ApiResponse.success(publicMessages));
     }
 
     @PostMapping("/public/ask")

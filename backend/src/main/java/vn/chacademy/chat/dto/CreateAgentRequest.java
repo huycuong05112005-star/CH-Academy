@@ -31,3 +31,4 @@ public class CreateAgentRequest {
     private String settingsJson;
     private List<Long> knowledgeBaseIds;
 }
+

@@ -38,3 +38,4 @@ Hệ sinh thái AI Agent của CH Academy đạt tiêu chuẩn an toàn bảo m�
 * Không có lỗ hổng rò rỉ dữ liệu chéo giữa các cổng hoặc giữa các tài khoản.
 * Phân quyền tại Backend là tuyệt đối (không phụ thuộc vào dữ liệu do Frontend gửi lên).
 * API Key OpenRouter/Gemini được lưu trữ an toàn trong biến môi trường máy chủ và không bao giờ bị trả về cho client.
+

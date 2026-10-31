@@ -35,3 +35,4 @@ public class AiKbChunk {
     @Builder.Default
     private Instant createdAt = Instant.now();
 }
+

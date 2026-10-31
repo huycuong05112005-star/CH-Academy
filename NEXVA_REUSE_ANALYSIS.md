@@ -41,3 +41,4 @@ Dự án Nexva được xây dựng dựa trên ngăn xếp:
 1. **Khắc phục triệt để lỗi rò rỉ lịch sử hội thoại**: Nexva dùng một session workspace chung, trong khi CH Academy phân tách 4 không gian hoàn toàn độc lập: `PUBLIC`, `STUDENT`, `TEACHER`, `ADMIN`.
 2. **Context Injection động từ Nghiệp vụ thật**: Thay vì chỉ tìm kiếm văn bản tĩnh, CH Academy tự động truy vấn điểm danh, lịch học, học phí, đề thi và sĩ số lớp từ database PostgreSQL thời gian thực để đưa vào câu trả lời của AI.
 3. **Phân quyền tài liệu đa cấp (Access Control Levels)**: Tài liệu nội bộ hoặc quản trị không bao giờ bị rò rỉ sang Agent tư vấn công khai trên Website.
+

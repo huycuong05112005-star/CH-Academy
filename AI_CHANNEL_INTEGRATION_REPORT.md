@@ -47,3 +47,4 @@ Hệ sinh thái AI của CH Academy được cấu hình theo bảng `ai_channel
   2. AI tạm dừng sinh câu trả lời tự động để tránh trả lời đè lên tư vấn viên.
   3. Giao diện người dùng xuất hiện thông báo trực quan: *"🔔 Yêu cầu kết nối nhân viên tư vấn đã được gửi đi thành công. Hotline: 0987.654.321"*.
   4. Quản trị viên nhìn thấy huy hiệu cảnh báo màu đỏ trên danh sách hội thoại tại Cổng Quản trị để mở khung chat tiếp quản ngay lập tức.
+

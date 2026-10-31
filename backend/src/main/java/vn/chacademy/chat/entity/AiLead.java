@@ -42,3 +42,4 @@ public class AiLead {
     @Builder.Default
     private Instant createdAt = Instant.now();
 }
+

@@ -302,3 +302,4 @@ INSERT INTO ai_channel_configs (channel_type, agent_id, is_active, config_json)
 SELECT 'VOICE', a.id, TRUE, '{"stt_engine": "WEB_SPEECH_API", "tts_engine": "WEB_SPEECH_SYNTHESIS", "language": "vi-VN", "enable_avatar_preview": true}'
 FROM ai_agents a WHERE a.code = 'AGENT_ADMISSIONS'
 ON CONFLICT (channel_type) DO NOTHING;
+

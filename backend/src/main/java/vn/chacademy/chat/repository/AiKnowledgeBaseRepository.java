@@ -18,3 +18,4 @@ public interface AiKnowledgeBaseRepository extends JpaRepository<AiKnowledgeBase
 
     List<AiKnowledgeBase> findAllByOrderByUpdatedAtDesc();
 }
+
