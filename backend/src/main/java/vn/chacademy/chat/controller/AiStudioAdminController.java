@@ -82,6 +82,12 @@ public class AiStudioAdminController {
         return ResponseEntity.ok(ApiResponse.success("Đã xóa Kho tri thức", "DELETED"));
     }
 
+    @PostMapping("/knowledge-bases/{id}/reindex")
+    public ResponseEntity<ApiResponse<String>> reindexKnowledgeBase(@PathVariable Long id) {
+        aiStudioService.reindexKnowledgeBase(id);
+        return ResponseEntity.ok(ApiResponse.success("Đã kích hoạt tái lập chỉ mục toàn bộ Kho tri thức", "SUCCESS"));
+    }
+
     @GetMapping("/knowledge-bases/{id}/documents")
     public ResponseEntity<ApiResponse<List<AiKbDocumentDto>>> getDocumentsByKb(@PathVariable Long id) {
         return ResponseEntity.ok(ApiResponse.success(aiStudioService.getDocumentsByKb(id)));

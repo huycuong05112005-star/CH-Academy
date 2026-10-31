@@ -53,11 +53,14 @@ import { LayoutDashboard } from 'lucide-react'
 import { TeacherDashboardTab } from './components/TeacherDashboardTab'
 import { TeacherExamStudioTab } from './components/TeacherExamStudioTab'
 import { TeacherExamResultsTab } from './components/TeacherExamResultsTab'
+import { TeacherTeachingHistorySection } from './TeacherTeachingHistorySection'
+import { useAcademicYear } from '../../context/AcademicYearContext'
 
 export const TeacherPortalPage: React.FC = () => {
   const { logout } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
+  const { selectedAcademicYear, setSelectedAcademicYear, academicYears } = useAcademicYear()
 
   const [profile, setProfile] = useState<TeacherProfile | null>(null)
   const [classes, setClasses] = useState<TeacherClassItem[]>([])
@@ -181,13 +184,14 @@ export const TeacherPortalPage: React.FC = () => {
     }
   }
 
-  const loadPortalData = async () => {
+  const loadPortalData = async (targetYear?: string) => {
     setLoading(true)
     setError(null)
     try {
+      const yearToUse = targetYear !== undefined ? targetYear : selectedAcademicYear
       const [profileRes, classesRes] = await Promise.all([
         teacherApi.getProfile(),
-        teacherApi.getMyClasses()
+        teacherApi.getMyClasses(yearToUse || undefined)
       ])
 
       if (profileRes.success && profileRes.data) {
@@ -198,6 +202,9 @@ export const TeacherPortalPage: React.FC = () => {
         setClasses(classesRes.data)
         if (classesRes.data.length > 0) {
           loadClassDetail(classesRes.data[0].id)
+        } else {
+          setCurrentClassDetail(null)
+          setSelectedClassId(null)
         }
       }
     } catch (err: unknown) {
@@ -278,6 +285,12 @@ export const TeacherPortalPage: React.FC = () => {
       else setActiveTab('dashboard')
     }
   }, [location.pathname, location.search])
+
+  useEffect(() => {
+    if (selectedAcademicYear) {
+      loadPortalData(selectedAcademicYear)
+    }
+  }, [selectedAcademicYear])
 
   const handleDashboardNavigate = (tab: string, filter?: string) => {
     if (tab === 'exams' && filter) {
@@ -679,6 +692,23 @@ export const TeacherPortalPage: React.FC = () => {
 
           {/* Right: Notifications & Account Menu */}
           <div className="flex items-center gap-2.5 shrink-0">
+            {academicYears.length > 0 && (
+              <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-[#1C293D] border border-slate-200/80 dark:border-[#2A3A50] text-xs">
+                <Calendar className="w-3.5 h-3.5 text-indigo-500 shrink-0" />
+                <select
+                  value={selectedAcademicYear}
+                  onChange={(e) => setSelectedAcademicYear(e.target.value)}
+                  className="bg-transparent border-none text-xs font-bold text-slate-700 dark:text-slate-200 focus:outline-none cursor-pointer"
+                  title="Năm học hoạt động"
+                >
+                  {academicYears.map((ay) => (
+                    <option key={ay.id} value={ay.code} className="dark:bg-[#151F31]">
+                      {ay.code} {ay.isCurrent ? '(Hiện tại)' : ''}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
             <NotificationBell
               notifications={notifications}
               onRefresh={loadNotifications}
@@ -932,6 +962,18 @@ export const TeacherPortalPage: React.FC = () => {
               ) : (
                 <span className="text-[11px] opacity-60">({notifications.length})</span>
               )}
+            </button>
+
+            <button
+              onClick={() => setActiveTab('history')}
+              className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all flex items-center gap-2 shrink-0 ${
+                activeTab === 'history'
+                  ? 'bg-indigo-600 text-white shadow-sm font-bold'
+                  : 'text-slate-600 dark:text-[#A6B4C8] hover:bg-slate-100 dark:hover:bg-[#1C293D]'
+              }`}
+            >
+              <History className="w-4 h-4 shrink-0" />
+              <span>Lịch sử Giảng dạy</span>
             </button>
           </div>
         </div>
@@ -1647,6 +1689,9 @@ export const TeacherPortalPage: React.FC = () => {
         {/* TAB 7: LỊCH SỬ GIẢNG DẠY & CHƯA ĐIỂM DANH */}
         {activeTab === 'history' && (
           <div className="space-y-6 animate-in fade-in duration-150">
+            {/* Multi-Year Teaching History */}
+            <TeacherTeachingHistorySection />
+
             {/* Unmarked Sessions Section */}
             <div className="bg-white dark:bg-[#151F31] rounded-3xl border border-slate-200/80 dark:border-[#2A3A50] shadow-sm p-6 space-y-4">
               <div className="flex items-center gap-2 pb-3 border-b border-slate-100 dark:border-[#2A3A50]">

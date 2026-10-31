@@ -8,6 +8,7 @@ import vn.chacademy.academic.dto.AcademicYearDto;
 import vn.chacademy.academic.dto.CreateAcademicYearRequest;
 import vn.chacademy.academic.entity.AcademicYear;
 import vn.chacademy.academic.repository.AcademicYearRepository;
+import vn.chacademy.academic.repository.ClassRepository;
 import vn.chacademy.common.exception.BadRequestException;
 import vn.chacademy.common.exception.ResourceNotFoundException;
 
@@ -20,6 +21,7 @@ import java.util.List;
 public class AcademicYearService {
 
     private final AcademicYearRepository academicYearRepository;
+    private final ClassRepository classRepository;
 
     @Transactional(readOnly = true)
     public List<AcademicYearDto> getAllAcademicYears() {
@@ -61,6 +63,9 @@ public class AcademicYearService {
                 .name(request.getName().trim())
                 .startDate(request.getStartDate())
                 .endDate(request.getEndDate())
+                .registrationStartDate(request.getRegistrationStartDate() != null ? request.getRegistrationStartDate() : request.getStartDate().minusDays(30))
+                .registrationEndDate(request.getRegistrationEndDate() != null ? request.getRegistrationEndDate() : request.getStartDate().plusDays(15))
+                .description(request.getDescription())
                 .isCurrent(Boolean.TRUE.equals(request.getIsCurrent()))
                 .status(request.getStatus() != null ? request.getStatus().trim().toUpperCase() : "ACTIVE")
                 .createdAt(Instant.now())
@@ -82,6 +87,40 @@ public class AcademicYearService {
 
         target.setIsCurrent(true);
         return AcademicYearDto.fromEntity(target);
+    }
+
+    @Transactional
+    public AcademicYearDto closeAcademicYear(Long id) {
+        AcademicYear target = academicYearRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy năm học #" + id));
+        target.setStatus("CLOSED");
+        target.setIsCurrent(false);
+        return AcademicYearDto.fromEntity(academicYearRepository.save(target));
+    }
+
+    @Transactional
+    public AcademicYearDto archiveAcademicYear(Long id) {
+        AcademicYear target = academicYearRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy năm học #" + id));
+        target.setStatus("ARCHIVED");
+        target.setIsCurrent(false);
+        return AcademicYearDto.fromEntity(academicYearRepository.save(target));
+    }
+
+    @Transactional
+    public void deleteAcademicYear(Long id) {
+        AcademicYear target = academicYearRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy năm học #" + id));
+
+        long classCount = classRepository.findAll().stream()
+                .filter(c -> target.getCode().equalsIgnoreCase(c.getAcademicYear()))
+                .count();
+
+        if (classCount > 0) {
+            throw new BadRequestException("Không thể xóa năm học '" + target.getCode() + "' vì đang có " + classCount + " lớp học liên kết. Hãy sử dụng tính năng Đóng hoặc Lưu trữ.");
+        }
+
+        academicYearRepository.delete(target);
     }
 }
 

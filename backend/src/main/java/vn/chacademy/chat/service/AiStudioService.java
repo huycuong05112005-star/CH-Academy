@@ -294,6 +294,17 @@ public class AiStudioService {
         return AiKbDocumentDto.fromEntity(doc);
     }
 
+    @Transactional
+    public void reindexKnowledgeBase(Long kbId) {
+        knowledgeBaseRepository.findById(kbId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy Kho tri thức ID: " + kbId));
+
+        List<AiKbDocument> docs = documentRepository.findByKnowledgeBaseIdOrderByCreatedAtDesc(kbId);
+        for (AiKbDocument doc : docs) {
+            reindexDocument(doc.getId());
+        }
+    }
+
     private void processDocumentChunks(AiKbDocument doc, String text) {
         if (text == null || text.isBlank()) {
             doc.setStatus("INDEXED");

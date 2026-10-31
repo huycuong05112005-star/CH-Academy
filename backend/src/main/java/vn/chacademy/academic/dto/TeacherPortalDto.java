@@ -41,6 +41,7 @@ public class TeacherPortalDto {
         private String courseName;
         private String courseCode;
         private String room;
+        private String academicYear;
         @JsonFormat(pattern = "yyyy-MM-dd")
         private LocalDate startDate;
         @JsonFormat(pattern = "yyyy-MM-dd")
@@ -50,6 +51,26 @@ public class TeacherPortalDto {
         private int enrolledStudents;
         private List<TeacherStudentDto> students;
         private List<TeacherSessionDto> sessions;
+    }
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class TeachingHistoryDto {
+        private Long classId;
+        private String classCode;
+        private String className;
+        private String courseName;
+        private String academicYear;
+        @JsonFormat(pattern = "yyyy-MM-dd")
+        private LocalDate startDate;
+        @JsonFormat(pattern = "yyyy-MM-dd")
+        private LocalDate endDate;
+        private String status;
+        private int studentCount;
+        private int completedSessions;
+        private int totalSessions;
     }
 
     @Data

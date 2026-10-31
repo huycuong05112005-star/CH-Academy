@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import vn.chacademy.academic.dto.CreateMaterialRequest;
@@ -21,6 +22,7 @@ import vn.chacademy.academic.dto.TeacherPortalDto.ClassExamResultDto;
 import vn.chacademy.academic.dto.TeacherPortalDto.StudentExamResultSummaryDto;
 import vn.chacademy.academic.dto.TeacherPortalDto.TeacherActionItemDto;
 import vn.chacademy.academic.dto.TeacherPortalDto.TeacherClassDto;
+import vn.chacademy.academic.dto.TeacherPortalDto.TeachingHistoryDto;
 import vn.chacademy.academic.dto.TeacherPortalDto.TeacherDashboardSummaryDto;
 import vn.chacademy.academic.dto.TeacherPortalDto.TeacherProfileDto;
 import vn.chacademy.academic.dto.TeacherPortalDto.TeacherSessionDto;
@@ -130,9 +132,17 @@ public class TeacherPortalController {
 
     @GetMapping("/classes")
     @Transactional(readOnly = true)
-    public ResponseEntity<ApiResponse<List<TeacherClassDto>>> getMyClasses(@AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<ApiResponse<List<TeacherClassDto>>> getMyClasses(
+            @RequestParam(required = false) String academicYear,
+            @AuthenticationPrincipal UserDetails userDetails) {
         Teacher teacher = getCurrentTeacher(userDetails);
         List<ClassEntity> classes = classRepository.findByPrimaryTeacherIdOrderByStartDateDesc(teacher.getId());
+
+        if (academicYear != null && !academicYear.isBlank()) {
+            classes = classes.stream()
+                    .filter(c -> academicYear.trim().equalsIgnoreCase(c.getAcademicYear()))
+                    .toList();
+        }
 
         List<TeacherClassDto> dtoList = classes.stream().map(c -> {
             List<Enrollment> enrollments = enrollmentRepository.findByClassEntityIdOrderByCreatedAtDesc(c.getId());
@@ -142,6 +152,7 @@ public class TeacherPortalController {
                     .id(c.getId())
                     .code(c.getCode())
                     .name(c.getName())
+                    .academicYear(c.getAcademicYear())
                     .courseId(c.getCourse() != null ? c.getCourse().getId() : null)
                     .courseName(c.getCourse() != null ? c.getCourse().getName() : null)
                     .courseCode(c.getCourse() != null ? c.getCourse().getCode() : null)
@@ -155,6 +166,36 @@ public class TeacherPortalController {
         }).toList();
 
         return ResponseEntity.ok(ApiResponse.success(dtoList));
+    }
+
+    @GetMapping("/teaching-history")
+    @Transactional(readOnly = true)
+    public ResponseEntity<ApiResponse<List<TeachingHistoryDto>>> getTeachingHistory(
+            @AuthenticationPrincipal UserDetails userDetails) {
+        Teacher teacher = getCurrentTeacher(userDetails);
+        List<ClassEntity> classes = classRepository.findByPrimaryTeacherIdOrderByStartDateDesc(teacher.getId());
+
+        List<TeachingHistoryDto> history = classes.stream().map(c -> {
+            List<Enrollment> enrollments = enrollmentRepository.findByClassEntityIdOrderByCreatedAtDesc(c.getId());
+            List<ClassSession> sessions = classSessionRepository.findByClassEntityIdOrderBySessionDateAscStartTimeAsc(c.getId());
+            int completed = (int) sessions.stream().filter(s -> "COMPLETED".equalsIgnoreCase(s.getStatus())).count();
+
+            return TeachingHistoryDto.builder()
+                    .classId(c.getId())
+                    .classCode(c.getCode())
+                    .className(c.getName())
+                    .courseName(c.getCourse() != null ? c.getCourse().getName() : null)
+                    .academicYear(c.getAcademicYear())
+                    .startDate(c.getStartDate())
+                    .endDate(c.getEndDate())
+                    .status(c.getStatus())
+                    .studentCount(enrollments.size())
+                    .completedSessions(completed)
+                    .totalSessions(sessions.size())
+                    .build();
+        }).toList();
+
+        return ResponseEntity.ok(ApiResponse.success(history));
     }
 
     @GetMapping("/classes/{classId}")

@@ -17,6 +17,8 @@ import { AccountMenu } from '../../components/account/AccountMenu'
 import { HeaderSearchBar } from '../../components/ui/HeaderSearchBar'
 import { NotificationBell } from '../../components/ui/NotificationBell'
 import { CommandPalette } from '../../components/ui/CommandPalette'
+import { StudentCourseRegistrationSection } from './StudentCourseRegistrationSection'
+import { StudentLearningHistorySection } from './StudentLearningHistorySection'
 import {
   GraduationCap,
   LogOut,
@@ -58,7 +60,7 @@ export const StudentPortalPage: React.FC = () => {
   const [data, setData] = useState<StudentPortalSummary | null>(null)
   const [loading, setLoading] = useState<boolean>(true)
   const [error, setError] = useState<string | null>(null)
-  const [activeTab, setActiveTab] = useState<'classes' | 'schedule' | 'attendance' | 'exams' | 'finance' | 'notifications' | 'profile'>('classes')
+  const [activeTab, setActiveTab] = useState<'classes' | 'registration' | 'history' | 'schedule' | 'attendance' | 'exams' | 'finance' | 'notifications' | 'profile'>('classes')
   const [showQrModal, setShowQrModal] = useState<boolean>(false)
 
   // Assessment states
@@ -576,6 +578,30 @@ export const StudentPortalPage: React.FC = () => {
             </button>
 
             <button
+              onClick={() => setActiveTab('registration')}
+              className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all flex items-center gap-2 shrink-0 ${
+                activeTab === 'registration'
+                  ? 'bg-[#142B4A] dark:bg-[#38BDF8] text-white dark:text-[#0B1220] shadow-sm font-bold'
+                  : 'text-slate-600 dark:text-[#A6B4C8] hover:bg-slate-100 dark:hover:bg-[#1C293D]'
+              }`}
+            >
+              <BookOpen className="w-4 h-4 shrink-0" />
+              <span>Đăng ký Khóa học Mới</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('history')}
+              className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all flex items-center gap-2 shrink-0 ${
+                activeTab === 'history'
+                  ? 'bg-[#142B4A] dark:bg-[#38BDF8] text-white dark:text-[#0B1220] shadow-sm font-bold'
+                  : 'text-slate-600 dark:text-[#A6B4C8] hover:bg-slate-100 dark:hover:bg-[#1C293D]'
+              }`}
+            >
+              <Calendar className="w-4 h-4 shrink-0" />
+              <span>Lịch sử Đào tạo</span>
+            </button>
+
+            <button
               onClick={() => setActiveTab('schedule')}
               className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all flex items-center gap-2 shrink-0 ${
                 activeTab === 'schedule'
@@ -840,6 +866,10 @@ export const StudentPortalPage: React.FC = () => {
         )}
 
         {/* TAB 2: THÔNG BÁO TỪ TRUNG TÂM & GIÁO VIÊN */}
+        {activeTab === 'registration' && <StudentCourseRegistrationSection />}
+
+        {activeTab === 'history' && <StudentLearningHistorySection />}
+
         {activeTab === 'notifications' && (
           <div className="space-y-4 animate-in fade-in duration-150">
             <div className="flex items-center justify-between pb-2">

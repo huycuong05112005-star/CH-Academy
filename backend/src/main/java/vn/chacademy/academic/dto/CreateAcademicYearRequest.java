@@ -24,6 +24,10 @@ public class CreateAcademicYearRequest {
     @NotNull(message = "Ngày kết thúc không được để trống")
     private LocalDate endDate;
 
+    private LocalDate registrationStartDate;
+    private LocalDate registrationEndDate;
+    private String description;
+
     private Boolean isCurrent;
     private String status;
 }

@@ -5,6 +5,7 @@ import { ExperienceProvider } from './context/ExperienceContext'
 import { DesktopTitleBar } from './components/desktop/DesktopTitleBar'
 import { SettingsProvider } from './context/SettingsContext'
 import { AuthProvider } from './context/AuthContext'
+import { AcademicYearProvider } from './context/AcademicYearContext'
 import { ProtectedRoute } from './components/auth/ProtectedRoute'
 import { PageLoadingFallback } from './components/ui/LoadingSkeleton'
 import { GlassBackground } from './components/ui/GlassBackground'
@@ -57,6 +58,8 @@ const GradingListPage = lazy(() => import('./pages/admin/assessment/GradingListP
 const ExamAnalyticsPage = lazy(() => import('./pages/admin/assessment/ExamAnalyticsPage').then(m => ({ default: m.ExamAnalyticsPage })))
 const ClassAnalyticsPage = lazy(() => import('./pages/admin/assessment/ClassAnalyticsPage').then(m => ({ default: m.ClassAnalyticsPage })))
 const AiStudioPage = lazy(() => import('./pages/admin/AiStudioPage').then(m => ({ default: m.AiStudioPage })))
+const EnrollmentRequestsPage = lazy(() => import('./pages/admin/EnrollmentRequestsPage').then(m => ({ default: m.EnrollmentRequestsPage })))
+const SecurityCenterPage = lazy(() => import('./pages/admin/security/SecurityCenterPage').then(m => ({ default: m.SecurityCenterPage })))
 
 export default function App() {
   return (
@@ -65,8 +68,9 @@ export default function App() {
         <DesktopTitleBar />
         <GlassBackground />
         <SettingsProvider>
-          <BrowserRouter>
-          <AuthProvider>
+          <AcademicYearProvider>
+            <BrowserRouter>
+            <AuthProvider>
             <Suspense fallback={<PageLoadingFallback />}>
               <Routes>
                 {/* Public Website */}
@@ -145,6 +149,8 @@ export default function App() {
                   <Route path="payments" element={<AdminPaymentsRedirect />} />
                   <Route path="notifications" element={<AdminNotificationsPage />} />
                   <Route path="ai-studio" element={<AiStudioPage />} />
+                  <Route path="enrollment-requests" element={<EnrollmentRequestsPage />} />
+                  <Route path="security" element={<SecurityCenterPage />} />
                   <Route path="audit-logs" element={<AuditLogsPage />} />
                   <Route path="settings" element={<SettingsPage />} />
 
@@ -165,6 +171,7 @@ export default function App() {
             <FloatingChatWidget />
           </AuthProvider>
         </BrowserRouter>
+        </AcademicYearProvider>
       </SettingsProvider>
     </ExperienceProvider>
   </ThemeProvider>

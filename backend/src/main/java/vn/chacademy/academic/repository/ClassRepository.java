@@ -42,6 +42,10 @@ public interface ClassRepository extends JpaRepository<ClassEntity, Long> {
     @EntityGraph(attributePaths = {"course", "primaryTeacher"})
     java.util.List<ClassEntity> findByPrimaryTeacherUserId(Long userId);
 
+    java.util.List<ClassEntity> findByStatus(String status);
+
+    java.util.List<ClassEntity> findByAcademicYearAndStatus(String academicYear, String status);
+
     long countByStatus(String status);
 
     long countByStatusIn(java.util.Collection<String> statuses);

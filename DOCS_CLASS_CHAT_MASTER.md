@@ -70,3 +70,4 @@ Tất cả các endpoint được bảo vệ bởi Spring Security và xác th�
    - Mọi thao tác gửi tin hoặc đọc tin nhắn (`/conversations/{id}/...`) đều thực hiện kiểm tra `validateUserInConversation(conversationId, user)` ở tầng Service trước khi thực thi truy vấn cơ sở dữ liệu.
 2. **Không phụ thuộc vào kiểm tra giao diện**:
    - Giao diện người dùng chỉ hiển thị nhóm được phép, nhưng ngay cả khi kẻ xấu thay đổi tham số `conversationId` trong request, Backend vẫn lập tức chặn đứng với mã lỗi `403 AccessDeniedException`.
+

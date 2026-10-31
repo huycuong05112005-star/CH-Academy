@@ -38,6 +38,10 @@ public class ClassDto {
     private Instant createdAt;
     private List<ClassScheduleDto> schedules;
 
+    public static ClassDto fromEntity(ClassEntity c) {
+        return fromEntity(c, 0);
+    }
+
     public static ClassDto fromEntity(ClassEntity c, int enrolledCount) {
         if (c == null) return null;
         return ClassDto.builder()

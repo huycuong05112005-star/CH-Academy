@@ -73,3 +73,4 @@ SUPER_ADMIN (Quản trị viên tối cao)
 | **AI Studio, KB & Chunking** | Chunk Inspector + RAG Retrieval Test | 8 | 8/8 Passed | Sẵn sàng Production |
 | **Zalo OA Webhook** | HMAC-SHA256 Signature Verification | 4 | 4/4 Passed | Sẵn sàng Production |
 | **Frontend Production Build** | TypeScript Compiler (`tsc -b`) & Vite Build | 1823 modules | 0 Type Errors | Sẵn sàng Production |
+

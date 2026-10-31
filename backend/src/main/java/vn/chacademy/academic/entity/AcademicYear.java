@@ -31,6 +31,15 @@ public class AcademicYear {
     @Column(name = "end_date", nullable = false)
     private LocalDate endDate;
 
+    @Column(name = "registration_start_date")
+    private LocalDate registrationStartDate;
+
+    @Column(name = "registration_end_date")
+    private LocalDate registrationEndDate;
+
+    @Column(columnDefinition = "TEXT")
+    private String description;
+
     @Column(name = "is_current")
     private Boolean isCurrent;
 

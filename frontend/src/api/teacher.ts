@@ -16,8 +16,13 @@ export const teacherApi = {
   getProfile: () =>
     apiFetch<ApiResponse<TeacherProfile>>('/teacher/portal/profile'),
 
-  getMyClasses: () =>
-    apiFetch<ApiResponse<TeacherClassItem[]>>('/teacher/portal/classes'),
+  getMyClasses: (academicYear?: string) =>
+    apiFetch<ApiResponse<TeacherClassItem[]>>(
+      academicYear ? `/teacher/portal/classes?academicYear=${encodeURIComponent(academicYear)}` : '/teacher/portal/classes'
+    ),
+
+  getTeachingHistory: () =>
+    apiFetch<ApiResponse<any[]>>('/teacher/portal/teaching-history'),
 
   getClassDetails: (classId: number) =>
     apiFetch<ApiResponse<TeacherClassItem>>(`/teacher/portal/classes/${classId}`),

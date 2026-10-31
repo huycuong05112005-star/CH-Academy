@@ -17,6 +17,9 @@ public class AcademicYearDto {
     private String name;
     private LocalDate startDate;
     private LocalDate endDate;
+    private LocalDate registrationStartDate;
+    private LocalDate registrationEndDate;
+    private String description;
     private Boolean isCurrent;
     private String status;
     private Instant createdAt;
@@ -30,6 +33,9 @@ public class AcademicYearDto {
                 .name(entity.getName())
                 .startDate(entity.getStartDate())
                 .endDate(entity.getEndDate())
+                .registrationStartDate(entity.getRegistrationStartDate())
+                .registrationEndDate(entity.getRegistrationEndDate())
+                .description(entity.getDescription())
                 .isCurrent(Boolean.TRUE.equals(entity.getIsCurrent()))
                 .status(entity.getStatus())
                 .createdAt(entity.getCreatedAt())

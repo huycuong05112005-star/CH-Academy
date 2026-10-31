@@ -40,5 +40,24 @@ public class AcademicYearController {
     public ResponseEntity<ApiResponse<AcademicYearDto>> setCurrent(@PathVariable Long id) {
         return ResponseEntity.ok(ApiResponse.success("Đã thiết lập năm học hiện tại", academicYearService.setCurrentYear(id)));
     }
+
+    @PostMapping("/{id}/close")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'CENTER_ADMIN', 'ADMIN')")
+    public ResponseEntity<ApiResponse<AcademicYearDto>> closeYear(@PathVariable Long id) {
+        return ResponseEntity.ok(ApiResponse.success("Đã đóng năm học thành công", academicYearService.closeAcademicYear(id)));
+    }
+
+    @PostMapping("/{id}/archive")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'CENTER_ADMIN', 'ADMIN')")
+    public ResponseEntity<ApiResponse<AcademicYearDto>> archiveYear(@PathVariable Long id) {
+        return ResponseEntity.ok(ApiResponse.success("Đã chuyển năm học sang chế độ lưu trữ", academicYearService.archiveAcademicYear(id)));
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'CENTER_ADMIN', 'ADMIN')")
+    public ResponseEntity<ApiResponse<Void>> deleteYear(@PathVariable Long id) {
+        academicYearService.deleteAcademicYear(id);
+        return ResponseEntity.ok(ApiResponse.success("Đã xóa năm học thành công", null));
+    }
 }
 
