@@ -25,9 +25,8 @@ import vn.chacademy.common.exception.ResourceNotFoundException;
 import vn.chacademy.identity.entity.User;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -43,16 +42,74 @@ public class ClassChatService {
 
     @Transactional(readOnly = true)
     public List<ChatConversationDto> getUserConversations(User user) {
+        return getUserConversations(user, null);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ChatConversationDto> getUserConversations(User user, String portal) {
         if (user == null) return List.of();
 
-        boolean isAdmin = user.getRoles() != null && user.getRoles().stream()
+        boolean isAdminRole = user.getRoles() != null && user.getRoles().stream()
                 .anyMatch(r -> r.getId() != null && (r.getId().contains("ADMIN") || r.getId().equals("SUPER_ADMIN")));
 
+        String effectivePortal = portal != null ? portal.trim().toUpperCase() : null;
+        if (effectivePortal == null) {
+            if (isAdminRole) {
+                effectivePortal = "ADMIN";
+            } else if (user.getRoles() != null && user.getRoles().stream().anyMatch(r -> "TEACHER".equals(r.getId()))) {
+                effectivePortal = "TEACHER";
+            } else {
+                effectivePortal = "STUDENT";
+            }
+        }
+
         List<ChatConversation> conversations;
-        if (isAdmin) {
+
+        if ("ADMIN".equals(effectivePortal)) {
+            if (!isAdminRole) {
+                throw new AccessDeniedException("Bạn không có quyền quản trị để giám sát toàn bộ nhóm chat");
+            }
             conversations = conversationRepository.findAll();
+        } else if ("TEACHER".equals(effectivePortal)) {
+            // Giảng viên: chỉ lấy những lớp được phân công giảng dạy (primary hoặc active assignment)
+            Set<Long> teacherClassIds = new HashSet<>();
+            classRepository.findByPrimaryTeacherUserId(user.getId())
+                    .forEach(c -> teacherClassIds.add(c.getId()));
+            teacherAssignmentRepository.findByTeacherUserIdAndStatus(user.getId(), "ACTIVE")
+                    .forEach(ta -> {
+                        if (ta.getClassEntity() != null) {
+                            teacherClassIds.add(ta.getClassEntity().getId());
+                        }
+                    });
+
+            if (teacherClassIds.isEmpty()) {
+                conversations = List.of();
+            } else {
+                conversations = teacherClassIds.stream()
+                        .map(conversationRepository::findByClassEntityId)
+                        .filter(Optional::isPresent)
+                        .map(Optional::get)
+                        .sorted(Comparator.comparing(ChatConversation::getUpdatedAt, Comparator.nullsLast(Comparator.reverseOrder())))
+                        .toList();
+            }
         } else {
-            conversations = conversationRepository.findConversationsByUserId(user.getId());
+            // Học viên (STUDENT): Chỉ lấy những lớp có Enrollment đang hoạt động (status = 'ENROLLED')
+            List<Enrollment> activeEnrollments = enrollmentRepository.findByStudentUserIdAndStatus(user.getId(), "ENROLLED");
+            Set<Long> enrolledClassIds = activeEnrollments.stream()
+                    .filter(e -> e.getClassEntity() != null && !"CANCELLED".equalsIgnoreCase(e.getClassEntity().getStatus()))
+                    .map(e -> e.getClassEntity().getId())
+                    .collect(Collectors.toSet());
+
+            if (enrolledClassIds.isEmpty()) {
+                conversations = List.of();
+            } else {
+                conversations = enrolledClassIds.stream()
+                        .map(conversationRepository::findByClassEntityId)
+                        .filter(Optional::isPresent)
+                        .map(Optional::get)
+                        .sorted(Comparator.comparing(ChatConversation::getUpdatedAt, Comparator.nullsLast(Comparator.reverseOrder())))
+                        .toList();
+            }
         }
 
         List<ChatConversationDto> result = new ArrayList<>();
@@ -63,8 +120,8 @@ public class ClassChatService {
             if (myMember.isPresent()) {
                 Long lastRead = myMember.get().getLastReadMessageId();
                 unread = messageRepository.countUnreadMessagesExcludingSender(c.getId(), lastRead, user.getId());
-            } else if (isAdmin) {
-                unread = 0; // Quản trị viên chưa gia nhập nhóm hiển thị 0 để không bị rác
+            } else if (isAdminRole) {
+                unread = 0;
             }
 
             Optional<ChatMessage> lastMsgOpt = messageRepository.findFirstByConversationIdOrderByCreatedAtDesc(c.getId());
@@ -78,8 +135,13 @@ public class ClassChatService {
 
     @Transactional(readOnly = true)
     public long getTotalUnreadCount(User user) {
+        return getTotalUnreadCount(user, null);
+    }
+
+    @Transactional(readOnly = true)
+    public long getTotalUnreadCount(User user, String portal) {
         if (user == null) return 0;
-        List<ChatConversationDto> list = getUserConversations(user);
+        List<ChatConversationDto> list = getUserConversations(user, portal);
         return list.stream().mapToLong(ChatConversationDto::getUnreadCount).sum();
     }
 
@@ -155,6 +217,8 @@ public class ClassChatService {
         ChatConversation conversation = conversationRepository.findById(conversationId).orElse(null);
         if (conversation == null) return;
 
+        verifyMembership(conversationId, user);
+
         messageRepository.findFirstByConversationIdOrderByCreatedAtDesc(conversationId)
                 .ifPresent(lastMsg -> {
                     boolean isAdmin = user.getRoles() != null && user.getRoles().stream()
@@ -173,8 +237,8 @@ public class ClassChatService {
     }
 
     /**
-     * Tự động đồng bộ thành viên nhóm chat theo lớp học (Idempotent).
-     * Được gọi khi: ghi danh học viên, phân công giảng viên, hủy ghi danh.
+     * Tự động đồng bộ thành viên nhóm chat theo lớp học (Idempotent & Self-Cleaning).
+     * Được gọi khi: ghi danh học viên, phân công giảng viên, hủy ghi danh, chuyển lớp.
      */
     @Transactional
     public void syncClassGroup(Long classId) {
@@ -191,16 +255,22 @@ public class ClassChatService {
                         .updatedAt(Instant.now())
                         .build()));
 
+        Set<Long> validUserIds = new HashSet<>();
+
         // 1. Đồng bộ Giảng viên chính
         if (classEntity.getPrimaryTeacher() != null && classEntity.getPrimaryTeacher().getUser() != null) {
-            addMemberIfNotExists(conv, classEntity.getPrimaryTeacher().getUser(), "TEACHER");
+            User primaryUser = classEntity.getPrimaryTeacher().getUser();
+            validUserIds.add(primaryUser.getId());
+            addMemberIfNotExists(conv, primaryUser, "TEACHER");
         }
 
         // 2. Đồng bộ Giảng viên từ bảng phân công active
         List<TeacherAssignment> assignments = teacherAssignmentRepository.findByClassEntityIdOrderByCreatedAtDesc(classId);
         for (TeacherAssignment ta : assignments) {
             if ("ACTIVE".equalsIgnoreCase(ta.getStatus()) && ta.getTeacher() != null && ta.getTeacher().getUser() != null) {
-                addMemberIfNotExists(conv, ta.getTeacher().getUser(), "TEACHER");
+                User teacherUser = ta.getTeacher().getUser();
+                validUserIds.add(teacherUser.getId());
+                addMemberIfNotExists(conv, teacherUser, "TEACHER");
             }
         }
 
@@ -208,11 +278,27 @@ public class ClassChatService {
         List<Enrollment> enrollments = enrollmentRepository.findByClassEntityIdOrderByCreatedAtDesc(classId);
         for (Enrollment e : enrollments) {
             if ("ENROLLED".equalsIgnoreCase(e.getStatus()) && e.getStudent() != null && e.getStudent().getUser() != null) {
-                addMemberIfNotExists(conv, e.getStudent().getUser(), "STUDENT");
+                User studentUser = e.getStudent().getUser();
+                validUserIds.add(studentUser.getId());
+                addMemberIfNotExists(conv, studentUser, "STUDENT");
             }
         }
 
-        log.info("Đã đồng bộ thành công nhóm chat cho lớp: {} ({})", classEntity.getName(), classEntity.getCode());
+        // 4. Thu hồi quyền (Revocation): Xóa thành viên không còn hợp lệ khỏi nhóm (ví dụ đã thôi học, chuyển lớp hoặc hết phân công)
+        List<ChatMember> currentMembers = memberRepository.findByConversationId(conv.getId());
+        for (ChatMember member : currentMembers) {
+            if ("ADMIN".equals(member.getRole())) {
+                continue; // Giữ lại tài khoản quản trị
+            }
+            if (!validUserIds.contains(member.getUser().getId())) {
+                memberRepository.deleteByConversationIdAndUserId(conv.getId(), member.getUser().getId());
+                log.info("Đã thu hồi quyền tham gia nhóm chat lớp {} ({}) của người dùng {}", 
+                        classEntity.getName(), classEntity.getCode(), member.getUser().getUsername());
+            }
+        }
+
+        log.info("Đã đồng bộ thành công nhóm chat cho lớp: {} ({}), sĩ số hợp lệ: {}", 
+                classEntity.getName(), classEntity.getCode(), validUserIds.size());
     }
 
     private void addMemberIfNotExists(ChatConversation conv, User user, String role) {
@@ -226,7 +312,7 @@ public class ClassChatService {
         }
     }
 
-    private void verifyMembership(Long conversationId, User user) {
+    public void verifyMembership(Long conversationId, User user) {
         if (user == null) {
             throw new AccessDeniedException("Chưa xác thực người dùng");
         }
@@ -235,10 +321,29 @@ public class ClassChatService {
         if (isAdmin) {
             return; // Quản trị viên có toàn quyền kiểm soát & hỗ trợ nhóm
         }
-        boolean isMember = memberRepository.findByConversationIdAndUserId(conversationId, user.getId()).isPresent();
-        if (!isMember) {
-            throw new AccessDeniedException("Bạn không phải thành viên của nhóm học tập này");
+
+        ChatConversation conv = conversationRepository.findById(conversationId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy nhóm học tập"));
+        ClassEntity classEntity = conv.getClassEntity();
+        if (classEntity == null) {
+            throw new ResourceNotFoundException("Nhóm chat không liên kết với lớp học hợp lệ");
+        }
+        Long classId = classEntity.getId();
+
+        boolean isTeacherRole = user.getRoles() != null && user.getRoles().stream().anyMatch(r -> "TEACHER".equals(r.getId()));
+        if (isTeacherRole) {
+            boolean isAssigned = (classEntity.getPrimaryTeacher() != null && classEntity.getPrimaryTeacher().getUser() != null && classEntity.getPrimaryTeacher().getUser().getId().equals(user.getId()))
+                    || teacherAssignmentRepository.existsByClassEntityIdAndTeacherUserIdAndStatus(classId, user.getId(), "ACTIVE");
+            if (!isAssigned) {
+                throw new AccessDeniedException("Bạn không được phân công giảng dạy lớp học này");
+            }
+            return;
+        }
+
+        // Học viên
+        boolean isEnrolled = enrollmentRepository.existsByClassEntityIdAndStudentUserIdAndStatus(classId, user.getId(), "ENROLLED");
+        if (!isEnrolled) {
+            throw new AccessDeniedException("Bạn không phải thành viên của lớp học này (ghi danh không còn hiệu lực)");
         }
     }
 }
-

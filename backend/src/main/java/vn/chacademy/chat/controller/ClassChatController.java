@@ -36,17 +36,19 @@ public class ClassChatController {
 
     @GetMapping("/conversations")
     public ResponseEntity<ApiResponse<List<ChatConversationDto>>> getMyConversations(
+            @RequestParam(required = false) String portal,
             @AuthenticationPrincipal UserDetails userDetails) {
         User user = getAuthenticatedUser(userDetails);
-        List<ChatConversationDto> list = classChatService.getUserConversations(user);
+        List<ChatConversationDto> list = classChatService.getUserConversations(user, portal);
         return ResponseEntity.ok(ApiResponse.success(list));
     }
 
     @GetMapping("/unread-count")
     public ResponseEntity<ApiResponse<Long>> getTotalUnreadCount(
+            @RequestParam(required = false) String portal,
             @AuthenticationPrincipal UserDetails userDetails) {
         User user = getAuthenticatedUser(userDetails);
-        long count = classChatService.getTotalUnreadCount(user);
+        long count = classChatService.getTotalUnreadCount(user, portal);
         return ResponseEntity.ok(ApiResponse.success(count));
     }
 

@@ -19,9 +19,10 @@ import { useAuth } from '../../context/AuthContext'
 
 interface GroupChatPanelProps {
   onUnreadChange?: (total: number) => void
+  portal?: 'STUDENT' | 'TEACHER' | 'ADMIN'
 }
 
-export const GroupChatPanel: React.FC<GroupChatPanelProps> = ({ onUnreadChange }) => {
+export const GroupChatPanel: React.FC<GroupChatPanelProps> = ({ onUnreadChange, portal }) => {
   const { user } = useAuth()
   const [conversations, setConversations] = useState<ChatConversationItem[]>([])
   const [selectedConvId, setSelectedConvId] = useState<number | null>(null)
@@ -54,7 +55,7 @@ export const GroupChatPanel: React.FC<GroupChatPanelProps> = ({ onUnreadChange }
   // 1. Tải danh sách nhóm lớp học
   const loadConversations = async (autoSelect = false) => {
     try {
-      const res = await classChatApi.getMyConversations()
+      const res = await classChatApi.getMyConversations(portal)
       if (res?.success && res.data) {
         setConversations(res.data)
 
@@ -80,7 +81,7 @@ export const GroupChatPanel: React.FC<GroupChatPanelProps> = ({ onUnreadChange }
 
   useEffect(() => {
     loadConversations(true)
-  }, [])
+  }, [portal])
 
   // 2. Lắng nghe sự kiện đồng bộ chọn lớp khi click từ các trang Khóa học / Lớp học
   useEffect(() => {
@@ -255,51 +256,82 @@ export const GroupChatPanel: React.FC<GroupChatPanelProps> = ({ onUnreadChange }
          ========================================================================= */}
       <div className="px-3.5 py-2.5 border-b border-slate-200/80 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md shrink-0 shadow-2xs">
         <div className="flex items-center justify-between gap-2">
-          {/* Nút bấm mở Menu Chuyển Nhóm Lớp */}
-          <button
-            type="button"
-            onClick={() => setShowSwitcher((prev) => !prev)}
-            className="flex-1 min-w-0 flex items-center justify-between p-1.5 px-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-750 transition text-left cursor-pointer group"
-            title="Bấm để chọn hoặc chuyển sang nhóm lớp học khác"
-          >
-            <div className="min-w-0 pr-2">
-              <div className="flex items-center gap-1.5 text-xs font-bold text-slate-800 dark:text-white truncate">
-                <GraduationCap className="w-4 h-4 text-indigo-500 shrink-0" />
-                <span className="truncate">{currentConv.className || currentConv.title}</span>
-                {currentConv.classCode && (
-                  <span className="font-mono text-[10px] px-1.5 py-0.2 rounded bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 font-semibold shrink-0">
-                    {currentConv.classCode}
+          {/* Header nhóm lớp: Nếu chỉ có 1 lớp thì hiển thị trực tiếp cố định, nếu nhiều lớp thì cho phép bấm chuyển đổi */}
+          {conversations.length > 1 ? (
+            <button
+              type="button"
+              onClick={() => setShowSwitcher((prev) => !prev)}
+              className="flex-1 min-w-0 flex items-center justify-between p-1.5 px-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-750 transition text-left cursor-pointer group"
+              title="Bấm để chọn hoặc chuyển sang nhóm lớp học khác"
+            >
+              <div className="min-w-0 pr-2">
+                <div className="flex items-center gap-1.5 text-xs font-bold text-slate-800 dark:text-white truncate">
+                  <GraduationCap className="w-4 h-4 text-indigo-500 shrink-0" />
+                  <span className="truncate">{currentConv.className || currentConv.title}</span>
+                  {currentConv.classCode && (
+                    <span className="font-mono text-[10px] px-1.5 py-0.2 rounded bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 font-semibold shrink-0">
+                      {currentConv.classCode}
+                    </span>
+                  )}
+                </div>
+                <div className="text-[11px] text-slate-500 dark:text-slate-400 truncate flex items-center gap-1.5 mt-0.5">
+                  {currentConv.courseName ? (
+                    <span>{currentConv.courseName}</span>
+                  ) : (
+                    <span>Khóa học</span>
+                  )}
+                  {currentConv.teacherName && (
+                    <>
+                      <span>•</span>
+                      <span className="text-emerald-600 dark:text-emerald-400 font-medium">
+                        GV: {currentConv.teacherName}
+                      </span>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex items-center gap-1.5 shrink-0 pl-1">
+                {totalUnreadCount > 0 && (
+                  <span className="px-1.5 py-0.2 rounded-full text-[10px] font-black bg-rose-500 text-white shadow-xs">
+                    {totalUnreadCount}
                   </span>
                 )}
+                <div className="p-1 rounded-lg bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-300 group-hover:bg-indigo-100 transition">
+                  <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${showSwitcher ? 'rotate-180' : ''}`} />
+                </div>
               </div>
-              <div className="text-[11px] text-slate-500 dark:text-slate-400 truncate flex items-center gap-1.5 mt-0.5">
-                {currentConv.courseName ? (
-                  <span>{currentConv.courseName}</span>
-                ) : (
-                  <span>Khóa học</span>
-                )}
-                {currentConv.teacherName && (
-                  <>
-                    <span>•</span>
-                    <span className="text-emerald-600 dark:text-emerald-400 font-medium">
-                      GV: {currentConv.teacherName}
+            </button>
+          ) : (
+            <div className="flex-1 min-w-0 p-1.5 px-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
+              <div className="min-w-0 pr-2">
+                <div className="flex items-center gap-1.5 text-xs font-bold text-slate-800 dark:text-white truncate">
+                  <GraduationCap className="w-4 h-4 text-indigo-500 shrink-0" />
+                  <span className="truncate">{currentConv.className || currentConv.title}</span>
+                  {currentConv.classCode && (
+                    <span className="font-mono text-[10px] px-1.5 py-0.2 rounded bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 font-semibold shrink-0">
+                      {currentConv.classCode}
                     </span>
-                  </>
-                )}
+                  )}
+                </div>
+                <div className="text-[11px] text-slate-500 dark:text-slate-400 truncate flex items-center gap-1.5 mt-0.5">
+                  {currentConv.courseName ? (
+                    <span>{currentConv.courseName}</span>
+                  ) : (
+                    <span>Khóa học</span>
+                  )}
+                  {currentConv.teacherName && (
+                    <>
+                      <span>•</span>
+                      <span className="text-emerald-600 dark:text-emerald-400 font-medium">
+                        GV: {currentConv.teacherName}
+                      </span>
+                    </>
+                  )}
+                </div>
               </div>
             </div>
-
-            <div className="flex items-center gap-1.5 shrink-0 pl-1">
-              {totalUnreadCount > 0 && (
-                <span className="px-1.5 py-0.2 rounded-full text-[10px] font-black bg-rose-500 text-white shadow-xs">
-                  {totalUnreadCount}
-                </span>
-              )}
-              <div className="p-1 rounded-lg bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-300 group-hover:bg-indigo-100 transition">
-                <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${showSwitcher ? 'rotate-180' : ''}`} />
-              </div>
-            </div>
-          </button>
+          )}
 
           {/* Nút xem thành viên lớp hiện tại */}
           <button

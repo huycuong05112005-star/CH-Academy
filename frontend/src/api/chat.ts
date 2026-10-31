@@ -21,11 +21,11 @@ import type {
 // ==========================================
 
 export const classChatApi = {
-  getMyConversations: (): Promise<ApiResponse<ChatConversationItem[]>> =>
-    apiClient.get<ChatConversationItem[]>('/chat/classes/conversations'),
+  getMyConversations: (portal?: string): Promise<ApiResponse<ChatConversationItem[]>> =>
+    apiClient.get<ChatConversationItem[]>(`/chat/classes/conversations${portal ? `?portal=${portal}` : ''}`),
 
-  getTotalUnreadCount: (): Promise<ApiResponse<number>> =>
-    apiClient.get<number>('/chat/classes/unread-count'),
+  getTotalUnreadCount: (portal?: string): Promise<ApiResponse<number>> =>
+    apiClient.get<number>(`/chat/classes/unread-count${portal ? `?portal=${portal}` : ''}`),
 
   getMessages: (conversationId: number): Promise<ApiResponse<ChatMessageItem[]>> =>
     apiClient.get<ChatMessageItem[]>(`/chat/classes/conversations/${conversationId}/messages`),

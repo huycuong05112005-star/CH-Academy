@@ -40,9 +40,7 @@ public class GenAiChatService {
 
     private final AiConversationRepository conversationRepository;
     private final AiMessageRepository messageRepository;
-    private final AiAgentRepository agentRepository;
     private final AiKbChunkRepository chunkRepository;
-    private final AiLeadRepository leadRepository;
     private final AiStudioService aiStudioService;
     private final StudentRepository studentRepository;
     private final TeacherRepository teacherRepository;
@@ -202,12 +200,15 @@ public class GenAiChatService {
                 ? resolvedAgent.getSystemPrompt()
                 : "Bạn là " + resolvedAgent.getName() + " của CH Academy.";
 
+        // Lấy lịch sử hội thoại để duy trì ngữ cảnh trao đổi nhiều lượt (Multi-turn conversational memory)
+        List<AiMessage> history = messageRepository.findByConversationIdOrderByCreatedAtAsc(conversation.getId());
+
         // 7. Sinh câu trả lời (LLM OpenRouter hoặc Engine tri thức cục bộ)
         String answer;
         if (openRouterKey != null && !openRouterKey.isBlank()) {
-            answer = callOpenRouterLlm(question, systemPrompt, dynamicContext, citations);
+            answer = callOpenRouterLlm(question, systemPrompt, dynamicContext, citations, history);
         } else {
-            answer = generateContextualAnswer(question, dynamicContext, portal, user, citations);
+            answer = generateContextualAnswer(question, dynamicContext, portal, user, citations, history);
         }
 
         // 8. Lưu câu trả lời của trợ lý
@@ -428,7 +429,7 @@ public class GenAiChatService {
     // 5. LLM CALL & LOCAL CONTEXTUAL ENGINE
     // ========================================================
 
-    private String callOpenRouterLlm(String question, String systemPrompt, String context, List<AiChatResponse.SourceCitation> citations) {
+    private String callOpenRouterLlm(String question, String systemPrompt, String context, List<AiChatResponse.SourceCitation> citations, List<AiMessage> history) {
         try {
             org.springframework.http.client.SimpleClientHttpRequestFactory factory = new org.springframework.http.client.SimpleClientHttpRequestFactory();
             factory.setConnectTimeout(3000);
@@ -441,15 +442,25 @@ public class GenAiChatService {
             headers.set("X-Title", "CH Academy GenAI Studio");
 
             String fullSystem = systemPrompt + "\n\nNgữ cảnh dữ liệu thực tế hệ thống CH Academy:\n" + context +
-                    "\n\nQuy tắc: Luôn trả lời bằng tiếng Việt, thân thiện, trung thực và không bịa đặt số liệu.";
+                    "\n\nQuy tắc: Luôn trả lời bằng tiếng Việt, thân thiện, trung thực, tự nhiên và duy trì trọn vẹn mạch hội thoại của các lượt trước.";
+
+            List<Map<String, String>> messagesList = new ArrayList<>();
+            messagesList.add(Map.of("role", "system", "content", fullSystem));
+
+            if (history != null && !history.isEmpty()) {
+                int start = Math.max(0, history.size() - 8);
+                for (int i = start; i < history.size(); i++) {
+                    AiMessage m = history.get(i);
+                    messagesList.add(Map.of("role", m.getRole(), "content", m.getContent()));
+                }
+            } else {
+                messagesList.add(Map.of("role", "user", "content", question));
+            }
 
             Map<String, Object> body = Map.of(
                     "model", aiModel,
-                    "messages", List.of(
-                            Map.of("role", "system", "content", fullSystem),
-                            Map.of("role", "user", "content", question)
-                    ),
-                    "temperature", 0.3,
+                    "messages", messagesList,
+                    "temperature", 0.4,
                     "max_tokens", 800
             );
 
@@ -478,7 +489,7 @@ public class GenAiChatService {
         } catch (Exception ex) {
             log.warn("Lỗi gọi OpenRouter API: {}. Sử dụng engine nội bộ.", ex.getMessage());
         }
-        return generateContextualAnswer(question, context, "PORTAL", null, citations);
+        return generateContextualAnswer(question, context, "PORTAL", null, citations, history);
     }
 
     public List<String> splitVietnameseSentences(String text) {
@@ -489,14 +500,29 @@ public class GenAiChatService {
                 .replaceAll("\\s+", " ")
                 .trim();
 
-        String[] parts = clean.split("(?<=[.!?…])\\s+|(?<=\\n+)");
+        // Tách câu thông minh theo dấu ngắt và ghép thành các phân đoạn 60-140 ký tự tự nhiên, không ngắt quãng
+        String[] parts = clean.split("(?<=[.!?…;:])\\s+|\\n+");
         List<String> list = new ArrayList<>();
+        StringBuilder currentClause = new StringBuilder();
+
         for (String p : parts) {
             String s = p.trim();
-            if (!s.isEmpty()) {
-                list.add(s);
+            if (s.isEmpty()) continue;
+
+            if (currentClause.length() > 0 && (currentClause.length() + s.length() < 140)) {
+                currentClause.append(" ").append(s);
+            } else {
+                if (currentClause.length() > 0) {
+                    list.add(currentClause.toString().trim());
+                    currentClause.setLength(0);
+                }
+                currentClause.append(s);
             }
         }
+        if (currentClause.length() > 0) {
+            list.add(currentClause.toString().trim());
+        }
+
         if (list.isEmpty() && !clean.isEmpty()) {
             list.add(clean);
         }
@@ -517,9 +543,10 @@ public class GenAiChatService {
         return diag;
     }
 
-    private String generateContextualAnswer(String question, String context, String portal, User user, List<AiChatResponse.SourceCitation> citations) {
+    private String generateContextualAnswer(String question, String context, String portal, User user, List<AiChatResponse.SourceCitation> citations, List<AiMessage> history) {
         String lower = question.toLowerCase();
 
+        // 1. Phân hệ công khai (Public Admission Agent)
         if ("PUBLIC".equals(portal)) {
             if (lower.contains("tiếng nhật") || lower.contains("tiếng hàn") || lower.contains("tiếng trung") || lower.contains("tiếng pháp") || lower.contains("nấu ăn")) {
                 return "Hiện tại CH Academy chưa có chương trình này trong danh mục đào tạo chính thức (trung tâm hiện chuyên sâu các chương trình Tiếng Anh từ trẻ em đến người đi làm, Luyện thi IELTS chuẩn quốc tế và Lập trình cơ bản). Bạn có thể để lại số điện thoại hoặc nhấn 'Tư vấn ngay' nếu cần tư vấn lộ trình học phù hợp nhất nhé!";
@@ -551,6 +578,71 @@ public class GenAiChatService {
             return "Chào bạn! Tôi là Chuyên viên Tư vấn Tuyển sinh AI của CH Academy. Tôi có thể hỗ trợ bạn tra cứu khóa học chính thức, biểu phí, lịch khai giảng và tiếp nhận đăng ký tư vấn. Bạn đang quan tâm đến khóa học nào ạ?";
         }
 
+        // 2. Kiểm tra ngữ cảnh của câu trước đó trong phiên hội thoại đa lượt
+        String prevTopic = "";
+        if (history != null && history.size() >= 2) {
+            for (int i = history.size() - 2; i >= 0; i--) {
+                AiMessage prev = history.get(i);
+                if ("user".equalsIgnoreCase(prev.getRole())) {
+                    prevTopic = prev.getContent().toLowerCase();
+                    break;
+                }
+            }
+        }
+
+        // Tình huống: Học tiếng Anh
+        if (lower.contains("học tiếng anh") || lower.contains("giúp tôi học tiếng anh") || lower.contains("trợ lý tiếng anh")) {
+            citations.add(AiChatResponse.SourceCitation.builder()
+                    .documentName("Khung năng lực Anh ngữ CH Academy")
+                    .section("Giáo trình CEFR chuẩn quốc tế")
+                    .snippet("Lộ trình Tiếng Anh toàn diện 4 kỹ năng Nghe - Nói - Đọc - Viết")
+                    .build());
+            return "Chào bạn! Tôi là AI Gia sư đồng hành học tập của CH Academy. Tôi luôn sẵn sàng hỗ trợ bạn học tiếng Anh: từ giải thích ngữ pháp, từ vựng, luyện phát âm, sửa bài tập đến hướng dẫn làm bài thi. Hôm nay bạn muốn tìm hiểu hoặc luyện tập chủ đề nào trước tiên?";
+        }
+
+        // Tình huống: Thì hiện tại đơn (Present Simple)
+        if (lower.contains("thì hiện tại đơn") || lower.contains("present simple")) {
+            citations.add(AiChatResponse.SourceCitation.builder()
+                    .documentName("Tài liệu Ngữ pháp Căn bản — Lớp CLS-ENG-KID01 / PRO01")
+                    .section("Bài 2: Các thì hiện tại trong Tiếng Anh")
+                    .snippet("Quy tắc cấu trúc S + V(s/es) và dấu hiệu nhận biết always, usually, every day")
+                    .build());
+            return "Thì Hiện tại đơn (Present Simple) dùng để diễn tả một sự thật hiển nhiên, chân lý hoặc một thói quen lặp đi lặp lại hàng ngày.\n" +
+                    "• Cấu trúc khẳng định: Chủ ngữ + Động từ (thêm 's' hoặc 'es' với he/she/it). Với động từ to be: S + am/is/are.\n" +
+                    "• Cấu trúc phủ định: S + do not / does not + V nguyên mẫu.\n" +
+                    "• Ví dụ: 'I study English every day' (Tôi học tiếng Anh mỗi ngày) hoặc 'The sun rises in the east' (Mặt trời mọc ở hướng Đông).\n" +
+                    "Bạn có muốn tôi cho thêm ví dụ hoặc làm thử một bài tập ngắn không?";
+        }
+
+        // Tình huống: Yêu cầu cho ví dụ khác
+        if (lower.contains("ví dụ khác") || lower.contains("cho tôi một ví dụ") || lower.contains("thêm ví dụ") || lower.contains("câu khác")) {
+            citations.add(AiChatResponse.SourceCitation.builder()
+                    .documentName("Kho bài tập thực hành CH Academy")
+                    .section("Ví dụ trực quan theo ngữ cảnh")
+                    .snippet("Bộ câu ví dụ thực tế chuẩn ngữ cảnh cuộc sống")
+                    .build());
+            if (prevTopic.contains("hiện tại đơn") || prevTopic.contains("present simple") || lower.contains("hiện tại đơn")) {
+                return "Dưới đây là một ví dụ khác rất quen thuộc về thì Hiện tại đơn:\n" +
+                        "• Khẳng định: 'She drinks green tea every morning.' (Cô ấy uống trà xanh vào mỗi buổi sáng — diễn tả thói quen).\n" +
+                        "• Phủ định: 'He does not work on Sundays.' (Anh ấy không làm việc vào các ngày Chủ Nhật).\n" +
+                        "• Câu hỏi: 'Do you live in Hanoi?' (Bạn có sống ở Hà Nội không?).\n" +
+                        "Bây giờ bạn hãy thử đặt một câu ngắn sử dụng thì này để tôi kiểm tra giúp bạn nhé!";
+            }
+            return "Dưới đây là một ví dụ thực tế khác:\n" +
+                    "• 'We practice speaking English with our teacher twice a week.' (Chúng tôi luyện nói tiếng Anh với giáo viên hai lần một tuần).\n" +
+                    "Bạn thấy câu này đã rõ ràng chưa, bạn muốn phân tích ngữ pháp hay luyện đặt câu tiếp theo?";
+        }
+
+        // Tình huống: Yêu cầu giải thích chậm hơn hoặc chi tiết hơn
+        if (lower.contains("chậm hơn") || lower.contains("giải thích lại") || lower.contains("nói chậm") || lower.contains("từ từ")) {
+            return "Dạ vâng, tôi giải thích lại từng bước thật chậm và dễ nhớ nhé:\n" +
+                    "1. Ý nghĩa: Bạn chỉ dùng thì này khi nói về thói quen hàng ngày (ngày nào cũng làm) hoặc sự thật hiển nhiên.\n" +
+                    "2. Với nhóm I / You / We / They: Bạn giữ nguyên động từ, không cần biến đổi gì cả. Ví dụ: 'I speak English'.\n" +
+                    "3. Với nhóm He / She / It: Bạn chỉ cần thêm chữ 's' hoặc 'es' vào sau động từ. Ví dụ: 'He speaks English'.\n" +
+                    "Rất đơn giản đúng không ạ? Bạn đã nắm được quy tắc này chưa?";
+        }
+
+        // Tình huống: Lớp học
         if (lower.contains("lớp") || lower.contains("học phần") || lower.contains("môn")) {
             citations.add(AiChatResponse.SourceCitation.builder()
                     .documentName("Hồ sơ đào tạo học viên")
@@ -562,6 +654,7 @@ public class GenAiChatService {
                     "\nBạn hãy chủ động vào nhóm chat của lớp để trao đổi cùng thầy cô và bạn bè nhé!";
         }
 
+        // Tình huống: Học phí
         if (lower.contains("học phí") || lower.contains("công nợ") || lower.contains("tiền học")) {
             citations.add(AiChatResponse.SourceCitation.builder()
                     .documentName("Sổ bộ Tài chính & Học phí")
@@ -573,6 +666,7 @@ public class GenAiChatService {
                     "\nĐể tra cứu chi tiết hóa đơn hoặc nhận biên lai điện tử, bạn có thể xem tại mục 'Học phí' trên thanh điều hướng.";
         }
 
+        // Tình huống: Chuyên cần
         if (lower.contains("chuyên cần") || lower.contains("điểm danh") || lower.contains("nghỉ học")) {
             citations.add(AiChatResponse.SourceCitation.builder()
                     .documentName("Quy_Che_Dao_Tao_Va_Noi_Quy_CH_Academy.pdf")
@@ -582,7 +676,7 @@ public class GenAiChatService {
             return "Theo quy chế đào tạo tại CH Academy: Học viên cần đảm bảo tỷ lệ chuyên cần từ 80% trở lên để đủ điều kiện tham dự bài kiểm tra đánh giá năng lực cuối kỳ. Nếu có việc bận, học viên vui lòng xin phép giáo viên chủ nhiệm trên nhóm chat của lớp trước ít nhất 2 giờ.";
         }
 
-        return "Chào " + (user != null ? user.getFullName() : "bạn") + "! Tôi là Trợ lý AI của CH Academy. Tôi có thể hỗ trợ bạn tra cứu lịch học, lớp học đang tham gia, tình trạng học phí, tài liệu môn học và nội quy của trung tâm. Bạn cần tôi hỗ trợ thông tin gì hôm nay?";
+        return "Chào " + (user != null ? user.getFullName() : "bạn") + "! Tôi là Trợ lý AI của CH Academy. Tôi có thể hỗ trợ bạn học tập, giải thích kiến thức, tra cứu lịch học, lớp học đang tham gia, học phí và tài liệu môn học. Bạn cần tôi hỗ trợ chủ đề gì?";
     }
 
     private void saveAssistantMessage(AiConversation conversation, String content, List<AiChatResponse.SourceCitation> citations, int tokens) {

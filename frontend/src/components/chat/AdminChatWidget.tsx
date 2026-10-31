@@ -195,7 +195,7 @@ export const AdminChatWidget: React.FC = () => {
               }}
             />
           ) : (
-            <GroupChatPanel onUnreadChange={setTotalUnread} />
+            <GroupChatPanel portal="ADMIN" onUnreadChange={setTotalUnread} />
           )}
         </div>
       )}

@@ -327,4 +327,65 @@ public class AcademicService {
         classChatService.syncClassGroup(classEntity.getId());
         return EnrollmentDto.fromEntity(saved);
     }
+
+    @Transactional
+    public EnrollmentDto dropEnrollment(Long enrollmentId, String reason) {
+        Enrollment enrollment = enrollmentRepository.findById(enrollmentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy thông tin ghi danh ID: " + enrollmentId));
+
+        enrollment.setStatus("DROPPED");
+        if (reason != null && !reason.isBlank()) {
+            enrollment.setNotes((enrollment.getNotes() != null ? enrollment.getNotes() + "; " : "") + "Lý do hủy/thôi học: " + reason);
+        }
+        Enrollment saved = enrollmentRepository.save(enrollment);
+
+        // Tự động thu hồi quyền tham gia nhóm chat lớp cũ
+        classChatService.syncClassGroup(enrollment.getClassEntity().getId());
+
+        return EnrollmentDto.fromEntity(saved);
+    }
+
+    @Transactional
+    public EnrollmentDto transferStudentClass(Long studentId, Long oldClassId, Long newClassId, String reason) {
+        Enrollment oldEnrollment = enrollmentRepository.findByClassEntityIdOrderByCreatedAtDesc(oldClassId).stream()
+                .filter(e -> e.getStudent().getId().equals(studentId) && "ENROLLED".equalsIgnoreCase(e.getStatus()))
+                .findFirst()
+                .orElseThrow(() -> new BadRequestException("Học viên không có ghi danh đang hoạt động tại lớp cũ để chuyển"));
+
+        ClassEntity newClass = classRepository.findById(newClassId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy lớp học mới ID: " + newClassId));
+
+        if (enrollmentRepository.existsByClassEntityIdAndStudentId(newClassId, studentId)) {
+            throw new BadRequestException("Học viên đã tồn tại trong danh sách lớp mới");
+        }
+
+        long currentEnrolled = enrollmentRepository.countByClassEntityIdAndStatus(newClassId, "ENROLLED");
+        if (currentEnrolled >= newClass.getMaxCapacity()) {
+            throw new BadRequestException("Lớp học mới đã đạt sĩ số tối đa (" + newClass.getMaxCapacity() + "). Không thể chuyển lớp!");
+        }
+
+        // 1. Chuyển trạng thái lớp cũ sang DROPPED
+        oldEnrollment.setStatus("DROPPED");
+        oldEnrollment.setNotes((oldEnrollment.getNotes() != null ? oldEnrollment.getNotes() + "; " : "") + "Chuyển sang lớp " + newClass.getName() + ": " + (reason != null ? reason : ""));
+        enrollmentRepository.save(oldEnrollment);
+
+        // 2. Tạo ghi danh lớp mới
+        Enrollment newEnrollment = Enrollment.builder()
+                .classEntity(newClass)
+                .student(oldEnrollment.getStudent())
+                .enrollmentDate(LocalDate.now())
+                .appliedTuitionFee(oldEnrollment.getAppliedTuitionFee())
+                .discountAmount(oldEnrollment.getDiscountAmount())
+                .finalFee(oldEnrollment.getFinalFee())
+                .status("ENROLLED")
+                .notes("Chuyển từ lớp " + oldEnrollment.getClassEntity().getName())
+                .build();
+        Enrollment saved = enrollmentRepository.save(newEnrollment);
+
+        // 3. Tự động thu hồi quyền nhóm cũ và cấp quyền nhóm mới
+        classChatService.syncClassGroup(oldClassId);
+        classChatService.syncClassGroup(newClassId);
+
+        return EnrollmentDto.fromEntity(saved);
+    }
 }

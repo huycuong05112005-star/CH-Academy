@@ -116,6 +116,8 @@ export const AiVoiceCallModal: React.FC<AiVoiceCallProps> = ({
   const aiRequestStartTimeRef = useRef(0)
   const ttsQueueRef = useRef<string[]>([])
   const currentUtteranceRef = useRef<SpeechSynthesisUtterance | null>(null)
+  const activeConversationIdRef = useRef<number | null>(conversationId || null)
+  const bargeInDebounceRef = useRef(0)
 
   const addDebugLog = (msg: string) => {
     const ts = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
@@ -220,11 +222,20 @@ export const AiVoiceCallModal: React.FC<AiVoiceCallProps> = ({
         }
       }
 
+      // Fallback timer nếu trình duyệt bỏ rơi sự kiện onend/onerror
+      const safetyEndTimer = setTimeout(() => {
+        if (currentUtteranceRef.current === utterance && isSpeakingRef.current && !window.speechSynthesis.speaking) {
+          playNextTtsSentence()
+        }
+      }, 8000)
+
       utterance.onend = () => {
+        clearTimeout(safetyEndTimer)
         playNextTtsSentence()
       }
 
       utterance.onerror = (err) => {
+        clearTimeout(safetyEndTimer)
         console.warn('TTS utterance error:', err)
         playNextTtsSentence()
       }
@@ -297,6 +308,9 @@ export const AiVoiceCallModal: React.FC<AiVoiceCallProps> = ({
             answer = res.data.answer
             sentences = res.data.sentences || []
             latencyMs = res.data.latencyMs || (Date.now() - aiRequestStartTimeRef.current)
+            if (res.data.conversationId) {
+              activeConversationIdRef.current = res.data.conversationId
+            }
           }
         } else {
           const res = await aiChatApi.ask({
@@ -304,12 +318,15 @@ export const AiVoiceCallModal: React.FC<AiVoiceCallProps> = ({
             portal,
             channel: 'VOICE',
             agentCode,
-            conversationId: conversationId || undefined
+            conversationId: activeConversationIdRef.current || undefined
           })
           if (res?.success && res.data) {
             answer = res.data.answer
             sentences = res.data.sentences || []
             latencyMs = res.data.latencyMs || (Date.now() - aiRequestStartTimeRef.current)
+            if (res.data.conversationId) {
+              activeConversationIdRef.current = res.data.conversationId
+            }
           }
         }
 
@@ -385,7 +402,7 @@ export const AiVoiceCallModal: React.FC<AiVoiceCallProps> = ({
     try {
       const recognition = new SpeechRecognition()
       recognition.lang = 'vi-VN'
-      recognition.continuous = false // Từng lượt tự nhiên (Turn-based endpointing)
+      recognition.continuous = true // Lắng nghe liên tục, không bị ngắt giữa chừng
       recognition.interimResults = true
       recognition.maxAlternatives = 1
 
@@ -417,7 +434,7 @@ export const AiVoiceCallModal: React.FC<AiVoiceCallProps> = ({
         const combined = (finalTranscriptRef.current + ' ' + interim).trim()
         setUserTranscript(combined)
 
-        // Reset bộ đếm im lặng để chốt câu khi ngừng nói
+        // Reset bộ đếm im lặng để chốt câu khi ngừng nói (1600ms giúp học viên nói tiếng Việt tự nhiên)
         if (silenceTimerRef.current) {
           clearTimeout(silenceTimerRef.current)
         }
@@ -429,7 +446,7 @@ export const AiVoiceCallModal: React.FC<AiVoiceCallProps> = ({
             stopListening()
             processUserSpeech(combined)
           }
-        }, 900)
+        }, 1600)
       }
 
       recognition.onerror = (event: any) => {
@@ -564,6 +581,16 @@ export const AiVoiceCallModal: React.FC<AiVoiceCallProps> = ({
             const db = rms > 0.0001 ? Math.max(-60, Math.min(0, Math.round(20 * Math.log10(rms)))) : -60
             setMicDb(db)
             setHasLiveAudioSignal(rms > 0.008)
+
+            // Auto Barge-in: Nếu AI đang nói mà micro phát hiện người dùng nói (RMS > 0.055)
+            if (isSpeakingRef.current && rms > 0.055) {
+              const now = Date.now()
+              if (now - bargeInDebounceRef.current > 1200) {
+                bargeInDebounceRef.current = now
+                addDebugLog(`Tự động ngắt lời (Barge-in do nhận diện tiếng nói RMS: ${(rms * 100).toFixed(0)}%)`)
+                interruptAi()
+              }
+            }
           } else {
             // Sóng mô phỏng khi AI đang trả lời hoặc Micro tắt
             wavePhase += 0.08

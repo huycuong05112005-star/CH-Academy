@@ -29,6 +29,11 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
     List<Enrollment> findByStudentIdOrderByCreatedAtDesc(Long studentId);
 
     @EntityGraph(attributePaths = {"classEntity", "student", "classEntity.course"})
+    List<Enrollment> findByStudentUserIdAndStatus(Long userId, String status);
+
+    boolean existsByClassEntityIdAndStudentUserIdAndStatus(Long classId, Long userId, String status);
+
+    @EntityGraph(attributePaths = {"classEntity", "student", "classEntity.course"})
     @Query("SELECT e FROM Enrollment e WHERE " +
            "(:classId IS NULL OR e.classEntity.id = :classId) AND " +
            "(:studentId IS NULL OR e.student.id = :studentId) AND " +

@@ -23,4 +23,9 @@ public interface TeacherAssignmentRepository extends JpaRepository<TeacherAssign
     Optional<TeacherAssignment> findByClassEntityIdAndTeacherIdAndStatus(Long classId, Long teacherId, String status);
 
     boolean existsByClassEntityIdAndTeacherIdAndStatus(Long classId, Long teacherId, String status);
+
+    boolean existsByClassEntityIdAndTeacherUserIdAndStatus(Long classId, Long userId, String status);
+
+    @EntityGraph(attributePaths = {"classEntity", "teacher", "assignedBy"})
+    List<TeacherAssignment> findByTeacherUserIdAndStatus(Long userId, String status);
 }

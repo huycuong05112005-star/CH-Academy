@@ -197,7 +197,7 @@ export const TeacherChatWidget: React.FC = () => {
               onOpenVoiceCall={() => setShowVoiceCall(true)}
             />
           ) : (
-            <GroupChatPanel onUnreadChange={setTotalUnread} />
+            <GroupChatPanel portal="TEACHER" onUnreadChange={setTotalUnread} />
           )}
         </div>
       )}

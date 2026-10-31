@@ -92,6 +92,26 @@ public class ClassController {
                 .body(ApiResponse.success("Ghi danh học viên vào lớp thành công", enrolled));
     }
 
+    @PostMapping("/enrollments/{id}/drop")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'CENTER_ADMIN', 'ACADEMIC_STAFF')")
+    public ResponseEntity<ApiResponse<EnrollmentDto>> dropEnrollment(
+            @PathVariable Long id,
+            @RequestParam(required = false) String reason) {
+        EnrollmentDto dropped = academicService.dropEnrollment(id, reason);
+        return ResponseEntity.ok(ApiResponse.success("Hủy ghi danh học viên thành công", dropped));
+    }
+
+    @PostMapping("/enrollments/transfer")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'CENTER_ADMIN', 'ACADEMIC_STAFF')")
+    public ResponseEntity<ApiResponse<EnrollmentDto>> transferStudent(
+            @RequestParam Long studentId,
+            @RequestParam Long fromClassId,
+            @RequestParam Long toClassId,
+            @RequestParam(required = false) String reason) {
+        EnrollmentDto transferred = academicService.transferStudentClass(studentId, fromClassId, toClassId, reason);
+        return ResponseEntity.ok(ApiResponse.success("Chuyển lớp học viên thành công", transferred));
+    }
+
     @GetMapping("/{id}/sessions")
     @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'CENTER_ADMIN', 'ACADEMIC_STAFF', 'TEACHER', 'ACCOUNTANT')")
     public ResponseEntity<ApiResponse<List<ClassSessionDto>>> getClassSessions(@PathVariable Long id) {
