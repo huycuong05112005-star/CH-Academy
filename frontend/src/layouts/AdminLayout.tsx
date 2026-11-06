@@ -109,20 +109,14 @@ export const AdminLayout: React.FC = () => {
 
   const navGroups: NavGroup[] = [
     {
-      group: 'ĐIỀU HÀNH',
+      group: 'ĐIỀU HÀNH & ĐÀO TẠO',
       items: [
         { label: 'Tổng quan hệ thống', path: '/admin', icon: LayoutDashboard, end: true },
-      ]
-    },
-    {
-      group: 'ĐÀO TẠO & HỌC VỤ',
-      items: [
         { label: 'Khóa học', path: '/admin/courses', icon: BookOpen },
         { label: 'Lớp học & Lịch', path: '/admin/classes', icon: Calendar },
         { label: 'Giảng viên & Phân công', path: '/admin/teacher-assignments', icon: UserCheck },
         { label: 'Điểm danh lớp', path: '/admin/attendance', icon: UserCheck },
         { label: 'Giám sát Điểm danh', path: '/admin/attendance-monitoring', icon: CheckCircle2 },
-        { label: 'Thông báo & GV', path: '/admin/notifications', icon: Bell },
       ]
     },
     {
@@ -138,20 +132,16 @@ export const AdminLayout: React.FC = () => {
     {
       group: 'HỌC VIÊN & TUYỂN SINH',
       items: [
-        { label: 'Tuyển sinh & Khách hàng', path: '/admin/leads', icon: UserPlus },
+        { label: 'Tuyển sinh & Leads', path: '/admin/leads', icon: UserPlus },
         { label: 'Học viên & Giám hộ', path: '/admin/students', icon: Users },
+        { label: 'Thông báo & GV', path: '/admin/notifications', icon: Bell },
       ]
     },
     {
-      group: 'HỆ SINH THÁI AI & AGENTS',
-      items: [
-        { label: 'AI Agent Studio', path: '/admin/ai-studio', icon: Sparkles },
-      ]
-    },
-    {
-      group: 'TÀI CHÍNH & HỆ THỐNG',
+      group: 'HỆ THỐNG & TÀI CHÍNH',
       items: [
         { label: 'Học phí & Công nợ', path: '/admin/finance', icon: CreditCard },
+        { label: 'AI Agent Studio', path: '/admin/ai-studio', icon: Sparkles },
         { label: 'Bảo mật & Nhật ký', path: '/admin/security-audit', icon: ShieldCheck },
         { label: 'Cấu hình hệ thống', path: '/admin/settings', icon: Settings },
       ]
@@ -164,23 +154,23 @@ export const AdminLayout: React.FC = () => {
   )
 
   const renderSidebarContent = () => (
-    <div className="flex flex-col h-full bg-[#0A1120] [data-theme=glass]_&:bg-[#070D1B]/55 [data-theme=glass]_&:backdrop-blur-2xl text-white border-r border-slate-800/80 [data-theme=glass]_&:border-white/15 shadow-2xl">
+    <div className="flex flex-col h-full bg-[#0A1120] [data-theme=glass]_&:bg-[#070D1B]/55 [data-theme=glass]_&:backdrop-blur-2xl text-white border-r border-slate-800/80 [data-theme=glass]_&:border-white/15 shadow-xl">
       {/* Brand Header */}
-      <div className="h-16 px-4 flex items-center justify-between border-b border-white/10 flex-shrink-0 bg-gradient-to-r from-[#0A1120] to-[#0E1A30] [data-theme=glass]_&:bg-none [data-theme=glass]_&:bg-white/[0.04]">
-        <div className="flex items-center gap-3 overflow-hidden">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-500 to-indigo-600 text-white flex items-center justify-center flex-shrink-0 shadow-lg shadow-sky-500/25">
-            <GraduationCap size={22} className="text-white" />
+      <div className="h-14 px-3.5 flex items-center justify-between border-b border-white/10 flex-shrink-0 bg-gradient-to-r from-[#0A1120] to-[#0E1A30]">
+        <div className="flex items-center gap-2.5 overflow-hidden">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-sky-500 to-indigo-600 text-white flex items-center justify-center flex-shrink-0 shadow-sm">
+            <GraduationCap size={18} className="text-white" />
           </div>
           {(!collapsed || mobileMenuOpen) && (
             <div className="whitespace-nowrap">
-              <div className="font-black text-base tracking-tight text-white flex items-center gap-1.5">
+              <div className="font-bold text-[14px] tracking-tight text-white flex items-center gap-1.5">
                 <span>{settings.shortName}</span>
-                <span className="px-1.5 py-0.2 rounded-md text-[9px] font-black uppercase tracking-wider bg-sky-500/20 text-[#38BDF8] border border-sky-500/30">
-                  SaaS
+                <span className="px-1.5 py-0.5 rounded text-[9.5px] font-semibold uppercase tracking-wider bg-sky-500/15 text-[#38BDF8] border border-sky-500/25">
+                  Admin
                 </span>
               </div>
-              <div className="text-[10px] text-slate-400 font-semibold tracking-wider uppercase">
-                Cổng Quản trị viên
+              <div className="text-[10px] text-slate-400 font-medium">
+                Quản trị đào tạo
               </div>
             </div>
           )}
@@ -191,19 +181,18 @@ export const AdminLayout: React.FC = () => {
             className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 lg:hidden"
             aria-label="Đóng menu"
           >
-            <X size={20} />
+            <X size={18} />
           </button>
         )}
       </div>
 
       {/* Nav Menu */}
-      <nav className="flex-1 px-3 py-4 overflow-y-auto space-y-5">
+      <nav className="flex-1 px-2.5 py-3 overflow-y-auto space-y-3">
         {navGroups.map((group, gIdx) => (
           <div key={gIdx} className="space-y-1">
             {(!collapsed || mobileMenuOpen) && (
-              <div className="text-[10px] font-extrabold text-slate-400 tracking-wider uppercase px-3 py-1 flex items-center justify-between">
-                <span>{group.group}</span>
-                <span className="text-[9px] font-mono text-slate-600 font-semibold">{group.items.length}</span>
+              <div className="text-[10.5px] font-semibold text-slate-400/90 tracking-wider uppercase px-2.5 py-1">
+                {group.group}
               </div>
             )}
             <div className="space-y-0.5">
@@ -215,17 +204,17 @@ export const AdminLayout: React.FC = () => {
                     to={item.path}
                     end={item.end}
                     className={({ isActive }) => `
-                      flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all group
-                      ${collapsed && !mobileMenuOpen ? 'justify-center px-0' : 'justify-start'}
+                      flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[12.5px] font-medium transition-all group
+                      ${collapsed && !mobileMenuOpen ? 'justify-center px-0 h-9' : 'justify-start h-9'}
                       ${
                         isActive
-                          ? 'nav-pill-active'
-                          : 'text-slate-400 hover:text-white hover:bg-white/5 border-l-3 border-transparent'
+                          ? 'nav-pill-active font-semibold'
+                          : 'text-slate-400 hover:text-white hover:bg-white/5 border-l-2 border-transparent'
                       }
                     `}
                     title={collapsed && !mobileMenuOpen ? item.label : undefined}
                   >
-                    <Icon size={18} className="flex-shrink-0 transition-transform group-hover:scale-110" />
+                    <Icon size={16} className="flex-shrink-0 transition-transform group-hover:scale-105" />
                     {(!collapsed || mobileMenuOpen) && (
                       <span className="truncate">{item.label}</span>
                     )}
@@ -238,22 +227,18 @@ export const AdminLayout: React.FC = () => {
       </nav>
 
       {/* Sidebar Footer */}
-      <div className="p-3 border-t border-white/10 flex items-center justify-between bg-black/40 [data-theme=glass]_&:bg-black/20 flex-shrink-0">
+      <div className="h-12 px-3 border-t border-white/10 flex items-center justify-between bg-black/30 flex-shrink-0">
         {(!collapsed || mobileMenuOpen) && (
-          <div className="px-2">
-            <div className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-              <span>CH Academy v2.4</span>
-            </div>
-            <div className="text-[10px] text-slate-400 font-medium">Nền tảng Quản lý Đào tạo</div>
+          <div className="px-1 text-[11px] text-slate-400 font-medium">
+            CH Academy v2.4
           </div>
         )}
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className="hidden lg:flex p-2 rounded-lg bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white transition-colors ml-auto"
+          className="hidden lg:flex p-1.5 rounded-md bg-white/5 hover:bg-white/15 text-slate-300 hover:text-white transition-colors ml-auto"
           aria-label={collapsed ? 'Mở rộng thanh điều hướng' : 'Thu gọn thanh điều hướng'}
         >
-          {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
+          {collapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
         </button>
       </div>
     </div>
@@ -268,8 +253,8 @@ export const AdminLayout: React.FC = () => {
       <aside
         className={`hidden lg:block sticky top-0 h-screen z-40 transition-all duration-200 flex-shrink-0 ${
           collapsed
-            ? (effectiveUsageMode === 'desktop' ? 'w-16' : 'w-20')
-            : (effectiveUsageMode === 'desktop' ? 'w-56' : 'w-64')
+            ? 'w-16'
+            : 'w-[240px]'
         }`}
       >
         {renderSidebarContent()}
@@ -285,7 +270,7 @@ export const AdminLayout: React.FC = () => {
 
       {/* Mobile Sidebar Drawer */}
       <aside
-        className={`fixed top-0 bottom-0 left-0 w-72 z-50 lg:hidden transform transition-transform duration-300 ease-in-out shadow-2xl ${
+        className={`fixed top-0 bottom-0 left-0 w-[240px] z-50 lg:hidden transform transition-transform duration-300 ease-in-out shadow-2xl ${
           mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
@@ -304,8 +289,8 @@ export const AdminLayout: React.FC = () => {
 
         {/* Top Header */}
         <header className={`${
-          effectiveUsageMode === 'desktop' ? 'h-12 px-3 lg:px-5' : 'h-16 px-4 lg:px-8'
-        } sticky top-0 z-20 bg-white/90 dark:bg-[#0D1524]/90 [data-theme=glass]_&:bg-[#070D1B]/45 [data-theme=glass]_&:backdrop-blur-2xl backdrop-blur-md border-b border-slate-200/80 dark:border-[#1E2E44] [data-theme=glass]_&:border-white/15 flex items-center justify-between shadow-xs transition-colors duration-200`}>
+          effectiveUsageMode === 'desktop' ? 'h-12 px-3 lg:px-5' : 'h-14 px-4 lg:px-6'
+        } sticky top-0 z-20 bg-white/95 dark:bg-[#0D1524]/95 [data-theme=glass]_&:bg-[#070D1B]/45 [data-theme=glass]_&:backdrop-blur-2xl backdrop-blur-md border-b border-slate-200/80 dark:border-[#1E2E44] [data-theme=glass]_&:border-white/15 flex items-center justify-between shadow-xs transition-colors duration-200`}>
           {/* Left: Mobile Toggle & Breadcrumb */}
           <div className="flex items-center gap-3">
             <button

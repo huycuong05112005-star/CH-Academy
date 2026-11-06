@@ -58,3 +58,4 @@ VS Code Eclipse Language Server failed to generate builder methods for newly add
 In [`DashboardStatsDto.java`](file:///e:/CA_NHAN_CV/CH_Academy/backend/src/main/java/vn/chacademy/dashboard/dto/DashboardStatsDto.java), implemented an explicit, static `DashboardStatsDtoBuilder` class covering all 18 metric and list fields.
 
 **Result:** Both `javac` and Eclipse JDT compile with 0 errors.
+

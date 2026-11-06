@@ -80,3 +80,4 @@ sequenceDiagram
 | `PSQLException: Connection refused` | PostgreSQL 5432 not listening | Run `docker compose up -d postgres` via [`start-database.bat`](file:///e:/CA_NHAN_CV/CH_Academy/start-database.bat). |
 | `PortInUseException: 8088` | Prior Java instance still holding port | Run `Stop-Process -Name java -Force` in PowerShell. |
 | `NoPluginFoundForPrefixException` | Typed `spring boot:run` with space | Use `spring-boot:run` or run `start-backend.bat`. |
+

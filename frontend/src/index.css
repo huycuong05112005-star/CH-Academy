@@ -54,8 +54,23 @@
 
   --focus-ring: rgba(37, 99, 235, 0.35);
 
-  /* Typography: Inter primary with Vietnamese support and fallback */
-  --font-family: 'Inter', 'Be Vietnam Pro', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  /* Typography Tokens: Inter primary with Vietnamese support and fallback */
+  --font-family-base: 'Inter', 'Be Vietnam Pro', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-family: var(--font-family-base);
+
+  --font-size-xs: 11px;
+  --font-size-sm: 12px;
+  --font-size-base: 13px;
+  --font-size-md: 14px;
+  --font-size-lg: 16px;
+  --font-size-xl: 18px;
+  --font-size-2xl: 22px;
+  --font-size-3xl: 25px;
+
+  --font-regular: 400;
+  --font-medium: 500;
+  --font-semibold: 600;
+  --font-bold: 700;
 
   /* Spacing Scale */
   --space-1: 4px;
@@ -64,7 +79,6 @@
   --space-4: 16px;
   --space-5: 20px;
   --space-6: 24px;
-
   --space-8: 32px;
   --space-10: 40px;
 
@@ -72,7 +86,7 @@
   --radius-sm: 6px;
   --radius-md: 8px;
   --radius-lg: 12px;
-  --radius-xl: 16px;
+  --radius-xl: 14px;
   --radius-full: 9999px;
 
   /* Shadows */
@@ -852,57 +866,74 @@ td {
 }
 
 /* ===================================================
-   Standardized Typography Hierarchy
+   Enterprise Standardized Typography Scale (Inter Primary)
+   Strict compliance with CH Academy Design System
    =================================================== */
 .typo-page-title {
-  font-size: clamp(1.5rem, 2.5vw, 1.875rem); /* 24px - 30px */
-  font-weight: 800;
-  line-height: 1.25;
-  letter-spacing: -0.025em;
+  font-size: 1.375rem; /* 22px (21px - 24px) */
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.3;
 }
 
 .typo-section-title {
-  font-size: clamp(1.125rem, 1.8vw, 1.25rem); /* 18px - 20px */
-  font-weight: 700;
-  line-height: 1.35;
-}
-
-.typo-card-title {
-  font-size: 1rem; /* 16px */
-  font-weight: 700;
+  font-size: 0.96875rem; /* 15.5px (15px - 16px) */
+  font-weight: 600;
+  letter-spacing: -0.01em;
   line-height: 1.4;
 }
 
-.typo-stat {
-  font-size: clamp(1.5rem, 2.8vw, 2rem); /* 24px - 32px */
-  font-weight: 900;
-  line-height: 1.1;
-  letter-spacing: -0.02em;
-}
-
-.typo-body {
-  font-size: 0.9375rem; /* 15px */
-  font-weight: 400;
-  line-height: 1.6;
-}
-
-.typo-menu {
-  font-size: 0.875rem; /* 14px */
+.typo-card-title {
+  font-size: 0.84375rem; /* 13.5px (13px - 14px) */
   font-weight: 600;
   line-height: 1.4;
 }
 
-.typo-label {
-  font-size: 0.8125rem; /* 13px */
+.typo-kpi-value {
+  font-size: 1.5625rem; /* 25px (23px - 27px) */
   font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+  font-feature-settings: 'tnum' 1;
 }
 
-.typo-secondary {
-  font-size: 0.75rem; /* 12px */
+.typo-body {
+  font-size: 0.84375rem; /* 13.5px (13px - 14px) */
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+.typo-table {
+  font-size: 0.78125rem; /* 12.5px (12px - 13px) */
+  font-weight: 400;
+  line-height: 1.4;
+}
+
+.typo-nav-item {
+  font-size: 0.78125rem; /* 12.5px (12px - 13px) */
   font-weight: 500;
   line-height: 1.4;
+}
+
+.typo-label-secondary {
+  font-size: 0.71875rem; /* 11.5px (11px - 12px) */
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  line-height: 1.3;
+}
+
+.typo-btn {
+  font-size: 0.78125rem; /* 12.5px (12px - 13px) */
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+}
+
+.typo-tooltip {
+  font-size: 0.71875rem; /* 11.5px (11px - 12px) */
+  font-weight: 500;
+  line-height: 1.3;
 }
 
 /* ===================================================
@@ -969,64 +1000,6 @@ html[data-mode="desktop"].electron-app[data-theme="glass"] body {
   -webkit-app-region: no-drag;
 }
 
-/* ===================================================
-   Enterprise Standardized Typography Scale (Inter Primary)
-   =================================================== */
-.typo-page-title {
-  font-size: clamp(1.375rem, 2vw, 1.5625rem); /* 22px - 25px */
-  font-weight: 800;
-  letter-spacing: -0.025em;
-  line-height: 1.25;
-}
-
-.typo-section-title {
-  font-size: clamp(0.9375rem, 1.2vw, 1.0625rem); /* 15px - 17px */
-  font-weight: 700;
-  letter-spacing: -0.015em;
-  line-height: 1.35;
-}
-
-.typo-kpi-value {
-  font-size: clamp(1.4375rem, 2.2vw, 1.8125rem); /* 23px - 29px */
-  font-weight: 800;
-  letter-spacing: -0.03em;
-  line-height: 1.15;
-  font-feature-settings: 'tnum' 1, 'cv02' 1, 'cv03' 1;
-}
-
-.typo-body {
-  font-size: 0.84375rem; /* ~13.5px */
-  font-weight: 400;
-  line-height: 1.55;
-}
-
-.typo-table {
-  font-size: 0.78125rem; /* 12.5px */
-  font-weight: 500;
-  line-height: 1.45;
-}
-
-.typo-label-secondary {
-  font-size: 0.71875rem; /* 11.5px */
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  line-height: 1.3;
-}
-
-.typo-nav-item {
-  font-size: 0.84375rem; /* 13.5px */
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  line-height: 1.4;
-}
-
-.typo-btn {
-  font-size: 0.8125rem; /* 13px */
-  font-weight: 700;
-  letter-spacing: -0.01em;
-  line-height: 1.3;
-}
 
 /* ===================================================
    3D Animated Border Glow (Enterprise SaaS Accent)

@@ -86,3 +86,4 @@ To eliminate manual CLI typing errors, the following automation scripts were cre
 - [`start-database.bat`](file:///e:/CA_NHAN_CV/CH_Academy/start-database.bat): Runs `docker compose up -d postgres`.
 - [`start-frontend.bat`](file:///e:/CA_NHAN_CV/CH_Academy/start-frontend.bat): Runs `npm run dev`.
 - [`start-all.bat`](file:///e:/CA_NHAN_CV/CH_Academy/start-all.bat): Launches all three services in synchronized, distinct console windows.
+

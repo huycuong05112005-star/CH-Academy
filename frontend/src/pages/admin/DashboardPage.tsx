@@ -27,13 +27,13 @@ import {
   Search,
   School,
   GraduationCap,
-  Percent
+  Percent,
+  LayoutDashboard
 } from 'lucide-react'
 import { StatCard } from '../../components/ui/StatCard'
 import { Badge } from '../../components/ui/Badge'
 import { GlowCard } from '../../components/ui/GlowCard'
 import { exportToCsv } from '../../utils/exportCsv'
-import { CyberOrb3D } from '../../components/3d/CyberOrb3D'
 import {
   TrendAnalyticsChart,
   DonutBreakdownChart,
@@ -256,21 +256,20 @@ export const DashboardPage: React.FC = () => {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
-      {/* 1. Header Cockpit & Academic Year Controller (Nexora Topbar + CH Academy Brand) */}
-      <div className="relative overflow-hidden bg-gradient-to-r from-white via-slate-50 to-sky-50/40 dark:from-[#0E1729] dark:via-[#131F35] dark:to-[#0F1B2E] [data-theme=glass]_&:bg-white/[0.08] [data-theme=glass]_&:bg-none [data-theme=glass]_&:backdrop-blur-2xl [data-theme=glass]_&:border-white/20 p-5 sm:p-7 rounded-3xl border border-slate-200/85 dark:border-[#20314C] shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-        <div className="flex items-center gap-5 relative z-10">
-          <div className="hidden sm:block shrink-0">
-            <CyberOrb3D size={68} />
+      {/* 1. Header Cockpit & Academic Year Controller */}
+      <div className="relative overflow-hidden bg-gradient-to-r from-white via-slate-50 to-sky-50/40 dark:from-[#0E1729] dark:via-[#131F35] dark:to-[#0F1B2E] [data-theme=glass]_&:bg-white/[0.08] [data-theme=glass]_&:bg-none [data-theme=glass]_&:backdrop-blur-2xl [data-theme=glass]_&:border-white/20 p-5 sm:p-6 rounded-2xl border border-slate-200/85 dark:border-[#20314C] shadow-xs flex flex-col lg:flex-row lg:items-center justify-between gap-5">
+        <div className="flex items-center gap-4 relative z-10">
+          <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[#0F243E] to-[#0284C7] flex items-center justify-center text-white shadow-xs shrink-0">
+            <LayoutDashboard size={22} />
           </div>
           <div>
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-sky-50 dark:bg-sky-950/60 border border-sky-200/60 dark:border-sky-800/60 text-[11px] font-bold text-[#0284C7] dark:text-[#38BDF8] mb-1.5">
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>Trung tâm Điều hành Đào tạo SaaS</span>
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-sky-50 dark:bg-sky-950/60 border border-sky-200/60 dark:border-sky-800/60 text-[11px] font-semibold text-[#0284C7] dark:text-[#38BDF8] mb-1">
+              <span>Trung tâm Điều hành Đào tạo</span>
             </div>
             <h1 className="typo-page-title text-[#0F172A] dark:text-[#E8EEF7] [data-theme=glass]_&:text-white [data-theme=glass]_&:drop-shadow-[0_2px_4px_rgba(0,0,0,0.35)]">
               Xin chào, {user?.fullName || 'Quản trị viên'}!
             </h1>
-            <p className="typo-body text-slate-600 dark:text-[#A6B4C8] [data-theme=glass]_&:text-slate-200 mt-1 max-w-2xl">
+            <p className="typo-body text-slate-500 dark:text-[#A6B4C8] [data-theme=glass]_&:text-slate-200 mt-0.5 max-w-2xl">
               Hệ thống quản lý học vụ, giảng viên, tài chính và tuyển sinh của {settings.shortName}.
             </p>
           </div>

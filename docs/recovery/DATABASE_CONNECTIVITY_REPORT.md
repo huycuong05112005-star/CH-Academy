@@ -96,3 +96,4 @@ PSQLException: Connection to localhost:5432 refused.
    docker ps
    ```
    (Should show `ch_academy_postgres` with status `Up (healthy)` on port `5432`).
+

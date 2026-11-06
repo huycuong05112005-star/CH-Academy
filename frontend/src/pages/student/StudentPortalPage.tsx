@@ -49,10 +49,8 @@ import {
   BarChart2,
   LayoutDashboard
 } from 'lucide-react'
-import { AmbientGlow } from '../../components/ui/AmbientGlow'
 import { Tilt3DCard } from '../../components/3d/Tilt3DCard'
 import { GlowCard } from '../../components/ui/GlowCard'
-import { CyberOrb3D } from '../../components/3d/CyberOrb3D'
 import { selectClassChat } from '../../utils/chatSync'
 
 export const StudentPortalPage: React.FC = () => {
@@ -448,195 +446,110 @@ export const StudentPortalPage: React.FC = () => {
 
       {/* Main Container */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 space-y-6">
-        {/* Student Welcome Banner with 3D CyberOrb */}
-        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#142B4A] via-[#1D4168] to-[#2B5D95] text-white p-6 sm:p-8 shadow-xl">
-          <AmbientGlow variant="cyan" className="-top-12 -right-12 w-72 h-72" />
-          <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-            <div className="space-y-2">
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md text-xs font-semibold text-cyan-200">
-                <Sparkles className="w-3.5 h-3.5" />
-                <span>Chào mừng bạn quay trở lại học tập!</span>
-              </div>
-              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
-                {student.fullName}
+        {/* Standardized SaaS Student Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-1">
+          <div>
+            <div className="flex items-center gap-2.5">
+              <h1 className="typo-page-title text-slate-900 dark:text-white">
+                Không gian Học viên
               </h1>
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-200">
-                <span>Mã học viên: <strong className="font-mono text-white">{student.studentCode}</strong></span>
-                <span>•</span>
-                {student.phone && (
-                  <span className="flex items-center gap-1">
-                    <Phone className="w-3.5 h-3.5 text-slate-300" />
-                    {student.phone}
-                  </span>
-                )}
-                {student.email && (
-                  <span className="flex items-center gap-1">
-                    <Mail className="w-3.5 h-3.5 text-slate-300" />
-                    {student.email}
-                  </span>
-                )}
-              </div>
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-sky-50 dark:bg-sky-950/60 text-sky-700 dark:text-sky-300 border border-sky-200/60 dark:border-sky-800/60">
+                {student.studentCode}
+              </span>
             </div>
+            <p className="typo-body text-slate-500 dark:text-slate-400 mt-0.5">
+              Học viên: <strong className="font-semibold text-slate-700 dark:text-slate-200">{student.fullName}</strong> • @{user?.username || student.username}
+            </p>
+          </div>
 
-            <div className="flex items-center gap-6">
-              <div className="hidden lg:block shrink-0">
-                <CyberOrb3D size={88} glowColor="#38BDF8" />
-              </div>
-              <div className="flex sm:flex-col items-center sm:items-end justify-between border-t sm:border-t-0 sm:border-l border-white/15 pt-4 sm:pt-0 sm:pl-6 gap-2">
-                <div className="text-left sm:text-right">
-                  <div className="text-[11px] uppercase tracking-wider text-slate-300">
-                    Chuyên cần
-                  </div>
-                  <div className="text-lg font-black text-emerald-300 flex items-center gap-1 mt-0.5">
-                    <ShieldCheck className="w-5 h-5" />
-                    <span>{attendanceRate}%</span>
-                  </div>
-                  <div className="text-[10px] text-slate-300">
-                    {presentSessions} / {totalSessions} buổi tham gia
-                  </div>
-                </div>
-                <div className="text-left sm:text-right">
-                  <div className="text-[11px] uppercase tracking-wider text-slate-300">
-                    Tài khoản đăng nhập
-                  </div>
-                  <div className="text-xs font-mono text-cyan-300 font-bold">
-                    @{user?.username || student.username}
-                  </div>
-                </div>
-              </div>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white dark:bg-[#151F31] border border-slate-200/80 dark:border-[#2A3A50] text-[12px] text-slate-600 dark:text-slate-300 shadow-xs">
+              <span className="text-slate-400">Chuyên cần:</span>
+              <strong className="font-semibold text-emerald-600 dark:text-emerald-400">{attendanceRate}%</strong>
+              <span className="text-[11px] text-slate-400">({presentSessions}/{totalSessions})</span>
             </div>
+            <button
+              onClick={() => setActiveTab('schedule')}
+              className="typo-btn inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#142B4A] dark:bg-[#38BDF8] text-white dark:text-[#0B1220] transition-colors shadow-xs"
+            >
+              <Clock className="w-3.5 h-3.5" />
+              <span>Lịch học ({schedules.length})</span>
+            </button>
           </div>
         </div>
 
-        {/* 3D Quick Metrics Overview */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <Tilt3DCard maxTilt={6}>
-            <div className="p-4 rounded-2xl bg-white/80 dark:bg-[#151F31]/80 backdrop-blur-sm border border-slate-200/80 dark:border-[#2A3A50] shadow-sm flex items-center gap-3 h-full">
-              <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/50 dark:border-emerald-800/40 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0">
-                <ShieldCheck className="w-5 h-5" />
-              </div>
-              <div>
-                <div className="text-[11px] font-semibold text-slate-500 dark:text-[#A6B4C8]">Chuyên cần</div>
-                <div className="text-xl font-black text-slate-900 dark:text-white">{attendanceRate}%</div>
-                <div className="text-[10px] text-slate-400">{presentSessions}/{totalSessions} buổi học</div>
-              </div>
-            </div>
-          </Tilt3DCard>
-
-          <Tilt3DCard maxTilt={6}>
-            <div className="p-4 rounded-2xl bg-white/80 dark:bg-[#151F31]/80 backdrop-blur-sm border border-slate-200/80 dark:border-[#2A3A50] shadow-sm flex items-center gap-3 h-full">
-              <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200/50 dark:border-blue-800/40 flex items-center justify-center text-blue-600 dark:text-blue-400 shrink-0">
-                <BookOpen className="w-5 h-5" />
-              </div>
-              <div>
-                <div className="text-[11px] font-semibold text-slate-500 dark:text-[#A6B4C8]">Khóa học</div>
-                <div className="text-xl font-black text-slate-900 dark:text-white">{enrollments.length} lớp</div>
-                <div className="text-[10px] text-slate-400">Đang theo học</div>
-              </div>
-            </div>
-          </Tilt3DCard>
-
-          <Tilt3DCard maxTilt={6}>
-            <div className="p-4 rounded-2xl bg-white/80 dark:bg-[#151F31]/80 backdrop-blur-sm border border-slate-200/80 dark:border-[#2A3A50] shadow-sm flex items-center gap-3 h-full">
-              <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200/50 dark:border-indigo-800/40 flex items-center justify-center text-indigo-600 dark:text-indigo-400 shrink-0">
-                <FileQuestion className="w-5 h-5" />
-              </div>
-              <div>
-                <div className="text-[11px] font-semibold text-slate-500 dark:text-[#A6B4C8]">Bài kiểm tra</div>
-                <div className="text-xl font-black text-slate-900 dark:text-white">{assignedExams.length} đề</div>
-                <div className="text-[10px] text-slate-400">Trong chương trình</div>
-              </div>
-            </div>
-          </Tilt3DCard>
-
-          <Tilt3DCard maxTilt={6}>
-            <div className="p-4 rounded-2xl bg-white/80 dark:bg-[#151F31]/80 backdrop-blur-sm border border-slate-200/80 dark:border-[#2A3A50] shadow-sm flex items-center gap-3 h-full">
-              <div className="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200/50 dark:border-amber-800/40 flex items-center justify-center text-amber-600 dark:text-amber-400 shrink-0">
-                <CreditCard className="w-5 h-5" />
-              </div>
-              <div>
-                <div className="text-[11px] font-semibold text-slate-500 dark:text-[#A6B4C8]">Học phí</div>
-                <div className={`text-sm font-black ${remainingTuition > 0 ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
-                  {remainingTuition > 0 ? formatVND(remainingTuition) : 'Đã hoàn tất'}
-                </div>
-                <div className="text-[10px] text-slate-400">{remainingTuition > 0 ? 'Cần hoàn tất' : '100% thanh toán'}</div>
-              </div>
-            </div>
-          </Tilt3DCard>
-        </div>
-
-        {/* Navigation Tabs */}
-        <div className="bg-white/80 dark:bg-[#151F31]/80 backdrop-blur-sm p-1.5 rounded-2xl border border-slate-200/80 dark:border-[#2A3A50] shadow-xs">
-          <div className="flex items-center gap-1.5 overflow-x-auto scroll-smooth py-0.5 px-1">
+        {/* Navigation Tabs - Compact Standardized */}
+        <div className="bg-white/90 dark:bg-[#151F31]/90 backdrop-blur-sm p-1 rounded-xl border border-slate-200/80 dark:border-[#2A3A50] shadow-xs">
+          <div className="flex items-center gap-1 overflow-x-auto scroll-smooth py-0.5 px-0.5">
             <button
               onClick={() => setActiveTab('dashboard')}
-              className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all flex items-center gap-2 shrink-0 ${
+              className={`px-3 py-1.5 rounded-lg text-[12.5px] font-medium transition-all flex items-center gap-2 shrink-0 ${
                 activeTab === 'dashboard'
-                  ? 'bg-[#142B4A] dark:bg-[#38BDF8] text-white dark:text-[#0B1220] shadow-sm font-bold'
+                  ? 'bg-[#142B4A] dark:bg-[#38BDF8] text-white dark:text-[#0B1220] shadow-xs font-semibold'
                   : 'text-slate-600 dark:text-[#A6B4C8] hover:bg-slate-100 dark:hover:bg-[#1C293D]'
               }`}
             >
-              <LayoutDashboard className="w-4 h-4 shrink-0" />
+              <LayoutDashboard className="w-3.5 h-3.5 shrink-0" />
               <span>Tổng quan</span>
             </button>
 
             <button
               onClick={() => setActiveTab('classes')}
-              className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all flex items-center gap-2 shrink-0 ${
+              className={`px-3 py-1.5 rounded-lg text-[12.5px] font-medium transition-all flex items-center gap-2 shrink-0 ${
                 activeTab === 'classes'
-                  ? 'bg-[#142B4A] dark:bg-[#38BDF8] text-white dark:text-[#0B1220] shadow-sm font-bold'
+                  ? 'bg-[#142B4A] dark:bg-[#38BDF8] text-white dark:text-[#0B1220] shadow-xs font-semibold'
                   : 'text-slate-600 dark:text-[#A6B4C8] hover:bg-slate-100 dark:hover:bg-[#1C293D]'
               }`}
             >
-              <BookOpen className="w-4 h-4 shrink-0" />
+              <BookOpen className="w-3.5 h-3.5 shrink-0" />
               <span>Khóa học ({enrollments.length})</span>
             </button>
 
             <button
               onClick={() => setActiveTab('registration')}
-              className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all flex items-center gap-2 shrink-0 ${
+              className={`px-3 py-1.5 rounded-lg text-[12.5px] font-medium transition-all flex items-center gap-2 shrink-0 ${
                 activeTab === 'registration'
-                  ? 'bg-[#142B4A] dark:bg-[#38BDF8] text-white dark:text-[#0B1220] shadow-sm font-bold'
+                  ? 'bg-[#142B4A] dark:bg-[#38BDF8] text-white dark:text-[#0B1220] shadow-xs font-semibold'
                   : 'text-slate-600 dark:text-[#A6B4C8] hover:bg-slate-100 dark:hover:bg-[#1C293D]'
               }`}
             >
-              <BookOpen className="w-4 h-4 shrink-0" />
+              <BookOpen className="w-3.5 h-3.5 shrink-0" />
               <span>Đăng ký Khóa học Mới</span>
             </button>
 
             <button
               onClick={() => setActiveTab('history')}
-              className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all flex items-center gap-2 shrink-0 ${
+              className={`px-3 py-1.5 rounded-lg text-[12.5px] font-medium transition-all flex items-center gap-2 shrink-0 ${
                 activeTab === 'history'
-                  ? 'bg-[#142B4A] dark:bg-[#38BDF8] text-white dark:text-[#0B1220] shadow-sm font-bold'
+                  ? 'bg-[#142B4A] dark:bg-[#38BDF8] text-white dark:text-[#0B1220] shadow-xs font-semibold'
                   : 'text-slate-600 dark:text-[#A6B4C8] hover:bg-slate-100 dark:hover:bg-[#1C293D]'
               }`}
             >
-              <Calendar className="w-4 h-4 shrink-0" />
+              <Calendar className="w-3.5 h-3.5 shrink-0" />
               <span>Lịch sử Đào tạo</span>
             </button>
 
             <button
               onClick={() => setActiveTab('schedule')}
-              className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all flex items-center gap-2 shrink-0 ${
+              className={`px-3 py-1.5 rounded-lg text-[12.5px] font-medium transition-all flex items-center gap-2 shrink-0 ${
                 activeTab === 'schedule'
-                  ? 'bg-[#142B4A] dark:bg-[#38BDF8] text-white dark:text-[#0B1220] shadow-sm font-bold'
+                  ? 'bg-[#142B4A] dark:bg-[#38BDF8] text-white dark:text-[#0B1220] shadow-xs font-semibold'
                   : 'text-slate-600 dark:text-[#A6B4C8] hover:bg-slate-100 dark:hover:bg-[#1C293D]'
               }`}
             >
-              <Clock className="w-4 h-4 shrink-0" />
+              <Clock className="w-3.5 h-3.5 shrink-0" />
               <span>Lịch học ({schedules.length})</span>
             </button>
 
             <button
               onClick={() => setActiveTab('attendance')}
-              className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all flex items-center gap-2 shrink-0 ${
+              className={`px-3 py-1.5 rounded-lg text-[12.5px] font-medium transition-all flex items-center gap-2 shrink-0 ${
                 activeTab === 'attendance'
-                  ? 'bg-[#142B4A] dark:bg-[#38BDF8] text-white dark:text-[#0B1220] shadow-sm font-bold'
+                  ? 'bg-[#142B4A] dark:bg-[#38BDF8] text-white dark:text-[#0B1220] shadow-xs font-semibold'
                   : 'text-slate-600 dark:text-[#A6B4C8] hover:bg-slate-100 dark:hover:bg-[#1C293D]'
               }`}
             >
-              <UserCheck className="w-4 h-4 shrink-0" />
+              <UserCheck className="w-3.5 h-3.5 shrink-0" />
               <span>Chuyên cần ({attendanceRate}%)</span>
             </button>
 
@@ -645,40 +558,40 @@ export const StudentPortalPage: React.FC = () => {
                 setActiveTab('exams')
                 loadAssessmentData()
               }}
-              className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all flex items-center gap-2 shrink-0 ${
+              className={`px-3 py-1.5 rounded-lg text-[12.5px] font-medium transition-all flex items-center gap-2 shrink-0 ${
                 activeTab === 'exams'
-                  ? 'bg-[#142B4A] dark:bg-[#38BDF8] text-white dark:text-[#0B1220] shadow-sm font-bold'
+                  ? 'bg-[#142B4A] dark:bg-[#38BDF8] text-white dark:text-[#0B1220] shadow-xs font-semibold'
                   : 'text-slate-600 dark:text-[#A6B4C8] hover:bg-slate-100 dark:hover:bg-[#1C293D]'
               }`}
             >
-              <FileQuestion className="w-4 h-4 shrink-0" />
+              <FileQuestion className="w-3.5 h-3.5 shrink-0" />
               <span>Bài kiểm tra {assignedExams.length > 0 && `(${assignedExams.length})`}</span>
             </button>
 
             <button
               onClick={() => setActiveTab('finance')}
-              className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all flex items-center gap-2 shrink-0 ${
+              className={`px-3 py-1.5 rounded-lg text-[12.5px] font-medium transition-all flex items-center gap-2 shrink-0 ${
                 activeTab === 'finance'
-                  ? 'bg-[#142B4A] dark:bg-[#38BDF8] text-white dark:text-[#0B1220] shadow-sm font-bold'
+                  ? 'bg-[#142B4A] dark:bg-[#38BDF8] text-white dark:text-[#0B1220] shadow-xs font-semibold'
                   : 'text-slate-600 dark:text-[#A6B4C8] hover:bg-slate-100 dark:hover:bg-[#1C293D]'
               }`}
             >
-              <CreditCard className="w-4 h-4 shrink-0" />
+              <CreditCard className="w-3.5 h-3.5 shrink-0" />
               <span>Học phí</span>
             </button>
 
             <button
               onClick={() => setActiveTab('notifications')}
-              className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all flex items-center gap-2 shrink-0 ${
+              className={`px-3 py-1.5 rounded-lg text-[12.5px] font-medium transition-all flex items-center gap-2 shrink-0 ${
                 activeTab === 'notifications'
-                  ? 'bg-[#142B4A] dark:bg-[#38BDF8] text-white dark:text-[#0B1220] shadow-sm font-bold'
+                  ? 'bg-[#142B4A] dark:bg-[#38BDF8] text-white dark:text-[#0B1220] shadow-xs font-semibold'
                   : 'text-slate-600 dark:text-[#A6B4C8] hover:bg-slate-100 dark:hover:bg-[#1C293D]'
               }`}
             >
-              <Bell className="w-4 h-4 shrink-0" />
+              <Bell className="w-3.5 h-3.5 shrink-0" />
               <span>Thông báo</span>
               {unreadNotificationCount > 0 ? (
-                <span className="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-rose-500 text-white shadow-2xs animate-pulse">
+                <span className="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-rose-500 text-white shadow-2xs">
                   {unreadNotificationCount > 99 ? '99+' : unreadNotificationCount}
                 </span>
               ) : (
@@ -688,13 +601,13 @@ export const StudentPortalPage: React.FC = () => {
 
             <button
               onClick={() => setActiveTab('profile')}
-              className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all flex items-center gap-2 shrink-0 ${
+              className={`px-3 py-1.5 rounded-lg text-[12.5px] font-medium transition-all flex items-center gap-2 shrink-0 ${
                 activeTab === 'profile'
-                  ? 'bg-[#142B4A] dark:bg-[#38BDF8] text-white dark:text-[#0B1220] shadow-sm font-bold'
+                  ? 'bg-[#142B4A] dark:bg-[#38BDF8] text-white dark:text-[#0B1220] shadow-xs font-semibold'
                   : 'text-slate-600 dark:text-[#A6B4C8] hover:bg-slate-100 dark:hover:bg-[#1C293D]'
               }`}
             >
-              <User className="w-4 h-4 shrink-0" />
+              <User className="w-3.5 h-3.5 shrink-0" />
               <span>Hồ sơ & Đổi MK</span>
             </button>
           </div>

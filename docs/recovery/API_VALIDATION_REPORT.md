@@ -61,3 +61,4 @@ PostgreSQL Database (Tables, Foreign Keys, Indexes, Flyway V1-V30)
 - **Tenant & Object Isolation:** Endpoints serving teacher classes (`/api/v1/teacher-portal/*`) verify `teacher.userId == SecurityContext.userId`.
 - **Student Data Privacy:** Students cannot query exam grades, schedules, or chat channels of classes they are not actively enrolled in (`403 Forbidden` response).
 - **Academic Year Filtering:** The `academicYear` parameter is validated against registered academic year entities.
+

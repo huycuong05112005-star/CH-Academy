@@ -45,9 +45,6 @@ import {
   Lock,
   ChevronRight
 } from 'lucide-react'
-import { AmbientGlow } from '../../components/ui/AmbientGlow'
-import { Tilt3DCard } from '../../components/3d/Tilt3DCard'
-import { CyberOrb3D } from '../../components/3d/CyberOrb3D'
 import { selectClassChat } from '../../utils/chatSync'
 import { LayoutDashboard } from 'lucide-react'
 import { TeacherDashboardTab } from './components/TeacherDashboardTab'
@@ -740,223 +737,148 @@ export const TeacherPortalPage: React.FC = () => {
 
       {/* Main Container */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 space-y-6">
-        {/* Teacher Welcome Banner */}
-        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#0F243E] via-indigo-900 to-[#173557] text-white p-6 sm:p-8 shadow-xl card-depth-3d">
-          <AmbientGlow className="-top-12 -left-12 w-64 h-64" variant="cyan" />
-          <AmbientGlow className="-bottom-16 -right-16 w-64 h-64" variant="primary" />
-          <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-            <div className="flex items-center gap-5">
-              <div className="hidden md:block shrink-0">
-                <CyberOrb3D size={72} />
-              </div>
-              <div className="space-y-2">
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md text-xs font-semibold text-sky-200">
-                  <Sparkles className="w-3.5 h-3.5 text-sky-400" />
-                  <span>Không gian sư phạm chuyên nghiệp</span>
-                </div>
-                <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
-                  Thầy/Cô {profile.fullName}
-                </h1>
-                <p className="text-xs text-sky-200 font-medium">
-                  {profile.specialization || 'Giảng viên chuyên môn CH Academy'}
-                </p>
-                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-300 pt-1">
-                  <span>Mã giảng viên: <strong className="font-mono text-white">{profile.teacherCode}</strong></span>
-                  <span>•</span>
-                  <span>SĐT: <strong className="text-white">{profile.phone || '—'}</strong></span>
-                  <span>•</span>
-                  <span>Email: <strong className="text-white">{profile.email || '—'}</strong></span>
-                </div>
-              </div>
+        {/* Standardized SaaS Teacher Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-1">
+          <div>
+            <div className="flex items-center gap-2.5">
+              <h1 className="typo-page-title text-slate-900 dark:text-white">
+                Không gian Giảng viên
+              </h1>
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200/60 dark:border-indigo-800/60">
+                {profile.teacherCode}
+              </span>
             </div>
+            <p className="typo-body text-slate-500 dark:text-slate-400 mt-0.5">
+              Thầy/Cô {profile.fullName} • {profile.specialization || 'Giảng viên chuyên môn CH Academy'}
+            </p>
+          </div>
 
-            <div className="flex items-center gap-4 border-t sm:border-t-0 sm:border-l border-white/15 pt-4 sm:pt-0 sm:pl-8">
-              <div className="text-center sm:text-right">
-                <div className="text-2xl sm:text-3xl font-black text-sky-300">
-                  {profile.totalClasses}
-                </div>
-                <div className="text-[11px] uppercase tracking-wider text-slate-300 mt-0.5">
-                  Lớp phụ trách
-                </div>
-              </div>
-              <div className="text-center sm:text-right pl-4 sm:pl-6 border-l border-white/15">
-                <div className="text-2xl sm:text-3xl font-black text-emerald-300">
-                  {profile.activeStudents}
-                </div>
-                <div className="text-[11px] uppercase tracking-wider text-slate-300 mt-0.5">
-                  Học sinh theo học
-                </div>
-              </div>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white dark:bg-[#151F31] border border-slate-200/80 dark:border-[#2A3A50] text-[12px] text-slate-600 dark:text-slate-300 shadow-xs">
+              <span className="text-slate-400">Năm học:</span>
+              <strong className="font-semibold text-slate-700 dark:text-slate-200">{selectedAcademicYear || '2026 - 2027'}</strong>
             </div>
+            <button
+              onClick={() => setActiveTab('classes')}
+              className="typo-btn inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white transition-colors shadow-xs"
+            >
+              <BookOpen className="w-3.5 h-3.5" />
+              <span>Lớp dạy ({classes.length})</span>
+            </button>
           </div>
         </div>
 
-        {/* 3D Quick Metrics Overview */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <Tilt3DCard maxTilt={6}>
-            <div className="p-4 rounded-2xl bg-white/80 dark:bg-[#151F31]/80 backdrop-blur-sm border border-slate-200/80 dark:border-[#2A3A50] shadow-sm flex items-center gap-3 h-full">
-              <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200/50 dark:border-indigo-800/40 flex items-center justify-center text-indigo-600 dark:text-indigo-400 shrink-0">
-                <BookOpen className="w-5 h-5" />
-              </div>
-              <div>
-                <div className="text-[11px] font-semibold text-slate-500 dark:text-[#A6B4C8]">Lớp phụ trách</div>
-                <div className="text-xl font-black text-slate-900 dark:text-white">{profile.totalClasses} lớp</div>
-                <div className="text-[10px] text-slate-400">Đang hoạt động</div>
-              </div>
-            </div>
-          </Tilt3DCard>
-
-          <Tilt3DCard maxTilt={6}>
-            <div className="p-4 rounded-2xl bg-white/80 dark:bg-[#151F31]/80 backdrop-blur-sm border border-slate-200/80 dark:border-[#2A3A50] shadow-sm flex items-center gap-3 h-full">
-              <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/50 dark:border-emerald-800/40 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0">
-                <Users className="w-5 h-5" />
-              </div>
-              <div>
-                <div className="text-[11px] font-semibold text-slate-500 dark:text-[#A6B4C8]">Học sinh</div>
-                <div className="text-xl font-black text-slate-900 dark:text-white">{profile.activeStudents} bạn</div>
-                <div className="text-[10px] text-slate-400">Theo học các lớp</div>
-              </div>
-            </div>
-          </Tilt3DCard>
-
-          <Tilt3DCard maxTilt={6}>
-            <div className="p-4 rounded-2xl bg-white/80 dark:bg-[#151F31]/80 backdrop-blur-sm border border-slate-200/80 dark:border-[#2A3A50] shadow-sm flex items-center gap-3 h-full">
-              <div className="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200/50 dark:border-amber-800/40 flex items-center justify-center text-amber-600 dark:text-amber-400 shrink-0">
-                <Calendar className="w-5 h-5" />
-              </div>
-              <div>
-                <div className="text-[11px] font-semibold text-slate-500 dark:text-[#A6B4C8]">Chưa điểm danh</div>
-                <div className="text-xl font-black text-amber-600 dark:text-amber-400">{unmarkedSessions.length} buổi</div>
-                <div className="text-[10px] text-slate-400">Cần hoàn thành</div>
-              </div>
-            </div>
-          </Tilt3DCard>
-
-          <Tilt3DCard maxTilt={6}>
-            <div className="p-4 rounded-2xl bg-white/80 dark:bg-[#151F31]/80 backdrop-blur-sm border border-slate-200/80 dark:border-[#2A3A50] shadow-sm flex items-center gap-3 h-full">
-              <div className="w-10 h-10 rounded-xl bg-sky-50 dark:bg-sky-950/40 border border-sky-200/50 dark:border-sky-800/40 flex items-center justify-center text-sky-600 dark:text-sky-400 shrink-0">
-                <Bell className="w-5 h-5" />
-              </div>
-              <div>
-                <div className="text-[11px] font-semibold text-slate-500 dark:text-[#A6B4C8]">Thông báo gửi</div>
-                <div className="text-xl font-black text-slate-900 dark:text-white">{sentAnnouncements.length} tin</div>
-                <div className="text-[10px] text-slate-400">Đã gửi học sinh</div>
-              </div>
-            </div>
-          </Tilt3DCard>
-        </div>
-
-        {/* Navigation Tabs */}
-        <div className="bg-white/80 dark:bg-[#151F31]/80 backdrop-blur-sm p-1.5 rounded-2xl border border-slate-200/80 dark:border-[#2A3A50] shadow-xs">
-          <div className="flex items-center gap-1.5 overflow-x-auto scroll-smooth py-0.5 px-1">
+        {/* Navigation Tabs - Compact Standardized */}
+        <div className="bg-white/90 dark:bg-[#151F31]/90 backdrop-blur-sm p-1 rounded-xl border border-slate-200/80 dark:border-[#2A3A50] shadow-xs">
+          <div className="flex items-center gap-1 overflow-x-auto scroll-smooth py-0.5 px-0.5">
             <button
               onClick={() => setActiveTab('dashboard')}
-              className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all flex items-center gap-2 shrink-0 ${
+              className={`px-3 py-1.5 rounded-lg text-[12.5px] font-medium transition-all flex items-center gap-2 shrink-0 ${
                 activeTab === 'dashboard'
-                  ? 'bg-indigo-600 text-white shadow-sm font-bold'
+                  ? 'bg-indigo-600 text-white shadow-xs font-semibold'
                   : 'text-slate-600 dark:text-[#A6B4C8] hover:bg-slate-100 dark:hover:bg-[#1C293D]'
               }`}
             >
-              <LayoutDashboard className="w-4 h-4 shrink-0" />
+              <LayoutDashboard className="w-3.5 h-3.5 shrink-0" />
               <span>Tổng quan</span>
             </button>
 
             <button
               onClick={() => setActiveTab('classes')}
-              className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all flex items-center gap-2 shrink-0 ${
+              className={`px-3 py-1.5 rounded-lg text-[12.5px] font-medium transition-all flex items-center gap-2 shrink-0 ${
                 activeTab === 'classes'
-                  ? 'bg-indigo-600 text-white shadow-sm font-bold'
+                  ? 'bg-indigo-600 text-white shadow-xs font-semibold'
                   : 'text-slate-600 dark:text-[#A6B4C8] hover:bg-slate-100 dark:hover:bg-[#1C293D]'
               }`}
             >
-              <BookOpen className="w-4 h-4 shrink-0" />
+              <BookOpen className="w-3.5 h-3.5 shrink-0" />
               <span>Lớp dạy ({classes.length})</span>
             </button>
 
             <button
               onClick={() => { setExamStudioFilter('ALL'); setActiveTab('exams'); }}
-              className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all flex items-center gap-2 shrink-0 ${
+              className={`px-3 py-1.5 rounded-lg text-[12.5px] font-medium transition-all flex items-center gap-2 shrink-0 ${
                 activeTab === 'exams'
-                  ? 'bg-indigo-600 text-white shadow-sm font-bold'
+                  ? 'bg-indigo-600 text-white shadow-xs font-semibold'
                   : 'text-slate-600 dark:text-[#A6B4C8] hover:bg-slate-100 dark:hover:bg-[#1C293D]'
               }`}
             >
-              <FileQuestion className="w-4 h-4 shrink-0" />
+              <FileQuestion className="w-3.5 h-3.5 shrink-0" />
               <span>Soạn đề & Quản lý thi</span>
             </button>
 
             <button
               onClick={() => setActiveTab('exam-results')}
-              className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all flex items-center gap-2 shrink-0 ${
+              className={`px-3 py-1.5 rounded-lg text-[12.5px] font-medium transition-all flex items-center gap-2 shrink-0 ${
                 activeTab === 'exam-results'
-                  ? 'bg-indigo-600 text-white shadow-sm font-bold'
+                  ? 'bg-indigo-600 text-white shadow-xs font-semibold'
                   : 'text-slate-600 dark:text-[#A6B4C8] hover:bg-slate-100 dark:hover:bg-[#1C293D]'
               }`}
             >
-              <Award className="w-4 h-4 shrink-0" />
+              <Award className="w-3.5 h-3.5 shrink-0" />
               <span>Kết quả thi lớp</span>
             </button>
 
             <button
               onClick={() => setActiveTab('students')}
-              className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all flex items-center gap-2 shrink-0 ${
+              className={`px-3 py-1.5 rounded-lg text-[12.5px] font-medium transition-all flex items-center gap-2 shrink-0 ${
                 activeTab === 'students'
-                  ? 'bg-indigo-600 text-white shadow-sm font-bold'
+                  ? 'bg-indigo-600 text-white shadow-xs font-semibold'
                   : 'text-slate-600 dark:text-[#A6B4C8] hover:bg-slate-100 dark:hover:bg-[#1C293D]'
               }`}
             >
-              <Users className="w-4 h-4 shrink-0" />
+              <Users className="w-3.5 h-3.5 shrink-0" />
               <span>Học sinh</span>
             </button>
 
             <button
               onClick={() => setActiveTab('attendance')}
-              className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all flex items-center gap-2 shrink-0 ${
+              className={`px-3 py-1.5 rounded-lg text-[12.5px] font-medium transition-all flex items-center gap-2 shrink-0 ${
                 activeTab === 'attendance'
-                  ? 'bg-indigo-600 text-white shadow-sm font-bold'
+                  ? 'bg-indigo-600 text-white shadow-xs font-semibold'
                   : 'text-slate-600 dark:text-[#A6B4C8] hover:bg-slate-100 dark:hover:bg-[#1C293D]'
               }`}
             >
-              <Calendar className="w-4 h-4 shrink-0" />
+              <Calendar className="w-3.5 h-3.5 shrink-0" />
               <span>Điểm danh</span>
             </button>
 
             <button
               onClick={() => setActiveTab('materials')}
-              className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all flex items-center gap-2 shrink-0 ${
+              className={`px-3 py-1.5 rounded-lg text-[12.5px] font-medium transition-all flex items-center gap-2 shrink-0 ${
                 activeTab === 'materials'
-                  ? 'bg-indigo-600 text-white shadow-sm font-bold'
+                  ? 'bg-indigo-600 text-white shadow-xs font-semibold'
                   : 'text-slate-600 dark:text-[#A6B4C8] hover:bg-slate-100 dark:hover:bg-[#1C293D]'
               }`}
             >
-              <Upload className="w-4 h-4 shrink-0" />
+              <Upload className="w-3.5 h-3.5 shrink-0" />
               <span>Tài liệu</span>
             </button>
 
             <button
               onClick={() => setActiveTab('announcements')}
-              className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all flex items-center gap-2 shrink-0 ${
+              className={`px-3 py-1.5 rounded-lg text-[12.5px] font-medium transition-all flex items-center gap-2 shrink-0 ${
                 activeTab === 'announcements'
-                  ? 'bg-indigo-600 text-white shadow-sm font-bold'
+                  ? 'bg-indigo-600 text-white shadow-xs font-semibold'
                   : 'text-slate-600 dark:text-[#A6B4C8] hover:bg-slate-100 dark:hover:bg-[#1C293D]'
               }`}
             >
-              <Send className="w-4 h-4 shrink-0" />
+              <Send className="w-3.5 h-3.5 shrink-0" />
               <span>Phát thông báo</span>
             </button>
 
             <button
               onClick={() => setActiveTab('notifications')}
-              className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all flex items-center gap-2 shrink-0 ${
+              className={`px-3 py-1.5 rounded-lg text-[12.5px] font-medium transition-all flex items-center gap-2 shrink-0 ${
                 activeTab === 'notifications'
-                  ? 'bg-indigo-600 text-white shadow-sm font-bold'
+                  ? 'bg-indigo-600 text-white shadow-xs font-semibold'
                   : 'text-slate-600 dark:text-[#A6B4C8] hover:bg-slate-100 dark:hover:bg-[#1C293D]'
               }`}
             >
-              <Bell className="w-4 h-4 shrink-0" />
+              <Bell className="w-3.5 h-3.5 shrink-0" />
               <span>Thông báo BQT</span>
               {unreadNotificationCount > 0 ? (
-                <span className="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-rose-500 text-white shadow-2xs animate-pulse">
+                <span className="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-rose-500 text-white shadow-2xs">
                   {unreadNotificationCount > 99 ? '99+' : unreadNotificationCount}
                 </span>
               ) : (
@@ -966,13 +888,13 @@ export const TeacherPortalPage: React.FC = () => {
 
             <button
               onClick={() => setActiveTab('history')}
-              className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all flex items-center gap-2 shrink-0 ${
+              className={`px-3 py-1.5 rounded-lg text-[12.5px] font-medium transition-all flex items-center gap-2 shrink-0 ${
                 activeTab === 'history'
-                  ? 'bg-indigo-600 text-white shadow-sm font-bold'
+                  ? 'bg-indigo-600 text-white shadow-xs font-semibold'
                   : 'text-slate-600 dark:text-[#A6B4C8] hover:bg-slate-100 dark:hover:bg-[#1C293D]'
               }`}
             >
-              <History className="w-4 h-4 shrink-0" />
+              <History className="w-3.5 h-3.5 shrink-0" />
               <span>Lịch sử Giảng dạy</span>
             </button>
           </div>

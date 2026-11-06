@@ -62,3 +62,4 @@ In Spring Security 6.5.0, this method was deprecated in favor of:
 .permissionsPolicyHeader(perms -> perms.policy("..."))
 ```
 This deprecation was updated in [`SecurityConfig.java`](file:///e:/CA_NHAN_CV/CH_Academy/backend/src/main/java/vn/chacademy/security/SecurityConfig.java), removing compiler warnings.
+
