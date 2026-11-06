@@ -74,7 +74,7 @@ public class SecurityConfig {
                                 "frame-ancestors 'none'"
                         ))
                         .referrerPolicy(ref -> ref.policy(org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN))
-                        .permissionsPolicy(perms -> perms.policy("camera=(), microphone=(self), geolocation=(), payment=()"))
+                        .permissionsPolicyHeader(perms -> perms.policy("camera=(), microphone=(self), geolocation=(), payment=()"))
                 )
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint((request, response, authException) -> {
