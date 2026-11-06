@@ -241,9 +241,13 @@ public class DashboardService {
                     long enrolledInCourse = 0;
                     List<ClassEntity> courseClasses = classRepository.findByCourseId(course.getId());
                     for (ClassEntity cls : courseClasses) {
-                        enrolledInCourse += enrollmentRepository.countDistinctActiveEnrolledStudentsInAcademicYear(
-                                effectiveYear, effectiveStart, effectiveEnd
-                        );
+                        boolean matchYear = (effectiveYear == null && effectiveStart == null)
+                                || (effectiveYear != null && effectiveYear.equals(cls.getAcademicYear()))
+                                || (effectiveStart != null && effectiveEnd != null && cls.getStartDate() != null
+                                && !cls.getStartDate().isBefore(effectiveStart) && !cls.getStartDate().isAfter(effectiveEnd));
+                        if (matchYear) {
+                            enrolledInCourse += enrollmentRepository.countByClassEntityIdAndStatus(cls.getId(), "ENROLLED");
+                        }
                     }
                     BigDecimal price = course.getDefaultTuitionFee() != null ? course.getDefaultTuitionFee() : BigDecimal.ZERO;
                     BigDecimal estRev = price.multiply(BigDecimal.valueOf(enrolledInCourse));

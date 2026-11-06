@@ -53,10 +53,23 @@ import type {
   AiMessageItem
 } from '../../types/chat'
 
+export type AiStudioTab =
+  | 'overview'
+  | 'agents'
+  | 'kb'
+  | 'docs'
+  | 'flows'
+  | 'channels'
+  | 'playground'
+  | 'conversations'
+  | 'calls'
+  | 'analytics'
+  | 'settings'
+
 export const AiStudioPage: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<
-    'overview' | 'agents' | 'kb' | 'docs' | 'flows' | 'channels' | 'playground' | 'conversations' | 'calls' | 'analytics' | 'settings'
-  >('overview')
+  const [activeTab, setActiveTab] = useState<AiStudioTab>('overview')
+
+  const isTab = (tab: AiStudioTab): boolean => (activeTab as string) === tab
 
   const [loading, setLoading] = useState(false)
   const [analytics, setAnalytics] = useState<AiAnalyticsData | null>(null)
@@ -466,13 +479,13 @@ export const AiStudioPage: React.FC = () => {
             { key: 'settings', label: 'Cấu hình Model', icon: Settings }
           ].map((tab) => {
             const Icon = tab.icon
-            const isActive = activeTab === tab.key
+            const isActive = isTab(tab.key as AiStudioTab)
             return (
               <button
                 key={tab.key}
                 ref={isActive ? activeTabBtnRef : null}
                 type="button"
-                onClick={() => setActiveTab(tab.key as any)}
+                onClick={() => setActiveTab(tab.key as AiStudioTab)}
                 className={`px-4 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition flex items-center gap-2 shrink-0 cursor-pointer ${
                   isActive
                     ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/20 ring-2 ring-indigo-500/30'
@@ -503,7 +516,7 @@ export const AiStudioPage: React.FC = () => {
       </div>
 
       {/* 3. TAB 1: TỔNG QUAN AI (OVERVIEW) */}
-      {activeTab === 'overview' && (
+      {isTab('overview') && (
         <div className="space-y-6 animate-in fade-in duration-200">
           {/* KPI Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -625,7 +638,7 @@ export const AiStudioPage: React.FC = () => {
       )}
 
       {/* 4. TAB 2: QUẢN LÝ AGENT (AGENT MANAGER) */}
-      {activeTab === 'agents' && (
+      {isTab('agents') && (
         <div className="space-y-4 animate-in fade-in duration-200">
           <div className="flex items-center justify-between">
             <h3 className="text-base font-bold text-slate-900 dark:text-white">
@@ -742,7 +755,7 @@ export const AiStudioPage: React.FC = () => {
       )}
 
       {/* 5. TAB 3: QUẢN LÝ KHO TRI THỨC (KNOWLEDGE BASE REPOSITORIES) */}
-      {activeTab === 'kb' && (
+      {isTab('kb') && (
         <div className="space-y-6 animate-in fade-in duration-200">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm">
             <div>
@@ -838,7 +851,7 @@ export const AiStudioPage: React.FC = () => {
       )}
 
       {/* 5.5. TAB 4: TÀI LIỆU & CHUNKING (DOCUMENT PIPELINE & RAG LIFECYCLE) */}
-      {activeTab === 'docs' && (
+      {isTab('docs') && (
         <div className="space-y-6 animate-in fade-in duration-200">
           {/* Header & KB Selector */}
           <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -1021,8 +1034,8 @@ export const AiStudioPage: React.FC = () => {
         </div>
       )}
 
-{/* 6. TAB 5: KỊCH BẢN HỘI THOẠI (CONVERSATION FLOW BUILDER) */}
-      {activeTab === 'flows' && (
+      {/* 6. TAB 5: KỊCH BẢN HỘI THOẠI (CONVERSATION FLOW BUILDER) */}
+      {isTab('flows') && (
         <div className="space-y-6 animate-in fade-in duration-200">
           <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
@@ -1086,7 +1099,7 @@ export const AiStudioPage: React.FC = () => {
       )}
 
       {/* 7. TAB 6: KÊNH KẾT NỐI (CHANNELS) */}
-      {activeTab === 'channels' && (
+      {isTab('channels') && (
         <div className="space-y-6 animate-in fade-in duration-200">
           <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
@@ -1199,8 +1212,8 @@ export const AiStudioPage: React.FC = () => {
         </div>
       )}
 
-{/* 8. TAB 7: KIỂM THỬ SANDBOX (AGENT PLAYGROUND) */}
-      {activeTab === 'playground' && (
+      {/* 8. TAB 7: KIỂM THỬ SANDBOX (AGENT PLAYGROUND) */}
+      {isTab('playground') && (
         <div className="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 overflow-hidden shadow-sm flex flex-col h-[600px] animate-in fade-in duration-200">
           <div className="p-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/80 flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -1291,7 +1304,7 @@ export const AiStudioPage: React.FC = () => {
       )}
 
       {/* 9. TAB 8: HỘI THOẠI & HUMAN HANDOFF */}
-      {activeTab === 'conversations' && (
+      {isTab('conversations') && (
         <div className="space-y-4 animate-in fade-in duration-200">
           <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 overflow-hidden shadow-sm">
             <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-800 font-bold text-sm text-slate-800 dark:text-white flex items-center justify-between">
@@ -1332,7 +1345,7 @@ export const AiStudioPage: React.FC = () => {
       )}
 
       {/* 9. TAB 9: CUỘC GỌI AI & VOICE TELEPHONY */}
-      {activeTab === 'calls' && (
+      {isTab('calls') && (
         <div className="space-y-4 animate-in fade-in duration-200">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
@@ -1501,7 +1514,7 @@ export const AiStudioPage: React.FC = () => {
       )}
 
       {/* 10. TAB 10: PHÂN TÍCH & BÁO CÁO TOÀN DIỆN */}
-      {activeTab === 'analytics' && (
+      {isTab('analytics') && (
         <div className="space-y-4 animate-in fade-in duration-200">
           <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-4">
             <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
@@ -1530,7 +1543,7 @@ export const AiStudioPage: React.FC = () => {
       )}
 
       {/* 11. TAB 11: CẤU HÌNH HỆ THỐNG & MODEL */}
-      {activeTab === 'settings' && (
+      {isTab('settings') && (
         <div className="space-y-4 animate-in fade-in duration-200">
           <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-4">
             <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">

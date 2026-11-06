@@ -109,3 +109,4 @@ Hệ thống cung cấp 2 cơ chế tích hợp linh hoạt:
    - Zero Layout Shift: Tỷ lệ co giãn viền 0px do sử dụng masking và inset âm.
    - Thao tác nhấp chuột, gõ phím trên tất cả các form và nút bấm hoạt động chính xác 100%.
    - Thời gian xoay dải sáng đồng đều 4.8 giây, màu sắc chuyển từ xanh lơ sang xanh biển đặc trưng của nhận diện CH Academy.
+
