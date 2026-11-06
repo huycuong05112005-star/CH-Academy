@@ -1,12 +1,24 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { GraduationCap, LogIn, Menu, X } from 'lucide-react'
+import { GraduationCap, LogIn, Menu, X, UserCheck } from 'lucide-react'
 import { ThemeSwitcher } from '../ui/ThemeSwitcher'
 import { useSettings } from '../../context/SettingsContext'
+import { useAuth } from '../../context/AuthContext'
 
 export const PublicNavbar: React.FC = () => {
   const [mobileOpen, setMobileOpen] = useState(false)
   const { settings } = useSettings()
+  const { isAuthenticated, user } = useAuth()
+
+  const getDashboardUrl = () => {
+    if (!user) return '/login'
+    const isSuperOrAdmin = user.roles?.some((r: string) =>
+      ['SUPER_ADMIN', 'CENTER_ADMIN', 'ADMIN', 'ACADEMIC_STAFF', 'ADMISSIONS_STAFF', 'ACCOUNTANT'].includes(r)
+    )
+    if (isSuperOrAdmin) return '/admin'
+    if (user.roles?.includes('TEACHER')) return '/teacher'
+    return '/student'
+  }
 
   return (
     <header
@@ -54,13 +66,23 @@ export const PublicNavbar: React.FC = () => {
         <div className="flex items-center gap-2.5">
           <ThemeSwitcher />
           
-          <Link
-            to="/login"
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-slate-200 dark:border-[#2A3A50] bg-white dark:bg-[#151F31] text-[#0F243E] dark:text-[#E8EEF7] hover:bg-slate-50 dark:hover:bg-[#1C293D] font-semibold text-xs shadow-xs transition-colors"
-          >
-            <LogIn className="w-3.5 h-3.5" />
-            <span>Đăng nhập</span>
-          </Link>
+          {isAuthenticated && user ? (
+            <Link
+              to={getDashboardUrl()}
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-blue-600 dark:bg-[#38BDF8] text-white dark:text-[#0B1220] hover:bg-blue-700 dark:hover:bg-[#0284C7] font-semibold text-xs shadow-xs transition-colors"
+            >
+              <UserCheck className="w-3.5 h-3.5" />
+              <span>Vào Dashboard ({user.username})</span>
+            </Link>
+          ) : (
+            <Link
+              to="/login"
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-slate-200 dark:border-[#2A3A50] bg-white dark:bg-[#151F31] text-[#0F243E] dark:text-[#E8EEF7] hover:bg-slate-50 dark:hover:bg-[#1C293D] font-semibold text-xs shadow-xs transition-colors"
+            >
+              <LogIn className="w-3.5 h-3.5" />
+              <span>Đăng nhập</span>
+            </Link>
+          )}
           <a
             href="/#tu-van"
             className="hidden sm:inline-flex px-4 py-2 rounded-xl bg-[#0F243E] dark:bg-[#38BDF8] text-white dark:text-[#0B1220] hover:bg-[#173557] dark:hover:bg-[#0284C7] font-semibold text-xs shadow-sm transition-colors"
@@ -110,7 +132,24 @@ export const PublicNavbar: React.FC = () => {
           >
             Liên hệ & Hỗ trợ
           </Link>
-          <div className="pt-2">
+          <div className="pt-2 space-y-2">
+            {isAuthenticated && user ? (
+              <Link
+                to={getDashboardUrl()}
+                onClick={() => setMobileOpen(false)}
+                className="block text-center w-full py-2.5 rounded-xl bg-blue-600 dark:bg-[#38BDF8] text-white dark:text-[#0B1220] font-semibold text-sm"
+              >
+                Vào Dashboard ({user.username})
+              </Link>
+            ) : (
+              <Link
+                to="/login"
+                onClick={() => setMobileOpen(false)}
+                className="block text-center w-full py-2.5 rounded-xl border border-slate-200 dark:border-[#2A3A50] font-semibold text-sm text-slate-800 dark:text-white"
+              >
+                Đăng nhập hệ thống
+              </Link>
+            )}
             <a
               href="/#tu-van"
               onClick={() => setMobileOpen(false)}

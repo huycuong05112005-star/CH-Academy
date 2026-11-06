@@ -12,6 +12,8 @@ public interface UserSessionRepository extends JpaRepository<UserSession, Long> 
 
     List<UserSession> findByIsActiveTrueOrderByLastActivityAtDesc();
 
+    List<UserSession> findByUserIdAndIsActiveTrue(Long userId);
+
     List<UserSession> findByUserIdOrderByCreatedAtDesc(Long userId);
 
     Optional<UserSession> findBySessionToken(String sessionToken);

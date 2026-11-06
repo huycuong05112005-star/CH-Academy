@@ -159,6 +159,11 @@ public class StudentPortalController {
 
         Student student = getCurrentStudent(userDetails);
 
+        boolean isEnrolled = enrollmentRepository.existsByClassEntityIdAndStudentId(classId, student.getId());
+        if (!isEnrolled) {
+            throw new org.springframework.security.access.AccessDeniedException("Bạn chưa được ghi danh vào lớp học này");
+        }
+
         ClassEntity classEntity = classRepository.findById(classId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy lớp học với ID: " + classId));
 

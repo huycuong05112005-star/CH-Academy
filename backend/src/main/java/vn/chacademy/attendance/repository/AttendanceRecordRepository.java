@@ -22,4 +22,7 @@ public interface AttendanceRecordRepository extends JpaRepository<AttendanceReco
     long countByStudentIdAndStatus(Long studentId, String status);
 
     long countByStudentId(Long studentId);
+
+    @org.springframework.data.jpa.repository.Query("SELECT count(a) FROM AttendanceRecord a WHERE a.status = :status")
+    long countByStatus(@org.springframework.data.repository.query.Param("status") String status);
 }

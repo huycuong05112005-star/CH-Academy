@@ -20,15 +20,19 @@ public class DashboardStatsDto {
     private long totalStudents;
     private long activeStudents;
     private long totalStudentsCenter;
+    private long totalTeachers;
     private long totalCourses;
     private long activeClasses;
     private long totalLeads;
     private long convertedLeads;
     private double leadConversionRate;
+    private double averageAttendanceRate;
 
     private BigDecimal totalReceivable;
     private BigDecimal totalPaid;
     private BigDecimal totalDebt;
 
     private List<UpcomingSessionDto> upcomingSessions;
+    private List<MonthlyStatDto> monthlyTrends;
+    private List<CourseEnrollmentStatDto> topCourses;
 }

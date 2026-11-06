@@ -39,4 +39,6 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
     BigDecimal sumTotalPayments();
 
     List<Payment> findByStudentIdOrderByCreatedAtDesc(Long studentId);
+
+    List<Payment> findByPaymentDateBetweenOrderByPaymentDateAsc(java.time.LocalDate startDate, java.time.LocalDate endDate);
 }

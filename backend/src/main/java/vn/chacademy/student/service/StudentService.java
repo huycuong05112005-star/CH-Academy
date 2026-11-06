@@ -10,7 +10,12 @@ import org.springframework.transaction.annotation.Transactional;
 import vn.chacademy.academic.entity.ClassEntity;
 import vn.chacademy.academic.entity.Enrollment;
 import vn.chacademy.academic.repository.ClassRepository;
+import vn.chacademy.academic.repository.ClassSessionRepository;
 import vn.chacademy.academic.repository.EnrollmentRepository;
+import vn.chacademy.assessment.entity.ExamAttempt;
+import vn.chacademy.assessment.repository.ExamAttemptRepository;
+import vn.chacademy.attendance.entity.AttendanceRecord;
+import vn.chacademy.attendance.repository.AttendanceRecordRepository;
 import vn.chacademy.common.exception.BadRequestException;
 import vn.chacademy.common.exception.ResourceNotFoundException;
 import vn.chacademy.common.service.EmailService;
@@ -55,6 +60,9 @@ public class StudentService {
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
+    private final AttendanceRecordRepository attendanceRecordRepository;
+    private final ExamAttemptRepository examAttemptRepository;
+    private final ClassSessionRepository classSessionRepository;
 
     private static final Set<String> VALID_STATUSES = Set.of("ACTIVE", "INACTIVE", "GRADUATED", "DROPPED");
     private static final Set<String> VALID_TARGET_TYPES = Set.of("KID", "ADULT");
@@ -169,6 +177,18 @@ public class StudentService {
         } else {
             dto.setTuitionStatus("UNPAID");
         }
+    }
+
+    @Transactional(readOnly = true)
+    public synchronized String generateNextStudentCode() {
+        long count = studentRepository.count();
+        long nextNum = count + 1;
+        String code = String.format("HV%06d", nextNum);
+        while (studentRepository.existsByStudentCode(code)) {
+            nextNum++;
+            code = String.format("HV%06d", nextNum);
+        }
+        return code;
     }
 
     @Transactional
@@ -351,6 +371,9 @@ public class StudentService {
             user.setPhone(student.getPhone());
             user.setPasswordHash(passwordEncoder.encode(plainPassword));
             user.setStatus("ACTIVE");
+            user.setMustChangePassword(true);
+            user.setActivationToken(UUID.randomUUID().toString());
+            user.setActivationTokenExpiresAt(java.time.Instant.now().plus(24, java.time.temporal.ChronoUnit.HOURS));
             user.setRoles(Set.of(studentRole));
 
             user = userRepository.save(user);
@@ -507,5 +530,160 @@ public class StudentService {
         }
 
         return getStudentById(studentId);
+    }
+
+    @Transactional(readOnly = true)
+    public StudentLearningHistoryResponseDto getStudentDetailedLearningHistory(Long studentId, String requestedYear) {
+        Student student = studentRepository.findById(studentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy học viên với ID: " + studentId));
+
+        User user = student.getUser();
+        List<Enrollment> allEnrollments = enrollmentRepository.findByStudentIdOrderByCreatedAtDesc(student.getId());
+
+        // Thu thập các năm học viên từng tham gia
+        Set<String> yearSet = new TreeSet<>(Collections.reverseOrder());
+        LocalDate firstDate = null;
+        for (Enrollment e : allEnrollments) {
+            if (e.getClassEntity() != null && e.getClassEntity().getAcademicYear() != null) {
+                yearSet.add(e.getClassEntity().getAcademicYear());
+            }
+            if (e.getEnrollmentDate() != null) {
+                if (firstDate == null || e.getEnrollmentDate().isBefore(firstDate)) {
+                    firstDate = e.getEnrollmentDate();
+                }
+            }
+        }
+        if (firstDate == null && student.getCreatedAt() != null) {
+            firstDate = student.getCreatedAt().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
+        }
+
+        // Lọc danh sách enrollment theo năm học được yêu cầu (nếu có)
+        List<Enrollment> filteredEnrollments = allEnrollments;
+        if (requestedYear != null && !requestedYear.isBlank() && !"ALL".equalsIgnoreCase(requestedYear.trim())) {
+            String filterYear = requestedYear.trim();
+            filteredEnrollments = allEnrollments.stream()
+                    .filter(e -> e.getClassEntity() != null && filterYear.equalsIgnoreCase(e.getClassEntity().getAcademicYear()))
+                    .toList();
+        }
+
+        List<AttendanceRecord> allAttendanceRecords = attendanceRecordRepository.findByStudentId(student.getId());
+        List<ExamAttempt> allAttempts = examAttemptRepository.findByStudentIdOrderByStartedAtDesc(student.getId());
+
+        List<StudentLearningHistoryResponseDto.LearningHistoryEnrollmentItem> enrollmentItems = new ArrayList<>();
+        int totalCompleted = 0;
+        int totalAttendedSessionsAll = 0;
+        int totalSessionsAll = 0;
+        BigDecimal sumTuition = BigDecimal.ZERO;
+        BigDecimal sumPaid = BigDecimal.ZERO;
+
+        for (Enrollment e : filteredEnrollments) {
+            ClassEntity cls = e.getClassEntity();
+            String teacherName = (cls != null && cls.getPrimaryTeacher() != null)
+                    ? cls.getPrimaryTeacher().getFullName()
+                    : "Chưa phân công";
+
+            if ("COMPLETED".equalsIgnoreCase(e.getStatus()) || "GRADUATED".equalsIgnoreCase(e.getStatus())) {
+                totalCompleted++;
+            }
+
+            // Tính toán chuyên cần cho lớp này
+            int totalClassSessions = cls != null ? (int) classSessionRepository.countByClassEntityId(cls.getId()) : 0;
+            long attendedClassSessions = cls != null ? allAttendanceRecords.stream()
+                    .filter(r -> r.getSession() != null && r.getSession().getClassEntity() != null
+                            && r.getSession().getClassEntity().getId().equals(cls.getId())
+                            && ("PRESENT".equalsIgnoreCase(r.getStatus()) || "LATE".equalsIgnoreCase(r.getStatus())))
+                    .count() : 0;
+
+            Double attendanceRate = totalClassSessions > 0
+                    ? Math.round(((double) attendedClassSessions / totalClassSessions) * 1000.0) / 10.0
+                    : null;
+
+            totalSessionsAll += totalClassSessions;
+            totalAttendedSessionsAll += (int) attendedClassSessions;
+
+            // Tính toán học phí
+            BigDecimal fee = e.getFinalFee() != null ? e.getFinalFee() : BigDecimal.ZERO;
+            sumTuition = sumTuition.add(fee);
+
+            BigDecimal paid = BigDecimal.ZERO;
+            List<Receivable> recs = receivableRepository.findByEnrollmentId(e.getId());
+            for (Receivable r : recs) {
+                if (r.getPaidAmount() != null) {
+                    paid = paid.add(r.getPaidAmount());
+                }
+            }
+            sumPaid = sumPaid.add(paid);
+            BigDecimal remainingDebt = fee.subtract(paid).max(BigDecimal.ZERO);
+            String payStatus = remainingDebt.compareTo(BigDecimal.ZERO) == 0 ? "PAID"
+                    : (paid.compareTo(BigDecimal.ZERO) > 0 ? "PARTIAL" : "UNPAID");
+
+            // Danh sách bài kiểm tra của học viên trong lớp
+            List<StudentLearningHistoryResponseDto.LearningHistoryExamItem> examItems = new ArrayList<>();
+            if (cls != null) {
+                for (ExamAttempt att : allAttempts) {
+                    if (att.getExam() != null && att.getExam().getCourse() != null && cls.getCourse() != null
+                            && att.getExam().getCourse().getId().equals(cls.getCourse().getId())) {
+                        examItems.add(StudentLearningHistoryResponseDto.LearningHistoryExamItem.builder()
+                                .examId(att.getExam().getId())
+                                .examTitle(att.getExam().getTitle())
+                                .examCode(att.getExam().getCode())
+                                .score(att.getTotalScore())
+                                .maxScore(att.getMaxScore())
+                                .isPassed(att.getIsPassed())
+                                .status(att.getStatus())
+                                .submittedAt(att.getSubmittedAt() != null ? att.getSubmittedAt().toString() : null)
+                                .build());
+                    }
+                }
+            }
+
+            enrollmentItems.add(StudentLearningHistoryResponseDto.LearningHistoryEnrollmentItem.builder()
+                    .enrollmentId(e.getId())
+                    .classId(cls != null ? cls.getId() : null)
+                    .classCode(cls != null ? cls.getCode() : null)
+                    .className(cls != null ? cls.getName() : null)
+                    .academicYear(cls != null ? cls.getAcademicYear() : null)
+                    .courseId(cls != null && cls.getCourse() != null ? cls.getCourse().getId() : null)
+                    .courseName(cls != null && cls.getCourse() != null ? cls.getCourse().getName() : null)
+                    .primaryTeacherName(teacherName)
+                    .enrollmentDate(e.getEnrollmentDate())
+                    .status(e.getStatus())
+                    .totalSessions(totalClassSessions)
+                    .attendedSessions((int) attendedClassSessions)
+                    .attendanceRate(attendanceRate)
+                    .tuitionFee(fee)
+                    .paidAmount(paid)
+                    .remainingDebt(remainingDebt)
+                    .paymentStatus(payStatus)
+                    .exams(examItems)
+                    .build());
+        }
+
+        Double overallRate = totalSessionsAll > 0
+                ? Math.round(((double) totalAttendedSessionsAll / totalSessionsAll) * 1000.0) / 10.0
+                : null;
+        BigDecimal totalDebt = sumTuition.subtract(sumPaid).max(BigDecimal.ZERO);
+
+        return StudentLearningHistoryResponseDto.builder()
+                .studentId(student.getId())
+                .studentCode(student.getStudentCode())
+                .fullName(student.getFullName())
+                .email(student.getEmail())
+                .phone(student.getPhone())
+                .targetType(student.getTargetType())
+                .studentStatus(student.getStatus())
+                .accountStatus(user != null ? user.getStatus() : "NO_ACCOUNT")
+                .username(user != null ? user.getUsername() : null)
+                .firstEnrollmentDate(firstDate)
+                .totalYearsEnrolled(yearSet.size())
+                .totalClassesEnrolled(filteredEnrollments.size())
+                .totalCompletedClasses(totalCompleted)
+                .overallAttendanceRate(overallRate)
+                .totalTuition(sumTuition)
+                .totalPaid(sumPaid)
+                .totalDebt(totalDebt)
+                .enrolledAcademicYears(new ArrayList<>(yearSet))
+                .enrollments(enrollmentItems)
+                .build();
     }
 }

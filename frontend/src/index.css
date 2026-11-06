@@ -1,18 +1,18 @@
-/* ----- Google Fonts: Be Vietnam Pro & Inter ----- */
-@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,600&family=Inter:wght@300;400;500;600;700;800&display=swap');
+/* ----- Google Fonts: Inter Primary & Be Vietnam Pro Fallback ----- */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Be+Vietnam+Pro:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
 
 @import "tailwindcss";
 
 @theme {
-  --font-sans: 'Be Vietnam Pro', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  --font-display: 'Be Vietnam Pro', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-sans: 'Inter', 'Be Vietnam Pro', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-display: 'Inter', 'Be Vietnam Pro', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
 
 @custom-variant dark (&:where(.dark, .dark *));
 
 /* ===================================================
-   CH Academy - Unified Design System
-   Brand: Navy & Cyan/Blue Accent, Dual Light/Dark Theme
+   CH Academy - Unified Design System & Typography
+   Standardized Font: Inter (Primary) with Be Vietnam Pro
    =================================================== */
 
 :root {
@@ -54,8 +54,8 @@
 
   --focus-ring: rgba(37, 99, 235, 0.35);
 
-  /* Typography: Be Vietnam Pro first for supreme Vietnamese typography */
-  --font-family: 'Be Vietnam Pro', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  /* Typography: Inter primary with Vietnamese support and fallback */
+  --font-family: 'Inter', 'Be Vietnam Pro', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 
   /* Spacing Scale */
   --space-1: 4px;
@@ -968,6 +968,124 @@ html[data-mode="desktop"].electron-app[data-theme="glass"] body {
 .app-no-drag {
   -webkit-app-region: no-drag;
 }
+
+/* ===================================================
+   Enterprise Standardized Typography Scale (Inter Primary)
+   =================================================== */
+.typo-page-title {
+  font-size: clamp(1.375rem, 2vw, 1.5625rem); /* 22px - 25px */
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  line-height: 1.25;
+}
+
+.typo-section-title {
+  font-size: clamp(0.9375rem, 1.2vw, 1.0625rem); /* 15px - 17px */
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  line-height: 1.35;
+}
+
+.typo-kpi-value {
+  font-size: clamp(1.4375rem, 2.2vw, 1.8125rem); /* 23px - 29px */
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+  font-feature-settings: 'tnum' 1, 'cv02' 1, 'cv03' 1;
+}
+
+.typo-body {
+  font-size: 0.84375rem; /* ~13.5px */
+  font-weight: 400;
+  line-height: 1.55;
+}
+
+.typo-table {
+  font-size: 0.78125rem; /* 12.5px */
+  font-weight: 500;
+  line-height: 1.45;
+}
+
+.typo-label-secondary {
+  font-size: 0.71875rem; /* 11.5px */
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  line-height: 1.3;
+}
+
+.typo-nav-item {
+  font-size: 0.84375rem; /* 13.5px */
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.4;
+}
+
+.typo-btn {
+  font-size: 0.8125rem; /* 13px */
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+}
+
+/* ===================================================
+   3D Animated Border Glow (Enterprise SaaS Accent)
+   Hardware-accelerated CSS Conic Gradient Beam
+   =================================================== */
+
+@keyframes border-glow-rotate {
+  0% {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  100% {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+.animate-glow-border-spin {
+  animation: border-glow-rotate 4s linear infinite;
+}
+
+/* Standalone CSS Utility: .glow-card */
+.glow-card {
+  position: relative;
+  border-radius: 1.25rem;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.25s ease;
+  will-change: transform, box-shadow;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .glow-card:hover {
+    transform: translateY(-2.5px);
+    border-color: rgba(14, 165, 233, 0.4);
+    box-shadow: 0 14px 30px -10px rgba(14, 165, 233, 0.15),
+                0 4px 10px -2px rgba(15, 23, 42, 0.05);
+  }
+
+  .dark .glow-card:hover {
+    border-color: rgba(56, 189, 248, 0.45);
+    box-shadow: 0 16px 36px -10px rgba(56, 189, 248, 0.18),
+                0 6px 14px -3px rgba(0, 0, 0, 0.5);
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .animate-glow-border-spin {
+    animation: none !important;
+  }
+  .glow-card {
+    transition: none !important;
+  }
+  .glow-card:hover {
+    transform: none !important;
+  }
+}
+
 
 
 

@@ -60,6 +60,12 @@ public class User {
     @Column(name = "password_reset_token_expiry")
     private Instant passwordResetTokenExpiry;
 
+    @Column(name = "activation_token")
+    private String activationToken;
+
+    @Column(name = "activation_token_expires_at")
+    private Instant activationTokenExpiresAt;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt = Instant.now();
 
@@ -208,6 +214,22 @@ public class User {
 
     public void setPasswordResetTokenExpiry(Instant passwordResetTokenExpiry) {
         this.passwordResetTokenExpiry = passwordResetTokenExpiry;
+    }
+
+    public String getActivationToken() {
+        return activationToken;
+    }
+
+    public void setActivationToken(String activationToken) {
+        this.activationToken = activationToken;
+    }
+
+    public Instant getActivationTokenExpiresAt() {
+        return activationTokenExpiresAt;
+    }
+
+    public void setActivationTokenExpiresAt(Instant activationTokenExpiresAt) {
+        this.activationTokenExpiresAt = activationTokenExpiresAt;
     }
 
     public Instant getCreatedAt() {

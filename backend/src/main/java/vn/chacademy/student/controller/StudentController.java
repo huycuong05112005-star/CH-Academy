@@ -138,6 +138,15 @@ public class StudentController {
         return ResponseEntity.ok(ApiResponse.success("Ghi danh, sinh học phí & cập nhật tài khoản thành công", res));
     }
 
+    @GetMapping("/{id}/learning-history")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'CENTER_ADMIN', 'ADMIN', 'ACADEMIC_STAFF')")
+    public ResponseEntity<ApiResponse<vn.chacademy.student.dto.StudentLearningHistoryResponseDto>> getStudentLearningHistory(
+            @PathVariable Long id,
+            @RequestParam(required = false) String academicYear) {
+        vn.chacademy.student.dto.StudentLearningHistoryResponseDto history = studentService.getStudentDetailedLearningHistory(id, academicYear);
+        return ResponseEntity.ok(ApiResponse.success(history));
+    }
+
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'CENTER_ADMIN')")
     public ResponseEntity<ApiResponse<Void>> deleteStudent(

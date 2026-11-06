@@ -26,6 +26,10 @@ public class LeadDto {
     private String assignedStaffName;
     private String status;
     private String notes;
+    private Boolean isExistingStudent;
+    private Long existingStudentId;
+    private String existingStudentCode;
+    private String existingStudentName;
     private Long convertedStudentId;
     private String convertedStudentCode;
     private String convertedStudentName;
@@ -48,6 +52,10 @@ public class LeadDto {
                 .assignedStaffName(lead.getAssignedStaff() != null ? lead.getAssignedStaff().getFullName() : null)
                 .status(lead.getStatus())
                 .notes(lead.getNotes())
+                .isExistingStudent(Boolean.TRUE.equals(lead.getIsExistingStudent()))
+                .existingStudentId(lead.getExistingStudent() != null ? lead.getExistingStudent().getId() : null)
+                .existingStudentCode(lead.getExistingStudent() != null ? lead.getExistingStudent().getStudentCode() : null)
+                .existingStudentName(lead.getExistingStudent() != null ? lead.getExistingStudent().getFullName() : null)
                 .convertedStudentId(lead.getConvertedStudent() != null ? lead.getConvertedStudent().getId() : null)
                 .convertedStudentCode(lead.getConvertedStudent() != null ? lead.getConvertedStudent().getStudentCode() : null)
                 .convertedStudentName(lead.getConvertedStudent() != null ? lead.getConvertedStudent().getFullName() : null)

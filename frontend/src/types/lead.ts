@@ -15,7 +15,7 @@ export interface Lead {
   fullName: string;
   phone: string;
   email?: string | null;
-  source: 'WEBSITE' | 'FACEBOOK' | 'REFERRAL' | 'WALK_IN' | 'HOTLINE' | 'OTHER';
+  source: 'WEBSITE' | 'FACEBOOK' | 'REFERRAL' | 'WALK_IN' | 'HOTLINE' | 'OTHER' | 'STUDENT_PORTAL' | 'AI_CHATBOT' | 'AI_WEBSITE' | string;
   targetCourseId?: number | null;
   targetCourseName?: string | null;
   assignedStaffId?: number | null;
@@ -25,6 +25,9 @@ export interface Lead {
   convertedStudentId?: number | null;
   convertedStudentCode?: string | null;
   convertedStudentName?: string | null;
+  isExistingStudent?: boolean;
+  existingStudentId?: number | null;
+  existingStudentCode?: string | null;
   createdAt: string;
   updatedAt: string;
   activities?: LeadActivity[];

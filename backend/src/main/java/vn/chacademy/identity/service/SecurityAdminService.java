@@ -1,7 +1,7 @@
 package vn.chacademy.identity.service;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.chacademy.common.audit.dto.AuditLogDto;
@@ -24,13 +24,21 @@ import java.util.Set;
 import java.util.UUID;
 
 @Service
-@RequiredArgsConstructor
-@Slf4j
 public class SecurityAdminService {
+
+    private static final Logger log = LoggerFactory.getLogger(SecurityAdminService.class);
 
     private final UserRepository userRepository;
     private final AuditLogRepository auditLogRepository;
     private final AuditService auditService;
+
+    public SecurityAdminService(UserRepository userRepository,
+                                AuditLogRepository auditLogRepository,
+                                AuditService auditService) {
+        this.userRepository = userRepository;
+        this.auditLogRepository = auditLogRepository;
+        this.auditService = auditService;
+    }
 
     @Transactional(readOnly = true)
     public List<UserSecurityDto> getStaffAndTeacherSecurityList(String keyword, String roleFilter, String statusFilter) {

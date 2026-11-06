@@ -39,6 +39,8 @@ public class EnrollmentRequestService {
     private final StudentRepository studentRepository;
     private final ReceivableRepository receivableRepository;
     private final ClassChatService classChatService;
+    private final vn.chacademy.lead.repository.LeadRepository leadRepository;
+    private final vn.chacademy.lead.repository.LeadActivityRepository leadActivityRepository;
 
     // ==========================================
     // 1. DÀNH CHO HỌC VIÊN (STUDENT WORKFLOW)
@@ -112,6 +114,35 @@ public class EnrollmentRequestService {
         EnrollmentRequest saved = requestRepository.save(request);
         log.info("Học viên {} ({}) gửi yêu cầu đăng ký lớp: {} ({})",
                 student.getFullName(), student.getStudentCode(), cls.getName(), cls.getCode());
+
+        // Tự động đồng bộ vào phân hệ Tuyển sinh & Khách hàng để quản trị viên tiếp nhận tại nơi duy nhất
+        try {
+            String leadCode = "LEAD-REG-" + (System.currentTimeMillis() % 1000000);
+            vn.chacademy.lead.entity.Lead lead = vn.chacademy.lead.entity.Lead.builder()
+                    .leadCode(leadCode)
+                    .fullName(student.getFullName())
+                    .phone(student.getPhone() != null ? student.getPhone() : "")
+                    .email(student.getEmail())
+                    .source("STUDENT_PORTAL")
+                    .status("NEW")
+                    .targetCourse(cls.getCourse())
+                    .isExistingStudent(true)
+                    .existingStudent(student)
+                    .notes("Học viên cũ gửi đăng ký khóa mới trên Portal: Lớp " + cls.getName() + " (" + cls.getCode() + ")"
+                            + (dto.getStudentNotes() != null && !dto.getStudentNotes().isBlank() ? " | Ghi chú: " + dto.getStudentNotes() : ""))
+                    .build();
+            vn.chacademy.lead.entity.Lead savedLead = leadRepository.save(lead);
+
+            vn.chacademy.lead.entity.LeadActivity act = vn.chacademy.lead.entity.LeadActivity.builder()
+                    .lead(savedLead)
+                    .actionType("NOTE")
+                    .content("Học viên " + student.getFullName() + " (" + student.getStudentCode() + ") đăng ký lớp " + cls.getName())
+                    .activityTime(Instant.now())
+                    .build();
+            leadActivityRepository.save(act);
+        } catch (Exception ex) {
+            log.warn("Không thể tự động đồng bộ Lead khi học viên gửi yêu cầu đăng ký: {}", ex.getMessage());
+        }
 
         return EnrollmentRequestDto.fromEntity(saved);
     }

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react'
-import { NavLink, Outlet, useLocation, Link } from 'react-router-dom'
+import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { useSettings } from '../context/SettingsContext'
 import { useExperience } from '../context/ExperienceContext'
 import { CommandPalette } from '../components/ui/CommandPalette'
@@ -31,9 +31,6 @@ import {
   FileText,
   CheckSquare,
   BarChart2,
-  Search,
-  ArrowRight,
-  Clock,
   Sparkles
 } from 'lucide-react'
 
@@ -143,7 +140,6 @@ export const AdminLayout: React.FC = () => {
       items: [
         { label: 'Tuyển sinh & Khách hàng', path: '/admin/leads', icon: UserPlus },
         { label: 'Học viên & Giám hộ', path: '/admin/students', icon: Users },
-        { label: 'Duyệt Đăng ký Khóa học', path: '/admin/enrollment-requests', icon: UserCheck },
       ]
     },
     {
@@ -156,8 +152,7 @@ export const AdminLayout: React.FC = () => {
       group: 'TÀI CHÍNH & HỆ THỐNG',
       items: [
         { label: 'Học phí & Công nợ', path: '/admin/finance', icon: CreditCard },
-        { label: 'Trung tâm An ninh', path: '/admin/security', icon: ShieldCheck },
-        { label: 'Nhật ký hệ thống', path: '/admin/audit-logs', icon: ShieldCheck },
+        { label: 'Bảo mật & Nhật ký', path: '/admin/security-audit', icon: ShieldCheck },
         { label: 'Cấu hình hệ thống', path: '/admin/settings', icon: Settings },
       ]
     }

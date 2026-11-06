@@ -58,4 +58,6 @@ public interface ClassRepository extends JpaRepository<ClassEntity, Long> {
 
     @Query("SELECT DISTINCT c.academicYear FROM ClassEntity c WHERE c.academicYear IS NOT NULL ORDER BY c.academicYear DESC")
     java.util.List<String> findDistinctAcademicYears();
+
+    java.util.List<ClassEntity> findByCourseId(Long courseId);
 }

@@ -26,7 +26,7 @@ export const LoginPage: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [oauthModal, setOauthModal] = useState<{ open: boolean; provider: string } | null>(null)
 
-  const { login, user, isAuthenticated, isLoading: authLoading } = useAuth()
+  const { login, logout, user, isAuthenticated, isLoading: authLoading } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
 
@@ -61,9 +61,9 @@ export const LoginPage: React.FC = () => {
     return '/admin'
   }
 
-  // Tự động điều hướng nếu đã có phiên đăng nhập hợp lệ
+  // Tự động điều hướng nếu người dùng truy cập từ route được bảo vệ trước đó
   React.useEffect(() => {
-    if (!authLoading && isAuthenticated && user) {
+    if (!authLoading && isAuthenticated && user && rawFrom) {
       const destination = getTargetPortal(user.roles, rawFrom)
       navigate(destination, { replace: true })
     }
@@ -190,6 +190,35 @@ export const LoginPage: React.FC = () => {
               >
                 <AlertCircle className="w-4 h-4 flex-shrink-0 text-rose-500" />
                 <span>{error}</span>
+              </div>
+            )}
+
+            {/* Active Session Notification Card */}
+            {isAuthenticated && user && (
+              <div className="p-4 mb-5 rounded-2xl bg-blue-50/80 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 text-xs text-blue-900 dark:text-blue-200 animate-in fade-in">
+                <div className="font-bold flex items-center gap-1.5 mb-1 text-slate-900 dark:text-white">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-500 flex-shrink-0" />
+                  <span>Đang đăng nhập: {user.fullName || user.username}</span>
+                </div>
+                <div className="text-[11px] text-slate-500 dark:text-slate-400 mb-3">
+                  Tài khoản hiện đang hoạt động với vai trò: <strong className="text-slate-700 dark:text-slate-300">{user.roles?.join(', ')}</strong>
+                </div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => navigate(getTargetPortal(user.roles, rawFrom), { replace: true })}
+                    className="px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-xs transition-colors"
+                  >
+                    Vào trang điều hành ({getTargetPortal(user.roles, rawFrom)})
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => logout()}
+                    className="px-3.5 py-1.5 rounded-xl border border-slate-300 dark:border-[#2A3A50] bg-white dark:bg-[#1C293D] hover:bg-slate-100 dark:hover:bg-[#25364F] text-slate-700 dark:text-slate-300 font-bold text-xs transition-colors"
+                  >
+                    Đăng xuất tài khoản này
+                  </button>
+                </div>
               </div>
             )}
 

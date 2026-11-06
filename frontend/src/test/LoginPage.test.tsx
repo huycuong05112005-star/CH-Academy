@@ -112,12 +112,12 @@ describe('LoginPage Component', () => {
 
   it('ngăn chặn gửi lặp request khi click liên tục', async () => {
     const user = userEvent.setup()
-    let resolveLogin: (val: any) => void = () => {}
+    let resolveLogin: (val: unknown) => void = () => {}
     const loginPromise = new Promise((resolve) => {
       resolveLogin = resolve
     })
 
-    vi.mocked(authApi.login).mockReturnValue(loginPromise as any)
+    vi.mocked(authApi.login).mockReturnValue(loginPromise as unknown as ReturnType<typeof authApi.login>)
 
     render(
       <BrowserRouter>

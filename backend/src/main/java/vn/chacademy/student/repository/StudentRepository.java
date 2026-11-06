@@ -16,6 +16,10 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
 
     Optional<Student> findByStudentCode(String studentCode);
 
+    Optional<Student> findByPhone(String phone);
+
+    Optional<Student> findByEmail(String email);
+
     boolean existsByStudentCode(String studentCode);
 
     boolean existsByStudentCodeAndIdNot(String studentCode, Long id);

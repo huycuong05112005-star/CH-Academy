@@ -313,6 +313,8 @@ export const LeadListPage: React.FC = () => {
       case 'AI_CHATBOT':
       case 'AI_WEBSITE':
         return <span className="text-xs bg-purple-50 text-purple-700 px-2 py-0.5 rounded border border-purple-200 font-semibold inline-flex items-center gap-1">🤖 Trợ lý AI</span>
+      case 'STUDENT_PORTAL':
+        return <span className="text-xs bg-violet-50 text-violet-700 px-2 py-0.5 rounded border border-violet-200 font-semibold inline-flex items-center gap-1">🎓 Cổng học viên</span>
       case 'WEBSITE':
         return <span className="text-xs bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded border border-indigo-200">Website</span>
       case 'FACEBOOK':
@@ -469,6 +471,7 @@ export const LeadListPage: React.FC = () => {
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#142B4A]"
             >
               <option value="">Tất cả nguồn</option>
+              <option value="STUDENT_PORTAL">Cổng học viên (Đăng ký thêm khóa)</option>
               <option value="AI_CHATBOT">Trợ lý AI (Website & Chat)</option>
               <option value="WEBSITE">Website công khai</option>
               <option value="FACEBOOK">Facebook Fanpage</option>
@@ -587,10 +590,19 @@ export const LeadListPage: React.FC = () => {
                     </td>
                     <td className="py-3 px-4">
                       <div className="font-medium text-slate-900 dark:text-[#E8EEF7]">{lead.fullName}</div>
-                      {lead.convertedStudentCode && (
+                      {lead.convertedStudentCode ? (
                         <div className="text-xs text-emerald-600 dark:text-emerald-400 font-medium flex items-center gap-1 mt-0.5">
                           <UserCheck className="w-3.5 h-3.5" />
                           <span>Học viên: {lead.convertedStudentCode}</span>
+                        </div>
+                      ) : lead.isExistingStudent ? (
+                        <div className="text-xs text-purple-600 dark:text-purple-400 font-medium flex items-center gap-1 mt-0.5">
+                          <Users className="w-3.5 h-3.5" />
+                          <span>Học viên cũ ({lead.existingStudentCode || 'Đã có tài khoản'})</span>
+                        </div>
+                      ) : (
+                        <div className="text-xs text-slate-400 dark:text-slate-500 font-normal mt-0.5">
+                          Khách hàng mới
                         </div>
                       )}
                     </td>
@@ -902,6 +914,28 @@ export const LeadListPage: React.FC = () => {
             </div>
 
             <form onSubmit={handleConvertLead} className="p-6 overflow-y-auto space-y-4">
+              {activeLeadForConvert.isExistingStudent ? (
+                <div className="p-3.5 bg-purple-50 rounded-xl border border-purple-200 text-xs text-purple-900 space-y-1">
+                  <div className="font-bold flex items-center gap-1.5 text-purple-800">
+                    <Users className="w-4 h-4 text-purple-600" />
+                    <span>Nhận diện Học viên cũ — Mã HV: {activeLeadForConvert.existingStudentCode || 'Đã có tài khoản'}</span>
+                  </div>
+                  <p className="text-purple-700">
+                    Học viên đã có tài khoản định danh duy nhất trong hệ thống. Thao tác tiếp nhận sẽ bổ sung ghi danh vào lớp học mới, giữ nguyên tài khoản và mật khẩu, <strong>không tạo tài khoản thứ hai</strong>.
+                  </p>
+                </div>
+              ) : (
+                <div className="p-3.5 bg-blue-50 rounded-xl border border-blue-200 text-xs text-blue-900 space-y-1">
+                  <div className="font-bold flex items-center gap-1.5 text-blue-800">
+                    <UserCheck className="w-4 h-4 text-blue-600" />
+                    <span>Học viên mới — Tự động cấp một tài khoản vĩnh viễn</span>
+                  </div>
+                  <p className="text-blue-700">
+                    Hệ thống sẽ tự động tạo hồ sơ học viên, sinh mã học viên tuần tự và cấp tài khoản định danh duy nhất dùng xuyên suốt các năm học.
+                  </p>
+                </div>
+              )}
+
               <div>
                 <label className="block text-xs font-semibold text-gray-700 mb-1">Phân loại học viên</label>
                 <select
@@ -1092,7 +1126,11 @@ export const LeadListPage: React.FC = () => {
                   disabled={formSubmitting}
                   className="px-4 py-2 bg-green-700 text-white text-sm font-semibold rounded-lg hover:bg-green-800 transition-colors disabled:opacity-50"
                 >
-                  {formSubmitting ? 'Đang chuyển đổi...' : 'Xác nhận tạo học viên'}
+                  {formSubmitting
+                    ? 'Đang xử lý...'
+                    : activeLeadForConvert.isExistingStudent
+                      ? 'Xác nhận tiếp nhận & Ghi danh lớp'
+                      : 'Xác nhận tạo học viên & Cấp tài khoản'}
                 </button>
               </div>
             </form>

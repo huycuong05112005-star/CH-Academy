@@ -23,6 +23,10 @@ public interface ReceivableRepository extends JpaRepository<Receivable, Long> {
 
     boolean existsByCode(String code);
 
+    List<Receivable> findByStudentId(Long studentId);
+
+    List<Receivable> findByEnrollmentId(Long enrollmentId);
+
     @EntityGraph(attributePaths = {"student", "enrollment"})
     @Query("SELECT r FROM Receivable r WHERE " +
            "(cast(:keyword as string) IS NULL OR " +

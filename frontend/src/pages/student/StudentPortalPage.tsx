@@ -19,6 +19,7 @@ import { NotificationBell } from '../../components/ui/NotificationBell'
 import { CommandPalette } from '../../components/ui/CommandPalette'
 import { StudentCourseRegistrationSection } from './StudentCourseRegistrationSection'
 import { StudentLearningHistorySection } from './StudentLearningHistorySection'
+import { StudentDashboardTab } from './StudentDashboardTab'
 import {
   GraduationCap,
   LogOut,
@@ -45,10 +46,12 @@ import {
   Award,
   TrendingUp,
   Target,
-  BarChart2
+  BarChart2,
+  LayoutDashboard
 } from 'lucide-react'
 import { AmbientGlow } from '../../components/ui/AmbientGlow'
 import { Tilt3DCard } from '../../components/3d/Tilt3DCard'
+import { GlowCard } from '../../components/ui/GlowCard'
 import { CyberOrb3D } from '../../components/3d/CyberOrb3D'
 import { selectClassChat } from '../../utils/chatSync'
 
@@ -60,7 +63,7 @@ export const StudentPortalPage: React.FC = () => {
   const [data, setData] = useState<StudentPortalSummary | null>(null)
   const [loading, setLoading] = useState<boolean>(true)
   const [error, setError] = useState<string | null>(null)
-  const [activeTab, setActiveTab] = useState<'classes' | 'registration' | 'history' | 'schedule' | 'attendance' | 'exams' | 'finance' | 'notifications' | 'profile'>('classes')
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'classes' | 'registration' | 'history' | 'schedule' | 'attendance' | 'exams' | 'finance' | 'notifications' | 'profile'>('dashboard')
   const [showQrModal, setShowQrModal] = useState<boolean>(false)
 
   // Assessment states
@@ -566,6 +569,18 @@ export const StudentPortalPage: React.FC = () => {
         <div className="bg-white/80 dark:bg-[#151F31]/80 backdrop-blur-sm p-1.5 rounded-2xl border border-slate-200/80 dark:border-[#2A3A50] shadow-xs">
           <div className="flex items-center gap-1.5 overflow-x-auto scroll-smooth py-0.5 px-1">
             <button
+              onClick={() => setActiveTab('dashboard')}
+              className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all flex items-center gap-2 shrink-0 ${
+                activeTab === 'dashboard'
+                  ? 'bg-[#142B4A] dark:bg-[#38BDF8] text-white dark:text-[#0B1220] shadow-sm font-bold'
+                  : 'text-slate-600 dark:text-[#A6B4C8] hover:bg-slate-100 dark:hover:bg-[#1C293D]'
+              }`}
+            >
+              <LayoutDashboard className="w-4 h-4 shrink-0" />
+              <span>Tổng quan</span>
+            </button>
+
+            <button
               onClick={() => setActiveTab('classes')}
               className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all flex items-center gap-2 shrink-0 ${
                 activeTab === 'classes'
@@ -684,6 +699,24 @@ export const StudentPortalPage: React.FC = () => {
             </button>
           </div>
         </div>
+
+        {/* TAB 0: TỔNG QUAN HỌC TẬP (ENTERPRISE DASHBOARD) */}
+        {activeTab === 'dashboard' && (
+          <StudentDashboardTab
+            data={data}
+            schedules={schedules}
+            assignedExams={assignedExams}
+            progressData={progressData}
+            notifications={notifications}
+            onNavigateTab={(tab, classId) => {
+              if (classId) {
+                setSelectedClassId(classId)
+                loadClassDetails(classId)
+              }
+              setActiveTab(tab as any)
+            }}
+          />
+        )}
 
         {/* TAB 1: LỚP HỌC & BÀI GIẢNG / TÀI LIỆU */}
         {activeTab === 'classes' && (

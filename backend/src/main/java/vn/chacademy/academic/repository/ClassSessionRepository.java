@@ -14,6 +14,8 @@ import java.util.List;
 @Repository
 public interface ClassSessionRepository extends JpaRepository<ClassSession, Long> {
 
+    long countByClassEntityId(Long classId);
+
     @EntityGraph(attributePaths = {"classEntity", "teacher"})
     List<ClassSession> findByClassEntityIdOrderBySessionDateAscStartTimeAsc(Long classId);
 

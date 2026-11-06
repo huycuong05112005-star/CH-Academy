@@ -56,8 +56,16 @@ public class Lead {
     @Column(columnDefinition = "TEXT")
     private String notes;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "converted_student_id", unique = true)
+    @Column(name = "is_existing_student")
+    @Builder.Default
+    private Boolean isExistingStudent = false;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "existing_student_id")
+    private Student existingStudent;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "converted_student_id")
     private Student convertedStudent;
 
     @CreationTimestamp

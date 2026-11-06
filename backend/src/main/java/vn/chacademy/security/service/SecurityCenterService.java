@@ -34,16 +34,26 @@ public class SecurityCenterService {
     public Map<String, Object> getSecurityOverview() {
         Map<String, Object> overview = new HashMap<>();
 
+        long totalAlerts = alertRepository.count();
         long activeSessions = sessionRepository.countByIsActiveTrue();
         long newAlerts = alertRepository.countByStatus("NEW");
         long investigatingAlerts = alertRepository.countByStatus("INVESTIGATING");
+        long resolvedAlerts = alertRepository.countByStatus("RESOLVED");
+        long falsePositiveAlerts = alertRepository.countByStatus("FALSE_POSITIVE");
+        long acceptedRiskAlerts = alertRepository.countByStatus("ACCEPTED_RISK");
         long criticalAlerts = alertRepository.countBySeverity("CRITICAL");
         long highAlerts = alertRepository.countBySeverity("HIGH");
 
-        overview.put("activeSessions", Math.max(activeSessions, 1)); // At least current admin
+        overview.put("totalAlerts", totalAlerts);
+        overview.put("newAlerts", newAlerts);
+        overview.put("investigatingAlerts", investigatingAlerts);
+        overview.put("resolvedAlerts", resolvedAlerts);
+        overview.put("falsePositiveAlerts", falsePositiveAlerts);
+        overview.put("acceptedRiskAlerts", acceptedRiskAlerts);
         overview.put("unresolvedAlerts", newAlerts + investigatingAlerts);
         overview.put("criticalAlerts", criticalAlerts);
         overview.put("highAlerts", highAlerts);
+        overview.put("activeSessions", Math.max(activeSessions, 1)); // At least current session
         overview.put("zeroTrustPosture", "COMPLIANT");
         overview.put("fieldLevelSecurityEnforced", true);
         overview.put("recentAlerts", alertRepository.findAllByOrderByCreatedAtDesc().stream().limit(5).toList());
@@ -52,11 +62,17 @@ public class SecurityCenterService {
     }
 
     @Transactional(readOnly = true)
-    public List<SecurityAlert> getAlerts(String severity, String status) {
+    public List<SecurityAlert> getAlerts(String severity, String status, String keyword) {
         return alertRepository.findFiltered(
                 severity != null && !severity.isBlank() ? severity.trim().toUpperCase() : null,
-                status != null && !status.isBlank() ? status.trim().toUpperCase() : null
+                status != null && !status.isBlank() ? status.trim().toUpperCase() : null,
+                keyword != null && !keyword.isBlank() ? keyword.trim() : null
         );
+    }
+
+    @Transactional(readOnly = true)
+    public List<SecurityAlert> getAlerts(String severity, String status) {
+        return getAlerts(severity, status, null);
     }
 
     @Transactional
@@ -65,7 +81,7 @@ public class SecurityCenterService {
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy cảnh báo an ninh #" + id));
 
         alert.setStatus(status.toUpperCase().trim());
-        if ("RESOLVED".equalsIgnoreCase(status) || "DISMISSED".equalsIgnoreCase(status)) {
+        if ("RESOLVED".equalsIgnoreCase(status) || "DISMISSED".equalsIgnoreCase(status) || "FALSE_POSITIVE".equalsIgnoreCase(status)) {
             alert.setResolvedBy(resolver != null ? resolver.getId() : null);
             alert.setResolvedAt(Instant.now());
         }
@@ -74,6 +90,76 @@ public class SecurityCenterService {
         }
 
         return alertRepository.save(alert);
+    }
+
+    @Transactional
+    public SecurityAlert investigateAlert(Long id, String notes, User investigator) {
+        SecurityAlert alert = alertRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy cảnh báo an ninh #" + id));
+        alert.setStatus("INVESTIGATING");
+        alert.setInvestigatedBy(investigator != null ? investigator.getId() : null);
+        alert.setInvestigatedAt(Instant.now());
+        if (notes != null && !notes.isBlank()) {
+            String current = alert.getInvestigationNotes() != null ? alert.getInvestigationNotes() + "\n" : "";
+            alert.setInvestigationNotes(current + "[" + Instant.now() + " - " + (investigator != null ? investigator.getFullName() : "Admin") + "]: " + notes.trim());
+        }
+        return alertRepository.save(alert);
+    }
+
+    @Transactional
+    public SecurityAlert resolveAlert(Long id, String status, String resolutionNotes, String actionTaken, User resolver) {
+        SecurityAlert alert = alertRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy cảnh báo an ninh #" + id));
+        String targetStatus = status != null ? status.trim().toUpperCase() : "RESOLVED";
+        alert.setStatus(targetStatus);
+        alert.setResolvedBy(resolver != null ? resolver.getId() : null);
+        alert.setResolvedAt(Instant.now());
+        if (resolutionNotes != null && !resolutionNotes.isBlank()) {
+            alert.setResolutionNotes(resolutionNotes.trim());
+        }
+        if (actionTaken != null && !actionTaken.isBlank()) {
+            alert.setActionTaken(actionTaken.trim());
+        }
+        return alertRepository.save(alert);
+    }
+
+    @Transactional
+    public Map<String, Object> remediateAlert(Long id, String actionType, User admin) {
+        SecurityAlert alert = alertRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy cảnh báo an ninh #" + id));
+        Map<String, Object> result = new HashMap<>();
+        result.put("alertId", id);
+        result.put("actionType", actionType);
+
+        if (alert.getUsername() != null && !alert.getUsername().isBlank()) {
+            User targetUser = userRepository.findByUsername(alert.getUsername()).orElse(null);
+            if (targetUser != null) {
+                if ("LOCK_USER".equalsIgnoreCase(actionType)) {
+                    targetUser.setStatus("LOCKED");
+                    targetUser.setLockedAt(Instant.now());
+                    userRepository.save(targetUser);
+                    alert.setActionTaken("Đã khóa tài khoản " + targetUser.getUsername());
+                    result.put("message", "Đã khóa tài khoản " + targetUser.getUsername());
+                } else if ("REQUIRE_PASSWORD_CHANGE".equalsIgnoreCase(actionType)) {
+                    targetUser.setMustChangePassword(true);
+                    userRepository.save(targetUser);
+                    alert.setActionTaken("Yêu cầu đổi mật khẩu cho tài khoản " + targetUser.getUsername());
+                    result.put("message", "Đã yêu cầu đổi mật khẩu cho " + targetUser.getUsername());
+                } else if ("REVOKE_SESSIONS".equalsIgnoreCase(actionType)) {
+                    List<UserSession> userSessions = sessionRepository.findByUserIdAndIsActiveTrue(targetUser.getId());
+                    for (UserSession s : userSessions) {
+                        s.setIsActive(false);
+                        s.setRevokedAt(Instant.now());
+                        s.setRevokedReason("Thu hồi phiên do cảnh báo an ninh #" + alert.getAlertCode());
+                        sessionRepository.save(s);
+                    }
+                    alert.setActionTaken("Đã thu hồi " + userSessions.size() + " phiên của " + targetUser.getUsername());
+                    result.put("message", "Đã thu hồi " + userSessions.size() + " phiên đăng nhập");
+                }
+            }
+        }
+        alertRepository.save(alert);
+        return result;
     }
 
     @Transactional(readOnly = true)

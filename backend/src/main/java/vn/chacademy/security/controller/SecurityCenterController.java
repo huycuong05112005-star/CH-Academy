@@ -39,8 +39,9 @@ public class SecurityCenterController {
     @GetMapping("/alerts")
     public ResponseEntity<ApiResponse<List<SecurityAlert>>> getAlerts(
             @RequestParam(required = false) String severity,
-            @RequestParam(required = false) String status) {
-        return ResponseEntity.ok(ApiResponse.success(securityCenterService.getAlerts(severity, status)));
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String keyword) {
+        return ResponseEntity.ok(ApiResponse.success(securityCenterService.getAlerts(severity, status, keyword)));
     }
 
     @PutMapping("/alerts/{id}/status")
@@ -52,6 +53,41 @@ public class SecurityCenterController {
         User user = getAuthenticatedUser(userDetails);
         SecurityAlert updated = securityCenterService.updateAlertStatus(id, status, notes, user);
         return ResponseEntity.ok(ApiResponse.success("Đã cập nhật trạng thái cảnh báo an ninh", updated));
+    }
+
+    @PostMapping("/alerts/{id}/investigate")
+    public ResponseEntity<ApiResponse<SecurityAlert>> investigateAlert(
+            @PathVariable Long id,
+            @RequestBody(required = false) Map<String, String> body,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        User user = getAuthenticatedUser(userDetails);
+        String notes = body != null ? body.get("notes") : null;
+        SecurityAlert alert = securityCenterService.investigateAlert(id, notes, user);
+        return ResponseEntity.ok(ApiResponse.success("Đã tiếp nhận điều tra sự cố an ninh", alert));
+    }
+
+    @PostMapping("/alerts/{id}/resolve")
+    public ResponseEntity<ApiResponse<SecurityAlert>> resolveAlert(
+            @PathVariable Long id,
+            @RequestBody Map<String, String> body,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        User user = getAuthenticatedUser(userDetails);
+        String status = body != null ? body.getOrDefault("status", "RESOLVED") : "RESOLVED";
+        String resolutionNotes = body != null ? body.get("notes") : null;
+        String actionTaken = body != null ? body.get("actionTaken") : null;
+        SecurityAlert alert = securityCenterService.resolveAlert(id, status, resolutionNotes, actionTaken, user);
+        return ResponseEntity.ok(ApiResponse.success("Đã cập nhật kết quả xử lý cảnh báo", alert));
+    }
+
+    @PostMapping("/alerts/{id}/remediate")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> remediateAlert(
+            @PathVariable Long id,
+            @RequestBody Map<String, String> body,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        User user = getAuthenticatedUser(userDetails);
+        String actionType = body != null ? body.get("actionType") : "LOCK_USER";
+        Map<String, Object> result = securityCenterService.remediateAlert(id, actionType, user);
+        return ResponseEntity.ok(ApiResponse.success("Thực hiện biện pháp khắc phục thành công", result));
     }
 
     @GetMapping("/sessions")

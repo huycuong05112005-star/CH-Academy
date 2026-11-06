@@ -13,6 +13,8 @@ public interface EnrollmentRequestRepository extends JpaRepository<EnrollmentReq
 
     List<EnrollmentRequest> findByStudentIdOrderByCreatedAtDesc(Long studentId);
 
+    List<EnrollmentRequest> findByClassEntityIdAndStudentId(Long classId, Long studentId);
+
     @Query("SELECT r FROM EnrollmentRequest r JOIN r.student s WHERE s.user.id = :userId ORDER BY r.createdAt DESC")
     List<EnrollmentRequest> findByStudentUserIdOrderByCreatedAtDesc(@Param("userId") Long userId);
 

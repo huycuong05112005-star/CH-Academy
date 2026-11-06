@@ -1,6 +1,7 @@
 package vn.chacademy.lead.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -29,6 +30,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class LeadService {
@@ -41,9 +43,10 @@ public class LeadService {
     private final GuardianRepository guardianRepository;
     private final StudentGuardianRepository studentGuardianRepository;
     private final vn.chacademy.student.service.StudentService studentService;
+    private final vn.chacademy.academic.repository.EnrollmentRequestRepository enrollmentRequestRepository;
 
     private static final Set<String> VALID_STATUSES = Set.of("NEW", "CONTACTED", "CONSULTING", "APPOINTMENT", "CONVERTED", "LOST");
-    private static final Set<String> VALID_SOURCES = Set.of("WEBSITE", "FACEBOOK", "REFERRAL", "WALK_IN", "HOTLINE", "OTHER", "AI_CHATBOT", "AI_WEBSITE");
+    private static final Set<String> VALID_SOURCES = Set.of("WEBSITE", "FACEBOOK", "REFERRAL", "WALK_IN", "HOTLINE", "OTHER", "AI_CHATBOT", "AI_WEBSITE", "STUDENT_PORTAL");
     private static final AtomicLong CODE_COUNTER = new AtomicLong(System.currentTimeMillis() % 1000000);
 
     @Transactional(readOnly = true)
@@ -133,6 +136,15 @@ public class LeadService {
 
         String leadCode = generateLeadCode();
 
+        // Anti-duplicate: Nhận diện nếu số điện thoại hoặc email đã thuộc về một học viên chính thức
+        Student existingStudent = null;
+        if (request.getPhone() != null && !request.getPhone().isBlank()) {
+            existingStudent = studentRepository.findByPhone(request.getPhone().trim()).orElse(null);
+        }
+        if (existingStudent == null && request.getEmail() != null && !request.getEmail().isBlank()) {
+            existingStudent = studentRepository.findByEmail(request.getEmail().trim().toLowerCase()).orElse(null);
+        }
+
         Lead lead = Lead.builder()
                 .leadCode(leadCode)
                 .fullName(request.getFullName().trim())
@@ -142,14 +154,21 @@ public class LeadService {
                 .targetCourse(course)
                 .status("NEW")
                 .notes(request.getNotes())
+                .isExistingStudent(existingStudent != null)
+                .existingStudent(existingStudent)
                 .build();
 
         Lead saved = leadRepository.save(lead);
 
+        String noteContent = "Đăng ký tư vấn trực tuyến từ Website công khai" + (course != null ? " cho khóa học: " + course.getName() : "");
+        if (existingStudent != null) {
+            noteContent += " (Hệ thống tự động nhận diện học viên cũ: " + existingStudent.getFullName() + " - Mã: " + existingStudent.getStudentCode() + ")";
+        }
+
         LeadActivity activity = LeadActivity.builder()
                 .lead(saved)
                 .actionType("NOTE")
-                .content("Đăng ký tư vấn trực tuyến từ Website công khai" + (course != null ? " cho khóa học: " + course.getName() : ""))
+                .content(noteContent)
                 .activityTime(Instant.now())
                 .build();
         leadActivityRepository.save(activity);
@@ -215,54 +234,70 @@ public class LeadService {
             throw new BadRequestException("Khách hàng này đã được chuyển đổi thành học viên trước đó.");
         }
 
-        // Generate student code HV + year + sequence
-        String studentCode = "HV" + (System.currentTimeMillis() % 1000000);
-        while (studentRepository.existsByStudentCode(studentCode)) {
-            studentCode = "HV" + (System.currentTimeMillis() % 1000000 + 1);
+        // Anti-duplicate: Kiểm tra xem học viên đã từng có hồ sơ chính thức hay chưa
+        Student existingStudent = lead.getExistingStudent();
+        if (existingStudent == null && lead.getPhone() != null && !lead.getPhone().isBlank()) {
+            existingStudent = studentRepository.findByPhone(lead.getPhone().trim()).orElse(null);
+        }
+        if (existingStudent == null && lead.getEmail() != null && !lead.getEmail().isBlank()) {
+            existingStudent = studentRepository.findByEmail(lead.getEmail().trim().toLowerCase()).orElse(null);
         }
 
-        String studentType = request.getStudentType() != null ? request.getStudentType().trim().toUpperCase() : "ADULT";
+        Student savedStudent;
+        boolean isReusing = existingStudent != null;
 
-        Student student = Student.builder()
-                .studentCode(studentCode)
-                .fullName(lead.getFullName())
-                .dateOfBirth(request.getDob())
-                .gender(request.getGender() != null ? request.getGender().trim().toUpperCase() : "OTHER")
-                .phone(lead.getPhone())
-                .email(lead.getEmail())
-                .address(request.getAddress())
-                .targetType(studentType)
-                .status("ACTIVE")
-                .internalNotes("Chuyển đổi từ khách hàng tiềm năng mã: " + lead.getLeadCode())
-                .build();
+        if (isReusing) {
+            // DUY TRÌ HỒ SƠ VÀ TÀI KHOẢN DUY NHẤT CHO HỌC VIÊN XUYÊN SUỐT CÁC NĂM
+            savedStudent = existingStudent;
+            log.info("Nhận diện học viên cũ {} ({}) khi chuyển đổi Lead #{} - Không tạo trùng tài khoản",
+                    savedStudent.getFullName(), savedStudent.getStudentCode(), lead.getLeadCode());
+        } else {
+            // Học viên mới lần đầu đến trung tâm - Tự động sinh mã học viên tuần tự
+            String studentCode = studentService.generateNextStudentCode();
 
-        Student savedStudent = studentRepository.save(student);
+            String studentType = request.getStudentType() != null ? request.getStudentType().trim().toUpperCase() : "ADULT";
 
-        // If KID and guardian info supplied, link guardian
-        if ("KID".equals(studentType)) {
-            Guardian guardian = null;
-            if (request.getExistingGuardianId() != null) {
-                guardian = guardianRepository.findById(request.getExistingGuardianId()).orElse(null);
-            } else if (request.getGuardianFullName() != null && !request.getGuardianFullName().isBlank()) {
-                guardian = Guardian.builder()
-                        .fullName(request.getGuardianFullName().trim())
-                        .phone(request.getGuardianPhone() != null ? request.getGuardianPhone().trim() : lead.getPhone())
-                        .email(request.getGuardianEmail() != null ? request.getGuardianEmail().trim() : null)
-                        .address(request.getAddress())
-                        .build();
-                guardian = guardianRepository.save(guardian);
-            }
+            Student student = Student.builder()
+                    .studentCode(studentCode)
+                    .fullName(lead.getFullName())
+                    .dateOfBirth(request.getDob())
+                    .gender(request.getGender() != null ? request.getGender().trim().toUpperCase() : "OTHER")
+                    .phone(lead.getPhone())
+                    .email(lead.getEmail())
+                    .address(request.getAddress())
+                    .targetType(studentType)
+                    .status("ACTIVE")
+                    .internalNotes("Chuyển đổi từ khách hàng tiềm năng mã: " + lead.getLeadCode())
+                    .build();
 
-            if (guardian != null) {
-                StudentGuardian link = StudentGuardian.builder()
-                        .id(new StudentGuardianId(savedStudent.getId(), guardian.getId()))
-                        .student(savedStudent)
-                        .guardian(guardian)
-                        .relationshipType(request.getGuardianRelationship() != null ? request.getGuardianRelationship().trim().toUpperCase() : "PARENT")
-                        .isPrimaryContact(true)
-                        .build();
-                studentGuardianRepository.save(link);
-                savedStudent.setStudentGuardians(List.of(link));
+            savedStudent = studentRepository.save(student);
+
+            // If KID and guardian info supplied, link guardian
+            if ("KID".equals(studentType)) {
+                Guardian guardian = null;
+                if (request.getExistingGuardianId() != null) {
+                    guardian = guardianRepository.findById(request.getExistingGuardianId()).orElse(null);
+                } else if (request.getGuardianFullName() != null && !request.getGuardianFullName().isBlank()) {
+                    guardian = Guardian.builder()
+                            .fullName(request.getGuardianFullName().trim())
+                            .phone(request.getGuardianPhone() != null ? request.getGuardianPhone().trim() : lead.getPhone())
+                            .email(request.getGuardianEmail() != null ? request.getGuardianEmail().trim() : null)
+                            .address(request.getAddress())
+                            .build();
+                    guardian = guardianRepository.save(guardian);
+                }
+
+                if (guardian != null) {
+                    StudentGuardian link = StudentGuardian.builder()
+                            .id(new StudentGuardianId(savedStudent.getId(), guardian.getId()))
+                            .student(savedStudent)
+                            .guardian(guardian)
+                            .relationshipType(request.getGuardianRelationship() != null ? request.getGuardianRelationship().trim().toUpperCase() : "PARENT")
+                            .isPrimaryContact(true)
+                            .build();
+                    studentGuardianRepository.save(link);
+                    savedStudent.setStudentGuardians(List.of(link));
+                }
             }
         }
 
@@ -273,15 +308,19 @@ public class LeadService {
 
         // Log activity
         User staff = currentUserId != null ? userRepository.findById(currentUserId).orElse(null) : null;
+        String actionContent = isReusing
+                ? "Đã ghi nhận đăng ký khóa học mới cho học viên cũ: " + savedStudent.getFullName() + " (Mã: " + savedStudent.getStudentCode() + ")"
+                : "Đã chuyển đổi thành công thành học viên chính thức: " + savedStudent.getFullName() + " (Mã: " + savedStudent.getStudentCode() + ")";
+
         LeadActivity activity = LeadActivity.builder()
                 .lead(updatedLead)
                 .staff(staff)
                 .actionType("STATUS_CHANGE")
-                .content("Đã chuyển đổi thành công thành học viên chính thức: " + savedStudent.getFullName() + " (Mã: " + savedStudent.getStudentCode() + ")")
+                .content(actionContent)
                 .activityTime(Instant.now())
                 .build();
         leadActivityRepository.save(activity);
-        // Optional automated enrollment, tuition & account provisioning
+        // Automated enrollment, tuition & account provisioning
         if (request.getClassId() != null) {
             vn.chacademy.student.dto.EnrollAndPayRequest enrollReq = vn.chacademy.student.dto.EnrollAndPayRequest.builder()
                     .classId(request.getClassId())
@@ -289,9 +328,29 @@ public class LeadService {
                     .paymentMethod(request.getPaymentMethod() != null ? request.getPaymentMethod() : "BANK_TRANSFER")
                     .referenceNumber(request.getReferenceNumber())
                     .notes("Ghi danh tự động khi chốt Lead mã " + lead.getLeadCode())
-                    .provisionAccount(Boolean.TRUE.equals(request.getProvisionAccount()))
+                    .provisionAccount(savedStudent.getUser() == null || Boolean.TRUE.equals(request.getProvisionAccount()))
                     .build();
             studentService.enrollAndPay(savedStudent.getId(), enrollReq, currentUserId);
+
+            // Tự động đồng bộ duyệt yêu cầu đăng ký nếu có
+            try {
+                List<vn.chacademy.academic.entity.EnrollmentRequest> pendingReqs = enrollmentRequestRepository
+                        .findByClassEntityIdAndStudentId(request.getClassId(), savedStudent.getId());
+                for (vn.chacademy.academic.entity.EnrollmentRequest pr : pendingReqs) {
+                    if ("PENDING".equalsIgnoreCase(pr.getStatus())) {
+                        pr.setStatus("APPROVED");
+                        pr.setReviewedBy(staff);
+                        pr.setReviewedAt(Instant.now());
+                        pr.setReviewNotes("Tự động phê duyệt qua quy trình Tuyển sinh & Tiếp nhận (Lead #" + lead.getLeadCode() + ")");
+                        enrollmentRequestRepository.save(pr);
+                    }
+                }
+            } catch (Exception e) {
+                log.warn("Không thể cập nhật trạng thái EnrollmentRequest: {}", e.getMessage());
+            }
+        } else if (savedStudent.getUser() == null) {
+            // Chưa chọn lớp nhưng học viên mới cần tài khoản định danh duy nhất ngay khi tiếp nhận
+            studentService.provisionAccount(savedStudent.getId(), null);
         }
 
         return LeadDto.fromEntity(updatedLead);

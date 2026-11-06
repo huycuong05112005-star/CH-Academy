@@ -58,7 +58,7 @@ const GradingListPage = lazy(() => import('./pages/admin/assessment/GradingListP
 const ExamAnalyticsPage = lazy(() => import('./pages/admin/assessment/ExamAnalyticsPage').then(m => ({ default: m.ExamAnalyticsPage })))
 const ClassAnalyticsPage = lazy(() => import('./pages/admin/assessment/ClassAnalyticsPage').then(m => ({ default: m.ClassAnalyticsPage })))
 const AiStudioPage = lazy(() => import('./pages/admin/AiStudioPage').then(m => ({ default: m.AiStudioPage })))
-const EnrollmentRequestsPage = lazy(() => import('./pages/admin/EnrollmentRequestsPage').then(m => ({ default: m.EnrollmentRequestsPage })))
+const UnifiedSecurityAuditPage = lazy(() => import('./pages/admin/security/UnifiedSecurityAuditPage').then(m => ({ default: m.UnifiedSecurityAuditPage })))
 const SecurityCenterPage = lazy(() => import('./pages/admin/security/SecurityCenterPage').then(m => ({ default: m.SecurityCenterPage })))
 
 export default function App() {
@@ -149,9 +149,10 @@ export default function App() {
                   <Route path="payments" element={<AdminPaymentsRedirect />} />
                   <Route path="notifications" element={<AdminNotificationsPage />} />
                   <Route path="ai-studio" element={<AiStudioPage />} />
-                  <Route path="enrollment-requests" element={<EnrollmentRequestsPage />} />
-                  <Route path="security" element={<SecurityCenterPage />} />
-                  <Route path="audit-logs" element={<AuditLogsPage />} />
+                  <Route path="enrollment-requests" element={<Navigate to="/admin/leads" replace />} />
+                  <Route path="security-audit" element={<UnifiedSecurityAuditPage />} />
+                  <Route path="security" element={<Navigate to="/admin/security-audit?tab=alerts" replace />} />
+                  <Route path="audit-logs" element={<Navigate to="/admin/security-audit?tab=audit-logs" replace />} />
                   <Route path="settings" element={<SettingsPage />} />
 
                   {/* Assessment Module Routes */}
