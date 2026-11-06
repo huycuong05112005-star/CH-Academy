@@ -22,3 +22,4 @@ echo   - Frontend: http://localhost:5173
 echo   - Backend : http://localhost:8088
 echo ========================================================
 pause
+

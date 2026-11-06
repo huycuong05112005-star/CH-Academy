@@ -11,3 +11,4 @@ echo.
 echo [2/2] Dang chay Spring Boot...
 call mvnw.cmd spring-boot:run
 pause
+

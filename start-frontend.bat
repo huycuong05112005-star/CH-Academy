@@ -8,3 +8,4 @@ cd /d "%~dp0frontend"
 echo Dang chay may chu phat trien Frontend...
 call npm run dev
 pause
+
