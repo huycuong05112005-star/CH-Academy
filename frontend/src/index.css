@@ -1001,12 +1001,12 @@ html[data-mode="desktop"].electron-app[data-theme="glass"] body {
 }
 
 
-/* ===================================================
-   3D Animated Border Glow (Enterprise SaaS Accent)
-   Hardware-accelerated CSS Conic Gradient Beam
-   =================================================== */
+/* ==========================================================================
+   CONTINUOUS 360° LED RUNNING BORDER ANIMATION (ENTERPRISE SAAS ACCENT)
+   Hardware-accelerated perimeter beam with mask-composite & 360° loop
+   ========================================================================== */
 
-@keyframes border-glow-rotate {
+@keyframes led-border-spin {
   0% {
     transform: translate(-50%, -50%) rotate(0deg);
   }
@@ -1016,7 +1016,127 @@ html[data-mode="desktop"].electron-app[data-theme="glass"] body {
 }
 
 .animate-glow-border-spin {
-  animation: border-glow-rotate 4s linear infinite;
+  animation: led-border-spin 4.5s linear infinite;
+}
+
+.led-border-beam {
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 2px;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  overflow: hidden;
+  opacity: 0;
+  transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 5;
+}
+
+.group:hover > .led-border-beam,
+.group:hover .led-border-beam,
+.led-card:hover > .led-border-beam,
+.led-border-beam.is-active {
+  opacity: 1;
+}
+
+.led-border-spinner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 350%;
+  padding-bottom: 350%;
+  transform: translate(-50%, -50%);
+  animation: led-border-spin 4.5s linear infinite;
+  transform-origin: center center;
+  will-change: transform;
+}
+
+/* Accent Color Conic Gradients */
+.led-beam-cyan {
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    transparent 260deg,
+    rgba(2, 132, 199, 0.2) 285deg,
+    rgba(14, 165, 233, 0.6) 325deg,
+    #38BDF8 348deg,
+    #0EA5E9 360deg
+  );
+}
+
+.led-beam-blue {
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    transparent 260deg,
+    rgba(37, 99, 235, 0.2) 285deg,
+    rgba(59, 130, 246, 0.6) 325deg,
+    #60A5FA 348deg,
+    #2563EB 360deg
+  );
+}
+
+.led-beam-indigo {
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    transparent 260deg,
+    rgba(79, 70, 229, 0.2) 285deg,
+    rgba(99, 102, 241, 0.6) 325deg,
+    #818CF8 348deg,
+    #4F46E5 360deg
+  );
+}
+
+.led-beam-emerald {
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    transparent 260deg,
+    rgba(16, 185, 129, 0.2) 285deg,
+    rgba(52, 211, 153, 0.6) 325deg,
+    #34D399 348deg,
+    #10B981 360deg
+  );
+}
+
+.led-beam-amber {
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    transparent 260deg,
+    rgba(245, 158, 11, 0.2) 285deg,
+    rgba(251, 191, 36, 0.6) 325deg,
+    #FBBF24 348deg,
+    #F59E0B 360deg
+  );
+}
+
+.led-beam-purple {
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    transparent 260deg,
+    rgba(147, 51, 234, 0.2) 285deg,
+    rgba(168, 85, 247, 0.6) 325deg,
+    #C084FC 348deg,
+    #9333EA 360deg
+  );
+}
+
+.led-beam-rose {
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    transparent 260deg,
+    rgba(225, 29, 72, 0.2) 285deg,
+    rgba(244, 63, 94, 0.6) 325deg,
+    #FB7185 348deg,
+    #E11D48 360deg
+  );
 }
 
 /* Standalone CSS Utility: .glow-card */
@@ -1048,8 +1168,12 @@ html[data-mode="desktop"].electron-app[data-theme="glass"] body {
 
 /* Reduced motion support */
 @media (prefers-reduced-motion: reduce) {
-  .animate-glow-border-spin {
+  .animate-glow-border-spin,
+  .led-border-spinner {
     animation: none !important;
+  }
+  .led-border-beam {
+    display: none !important;
   }
   .glow-card {
     transition: none !important;

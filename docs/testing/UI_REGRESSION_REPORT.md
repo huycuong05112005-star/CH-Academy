@@ -86,3 +86,4 @@
 | **Bảo tồn Tuyến đường (Routing)** | **PASS** | 18 routes Admin, 10 tabs Teacher, 9 tabs Student nguyên vẹn |
 | **Bảo tồn Hợp đồng API** | **PASS** | Giữ nguyên các params `academicYear`, JWT header, payload DTO |
 | **Độ tương thích Responsive** | **PASS** | Kiểm tra hiển thị tốt từ mobile đến laptop và màn hình 2K |
+

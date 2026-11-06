@@ -90,3 +90,4 @@ graph TD
 - Nhãn nhóm và tên menu tự động ẩn.
 - Các icon 16px được căn giữa hoàn hảo.
 - Khi rê chuột vào icon, tooltip hiển thị tên chức năng sắc nét với font 11.5px, vị trí bên phải cố định (`fixed left-16`), không bị che khuất bởi z-index của các thành phần nội dung.
+

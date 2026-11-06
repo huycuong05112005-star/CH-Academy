@@ -263,8 +263,8 @@ export const StudentAssessmentDrawer: React.FC<StudentAssessmentDrawerProps> = (
                     Chưa có dữ liệu điểm danh thực tế cho học viên này.
                   </div>
                 ) : (
-                  <div className="border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden">
-                    <table className="w-full text-left border-collapse text-xs">
+                  <div className="border border-slate-200 dark:border-slate-800 rounded-xl overflow-x-auto">
+                    <table className="w-full text-left border-collapse text-xs min-w-[480px]">
                       <thead className="bg-slate-100 dark:bg-slate-800 font-bold text-slate-600 dark:text-slate-300">
                         <tr>
                           <th className="p-3 w-16 text-center">Buổi</th>

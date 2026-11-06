@@ -121,3 +121,4 @@ CH Academy đã chuẩn hóa toàn bộ font chữ dựa trên **Inter**, áp d�
 | **Sidebar Group Headers** | `text-[11px] font-bold text-slate-400` kèm badge đếm | `text-[10.5px] font-semibold tracking-wider uppercase` | Không bị rối mắt, phân vùng chức năng rõ nét |
 | **Navigation Tab Pills** | `px-3.5 py-2 text-xs sm:text-sm font-bold` | `px-3 py-1.5 text-[12.5px] font-medium` | Tab bar thấp hơn 12px, thao tác nhanh và êm mắt |
 | **Table Column Headers** | Hỗn hợp `text-xs font-medium` và `text-sm` | `.typo-table font-semibold uppercase text-[11px]` | Định vị cột chuẩn quốc tế, dễ đọc khi quét nhanh dữ liệu |
+

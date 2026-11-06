@@ -292,29 +292,35 @@ export const DonutBreakdownChart: React.FC<DonutBreakdownChartProps> = ({
   let cumulative = 0
 
   return (
-    <div className="space-y-4">
-      <div>
-        <h3 className="typo-section-title text-[#0F172A] dark:text-[#E8EEF7] flex items-center gap-2">
-          <Layers className="w-4 h-4 text-[#0284C7] dark:text-[#38BDF8]" />
-          <span>{title}</span>
-        </h3>
-        {subtitle && (
-          <p className="text-[11.5px] text-slate-500 dark:text-slate-400 mt-0.5">{subtitle}</p>
-        )}
+    <div className="space-y-4 w-full min-w-0">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 pb-1">
+        <div>
+          <h3 className="typo-section-title text-[#0F172A] dark:text-[#E8EEF7] flex items-center gap-2">
+            <Layers className="w-4 h-4 text-[#0284C7] dark:text-[#38BDF8]" />
+            <span>{title}</span>
+          </h3>
+          {subtitle && (
+            <p className="text-[12px] text-slate-500 dark:text-slate-400 mt-0.5">{subtitle}</p>
+          )}
+        </div>
+        <div className="text-[11px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+          Đối soát 100%
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center">
-        {/* Donut SVG */}
-        <div className="sm:col-span-5 flex items-center justify-center relative">
-          <div className="relative w-36 h-36">
-            <svg viewBox="0 0 42 42" className="w-full h-full transform -rotate-90">
+      {/* Enterprise Responsive Grid Layout */}
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center w-full min-w-0">
+        {/* Left Column: Donut Chart Area */}
+        <div className="md:col-span-5 flex items-center justify-center min-w-0 py-2">
+          <div className="relative w-40 h-40 sm:w-44 sm:h-44 shrink-0">
+            <svg viewBox="0 0 42 42" className="w-full h-full transform -rotate-90 drop-shadow-xs">
               <circle
                 cx="21"
                 cy="21"
                 r="15.91549430918954"
                 fill="transparent"
                 stroke="currentColor"
-                strokeWidth="4.2"
+                strokeWidth="4"
                 className="text-slate-100 dark:text-[#18263D]"
               />
               {segments.map((seg, i) => {
@@ -330,46 +336,57 @@ export const DonutBreakdownChart: React.FC<DonutBreakdownChartProps> = ({
                     r="15.91549430918954"
                     fill="transparent"
                     stroke={seg.color}
-                    strokeWidth="4.5"
+                    strokeWidth="4.2"
                     strokeDasharray={`${pct} ${100 - pct}`}
                     strokeDashoffset={dashOffset}
                     strokeLinecap="round"
-                    className="transition-all duration-500"
+                    className="transition-all duration-500 hover:opacity-90"
                   />
                 )
               })}
             </svg>
-            <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-              <span className="text-[10px] uppercase font-bold text-slate-400 dark:text-slate-500">
+            <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-2 pointer-events-none">
+              <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400 dark:text-slate-500">
                 {centerLabel}
               </span>
-              <span className="text-sm font-extrabold text-[#0F172A] dark:text-white tabular-nums">
+              <span className="text-xs sm:text-[13px] font-extrabold text-[#0F172A] dark:text-white tabular-nums truncate max-w-full mt-0.5 px-1" title={centerValue}>
                 {centerValue}
               </span>
             </div>
           </div>
         </div>
 
-        {/* Legend List with percent and formatted amount */}
-        <div className="sm:col-span-7 space-y-2">
+        {/* Right Column: Structured Legend Rows */}
+        <div className="md:col-span-7 flex flex-col justify-center gap-2.5 min-w-0">
           {segments.map((seg, i) => {
             const pct = Math.round((seg.value / total) * 100)
             return (
-              <div key={i} className="flex items-center justify-between text-xs gap-2">
-                <div className="flex items-center gap-2 min-w-0">
+              <div
+                key={i}
+                className="grid grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-3 px-3 py-2.5 rounded-xl bg-slate-50/70 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800/70 text-xs min-w-0 transition-colors hover:bg-slate-100/70 dark:hover:bg-slate-800/70"
+              >
+                {/* Col 1: Status Dot + Label */}
+                <div className="flex items-center gap-2.5 min-w-0">
                   <span
-                    className="w-2.5 h-2.5 rounded-full shrink-0"
+                    className="w-2.5 h-2.5 rounded-full shrink-0 shadow-2xs"
                     style={{ backgroundColor: seg.color }}
                   />
-                  <span className="font-semibold text-slate-700 dark:text-slate-300 truncate">
+                  <span
+                    className="font-medium text-slate-700 dark:text-slate-300 truncate text-[12.5px]"
+                    title={seg.label}
+                  >
                     {seg.label}
                   </span>
                 </div>
-                <div className="flex items-center gap-2 shrink-0 font-mono text-[11.5px]">
-                  <span className="text-slate-400 dark:text-slate-500">{pct}%</span>
-                  <span className="font-bold text-slate-900 dark:text-white">
-                    {valueFormatter(seg.value)}
-                  </span>
+
+                {/* Col 2: Percentage */}
+                <div className="w-11 text-right font-mono text-[11.5px] font-semibold text-slate-500 dark:text-slate-400 shrink-0">
+                  {pct}%
+                </div>
+
+                {/* Col 3: Currency Amount */}
+                <div className="text-right font-mono text-[12.5px] font-bold text-slate-900 dark:text-white shrink-0 pl-1 pr-1">
+                  {valueFormatter(seg.value)}
                 </div>
               </div>
             )

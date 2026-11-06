@@ -21,8 +21,9 @@ public class DashboardController {
     @GetMapping({"", "/", "/stats"})
     @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'CENTER_ADMIN', 'ADMIN', 'ACADEMIC_STAFF', 'ADMISSIONS_STAFF', 'ACCOUNTANT')")
     public ResponseEntity<ApiResponse<DashboardStatsDto>> getDashboardStats(
-            @RequestParam(required = false) String academicYear) {
-        DashboardStatsDto stats = dashboardService.getDashboardStats(academicYear);
+            @RequestParam(required = false) String academicYear,
+            @RequestParam(required = false, defaultValue = "YEAR") String period) {
+        DashboardStatsDto stats = dashboardService.getDashboardStats(academicYear, period);
         return ResponseEntity.ok(ApiResponse.success("Lấy số liệu thống kê thành công", stats));
     }
 }

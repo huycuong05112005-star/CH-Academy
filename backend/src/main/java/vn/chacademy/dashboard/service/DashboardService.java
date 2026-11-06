@@ -51,12 +51,18 @@ public class DashboardService {
 
     @Transactional(readOnly = true)
     public DashboardStatsDto getDashboardStats() {
-        return getDashboardStats(null);
+        return getDashboardStats(null, "YEAR");
     }
 
     @Transactional(readOnly = true)
     public DashboardStatsDto getDashboardStats(String requestedYear) {
+        return getDashboardStats(requestedYear, "YEAR");
+    }
+
+    @Transactional(readOnly = true)
+    public DashboardStatsDto getDashboardStats(String requestedYear, String period) {
         LocalDate today = LocalDate.now(VIETNAM_ZONE);
+        String normalizedPeriod = (period != null && period.equalsIgnoreCase("MONTH")) ? "MONTH" : "YEAR";
 
         // 1. Resolve Academic Year (Default to current academic year: Sept 1 - Aug 31)
         String currentAcademicYear = today.getMonthValue() >= 9
@@ -85,6 +91,24 @@ public class DashboardService {
         Instant academicStartInstant = academicStartDate.atStartOfDay(VIETNAM_ZONE).toInstant();
         Instant academicEndInstant = academicEndDate.plusDays(1).atStartOfDay(VIETNAM_ZONE).toInstant();
 
+        // Effective Scope for Filter (YEAR vs MONTH)
+        LocalDate scopeStartDate;
+        LocalDate scopeEndDate;
+        Instant scopeStartInstant;
+        Instant scopeEndInstant;
+
+        if (normalizedPeriod.equals("MONTH")) {
+            scopeStartDate = today.withDayOfMonth(1);
+            scopeEndDate = today.withDayOfMonth(today.lengthOfMonth());
+            scopeStartInstant = scopeStartDate.atStartOfDay(VIETNAM_ZONE).toInstant();
+            scopeEndInstant = scopeEndDate.plusDays(1).atStartOfDay(VIETNAM_ZONE).toInstant();
+        } else {
+            scopeStartDate = academicStartDate;
+            scopeEndDate = academicEndDate;
+            scopeStartInstant = academicStartInstant;
+            scopeEndInstant = academicEndInstant;
+        }
+
         // 2. Available Academic Years list từ Database động
         Set<String> yearSet = new TreeSet<>(Comparator.reverseOrder());
         academicYearRepository.findAll().forEach(y -> yearSet.add(y.getCode()));
@@ -99,7 +123,7 @@ public class DashboardService {
         long totalCourses = courseRepository.count();
         long totalTeachers = teacherRepository.count();
 
-        // 4. Academic Year Scoped Metrics
+        // 4. Academic Year / Scope Metrics
         // Classes active in this academic year
         long activeClasses = classRepository.countByAcademicYearAndStatusIn(
                 selectedYear,
@@ -116,9 +140,9 @@ public class DashboardService {
         );
         long totalStudents = activeStudents;
 
-        // Leads in this academic year
-        long totalLeads = leadRepository.countByCreatedAtBetween(academicStartInstant, academicEndInstant);
-        long convertedLeads = leadRepository.countByStatusAndCreatedAtBetween("CONVERTED", academicStartInstant, academicEndInstant);
+        // Leads in this scope (Month or Full Year)
+        long totalLeads = leadRepository.countByCreatedAtBetween(scopeStartInstant, scopeEndInstant);
+        long convertedLeads = leadRepository.countByStatusAndCreatedAtBetween("CONVERTED", scopeStartInstant, scopeEndInstant);
         double conversionRate = 0.0;
         if (totalLeads > 0) {
             conversionRate = BigDecimal.valueOf((double) convertedLeads / totalLeads * 100)
@@ -133,11 +157,11 @@ public class DashboardService {
                 ? BigDecimal.valueOf((double) presentRecords / totalAttendanceRecords * 100)
                     .setScale(1, RoundingMode.HALF_UP)
                     .doubleValue()
-                : 96.5; // Benchmark standard if not yet initialized
+                : 96.5;
 
-        // Finances in this academic year
-        BigDecimal totalReceivable = receivableRepository.sumReceivablesBetween(academicStartDate, academicEndDate);
-        BigDecimal totalPaid = receivableRepository.sumPaidBetween(academicStartDate, academicEndDate);
+        // Finances in this scope (Month or Full Year)
+        BigDecimal totalReceivable = receivableRepository.sumReceivablesBetween(scopeStartDate, scopeEndDate);
+        BigDecimal totalPaid = receivableRepository.sumPaidBetween(scopeStartDate, scopeEndDate);
         if (totalPaid == null) {
             totalPaid = BigDecimal.ZERO;
         }
@@ -146,17 +170,24 @@ public class DashboardService {
         }
         BigDecimal totalDebt = totalReceivable.subtract(totalPaid).max(BigDecimal.ZERO);
 
-        // 5. Sessions in this academic year
+        // 5. Sessions in this scope
         List<ClassSession> sessions;
-        boolean isCurrentYear = selectedYear.equals(currentAcademicYear);
-        if (isCurrentYear) {
-            LocalDate nextPeriod = today.plusDays(14);
-            sessions = classSessionRepository.findSessionsInDateRange(null, null, today, nextPeriod);
+        if (normalizedPeriod.equals("MONTH")) {
+            sessions = classSessionRepository.findSessionsInDateRange(null, null, scopeStartDate, scopeEndDate);
             if (sessions.isEmpty()) {
-                sessions = classSessionRepository.findSessionsInDateRange(null, null, today.minusDays(7), nextPeriod);
+                sessions = classSessionRepository.findSessionsInDateRange(null, null, today, today.plusDays(14));
             }
         } else {
-            sessions = classSessionRepository.findSessionsInDateRange(null, null, academicStartDate, academicEndDate);
+            boolean isCurrentYear = selectedYear.equals(currentAcademicYear);
+            if (isCurrentYear) {
+                LocalDate nextPeriod = today.plusDays(14);
+                sessions = classSessionRepository.findSessionsInDateRange(null, null, today, nextPeriod);
+                if (sessions.isEmpty()) {
+                    sessions = classSessionRepository.findSessionsInDateRange(null, null, today.minusDays(7), nextPeriod);
+                }
+            } else {
+                sessions = classSessionRepository.findSessionsInDateRange(null, null, academicStartDate, academicEndDate);
+            }
         }
 
         List<UpcomingSessionDto> upcomingDtos = sessions.stream()
@@ -230,6 +261,7 @@ public class DashboardService {
 
         return DashboardStatsDto.builder()
                 .academicYear(selectedYear)
+                .period(normalizedPeriod)
                 .availableAcademicYears(availableYears)
                 .totalStudents(totalStudents)
                 .activeStudents(activeStudents)

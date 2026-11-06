@@ -51,9 +51,12 @@ export const DashboardPage: React.FC = () => {
   const [statsLoading, setStatsLoading] = useState<boolean>(true)
   const [statsError, setStatsError] = useState<string | null>(null)
   const [lastUpdated, setLastUpdated] = useState<string>(() => new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit' }))
-  const [timeRangeFilter, setTimeRangeFilter] = useState<'YEAR' | 'MONTH' | 'WEEK' | 'TODAY'>('YEAR')
-  const [tableSearch, setTableSearch] = useState<string>('')
   const [searchParams, setSearchParams] = useSearchParams()
+  const [timeRangeFilter, setTimeRangeFilter] = useState<'YEAR' | 'MONTH'>(() => {
+    const urlPeriod = searchParams.get('period')
+    return urlPeriod === 'MONTH' ? 'MONTH' : 'YEAR'
+  })
+  const [tableSearch, setTableSearch] = useState<string>('')
 
   const [selectedAcademicYear, setSelectedAcademicYear] = useState<string>(() => {
     const urlYear = searchParams.get('year')
@@ -66,12 +69,13 @@ export const DashboardPage: React.FC = () => {
   })
   const [sessionFilter, setSessionFilter] = useState<'ALL' | 'TODAY' | 'UPCOMING'>('ALL')
 
-  const fetchStats = async (yearToFetch?: string) => {
+  const fetchStats = async (yearToFetch?: string, periodToFetch?: 'YEAR' | 'MONTH') => {
     setStatsLoading(true)
     setStatsError(null)
     const targetYear = yearToFetch || selectedAcademicYear
+    const targetPeriod = periodToFetch || timeRangeFilter
     try {
-      const data = await dashboardApi.getStats(targetYear)
+      const data = await dashboardApi.getStats(targetYear, targetPeriod)
       setStats(data)
       setLastUpdated(new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit' }))
       if (data.academicYear && data.academicYear !== selectedAcademicYear) {
@@ -86,6 +90,16 @@ export const DashboardPage: React.FC = () => {
     } finally {
       setStatsLoading(false)
     }
+  }
+
+  const handlePeriodChange = (newPeriod: 'YEAR' | 'MONTH') => {
+    setTimeRangeFilter(newPeriod)
+    setSearchParams((prev) => {
+      const updated = new URLSearchParams(prev)
+      updated.set('period', newPeriod)
+      return updated
+    })
+    fetchStats(selectedAcademicYear, newPeriod)
   }
 
   useEffect(() => {
@@ -109,7 +123,14 @@ export const DashboardPage: React.FC = () => {
     if (finalYear !== selectedAcademicYear) {
       setSelectedAcademicYear(finalYear)
     }
-    fetchStats(finalYear)
+
+    const p = searchParams.get('period')
+    const finalPeriod = p === 'MONTH' ? 'MONTH' : 'YEAR'
+    if (finalPeriod !== timeRangeFilter) {
+      setTimeRangeFilter(finalPeriod)
+    }
+
+    fetchStats(finalYear, finalPeriod)
 
     return () => {
       window.removeEventListener('ch_academy_academic_year_changed', handleYearSync)
@@ -126,9 +147,10 @@ export const DashboardPage: React.FC = () => {
     setSearchParams((prev) => {
       const updated = new URLSearchParams(prev)
       updated.set('year', newYear)
+      if (timeRangeFilter) updated.set('period', timeRangeFilter)
       return updated
     })
-    fetchStats(newYear)
+    fetchStats(newYear, timeRangeFilter)
   }
 
   const formatVND = (amount: number) => {
@@ -301,14 +323,15 @@ export const DashboardPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Time Filter Pills */}
-          <div className="hidden md:flex items-center p-1 rounded-2xl bg-white dark:bg-[#111C30] border border-slate-200/90 dark:border-[#20314C] text-xs font-bold shadow-2xs">
+          {/* Time Filter Pills: Cả năm / Tháng này */}
+          <div className="flex items-center p-1 rounded-xl bg-white dark:bg-[#111C30] border border-slate-200/90 dark:border-[#20314C] text-xs font-semibold shadow-2xs">
             <button
               type="button"
-              onClick={() => setTimeRangeFilter('YEAR')}
-              className={`px-2.5 py-1 rounded-xl transition-all ${
+              onClick={() => handlePeriodChange('YEAR')}
+              disabled={statsLoading}
+              className={`px-3 py-1 rounded-lg transition-all ${
                 timeRangeFilter === 'YEAR'
-                  ? 'bg-sky-50 dark:bg-sky-950/60 text-[#0284C7] dark:text-[#38BDF8]'
+                  ? 'bg-sky-50 dark:bg-sky-950/60 text-[#0284C7] dark:text-[#38BDF8] font-bold shadow-2xs'
                   : 'text-slate-500 hover:text-slate-700 dark:text-slate-400'
               }`}
             >
@@ -316,10 +339,11 @@ export const DashboardPage: React.FC = () => {
             </button>
             <button
               type="button"
-              onClick={() => setTimeRangeFilter('MONTH')}
-              className={`px-2.5 py-1 rounded-xl transition-all ${
+              onClick={() => handlePeriodChange('MONTH')}
+              disabled={statsLoading}
+              className={`px-3 py-1 rounded-lg transition-all ${
                 timeRangeFilter === 'MONTH'
-                  ? 'bg-sky-50 dark:bg-sky-950/60 text-[#0284C7] dark:text-[#38BDF8]'
+                  ? 'bg-sky-50 dark:bg-sky-950/60 text-[#0284C7] dark:text-[#38BDF8] font-bold shadow-2xs'
                   : 'text-slate-500 hover:text-slate-700 dark:text-slate-400'
               }`}
             >
@@ -484,7 +508,7 @@ export const DashboardPage: React.FC = () => {
           <div className="p-4 sm:p-5 flex flex-col justify-between h-full">
             <div className="flex items-center justify-between">
               <span className="typo-label-secondary text-slate-500 dark:text-slate-400">
-                Doanh thu thực tế
+                {timeRangeFilter === 'MONTH' ? 'Doanh thu tháng này' : 'Doanh thu thực tế (Cả năm)'}
               </span>
               <div className="w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
                 <TrendingUp size={16} />
@@ -498,7 +522,7 @@ export const DashboardPage: React.FC = () => {
                 <span className="font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-1.5 py-0.2 rounded">
                   {paidRatio}% đã thu
                 </span>
-                <span>ghi nhận thực tế</span>
+                <span>{timeRangeFilter === 'MONTH' ? 'trong tháng' : 'sổ quỹ năm học'}</span>
               </div>
             </div>
             <div className="pt-2 border-t border-slate-100 dark:border-slate-800 text-[11px] font-bold text-emerald-600 dark:text-emerald-400 flex items-center justify-between">
@@ -512,7 +536,7 @@ export const DashboardPage: React.FC = () => {
           <div className="p-4 sm:p-5 flex flex-col justify-between h-full">
             <div className="flex items-center justify-between">
               <span className="typo-label-secondary text-slate-500 dark:text-slate-400">
-                Học phí phải thu
+                {timeRangeFilter === 'MONTH' ? 'Học phí phải thu (Tháng này)' : 'Học phí phải thu (Cả năm)'}
               </span>
               <div className="w-8 h-8 rounded-lg bg-sky-50 dark:bg-sky-950/50 text-[#0284C7] dark:text-[#38BDF8] flex items-center justify-center">
                 <DollarSign size={16} />
@@ -523,7 +547,7 @@ export const DashboardPage: React.FC = () => {
                 {statsLoading ? '...' : formatVND(stats?.totalReceivable || 0)}
               </div>
               <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                Theo hợp đồng đào tạo & biểu phí
+                {timeRangeFilter === 'MONTH' ? 'Khoản dự thu phát sinh trong tháng' : 'Theo hợp đồng đào tạo & biểu phí'}
               </div>
             </div>
             <div className="pt-2 border-t border-slate-100 dark:border-slate-800 text-[11px] font-bold text-[#0284C7] dark:text-[#38BDF8] flex items-center justify-between">
@@ -537,7 +561,7 @@ export const DashboardPage: React.FC = () => {
           <div className="p-4 sm:p-5 flex flex-col justify-between h-full">
             <div className="flex items-center justify-between">
               <span className="typo-label-secondary text-slate-500 dark:text-slate-400">
-                Công nợ còn lại
+                {timeRangeFilter === 'MONTH' ? 'Công nợ tồn tháng này' : 'Công nợ còn lại (Cả năm)'}
               </span>
               <div className="w-8 h-8 rounded-lg bg-rose-50 dark:bg-rose-950/50 text-rose-600 dark:text-rose-400 flex items-center justify-center">
                 <CreditCard size={16} />
@@ -548,7 +572,7 @@ export const DashboardPage: React.FC = () => {
                 {statsLoading ? '...' : formatVND(stats?.totalDebt || 0)}
               </div>
               <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                Khoản chưa hoàn tất cần đôn đốc
+                {timeRangeFilter === 'MONTH' ? 'Khoản cần đôn đốc kỳ này' : 'Khoản chưa hoàn tất toàn khóa'}
               </div>
             </div>
             <div className="pt-2 border-t border-slate-100 dark:border-slate-800 text-[11px] font-bold text-rose-600 dark:text-rose-400 flex items-center justify-between">
@@ -601,9 +625,9 @@ export const DashboardPage: React.FC = () => {
           <GlowCard glowColor="blue" className="p-5 sm:p-6">
             <DonutBreakdownChart
               title="Cơ cấu học phí & thanh toán"
-              subtitle="Tỷ lệ đối soát nguồn tiền theo sổ quỹ năm học"
+              subtitle={timeRangeFilter === 'MONTH' ? 'Tỷ lệ đối soát nguồn tiền trong tháng hiện tại' : 'Tỷ lệ đối soát nguồn tiền theo sổ quỹ năm học'}
               segments={tuitionSegments}
-              centerLabel="Tổng dự thu"
+              centerLabel={timeRangeFilter === 'MONTH' ? 'Dự thu tháng' : 'Tổng dự thu'}
               centerValue={formatVND(stats?.totalReceivable || 0)}
               valueFormatter={formatVND}
             />

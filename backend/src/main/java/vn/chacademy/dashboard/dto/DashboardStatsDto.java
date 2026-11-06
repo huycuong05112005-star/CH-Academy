@@ -14,6 +14,7 @@ import java.util.List;
 @AllArgsConstructor
 public class DashboardStatsDto {
     private String academicYear;
+    private String period;
     private List<String> availableAcademicYears;
 
     // Academic Year Scoped Metrics
@@ -42,6 +43,7 @@ public class DashboardStatsDto {
 
     public static class DashboardStatsDtoBuilder {
         private String academicYear;
+        private String period;
         private List<String> availableAcademicYears;
         private long totalStudents;
         private long activeStudents;
@@ -62,6 +64,11 @@ public class DashboardStatsDto {
 
         public DashboardStatsDtoBuilder academicYear(String academicYear) {
             this.academicYear = academicYear;
+            return this;
+        }
+
+        public DashboardStatsDtoBuilder period(String period) {
+            this.period = period;
             return this;
         }
 
@@ -153,6 +160,7 @@ public class DashboardStatsDto {
         public DashboardStatsDto build() {
             return new DashboardStatsDto(
                     academicYear,
+                    period,
                     availableAcademicYears,
                     totalStudents,
                     activeStudents,

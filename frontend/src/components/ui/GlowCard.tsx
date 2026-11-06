@@ -21,39 +21,39 @@ export interface GlowCardProps {
   elevation?: 'none' | 'sm' | 'md' | 'lg'
 }
 
-const colorGradientMap: Record<GlowColorVariant, { beam: string; shadow: string; borderHover: string }> = {
+const colorGradientMap: Record<GlowColorVariant, { beamClass: string; shadow: string; borderHover: string }> = {
   cyan: {
-    beam: 'conic-gradient(from 0deg, transparent 0deg, transparent 260deg, rgba(2, 132, 199, 0.4) 290deg, #38BDF8 335deg, #0EA5E9 360deg)',
+    beamClass: 'led-beam-cyan',
     shadow: 'hover:shadow-[0_16px_36px_-10px_rgba(14,165,233,0.22),0_4px_12px_rgba(15,23,42,0.06)] dark:hover:shadow-[0_18px_40px_-10px_rgba(56,189,248,0.25)]',
     borderHover: 'group-hover:border-sky-400/60 dark:group-hover:border-sky-400/80'
   },
   blue: {
-    beam: 'conic-gradient(from 0deg, transparent 0deg, transparent 260deg, rgba(37, 99, 235, 0.35) 290deg, #60A5FA 335deg, #2563EB 360deg)',
+    beamClass: 'led-beam-blue',
     shadow: 'hover:shadow-[0_16px_36px_-10px_rgba(37,99,235,0.2)] dark:hover:shadow-[0_18px_40px_-10px_rgba(96,165,250,0.25)]',
     borderHover: 'group-hover:border-blue-400/60 dark:group-hover:border-blue-400/80'
   },
   indigo: {
-    beam: 'conic-gradient(from 0deg, transparent 0deg, transparent 260deg, rgba(79, 70, 229, 0.35) 290deg, #818CF8 335deg, #4F46E5 360deg)',
+    beamClass: 'led-beam-indigo',
     shadow: 'hover:shadow-[0_16px_36px_-10px_rgba(99,102,241,0.2)] dark:hover:shadow-[0_18px_40px_-10px_rgba(129,140,248,0.25)]',
     borderHover: 'group-hover:border-indigo-400/60 dark:group-hover:border-indigo-400/80'
   },
   emerald: {
-    beam: 'conic-gradient(from 0deg, transparent 0deg, transparent 260deg, rgba(16, 185, 129, 0.35) 290deg, #34D399 335deg, #10B981 360deg)',
+    beamClass: 'led-beam-emerald',
     shadow: 'hover:shadow-[0_16px_36px_-10px_rgba(16,185,129,0.2)] dark:hover:shadow-[0_18px_40px_-10px_rgba(52,211,153,0.25)]',
     borderHover: 'group-hover:border-emerald-400/60 dark:group-hover:border-emerald-400/80'
   },
   amber: {
-    beam: 'conic-gradient(from 0deg, transparent 0deg, transparent 260deg, rgba(245, 158, 11, 0.35) 290deg, #FBBF24 335deg, #F59E0B 360deg)',
+    beamClass: 'led-beam-amber',
     shadow: 'hover:shadow-[0_16px_36px_-10px_rgba(245,158,11,0.2)] dark:hover:shadow-[0_18px_40px_-10px_rgba(251,191,36,0.25)]',
     borderHover: 'group-hover:border-amber-400/60 dark:group-hover:border-amber-400/80'
   },
   purple: {
-    beam: 'conic-gradient(from 0deg, transparent 0deg, transparent 260deg, rgba(168, 85, 247, 0.35) 290deg, #C084FC 335deg, #9333EA 360deg)',
+    beamClass: 'led-beam-purple',
     shadow: 'hover:shadow-[0_16px_36px_-10px_rgba(168,85,247,0.2)] dark:hover:shadow-[0_18px_40px_-10px_rgba(192,132,252,0.25)]',
     borderHover: 'group-hover:border-purple-400/60 dark:group-hover:border-purple-400/80'
   },
   rose: {
-    beam: 'conic-gradient(from 0deg, transparent 0deg, transparent 260deg, rgba(244, 63, 94, 0.35) 290deg, #FB7185 335deg, #E11D48 360deg)',
+    beamClass: 'led-beam-rose',
     shadow: 'hover:shadow-[0_16px_36px_-10px_rgba(244,63,94,0.2)] dark:hover:shadow-[0_18px_40px_-10px_rgba(251,113,133,0.25)]',
     borderHover: 'group-hover:border-rose-400/60 dark:group-hover:border-rose-400/80'
   }
@@ -168,19 +168,14 @@ export const GlowCard: React.FC<GlowCardProps> = ({
         }
       }}
     >
-      {/* 1. Animated Conic Border Glow Beam (Hardware-Accelerated) */}
+      {/* 1. Continuous 360° Running LED Border Beam (Hardware-Accelerated) */}
       {interactive && !disabled && !reducedMotion && (
         <div
           aria-hidden="true"
-          className={`pointer-events-none absolute -inset-px ${roundedClasses[rounded]} overflow-hidden transition-opacity duration-300 ${
-            isHovered ? 'opacity-100' : 'opacity-0'
-          }`}
+          className={`led-border-beam ${isHovered || active ? 'opacity-100' : 'opacity-0'}`}
         >
           <div
-            className="absolute -inset-[150%] animate-glow-border-spin"
-            style={{
-              background: variant.beam
-            }}
+            className={`led-border-spinner ${variant.beamClass || 'led-beam-cyan'}`}
           />
         </div>
       )}

@@ -1373,8 +1373,8 @@ export const SessionQuestionExamModal: React.FC<SessionQuestionExamModalProps> =
                     </button>
                   </div>
 
-                  <div className="border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden max-h-60 overflow-y-auto">
-                    <table className="w-full text-left border-collapse text-[11px]">
+                  <div className="border border-slate-200 dark:border-slate-800 rounded-xl max-h-60 overflow-y-auto overflow-x-auto">
+                    <table className="w-full text-left border-collapse text-[11px] min-w-[500px]">
                       <thead className="bg-slate-100 dark:bg-slate-800 sticky top-0 font-bold text-slate-600 dark:text-slate-300">
                         <tr>
                           <th className="p-2 w-8"></th>

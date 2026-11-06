@@ -57,3 +57,4 @@ Trong các phiên bản phát triển trước đây, giao diện bị lạm d�
 - **Tiết kiệm chiều cao màn hình:** Giảm hơn **320px** khoảng trống chết trên màn hình chính của Giảng viên và Học viên.
 - **Hiệu năng dựng hình (Render Performance):** Giảm tải 3 WebGL render loops liên tục, giúp laptop tiết kiệm pin và quạt tản nhiệt không bị kích hoạt khi duyệt bảng điều khiển.
 - **Thẩm mỹ:** Đạt được phong thái điềm tĩnh, chuẩn mực của một nền tảng SaaS giáo dục hàng đầu.
+

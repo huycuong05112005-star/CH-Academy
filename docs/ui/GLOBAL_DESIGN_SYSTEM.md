@@ -115,3 +115,4 @@ Các tokens dùng chung được cấu hình trực tiếp tại `frontend/src/i
   - Primary: Chiều cao 36px, font `.typo-btn` (12.5px, 600), bo góc `rounded-lg`.
   - Secondary/Ghost: Nền trong suốt hoặc xám nhẹ, viền mảnh.
   - Icon Button: Kích thước `w-8 h-8` hoặc `w-9 h-9`, bo góc `rounded-lg`.
+

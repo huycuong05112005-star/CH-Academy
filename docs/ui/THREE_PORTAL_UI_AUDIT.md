@@ -69,3 +69,4 @@ Quá trình kiểm định được tiến hành độc lập trên cả ba khô
 | **Khả năng tương thích Màn hình Laptop** | 20% | **9.9 / 10** | Hoạt động hoàn hảo ở 1366x768, 1440x900 và 1920x1080 |
 | **Bảo tồn Nhận diện Thương hiệu CH Academy** | 20% | **10 / 10** | Giữ vững sắc Navy, Cyan, logo và triết lý giáo dục |
 | **TỔNG KẾT** | **100%** | **9.94 / 10** | **XUẤT SẮC (ENTERPRISE GRADE)** |
+

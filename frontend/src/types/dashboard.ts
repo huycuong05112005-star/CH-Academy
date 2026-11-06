@@ -28,6 +28,7 @@ export interface CourseEnrollmentStat {
 
 export interface DashboardStats {
   academicYear?: string
+  period?: 'YEAR' | 'MONTH' | string
   availableAcademicYears?: string[]
   totalStudents: number
   activeStudents: number
