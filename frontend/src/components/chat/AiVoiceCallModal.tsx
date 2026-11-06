@@ -873,7 +873,7 @@ export const AiVoiceCallModal: React.FC<AiVoiceCallProps> = ({
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/85 backdrop-blur-md animate-in fade-in duration-200">
       <div className="flex min-h-full items-center justify-center p-3 sm:p-4 text-center">
-        <div className="relative w-full max-w-xl bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 border border-slate-700/60 rounded-3xl shadow-2xl overflow-hidden flex flex-col text-white text-left max-h-[95vh]">
+        <div className="relative w-full max-w-xl bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 border border-slate-700/60 rounded-3xl shadow-2xl overflow-hidden flex flex-col text-white text-left max-h-[95vh] led-card">
           {/* Header */}
           <div className="pt-5 pb-3 px-6 flex flex-col items-center text-center border-b border-slate-800/80 shrink-0 relative">
             <div className="absolute top-4 right-4 flex items-center gap-1.5 z-10">

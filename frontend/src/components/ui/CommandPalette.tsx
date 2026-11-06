@@ -508,7 +508,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
       {/* Center Top Wrapper */}
       <div className="flex min-h-full items-start justify-center pt-8 sm:pt-16 p-3 sm:p-4 text-center">
         <div
-          className="relative w-full max-w-2xl bg-white dark:bg-[#101B2D] border border-slate-200 dark:border-[#2A3A50] rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[calc(100vh-4rem)] text-left animate-in zoom-in-95 duration-150"
+          className="relative w-full max-w-2xl bg-white dark:bg-[#101B2D] border border-slate-200 dark:border-[#2A3A50] rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[calc(100vh-4rem)] text-left animate-in zoom-in-95 duration-150 led-card"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Search Input Bar */}

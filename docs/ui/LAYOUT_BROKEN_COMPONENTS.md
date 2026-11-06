@@ -93,3 +93,4 @@
 3. **Cập nhật Frontend Client & Dashboard Page:**
    - `dashboardApi.getStats(academicYear, period)`.
    - Hàm `handlePeriodChange('YEAR' | 'MONTH')` đồng bộ URL query param `?period=...`, kích hoạt `fetchStats` và cập nhật lại toàn bộ KPI cards, Donut Breakdown và các nhãn phụ đề trực quan.
+

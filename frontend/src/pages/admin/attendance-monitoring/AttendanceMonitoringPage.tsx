@@ -122,12 +122,12 @@ export const AttendanceMonitoringPage: React.FC = () => {
 
       {/* Metric Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="p-4 bg-white dark:bg-[#1E293B] rounded-xl border border-slate-100 dark:border-slate-800 shadow-sm">
+        <div className="p-4 bg-white dark:bg-[#1E293B] rounded-xl border border-slate-100 dark:border-slate-800 shadow-sm led-card">
           <div className="text-xs text-slate-500 dark:text-slate-400 font-medium">Tổng số buổi học</div>
           <div className="text-2xl font-bold text-slate-900 dark:text-white mt-1">{sessions.length}</div>
         </div>
 
-        <div className="p-4 bg-emerald-50/60 dark:bg-emerald-950/20 rounded-xl border border-emerald-200 dark:border-emerald-800 shadow-sm">
+        <div className="p-4 bg-emerald-50/60 dark:bg-emerald-950/20 rounded-xl border border-emerald-200 dark:border-emerald-800 shadow-sm led-card">
           <div className="text-xs text-emerald-700 dark:text-emerald-400 font-medium flex items-center gap-1.5">
             <CheckCircle2 className="w-4 h-4" />
             Đã hoàn thành điểm danh
@@ -135,7 +135,7 @@ export const AttendanceMonitoringPage: React.FC = () => {
           <div className="text-2xl font-bold text-emerald-700 dark:text-emerald-300 mt-1">{markedCount}</div>
         </div>
 
-        <div className="p-4 bg-amber-50/60 dark:bg-amber-950/20 rounded-xl border border-amber-200 dark:border-amber-800 shadow-sm">
+        <div className="p-4 bg-amber-50/60 dark:bg-amber-950/20 rounded-xl border border-amber-200 dark:border-amber-800 shadow-sm led-card">
           <div className="text-xs text-amber-700 dark:text-amber-400 font-medium flex items-center gap-1.5">
             <AlertTriangle className="w-4 h-4" />
             Chưa điểm danh (Cần nhắc nhở GV)

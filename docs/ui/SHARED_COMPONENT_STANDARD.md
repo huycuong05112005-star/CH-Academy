@@ -40,3 +40,4 @@ Tài liệu này xác lập quy chuẩn kỹ thuật cho toàn bộ các thành 
 - **Backdrop:** Nền tối mờ `bg-slate-900/60 backdrop-blur-sm`, nhấp ra ngoài để đóng.
 - **Thích ứng chiều cao:** Viewport wrapper sử dụng `flex min-h-full items-start justify-center p-3 sm:p-6 overflow-y-auto`. Hộp thoại chính mang `max-h-[calc(100vh-3rem)] flex flex-col`.
 - **Phím tắt hỗ trợ:** Lắng nghe phím `Escape` để đóng cửa sổ ngay lập tức.
+

@@ -356,7 +356,7 @@ export const LeadListPage: React.FC = () => {
 
       {/* KPI Overview Strip */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-        <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-xs flex items-center gap-3">
+        <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-xs flex items-center gap-3 led-card">
           <div className="w-10 h-10 rounded-lg bg-blue-50 text-blue-700 flex items-center justify-center font-bold">
             <Users className="w-5 h-5" />
           </div>
@@ -366,7 +366,7 @@ export const LeadListPage: React.FC = () => {
           </div>
         </div>
 
-        <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-xs flex items-center gap-3">
+        <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-xs flex items-center gap-3 led-card">
           <div className="w-10 h-10 rounded-lg bg-sky-50 text-sky-700 flex items-center justify-center font-bold">
             <UserPlus className="w-5 h-5" />
           </div>
@@ -378,7 +378,7 @@ export const LeadListPage: React.FC = () => {
           </div>
         </div>
 
-        <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-xs flex items-center gap-3">
+        <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-xs flex items-center gap-3 led-card">
           <div className="w-10 h-10 rounded-lg bg-amber-50 text-amber-700 flex items-center justify-center font-bold">
             <MessageSquare className="w-5 h-5" />
           </div>
@@ -390,7 +390,7 @@ export const LeadListPage: React.FC = () => {
           </div>
         </div>
 
-        <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-xs flex items-center gap-3">
+        <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-xs flex items-center gap-3 led-card">
           <div className="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center font-bold">
             <UserCheck className="w-5 h-5" />
           </div>
@@ -720,7 +720,7 @@ export const LeadListPage: React.FC = () => {
       {/* MODAL: CREATE LEAD */}
       {isCreateModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh] led-card">
             <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between bg-gray-50">
               <h2 className="text-lg font-bold text-[#142B4A]">Thêm khách hàng tiềm năng</h2>
               <button onClick={() => setIsCreateModalOpen(false)} className="text-gray-400 hover:text-gray-600">
@@ -837,7 +837,7 @@ export const LeadListPage: React.FC = () => {
       {/* MODAL: ADD ACTIVITY */}
       {isActivityModalOpen && activeLeadForActivity && (
         <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden flex flex-col">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden flex flex-col led-card">
             <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between bg-gray-50">
               <div>
                 <h2 className="text-base font-bold text-[#142B4A]">Ghi nhận hoạt động tư vấn</h2>
@@ -899,7 +899,7 @@ export const LeadListPage: React.FC = () => {
       {/* MODAL: CONVERT TO STUDENT */}
       {isConvertModalOpen && activeLeadForConvert && (
         <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh] led-card">
             <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between bg-green-50">
               <div>
                 <h2 className="text-base font-bold text-green-900 flex items-center gap-2">
@@ -1141,7 +1141,7 @@ export const LeadListPage: React.FC = () => {
       {/* MODAL: DETAIL & TIMELINE */}
       {detailLead && (
         <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh] led-card">
             <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between bg-gray-50">
               <div>
                 <h2 className="text-base font-bold text-[#142B4A]">Chi tiết hồ sơ khách hàng</h2>

@@ -27,7 +27,7 @@ export const AboutPage: React.FC = () => {
       {/* Mission & Vision */}
       <main className="max-w-6xl mx-auto my-12 px-4 sm:px-6 w-full box-border space-y-12 flex-1">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-white dark:bg-[#111C31] p-6 sm:p-8 rounded-2xl border border-slate-200/80 dark:border-[#1E3152] shadow-xs hover-lift transition-all">
+          <div className="bg-white dark:bg-[#111C31] p-6 sm:p-8 rounded-2xl border border-slate-200/80 dark:border-[#1E3152] shadow-xs hover-lift transition-all led-card">
             <div className="w-12 h-12 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-[#2563EB] dark:text-[#38BDF8] flex items-center justify-center mb-5 shadow-xs">
               <Target size={26} />
             </div>
@@ -39,7 +39,7 @@ export const AboutPage: React.FC = () => {
             </p>
           </div>
 
-          <div className="bg-white dark:bg-[#111C31] p-6 sm:p-8 rounded-2xl border border-slate-200/80 dark:border-[#1E3152] shadow-xs hover-lift transition-all">
+          <div className="bg-white dark:bg-[#111C31] p-6 sm:p-8 rounded-2xl border border-slate-200/80 dark:border-[#1E3152] shadow-xs hover-lift transition-all led-card">
             <div className="w-12 h-12 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-5 shadow-xs">
               <Eye size={26} />
             </div>
@@ -51,7 +51,7 @@ export const AboutPage: React.FC = () => {
             </p>
           </div>
 
-          <div className="bg-white dark:bg-[#111C31] p-6 sm:p-8 rounded-2xl border border-slate-200/80 dark:border-[#1E3152] shadow-xs hover-lift transition-all">
+          <div className="bg-white dark:bg-[#111C31] p-6 sm:p-8 rounded-2xl border border-slate-200/80 dark:border-[#1E3152] shadow-xs hover-lift transition-all led-card">
             <div className="w-12 h-12 rounded-xl bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 flex items-center justify-center mb-5 shadow-xs">
               <Award size={26} />
             </div>

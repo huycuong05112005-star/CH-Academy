@@ -168,7 +168,7 @@ export const LoginPage: React.FC = () => {
 
         {/* Right Column: High-Grade Glassmorphic Login Card */}
         <div className="lg:col-span-6 xl:col-span-5 flex justify-center">
-          <div className="w-full max-w-md glass-specular rounded-3xl p-6 sm:p-8 border border-white/60 dark:border-[#2A3A50] shadow-2xl relative z-10 transition-all hover:shadow-cyan-500/10">
+          <div className="w-full max-w-md glass-specular rounded-3xl p-6 sm:p-8 border border-white/60 dark:border-[#2A3A50] shadow-2xl relative z-10 transition-all hover:shadow-cyan-500/10 led-card">
             {/* Header Badge */}
             <div className="text-center mb-6">
               <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-[#0F243E] to-blue-700 dark:from-[#38BDF8] dark:to-cyan-400 inline-flex items-center justify-center mb-3 text-white dark:text-[#0B1220] shadow-md hover-glow transition-all">

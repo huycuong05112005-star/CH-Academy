@@ -34,3 +34,4 @@
 1. **Tính cân đối thị giác:** Các thẻ số liệu và biểu đồ phân bổ tỷ lệ hoàn hảo; phần chú thích có nền xám/tối phân định, các cột phần trăm và tiền tệ thẳng hàng tuyệt đối.
 2. **Hiệu năng chuyển động (Animation):** Hiệu ứng viền LED sử dụng thuộc tính `transform: rotate()` kết hợp CSS mask, không gây layout reflow, chạy trơn tru 60fps trên mọi GPU.
 3. **Tính chính xác của Dữ liệu:** Bộ lọc thời gian phản ánh chính xác nguồn thu và công nợ phát sinh theo đúng kỳ kế toán của Trung tâm.
+

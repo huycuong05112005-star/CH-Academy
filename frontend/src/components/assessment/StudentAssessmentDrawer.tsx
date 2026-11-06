@@ -107,7 +107,7 @@ export const StudentAssessmentDrawer: React.FC<StudentAssessmentDrawerProps> = (
           <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
             {/* KPI Summary Cards Bar */}
             <div className="p-4 bg-slate-50/70 dark:bg-slate-900/40 border-b border-slate-200 dark:border-slate-800 grid grid-cols-4 gap-2 text-center text-xs">
-              <div className="p-2.5 rounded-xl bg-white dark:bg-[#1E293B] border border-slate-200 dark:border-slate-800 shadow-xs">
+              <div className="p-2.5 rounded-xl bg-white dark:bg-[#1E293B] border border-slate-200 dark:border-slate-800 shadow-xs led-card">
                 <span className="text-[10px] text-slate-400 block font-semibold">Điểm TB</span>
                 <span className="text-base font-black text-[#142B4A] dark:text-[#38BDF8]">
                   {data.averageScore ?? '—'}
@@ -115,7 +115,7 @@ export const StudentAssessmentDrawer: React.FC<StudentAssessmentDrawerProps> = (
                 <span className="text-[10px] text-slate-400 block">/ 10</span>
               </div>
 
-              <div className="p-2.5 rounded-xl bg-white dark:bg-[#1E293B] border border-slate-200 dark:border-slate-800 shadow-xs">
+              <div className="p-2.5 rounded-xl bg-white dark:bg-[#1E293B] border border-slate-200 dark:border-slate-800 shadow-xs led-card">
                 <span className="text-[10px] text-slate-400 block font-semibold">Tỷ lệ đạt</span>
                 <span className="text-base font-black text-emerald-600 dark:text-emerald-400">
                   {data.passRate ?? 0}%
@@ -125,7 +125,7 @@ export const StudentAssessmentDrawer: React.FC<StudentAssessmentDrawerProps> = (
                 </span>
               </div>
 
-              <div className="p-2.5 rounded-xl bg-white dark:bg-[#1E293B] border border-slate-200 dark:border-slate-800 shadow-xs">
+              <div className="p-2.5 rounded-xl bg-white dark:bg-[#1E293B] border border-slate-200 dark:border-slate-800 shadow-xs led-card">
                 <span className="text-[10px] text-slate-400 block font-semibold">Chuyên cần</span>
                 <span className="text-base font-black text-blue-600 dark:text-blue-400">
                   {data.attendanceRate ?? 0}%
@@ -135,7 +135,7 @@ export const StudentAssessmentDrawer: React.FC<StudentAssessmentDrawerProps> = (
                 </span>
               </div>
 
-              <div className="p-2.5 rounded-xl bg-white dark:bg-[#1E293B] border border-slate-200 dark:border-slate-800 shadow-xs">
+              <div className="p-2.5 rounded-xl bg-white dark:bg-[#1E293B] border border-slate-200 dark:border-slate-800 shadow-xs led-card">
                 <span className="text-[10px] text-slate-400 block font-semibold">Cao / Thấp</span>
                 <span className="text-xs font-black text-slate-800 dark:text-slate-200 mt-1 block">
                   {data.highestScore} / {data.lowestScore}

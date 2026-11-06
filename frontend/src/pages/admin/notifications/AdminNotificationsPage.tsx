@@ -218,7 +218,7 @@ export const AdminNotificationsPage: React.FC = () => {
 
       {/* TAB 1: GỬI THÔNG BÁO */}
       {activeTab === 'send' && (
-        <div className="max-w-3xl bg-white dark:bg-[#151F31] rounded-3xl border border-slate-200/80 dark:border-[#2A3A50] p-6 sm:p-8 shadow-sm space-y-6">
+        <div className="max-w-3xl bg-white dark:bg-[#151F31] rounded-3xl border border-slate-200/80 dark:border-[#2A3A50] p-6 sm:p-8 shadow-sm space-y-6 led-card">
           <div>
             <h3 className="text-base font-bold text-[#142B4A] dark:text-[#E8EEF7]">
               Tạo thông báo mới

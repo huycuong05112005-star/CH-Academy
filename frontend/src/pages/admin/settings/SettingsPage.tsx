@@ -1156,7 +1156,7 @@ export const SettingsPage: React.FC = () => {
         <div className="space-y-6">
           {/* Security KPI Summary Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="p-4 rounded-2xl bg-white dark:bg-[#151F31] border border-slate-200/80 dark:border-[#2A3A50] shadow-xs">
+            <div className="p-4 rounded-2xl bg-white dark:bg-[#151F31] border border-slate-200/80 dark:border-[#2A3A50] shadow-xs led-card">
               <div className="flex items-center justify-between text-xs text-slate-500 dark:text-[#A6B4C8] mb-1">
                 <span>Tài khoản nhân sự</span>
                 <UserCheck size={16} className="text-sky-500" />
@@ -1165,7 +1165,7 @@ export const SettingsPage: React.FC = () => {
               <div className="text-[11px] text-slate-400 mt-1">Admin, Giảng viên, Giáo vụ</div>
             </div>
 
-            <div className="p-4 rounded-2xl bg-white dark:bg-[#151F31] border border-slate-200/80 dark:border-[#2A3A50] shadow-xs">
+            <div className="p-4 rounded-2xl bg-white dark:bg-[#151F31] border border-slate-200/80 dark:border-[#2A3A50] shadow-xs led-card">
               <div className="flex items-center justify-between text-xs text-slate-500 dark:text-[#A6B4C8] mb-1">
                 <span>Cần đổi mật khẩu</span>
                 <RotateCcw size={16} className="text-amber-500" />
@@ -1176,7 +1176,7 @@ export const SettingsPage: React.FC = () => {
               <div className="text-[11px] text-slate-400 mt-1">Buộc đổi trong lần đăng nhập tới</div>
             </div>
 
-            <div className="p-4 rounded-2xl bg-white dark:bg-[#151F31] border border-slate-200/80 dark:border-[#2A3A50] shadow-xs">
+            <div className="p-4 rounded-2xl bg-white dark:bg-[#151F31] border border-slate-200/80 dark:border-[#2A3A50] shadow-xs led-card">
               <div className="flex items-center justify-between text-xs text-slate-500 dark:text-[#A6B4C8] mb-1">
                 <span>Tài khoản bị khóa</span>
                 <Lock size={16} className="text-rose-500" />
@@ -1187,7 +1187,7 @@ export const SettingsPage: React.FC = () => {
               <div className="text-[11px] text-slate-400 mt-1">Bị khóa do vi phạm hoặc thủ công</div>
             </div>
 
-            <div className="p-4 rounded-2xl bg-white dark:bg-[#151F31] border border-slate-200/80 dark:border-[#2A3A50] shadow-xs">
+            <div className="p-4 rounded-2xl bg-white dark:bg-[#151F31] border border-slate-200/80 dark:border-[#2A3A50] shadow-xs led-card">
               <div className="flex items-center justify-between text-xs text-slate-500 dark:text-[#A6B4C8] mb-1">
                 <span>Sự kiện an ninh</span>
                 <Clock size={16} className="text-indigo-500" />

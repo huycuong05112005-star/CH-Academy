@@ -452,7 +452,7 @@ export const ClassListPage: React.FC = () => {
 
       {/* KPI Overview Strip */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-        <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-xs flex items-center gap-3">
+        <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-xs flex items-center gap-3 led-card">
           <div className="w-10 h-10 rounded-lg bg-blue-50 text-blue-700 flex items-center justify-center font-bold">
             <Calendar className="w-5 h-5" />
           </div>
@@ -462,7 +462,7 @@ export const ClassListPage: React.FC = () => {
           </div>
         </div>
 
-        <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-xs flex items-center gap-3">
+        <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-xs flex items-center gap-3 led-card">
           <div className="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center font-bold">
             <GraduationCap className="w-5 h-5" />
           </div>
@@ -472,7 +472,7 @@ export const ClassListPage: React.FC = () => {
           </div>
         </div>
 
-        <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-xs flex items-center gap-3">
+        <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-xs flex items-center gap-3 led-card">
           <div className="w-10 h-10 rounded-lg bg-amber-50 text-amber-700 flex items-center justify-center font-bold">
             <Clock className="w-5 h-5" />
           </div>
@@ -482,7 +482,7 @@ export const ClassListPage: React.FC = () => {
           </div>
         </div>
 
-        <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-xs flex items-center gap-3">
+        <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-xs flex items-center gap-3 led-card">
           <div className="w-10 h-10 rounded-lg bg-purple-50 text-purple-700 flex items-center justify-center font-bold">
             <Users className="w-5 h-5" />
           </div>
@@ -918,7 +918,7 @@ export const ClassListPage: React.FC = () => {
       {/* MODAL: CLASS DETAIL DRAWER */}
       {detailClass && (
         <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4 animate-fade-in">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh] led-card">
             <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between bg-slate-50">
               <div className="flex items-center gap-2.5">
                 <div className="w-9 h-9 rounded-lg bg-[#142B4A] text-white flex items-center justify-center font-bold">
@@ -1040,7 +1040,7 @@ export const ClassListPage: React.FC = () => {
       {/* MODAL: CREATE CLASS */}
       {isCreateModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh] led-card">
             <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between bg-gray-50">
               <h2 className="text-lg font-bold text-[#142B4A]">Tạo lớp học & Xếp lịch lặp lại</h2>
               <button onClick={() => setIsCreateModalOpen(false)} className="text-gray-400 hover:text-gray-600">

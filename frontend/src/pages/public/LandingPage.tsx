@@ -175,7 +175,7 @@ export const LandingPage: React.FC = () => {
           {/* Hero right 3D visual card */}
           <div className="lg:col-span-5 relative animate-slide-up stagger-2">
             <Tilt3DCard maxTilt={5} className="w-full">
-              <div className="bg-white/10 dark:bg-[#111C31]/70 backdrop-blur-xl border border-white/25 rounded-3xl p-6 sm:p-7 shadow-2xl space-y-4">
+              <div className="bg-white/10 dark:bg-[#111C31]/70 backdrop-blur-xl border border-white/25 rounded-3xl p-6 sm:p-7 shadow-2xl space-y-4 led-card">
                 {/* 3D WebGL Matrix Viewport */}
                 <div className="relative w-full h-44 rounded-2xl overflow-hidden bg-slate-950/40 border border-white/15">
                   <KnowledgeMatrix3D className="w-full h-full" />
@@ -230,7 +230,7 @@ export const LandingPage: React.FC = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <Tilt3DCard maxTilt={6}>
-              <div className="p-6 rounded-2xl border border-slate-200/80 dark:border-[#1E3152] bg-slate-50/60 dark:bg-[#152238] shadow-sm hover:shadow-md transition-all h-full">
+              <div className="p-6 rounded-2xl border border-slate-200/80 dark:border-[#1E3152] bg-slate-50/60 dark:bg-[#152238] shadow-sm hover:shadow-md transition-all h-full led-card">
                 <div className="w-12 h-12 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-[#2563EB] dark:text-[#38BDF8] flex items-center justify-center mb-4 shadow-xs">
                   <BookOpen size={24} />
                 </div>
@@ -244,7 +244,7 @@ export const LandingPage: React.FC = () => {
             </Tilt3DCard>
 
             <Tilt3DCard maxTilt={6}>
-              <div className="p-6 rounded-2xl border border-slate-200/80 dark:border-[#1E3152] bg-slate-50/60 dark:bg-[#152238] shadow-sm hover:shadow-md transition-all h-full">
+              <div className="p-6 rounded-2xl border border-slate-200/80 dark:border-[#1E3152] bg-slate-50/60 dark:bg-[#152238] shadow-sm hover:shadow-md transition-all h-full led-card">
                 <div className="w-12 h-12 rounded-xl bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 flex items-center justify-center mb-4 shadow-xs">
                   <Users size={24} />
                 </div>
@@ -258,7 +258,7 @@ export const LandingPage: React.FC = () => {
             </Tilt3DCard>
 
             <Tilt3DCard maxTilt={6}>
-              <div className="p-6 rounded-2xl border border-slate-200/80 dark:border-[#1E3152] bg-slate-50/60 dark:bg-[#152238] shadow-sm hover:shadow-md transition-all h-full">
+              <div className="p-6 rounded-2xl border border-slate-200/80 dark:border-[#1E3152] bg-slate-50/60 dark:bg-[#152238] shadow-sm hover:shadow-md transition-all h-full led-card">
                 <div className="w-12 h-12 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-4 shadow-xs">
                   <CreditCard size={24} />
                 </div>
@@ -296,7 +296,7 @@ export const LandingPage: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {featuredCourses.map((c) => (
               <Tilt3DCard key={c.id} maxTilt={5}>
-                <div className="bg-white dark:bg-[#111C31] rounded-2xl border border-slate-200/80 dark:border-[#1E3152] shadow-xs p-6 flex flex-col justify-between hover-lift transition-all h-full">
+                <div className="bg-white dark:bg-[#111C31] rounded-2xl border border-slate-200/80 dark:border-[#1E3152] shadow-xs p-6 flex flex-col justify-between hover-lift transition-all h-full led-card">
                   <div>
                     <div className="flex justify-between items-center mb-3">
                       <span className={`px-2.5 py-1 rounded-md text-xs font-bold ${
@@ -373,7 +373,7 @@ export const LandingPage: React.FC = () => {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="p-6 rounded-2xl bg-slate-50/60 dark:bg-[#152238] border border-slate-200/80 dark:border-[#1E3152] hover-lift transition-all">
+            <div className="p-6 rounded-2xl bg-slate-50/60 dark:bg-[#152238] border border-slate-200/80 dark:border-[#1E3152] hover-lift transition-all led-card">
               <div className="w-10 h-10 rounded-full bg-[#0F243E] dark:bg-[#38BDF8] text-white dark:text-[#0B1220] flex items-center justify-center font-extrabold text-sm mb-4 shadow-xs">
                 1
               </div>
@@ -383,7 +383,7 @@ export const LandingPage: React.FC = () => {
               </p>
             </div>
 
-            <div className="p-6 rounded-2xl bg-slate-50/60 dark:bg-[#152238] border border-slate-200/80 dark:border-[#1E3152] hover-lift transition-all">
+            <div className="p-6 rounded-2xl bg-slate-50/60 dark:bg-[#152238] border border-slate-200/80 dark:border-[#1E3152] hover-lift transition-all led-card">
               <div className="w-10 h-10 rounded-full bg-[#0F243E] dark:bg-[#38BDF8] text-white dark:text-[#0B1220] flex items-center justify-center font-extrabold text-sm mb-4 shadow-xs">
                 2
               </div>
@@ -393,7 +393,7 @@ export const LandingPage: React.FC = () => {
               </p>
             </div>
 
-            <div className="p-6 rounded-2xl bg-slate-50/60 dark:bg-[#152238] border border-slate-200/80 dark:border-[#1E3152] hover-lift transition-all">
+            <div className="p-6 rounded-2xl bg-slate-50/60 dark:bg-[#152238] border border-slate-200/80 dark:border-[#1E3152] hover-lift transition-all led-card">
               <div className="w-10 h-10 rounded-full bg-[#0F243E] dark:bg-[#38BDF8] text-white dark:text-[#0B1220] flex items-center justify-center font-extrabold text-sm mb-4 shadow-xs">
                 3
               </div>
@@ -403,7 +403,7 @@ export const LandingPage: React.FC = () => {
               </p>
             </div>
 
-            <div className="p-6 rounded-2xl bg-slate-50/60 dark:bg-[#152238] border border-slate-200/80 dark:border-[#1E3152] hover-lift transition-all">
+            <div className="p-6 rounded-2xl bg-slate-50/60 dark:bg-[#152238] border border-slate-200/80 dark:border-[#1E3152] hover-lift transition-all led-card">
               <div className="w-10 h-10 rounded-full bg-[#0F243E] dark:bg-[#38BDF8] text-white dark:text-[#0B1220] flex items-center justify-center font-extrabold text-sm mb-4 shadow-xs">
                 4
               </div>
@@ -418,7 +418,7 @@ export const LandingPage: React.FC = () => {
 
       {/* Consultation Form Section */}
       <section id="tu-van" className="py-16 px-4 sm:px-6 max-w-4xl mx-auto w-full box-border">
-        <div className="bg-white dark:bg-[#111C31] rounded-3xl border border-slate-200/80 dark:border-[#1E3152] shadow-xl p-6 sm:p-10 transition-colors">
+        <div className="bg-white dark:bg-[#111C31] rounded-3xl border border-slate-200/80 dark:border-[#1E3152] shadow-xl p-6 sm:p-10 transition-colors led-card">
           <div className="text-center mb-8">
             <span className="text-xs font-bold text-[#2563EB] dark:text-[#38BDF8] uppercase tracking-wider">
               Liên hệ trực tiếp
@@ -574,7 +574,7 @@ export const LandingPage: React.FC = () => {
               return (
                 <div
                   key={idx}
-                  className="border border-slate-200/80 dark:border-[#1E3152] rounded-2xl overflow-hidden bg-white dark:bg-[#111C31] shadow-2xs transition-colors"
+                  className="border border-slate-200/80 dark:border-[#1E3152] rounded-2xl overflow-hidden bg-white dark:bg-[#111C31] shadow-2xs transition-colors led-card"
                 >
                   <button
                     onClick={() => setOpenFaqIndex(isOpen ? null : idx)}

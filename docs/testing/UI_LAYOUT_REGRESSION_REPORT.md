@@ -66,3 +66,4 @@ Tất cả 12 điều kiện nghiệm thu trong yêu cầu của người dùng 
 - [x] Hiệu ứng viền LED chạy liên tục 360 độ khép kín quanh 4 cạnh, trơn tru, không nhấp nháy tại chỗ.
 - [x] Bộ lọc "Cả năm" / "Tháng này" hoạt động với dữ liệu thực từ Backend API.
 - [x] Toàn bộ hệ thống vượt qua 100% các bài kiểm thử tự động, build thành công 0 lỗi.
+

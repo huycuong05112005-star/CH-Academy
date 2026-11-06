@@ -17,7 +17,7 @@ export const HeaderSearchBar: React.FC<HeaderSearchBarProps> = ({
       <button
         type="button"
         onClick={onClick}
-        className="flex items-center gap-2.5 px-3.5 py-1.5 rounded-xl border border-slate-200/80 dark:border-[#2A3A50] [data-theme=glass]_&:border-white/15 bg-slate-50 dark:bg-[#152338] [data-theme=glass]_&:bg-white/[0.08] hover:bg-slate-100 dark:hover:bg-[#1B2F4C] [data-theme=glass]_&:hover:bg-white/[0.14] text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 [data-theme=glass]_&:text-slate-200 text-xs font-medium shadow-2xs transition group cursor-pointer"
+        className="flex items-center gap-2.5 px-3.5 py-1.5 rounded-xl border border-slate-200/80 dark:border-[#2A3A50] [data-theme=glass]_&:border-white/15 bg-slate-50 dark:bg-[#152338] [data-theme=glass]_&:bg-white/[0.08] hover:bg-slate-100 dark:hover:bg-[#1B2F4C] [data-theme=glass]_&:hover:bg-white/[0.14] text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 [data-theme=glass]_&:text-slate-200 text-xs font-medium shadow-2xs transition group cursor-pointer led-card"
         title={`Mở thanh tìm kiếm nhanh (${shortcutText})`}
       >
         <Search size={14} className="text-slate-400 group-hover:text-[#38BDF8] transition-colors shrink-0" />

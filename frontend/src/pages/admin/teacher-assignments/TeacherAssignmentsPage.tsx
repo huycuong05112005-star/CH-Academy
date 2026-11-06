@@ -351,7 +351,7 @@ export const TeacherAssignmentsPage: React.FC = () => {
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-        <div className="p-4 bg-white dark:bg-[#151F31] rounded-2xl border border-slate-200/80 dark:border-[#2A3A50] shadow-xs flex items-center gap-3">
+        <div className="p-4 bg-white dark:bg-[#151F31] rounded-2xl border border-slate-200/80 dark:border-[#2A3A50] shadow-xs flex items-center gap-3 led-card">
           <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-[#142B4A] dark:text-[#38BDF8] flex items-center justify-center font-bold">
             <Users className="w-5 h-5" />
           </div>
@@ -361,7 +361,7 @@ export const TeacherAssignmentsPage: React.FC = () => {
           </div>
         </div>
 
-        <div className="p-4 bg-white dark:bg-[#151F31] rounded-2xl border border-slate-200/80 dark:border-[#2A3A50] shadow-xs flex items-center gap-3">
+        <div className="p-4 bg-white dark:bg-[#151F31] rounded-2xl border border-slate-200/80 dark:border-[#2A3A50] shadow-xs flex items-center gap-3 led-card">
           <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold">
             <ShieldCheck className="w-5 h-5" />
           </div>
@@ -373,7 +373,7 @@ export const TeacherAssignmentsPage: React.FC = () => {
           </div>
         </div>
 
-        <div className="p-4 bg-white dark:bg-[#151F31] rounded-2xl border border-slate-200/80 dark:border-[#2A3A50] shadow-xs flex items-center gap-3">
+        <div className="p-4 bg-white dark:bg-[#151F31] rounded-2xl border border-slate-200/80 dark:border-[#2A3A50] shadow-xs flex items-center gap-3 led-card">
           <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold">
             <BookOpen className="w-5 h-5" />
           </div>
@@ -385,7 +385,7 @@ export const TeacherAssignmentsPage: React.FC = () => {
           </div>
         </div>
 
-        <div className="p-4 bg-white dark:bg-[#151F31] rounded-2xl border border-slate-200/80 dark:border-[#2A3A50] shadow-xs flex items-center gap-3">
+        <div className="p-4 bg-white dark:bg-[#151F31] rounded-2xl border border-slate-200/80 dark:border-[#2A3A50] shadow-xs flex items-center gap-3 led-card">
           <div className="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold">
             <Key className="w-5 h-5" />
           </div>

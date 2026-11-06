@@ -565,7 +565,7 @@ export const SessionQuestionExamModal: React.FC<SessionQuestionExamModalProps> =
 
   return (
     <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4 overflow-y-auto animate-fade-in">
-      <div className="bg-white dark:bg-[#0F172A] rounded-2xl shadow-2xl w-full max-w-6xl max-h-[95vh] flex flex-col border border-slate-200 dark:border-slate-800 overflow-hidden text-slate-800 dark:text-slate-100">
+      <div className="bg-white dark:bg-[#0F172A] rounded-2xl shadow-2xl w-full max-w-6xl max-h-[95vh] flex flex-col border border-slate-200 dark:border-slate-800 overflow-hidden text-slate-800 dark:text-slate-100 led-card">
         
         {/* Modal Top Header */}
         <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-[#1E293B]">

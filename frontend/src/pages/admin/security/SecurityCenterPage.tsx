@@ -185,7 +185,7 @@ export const SecurityCenterPage: React.FC = () => {
 
       {/* Top 4 KPI Security Metrics */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="p-4 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm flex items-center justify-between">
+        <div className="p-4 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm flex items-center justify-between led-card">
           <div>
             <span className="text-[11px] text-slate-400 block font-medium">Phiên hoạt động</span>
             <span className="text-xl font-black text-slate-900 dark:text-white mt-1 block">
@@ -198,7 +198,7 @@ export const SecurityCenterPage: React.FC = () => {
           </div>
         </div>
 
-        <div className="p-4 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm flex items-center justify-between">
+        <div className="p-4 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm flex items-center justify-between led-card">
           <div>
             <span className="text-[11px] text-slate-400 block font-medium">Cảnh báo chưa xử lý</span>
             <span className="text-xl font-black text-amber-500 mt-1 block">
@@ -211,7 +211,7 @@ export const SecurityCenterPage: React.FC = () => {
           </div>
         </div>
 
-        <div className="p-4 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm flex items-center justify-between">
+        <div className="p-4 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm flex items-center justify-between led-card">
           <div>
             <span className="text-[11px] text-slate-400 block font-medium">Đe dọa nghiêm trọng</span>
             <span className="text-xl font-black text-rose-500 mt-1 block">
@@ -224,7 +224,7 @@ export const SecurityCenterPage: React.FC = () => {
           </div>
         </div>
 
-        <div className="p-4 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm flex items-center justify-between">
+        <div className="p-4 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm flex items-center justify-between led-card">
           <div>
             <span className="text-[11px] text-slate-400 block font-medium">Field-Level Security</span>
             <span className="text-base font-black text-emerald-600 dark:text-emerald-400 mt-1 block">

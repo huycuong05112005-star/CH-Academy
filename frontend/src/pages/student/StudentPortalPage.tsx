@@ -657,7 +657,7 @@ export const StudentPortalPage: React.FC = () => {
                       <div
                         key={e.id}
                         onClick={() => loadClassDetails(e.classId)}
-                        className={`p-4 rounded-2xl border transition-all cursor-pointer ${
+                        className={`p-4 rounded-2xl border transition-all cursor-pointer led-card ${
                           isSelected
                             ? 'bg-blue-50/80 dark:bg-blue-950/40 border-blue-400 dark:border-blue-600 shadow-md ring-2 ring-blue-500/20'
                             : 'bg-white dark:bg-[#151F31] border-slate-200/80 dark:border-[#2A3A50] hover:border-slate-300 dark:hover:border-slate-600'
@@ -700,7 +700,7 @@ export const StudentPortalPage: React.FC = () => {
                   ) : classDetail ? (
                     <div className="space-y-4">
                       {/* Class Header Card */}
-                      <div className="p-5 rounded-2xl bg-white dark:bg-[#151F31] border border-slate-200 dark:border-[#2A3A50] shadow-xs">
+                      <div className="p-5 rounded-2xl bg-white dark:bg-[#151F31] border border-slate-200 dark:border-[#2A3A50] shadow-xs led-card">
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                           <div>
                             <div className="text-xs font-bold text-blue-600 dark:text-[#38BDF8] uppercase tracking-wider">

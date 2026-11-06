@@ -164,7 +164,7 @@ export const AuditLogsPage: React.FC = () => {
       </div>
 
       {/* Logs Table */}
-      <div className="bg-white dark:bg-[#1E293B] rounded-xl shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden">
+      <div className="bg-white dark:bg-[#1E293B] rounded-xl shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden led-card">
         <div className="overflow-x-auto rounded-xl">
           <table className="w-full text-left text-sm min-w-[880px]">
             <thead className="bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-700/60 text-slate-600 dark:text-slate-300 font-semibold text-xs uppercase tracking-wider">

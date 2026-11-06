@@ -69,7 +69,7 @@ export const ContactPage: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* Left: Contact Info */}
           <div className="lg:col-span-5 space-y-6">
-            <div className="bg-white dark:bg-[#111C31] p-6 sm:p-8 rounded-2xl border border-slate-200/80 dark:border-[#1E3152] shadow-xs space-y-6 transition-colors">
+            <div className="bg-white dark:bg-[#111C31] p-6 sm:p-8 rounded-2xl border border-slate-200/80 dark:border-[#1E3152] shadow-xs space-y-6 transition-colors led-card">
               <h2 className="text-xl font-bold text-[#0F172A] dark:text-[#F8FAFC]">
                 Thông tin Trụ sở & Kênh liên lạc
               </h2>
@@ -137,7 +137,7 @@ export const ContactPage: React.FC = () => {
               </div>
             </div>
 
-            <div className="bg-blue-50/70 dark:bg-blue-950/30 p-6 rounded-2xl border border-blue-200/80 dark:border-blue-900/50 text-[#1E40AF] dark:text-[#38BDF8]">
+            <div className="bg-blue-50/70 dark:bg-blue-950/30 p-6 rounded-2xl border border-blue-200/80 dark:border-blue-900/50 text-[#1E40AF] dark:text-[#38BDF8] led-card">
               <h3 className="text-base font-bold mb-2">Dành cho Phụ huynh & Học viên</h3>
               <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
                 Quý khách có thể đến trực tiếp văn phòng trung tâm vào các khung giờ trên để tham quan phòng học, làm bài kiểm tra xếp lớp và nhận tài liệu lộ trình đào tạo.
@@ -146,7 +146,7 @@ export const ContactPage: React.FC = () => {
           </div>
 
           {/* Right: Interactive Contact Form */}
-          <div className="lg:col-span-7 bg-white dark:bg-[#111C31] p-6 sm:p-8 rounded-2xl border border-slate-200/80 dark:border-[#1E3152] shadow-xs transition-colors">
+          <div className="lg:col-span-7 bg-white dark:bg-[#111C31] p-6 sm:p-8 rounded-2xl border border-slate-200/80 dark:border-[#1E3152] shadow-xs transition-colors led-card">
             <h2 className="text-xl font-bold text-[#0F172A] dark:text-[#F8FAFC] mb-1">
               Gửi tin nhắn hoặc Yêu cầu tư vấn
             </h2>

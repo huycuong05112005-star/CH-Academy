@@ -284,7 +284,7 @@ export const OnlineExamRoomPage: React.FC = () => {
             {/* Thẻ Điểm Số Lớn với Chiều Sâu 3D */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-8 max-w-2xl mx-auto">
               <Tilt3DCard maxTilt={5}>
-                <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#1E293B] border border-slate-100 dark:border-slate-700 h-full">
+                <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#1E293B] border border-slate-100 dark:border-slate-700 h-full led-card">
                   <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Điểm số</span>
                   <p className="text-2xl font-black text-[#142B4A] dark:text-[#38BDF8] mt-1">
                     {examResult.totalScore} / {examResult.maxScore}
@@ -293,7 +293,7 @@ export const OnlineExamRoomPage: React.FC = () => {
               </Tilt3DCard>
 
               <Tilt3DCard maxTilt={5}>
-                <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#1E293B] border border-slate-100 dark:border-slate-700 h-full">
+                <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#1E293B] border border-slate-100 dark:border-slate-700 h-full led-card">
                   <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Phần trăm</span>
                   <p className="text-2xl font-black text-slate-800 dark:text-slate-100 mt-1">
                     {examResult.percentage}%
@@ -302,7 +302,7 @@ export const OnlineExamRoomPage: React.FC = () => {
               </Tilt3DCard>
 
               <Tilt3DCard maxTilt={5}>
-                <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#1E293B] border border-slate-100 dark:border-slate-700 h-full">
+                <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#1E293B] border border-slate-100 dark:border-slate-700 h-full led-card">
                   <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Số câu đúng</span>
                   <p className="text-2xl font-black text-emerald-600 dark:text-emerald-400 mt-1">
                     {examResult.correctCount} / {examResult.answers.length}
@@ -311,7 +311,7 @@ export const OnlineExamRoomPage: React.FC = () => {
               </Tilt3DCard>
 
               <Tilt3DCard maxTilt={5}>
-                <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#1E293B] border border-slate-100 dark:border-slate-700 h-full">
+                <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#1E293B] border border-slate-100 dark:border-slate-700 h-full led-card">
                   <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Thời gian thi</span>
                   <p className="text-2xl font-black text-slate-800 dark:text-slate-100 mt-1">
                     {Math.floor(examResult.durationSeconds / 60)}p {examResult.durationSeconds % 60}s

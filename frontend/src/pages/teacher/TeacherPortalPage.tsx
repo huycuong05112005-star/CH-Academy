@@ -934,7 +934,7 @@ export const TeacherPortalPage: React.FC = () => {
               {classes.map((cls) => (
                 <div
                   key={cls.id}
-                  className="p-6 rounded-3xl bg-white dark:bg-[#151F31] border border-slate-200/80 dark:border-[#2A3A50] shadow-sm hover:shadow-md transition-all flex flex-col justify-between space-y-4"
+                  className="p-6 rounded-3xl bg-white dark:bg-[#151F31] border border-slate-200/80 dark:border-[#2A3A50] shadow-sm hover:shadow-md transition-all flex flex-col justify-between space-y-4 led-card"
                 >
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
@@ -1334,7 +1334,7 @@ export const TeacherPortalPage: React.FC = () => {
                   {selectedSession.materials.map((m) => (
                     <div
                       key={m.id}
-                      className="p-4 rounded-2xl bg-slate-50 dark:bg-[#1C293D]/50 border border-slate-200/80 dark:border-[#2A3A50] flex items-start justify-between gap-3 group"
+                      className="p-4 rounded-2xl bg-slate-50 dark:bg-[#1C293D]/50 border border-slate-200/80 dark:border-[#2A3A50] flex items-start justify-between gap-3 group led-card"
                     >
                       <div className="space-y-1.5">
                         <div className="flex items-center gap-2">
@@ -1638,7 +1638,7 @@ export const TeacherPortalPage: React.FC = () => {
                   {unmarkedSessions.map((session) => (
                     <div
                       key={session.id}
-                      className="p-4 rounded-2xl bg-amber-50/50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/60 flex items-center justify-between gap-3"
+                      className="p-4 rounded-2xl bg-amber-50/50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/60 flex items-center justify-between gap-3 led-card"
                     >
                       <div className="space-y-1">
                         <div className="text-xs font-bold text-amber-800 dark:text-amber-300 flex items-center gap-1.5">
@@ -1675,15 +1675,15 @@ export const TeacherPortalPage: React.FC = () => {
                 Tổng hợp hoạt động giảng dạy
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#1C293D]/60 border border-slate-200/80 dark:border-[#2A3A50]">
+                <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#1C293D]/60 border border-slate-200/80 dark:border-[#2A3A50] led-card">
                   <div className="text-xs text-slate-400 font-medium">Lớp đang phụ trách</div>
                   <div className="text-2xl font-black text-slate-900 dark:text-white mt-1">{classes.length}</div>
                 </div>
-                <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#1C293D]/60 border border-slate-200/80 dark:border-[#2A3A50]">
+                <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#1C293D]/60 border border-slate-200/80 dark:border-[#2A3A50] led-card">
                   <div className="text-xs text-slate-400 font-medium">Học sinh theo học</div>
                   <div className="text-2xl font-black text-slate-900 dark:text-white mt-1">{profile?.activeStudents || 0}</div>
                 </div>
-                <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#1C293D]/60 border border-slate-200/80 dark:border-[#2A3A50]">
+                <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#1C293D]/60 border border-slate-200/80 dark:border-[#2A3A50] led-card">
                   <div className="text-xs text-slate-400 font-medium">Thông báo lớp đã phát hành</div>
                   <div className="text-2xl font-black text-slate-900 dark:text-white mt-1">{sentAnnouncements.length}</div>
                 </div>

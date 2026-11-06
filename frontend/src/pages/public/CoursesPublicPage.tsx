@@ -196,7 +196,7 @@ export const CoursesPublicPage: React.FC = () => {
             {courses.map((c) => (
               <div
                 key={c.id}
-                className="hover-lift bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 p-6 flex flex-col justify-between shadow-sm hover:shadow-lg transition-all duration-200 group"
+                className="hover-lift bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 p-6 flex flex-col justify-between shadow-sm hover:shadow-lg transition-all duration-200 group led-card"
               >
                 <div>
                   <div className="flex justify-between items-center mb-3">

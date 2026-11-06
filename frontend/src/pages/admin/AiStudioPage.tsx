@@ -507,7 +507,7 @@ export const AiStudioPage: React.FC = () => {
         <div className="space-y-6 animate-in fade-in duration-200">
           {/* KPI Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm">
+            <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm led-card">
               <div className="flex items-center justify-between text-slate-500 text-xs font-bold uppercase">
                 <span>AI Agents Hoạt động</span>
                 <Bot className="w-5 h-5 text-indigo-500" />
@@ -520,7 +520,7 @@ export const AiStudioPage: React.FC = () => {
               </div>
             </div>
 
-            <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm">
+            <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm led-card">
               <div className="flex items-center justify-between text-slate-500 text-xs font-bold uppercase">
                 <span>Kho tri thức & Đoạn văn</span>
                 <Database className="w-5 h-5 text-emerald-500" />
@@ -533,7 +533,7 @@ export const AiStudioPage: React.FC = () => {
               </div>
             </div>
 
-            <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm">
+            <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm led-card">
               <div className="flex items-center justify-between text-slate-500 text-xs font-bold uppercase">
                 <span>Leads Thu thập từ AI</span>
                 <UserCheck className="w-5 h-5 text-amber-500" />
@@ -546,7 +546,7 @@ export const AiStudioPage: React.FC = () => {
               </div>
             </div>
 
-            <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm">
+            <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm led-card">
               <div className="flex items-center justify-between text-slate-500 text-xs font-bold uppercase">
                 <span>Yêu cầu Chuyển nhân viên</span>
                 <Headphones className="w-5 h-5 text-rose-500" />
@@ -568,7 +568,7 @@ export const AiStudioPage: React.FC = () => {
             </h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="p-4 rounded-2xl bg-blue-50/60 dark:bg-blue-950/30 border border-blue-200/80 dark:border-blue-900/60">
+              <div className="p-4 rounded-2xl bg-blue-50/60 dark:bg-blue-950/30 border border-blue-200/80 dark:border-blue-900/60 led-card">
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-blue-600 text-white">
                   WEBSITE CÔNG KHAI
                 </span>
@@ -581,7 +581,7 @@ export const AiStudioPage: React.FC = () => {
                 </div>
               </div>
 
-              <div className="p-4 rounded-2xl bg-emerald-50/60 dark:bg-emerald-950/30 border border-emerald-200/80 dark:border-emerald-900/60">
+              <div className="p-4 rounded-2xl bg-emerald-50/60 dark:bg-emerald-950/30 border border-emerald-200/80 dark:border-emerald-900/60 led-card">
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-600 text-white">
                   CỔNG HỌC VIÊN
                 </span>
@@ -594,7 +594,7 @@ export const AiStudioPage: React.FC = () => {
                 </div>
               </div>
 
-              <div className="p-4 rounded-2xl bg-amber-50/60 dark:bg-amber-950/30 border border-amber-200/80 dark:border-amber-900/60">
+              <div className="p-4 rounded-2xl bg-amber-50/60 dark:bg-amber-950/30 border border-amber-200/80 dark:border-amber-900/60 led-card">
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-600 text-white">
                   CỔNG GIẢNG VIÊN
                 </span>
@@ -607,7 +607,7 @@ export const AiStudioPage: React.FC = () => {
                 </div>
               </div>
 
-              <div className="p-4 rounded-2xl bg-purple-50/60 dark:bg-purple-950/30 border border-purple-200/80 dark:border-purple-900/60">
+              <div className="p-4 rounded-2xl bg-purple-50/60 dark:bg-purple-950/30 border border-purple-200/80 dark:border-purple-900/60 led-card">
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-purple-600 text-white">
                   CỔNG QUẢN TRỊ
                 </span>
@@ -657,7 +657,7 @@ export const AiStudioPage: React.FC = () => {
             {agents.map((ag) => (
               <div
                 key={ag.id}
-                className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm flex flex-col justify-between"
+                className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm flex flex-col justify-between led-card"
               >
                 <div>
                   <div className="flex items-center justify-between mb-2">
