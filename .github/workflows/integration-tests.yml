@@ -1,0 +1,76 @@
+name: Integration Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'backend/**'
+      - 'database/**'
+      - '.github/workflows/integration-tests.yml'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'backend/**'
+      - 'database/**'
+      - '.github/workflows/integration-tests.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: integration-tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  integration-test:
+    name: Database Migration, Repository & Service Integration Tests
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: ch_academy_ci_test
+          POSTGRES_USER: ci_test_user
+          POSTGRES_PASSWORD: ci_test_password_secure
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Setup JDK 21 (Temurin)
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+          cache: 'maven'
+
+      - name: Make Maven Wrapper Executable
+        run: chmod +x mvnw
+
+      - name: Run Flyway Migration & Database Integration Tests
+        run: ./mvnw test -B
+        env:
+          SPRING_PROFILES_ACTIVE: test
+          SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/ch_academy_ci_test
+          SPRING_DATASOURCE_USERNAME: ci_test_user
+          SPRING_DATASOURCE_PASSWORD: ci_test_password_secure
+          SPRING_FLYWAY_ENABLED: "true"
+          JWT_SECRET: "CiSecretForIntegrationTestingMustBeAtLeast256BitsLongForHmacSha256!"
+
+      - name: Upload Integration Test Reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: integration-test-reports
+          path: backend/target/surefire-reports/
+          retention-days: 7

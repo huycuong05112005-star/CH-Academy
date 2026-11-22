@@ -1,0 +1,67 @@
+name: Backend CI
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend-ci.yml'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend-ci.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: backend-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    name: Backend Maven Compile, Unit Tests & Packaging
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Setup JDK 21 (Eclipse Temurin)
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+          cache: 'maven'
+
+      - name: Make Maven Wrapper Executable
+        run: chmod +x mvnw
+
+      - name: Maven Clean Compile
+        run: ./mvnw clean compile -B
+
+      - name: Execute Unit, Service & Controller Tests
+        run: ./mvnw test -B
+        env:
+          SPRING_PROFILES_ACTIVE: test
+
+      - name: Package Executable JAR
+        run: ./mvnw package -DskipTests=true -B
+
+      - name: Upload Surefire Test Reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: backend-surefire-reports
+          path: backend/target/surefire-reports/
+          retention-days: 7
+
+      - name: Upload Packaged Backend JAR
+        uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: backend-jar
+          path: backend/target/*.jar
+          retention-days: 7
