@@ -175,15 +175,21 @@ public class DashboardService {
         if (normalizedPeriod.equals("MONTH")) {
             sessions = classSessionRepository.findSessionsInDateRange(null, null, scopeStartDate, scopeEndDate);
             if (sessions.isEmpty()) {
-                sessions = classSessionRepository.findSessionsInDateRange(null, null, today, today.plusDays(14));
+                sessions = classSessionRepository.findSessionsInDateRange(null, null, today, today.plusDays(30));
+            }
+            if (sessions.isEmpty()) {
+                sessions = classSessionRepository.findSessionsInDateRange(null, null, academicStartDate, academicEndDate);
             }
         } else {
             boolean isCurrentYear = selectedYear.equals(currentAcademicYear);
             if (isCurrentYear) {
-                LocalDate nextPeriod = today.plusDays(14);
+                LocalDate nextPeriod = today.plusDays(30);
                 sessions = classSessionRepository.findSessionsInDateRange(null, null, today, nextPeriod);
                 if (sessions.isEmpty()) {
-                    sessions = classSessionRepository.findSessionsInDateRange(null, null, today.minusDays(7), nextPeriod);
+                    sessions = classSessionRepository.findSessionsInDateRange(null, null, today.minusDays(30), nextPeriod);
+                }
+                if (sessions.isEmpty()) {
+                    sessions = classSessionRepository.findSessionsInDateRange(null, null, academicStartDate, academicEndDate);
                 }
             } else {
                 sessions = classSessionRepository.findSessionsInDateRange(null, null, academicStartDate, academicEndDate);
@@ -191,7 +197,7 @@ public class DashboardService {
         }
 
         List<UpcomingSessionDto> upcomingDtos = sessions.stream()
-                .limit(15)
+                .limit(30)
                 .map(this::toUpcomingSessionDto)
                 .collect(Collectors.toList());
 
