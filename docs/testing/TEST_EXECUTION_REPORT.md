@@ -3,13 +3,13 @@
 **Dự án:** CH Academy - Nền tảng Học thuật & AI Thông minh  
 **Repository:** `https://github.com/huycuong05112005-star/CH-Academy`  
 **Nhánh:** `main`  
-**Thời gian thực thi:** 22/11/2026 20:15:00 UTC+7  
+**Thời gian thực thi:** 23/11/2026 15:15:00 UTC+7  
 **Môi trường thử nghiệm:**
-- **OS:** Windows 11 Enterprise (64-bit)
+- **OS:** Windows 11 Enterprise (64-bit) & Ubuntu 24.04 LTS (GitHub Actions Runner)
 - **Node.js:** v22.12.0 | **NPM:** 10.9.0
 - **JDK:** Eclipse Temurin 21.0.6+7 (build 21.0.6)
-- **Database:** PostgreSQL 16.4 (Alpine Linux container trên Docker Desktop)
-- **Frontend Stack:** React 19, TypeScript 5.8, Vite 6.2, Tailwind CSS 4, Vitest 3.0, Playwright 1.56
+- **Database:** PostgreSQL 16.4 (Alpine Linux container trên Docker Desktop & GitHub Actions PostgreSQL Service)
+- **Frontend Stack:** React 19, TypeScript 5.8, Vite 6.2/8.3, Tailwind CSS 4, Vitest 5.0, Playwright 1.65
 - **Backend Stack:** Spring Boot 3.5.0-SNAPSHOT, Spring Security 6, JPA / Hibernate 6, Flyway 10, JUnit 5
 
 ---
@@ -150,7 +150,21 @@ Running 19 tests using 1 worker
 
 ---
 
-## 5. Kết luận & Đánh giá mức độ Sẵn sàng
+## 5. Kết quả GitHub Actions CI/CD Pipeline (Remote Repository)
+
+Tất cả 5 workflows trên GitHub Repository `huycuong05112005-star/CH-Academy` đều đã được kích hoạt thực tế và đạt trạng thái **100% SUCCESS (GREEN ✅)**:
+
+| Workflow | File cấu hình | Trạng thái | Thời gian thực thi | Nội dung xác thực |
+| :--- | :--- | :---: | :---: | :--- |
+| **End-to-End Tests (Playwright)** | `e2e-tests.yml` | **SUCCESS ✅** | 2m 4s | 19/19 kịch bản Playwright passed trên Chromium (44.1s runtime) |
+| **Frontend CI** | `frontend-ci.yml` | **SUCCESS ✅** | 44s | TypeScript check, Oxlint, 60/60 Vitest specs, Vite build |
+| **Integration Tests** | `integration-tests.yml` | **SUCCESS ✅** | 59s | Chạy PostgreSQL service sạch, apply 31 Flyway migrations, CRUD & Transactions |
+| **Backend CI** | `backend-ci.yml` | **SUCCESS ✅** | 1m 15s | Compile 303 Java classes, 45 JUnit 5 tests, đóng gói Jar file |
+| **Security & Vulnerability Scan** | `security-scan.yml` | **SUCCESS ✅** | 2m 45s | Quét rò rỉ bí mật Gitleaks + Phân tích mã CodeQL (Java & TS) |
+
+---
+
+## 6. Kết luận & Đánh giá mức độ Sẵn sàng
 
 Toàn bộ hệ thống kiểm thử tự động của dự án CH Academy đã được hoàn thành, vận hành trơn tru và đạt tiêu chuẩn chất lượng cao nhất:
 1. Mã nguồn Backend biên dịch 100% sạch lỗi, vượt qua 45/45 Unit & Service tests.

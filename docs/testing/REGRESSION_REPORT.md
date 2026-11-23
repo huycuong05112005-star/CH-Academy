@@ -2,7 +2,7 @@
 
 **Dự án:** CH Academy - Nền tảng Học thuật & AI Thông minh  
 **Phiên bản kiểm toán:** Release Candidate v1.0.0-RC  
-**Ngày thực hiện:** 22/11/2026  
+**Ngày thực hiện:** 23/11/2026  
 **Trạng thái hồi quy:** **0 HỒI QUY PHÁT HIỆN (ZERO REGRESSION)**
 
 ---
@@ -48,6 +48,14 @@ Kiểm tra toàn diện hệ thống nhằm đảm bảo các cập nhật gần
   - Token mới cấp đúng danh sách Granted Authorities (`ROLE_ADMIN`, `ROLE_TEACHER`, `ROLE_STUDENT`).
   - Giao diện chuyển hướng chính xác đến từng Portal chuyên biệt.
 - **Kết luận:** Luồng xác thực không bị ảnh hưởng, hoạt động tin cậy.
+
+### 3.3. Đồng bộ Dữ liệu Kiểm thử & Migration Flyway V31
+- **Kịch bản kiểm tra:** Áp dụng liên tục từ Flyway migration V1 đến V31 trên môi trường PostgreSQL sạch hoàn toàn.
+- **Quan sát:**
+  - `V31__Seed_Student_User_Account_And_Link_Identity.sql` khởi tạo thành công tài khoản học viên chuẩn (`thuylinh.nguyen@gmail.com`) và liên kết khóa ngoại `students.user_id`.
+  - Mật khẩu BCrypt của giáo viên (`gv.minhhanh`) và học viên được hash chuẩn, vượt qua 100% kịch bản đăng nhập E2E.
+  - Không phát sinh xung đột khóa ngoại hay trùng lặp dữ liệu với các migration trước đó.
+- **Kết luận:** Cơ chế Migration & Khởi tạo dữ liệu đạt chuẩn: **PASS**.
 
 ---
 
