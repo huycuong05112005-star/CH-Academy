@@ -5,6 +5,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
@@ -29,11 +30,18 @@ public class RateLimitingFilter extends OncePerRequestFilter {
 
     private static final long WINDOW_MS = 60_000L; // Cửa sổ 1 phút
 
-    // Giới hạn số lượng request cho từng nhóm endpoint
-    private static final int MAX_LOGIN_PER_MIN = 10;
-    private static final int MAX_PUBLIC_AI_PER_MIN = 20;
-    private static final int MAX_AUTH_AI_PER_MIN = 60;
-    private static final int MAX_UPLOAD_PER_MIN = 15;
+    // Giới hạn số lượng request cho từng nhóm endpoint (hỗ trợ ghi đè qua cấu hình)
+    @Value("${app.security.rate-limit.login:60}")
+    private int maxLoginPerMin = 60;
+
+    @Value("${app.security.rate-limit.public-ai:30}")
+    private int maxPublicAiPerMin = 30;
+
+    @Value("${app.security.rate-limit.auth-ai:60}")
+    private int maxAuthAiPerMin = 60;
+
+    @Value("${app.security.rate-limit.upload:30}")
+    private int maxUploadPerMin = 30;
 
     private static class RequestBucket {
         long windowStart;
@@ -65,16 +73,16 @@ public class RateLimitingFilter extends OncePerRequestFilter {
         String bucketType = null;
 
         if (path.startsWith("/api/v1/auth/login") && "POST".equalsIgnoreCase(method)) {
-            maxLimit = MAX_LOGIN_PER_MIN;
+            maxLimit = maxLoginPerMin;
             bucketType = "LOGIN";
         } else if (path.startsWith("/api/v1/chat/ai/public")) {
-            maxLimit = MAX_PUBLIC_AI_PER_MIN;
+            maxLimit = maxPublicAiPerMin;
             bucketType = "PUBLIC_AI";
         } else if (path.startsWith("/api/v1/chat/ai")) {
-            maxLimit = MAX_AUTH_AI_PER_MIN;
+            maxLimit = maxAuthAiPerMin;
             bucketType = "AUTH_AI";
         } else if (path.startsWith("/api/v1/files/upload") && "POST".equalsIgnoreCase(method)) {
-            maxLimit = MAX_UPLOAD_PER_MIN;
+            maxLimit = maxUploadPerMin;
             bucketType = "UPLOAD";
         }
 

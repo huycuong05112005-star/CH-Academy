@@ -49,7 +49,7 @@ test.describe('5. Security Audit Center & AI Studio Integration', () => {
   })
 
   test('5.4 Kiểm tra phân định Voice AI: Đánh dấu BLOCKED nếu thiếu API Key ngoài thực tế', async ({ page }) => {
-    const response = await page.request.get('http://localhost:8088/api/v1/chat/ai/voice/diagnostics')
+    const response = await page.request.get('http://127.0.0.1:8088/api/v1/chat/ai/voice/diagnostics')
     expect(response.status()).toBe(200)
     const json = await response.json()
 

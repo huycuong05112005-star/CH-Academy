@@ -68,18 +68,23 @@ jobs:
         run: |
           nohup java -jar backend/target/*.jar \
             --spring.profiles.active=dev \
-            --spring.datasource.url=jdbc:postgresql://localhost:5432/ch_academy_e2e \
-            --spring.datasource.username=e2e_user \
-            --spring.datasource.password=e2e_password_secure \
             --server.port=8088 > backend.log 2>&1 &
           echo "Backend process launched in background."
+        env:
+          SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/ch_academy_e2e
+          SPRING_DATASOURCE_USERNAME: e2e_user
+          SPRING_DATASOURCE_PASSWORD: e2e_password_secure
+          POSTGRES_DB: ch_academy_e2e
+          POSTGRES_USER: e2e_user
+          POSTGRES_PASSWORD: e2e_password_secure
+          JWT_SECRET: chAcademySuperSecretKeyForJwtAuthenticationInDevModeOnlyMin256BitsLong2024
 
       - name: Wait for Backend Health Check
         run: |
           echo "Awaiting backend readiness on port 8088..."
           UP=false
           for i in {1..40}; do
-            if curl -s http://localhost:8088/api/v1/health | grep -q '"status":"UP"'; then
+            if curl -s http://127.0.0.1:8088/api/v1/health | grep -q '"status":"UP"'; then
               echo "Backend is UP and healthy!"
               UP=true
               break

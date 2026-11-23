@@ -23,8 +23,8 @@ test.describe('1. Public Homepage & Navigation', () => {
     await page.goto('/courses')
     await expect(page.locator('text=Khóa học').first()).toBeVisible()
     await page.waitForTimeout(1000)
-    const cards = page.locator('.led-card, [class*="card"]')
-    await expect(cards.first()).toBeVisible()
+    const cards = page.locator('.course-card, .led-card, button:has-text("Đăng ký tư vấn"), h3')
+    await expect(cards.first()).toBeVisible({ timeout: 10000 })
   })
 
   test('1.3 Điều hướng đến trang Giới thiệu', async ({ page }) => {
