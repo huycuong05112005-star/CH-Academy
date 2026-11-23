@@ -67,7 +67,11 @@ jobs:
       - name: Start Backend in Background
         run: |
           nohup java -jar backend/target/*.jar \
-            --spring.profiles.active=dev \
+            --spring.datasource.url=jdbc:postgresql://localhost:5432/ch_academy_e2e \
+            --spring.datasource.username=e2e_user \
+            --spring.datasource.password=e2e_password_secure \
+            --jwt.secret=chAcademySuperSecretKeyForJwtAuthenticationInDevModeOnlyMin256BitsLong2024 \
+            --app.security.rate-limit.login=120 \
             --server.port=8088 > backend.log 2>&1 &
           echo "Backend process launched in background."
         env:
@@ -108,7 +112,7 @@ jobs:
       - name: Run Playwright E2E Tests
         run: |
           cd frontend
-          npm run test:e2e
+          npx playwright test --reporter=list,github,html
         env:
           CI: true
           VITE_API_BASE_URL: http://127.0.0.1:8088/api/v1
@@ -119,6 +123,8 @@ jobs:
         run: |
           echo "=== Backend logs ==="
           cat backend.log || true
+          echo "=== Test results ==="
+          cat frontend/playwright-report/test-results.json || true
 
       - name: Upload Playwright Test Report & Traces
         uses: actions/upload-artifact@v4
