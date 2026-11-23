@@ -190,21 +190,26 @@ LEFT JOIN users u ON u.username = 'gv.minhhanh'
 WHERE c.code = 'CLS-ENG-KID01' AND cs.topic LIKE 'Buổi 03%'
 LIMIT 1;
 
--- 6. Điểm danh bổ sung cho Buổi 17 (Buổi 02 Lớp 1)
+-- 6. Điểm danh bổ sung cho Buổi học của Lớp 1 (CLS-ENG-KID01)
 INSERT INTO attendance_records (session_id, student_id, status, note, recorded_by)
 SELECT 
-    17, 
+    cs.id, 
     s.id, 
     'PRESENT', 
     'Bé tham gia lớp đúng giờ, hào hứng phát biểu và thuộc bài hát rất nhanh.', 
     u.id
-FROM students s
+FROM class_sessions cs
+JOIN classes c ON c.id = cs.class_id
+CROSS JOIN students s
 LEFT JOIN users u ON u.username = 'gv.minhhanh'
-WHERE s.id IN (1, 4, 5, 6)
+WHERE c.code = 'CLS-ENG-KID01' AND s.id IN (1, 4, 5, 6)
 ON CONFLICT (session_id, student_id) DO NOTHING;
 
 -- 7. Ghi danh Học viên 3 (Lê Hoàng Long) vào Lớp 2 (CLS-ENG-PRO01) để có đầy đủ dữ liệu học
 INSERT INTO enrollments (class_id, student_id, status, enrollment_date, applied_tuition_fee, discount_amount, final_fee, notes)
-SELECT 2, 3, 'ENROLLED', CURRENT_DATE - INTERVAL '10 days', 4500000.00, 0.00, 4500000.00, 'Ghi danh khóa học Giao tiếp công sở chuyên sâu'
-WHERE NOT EXISTS (SELECT 1 FROM enrollments WHERE class_id = 2 AND student_id = 3);
+SELECT c.id, s.id, 'ENROLLED', CURRENT_DATE - INTERVAL '10 days', 4500000.00, 0.00, 4500000.00, 'Ghi danh khóa học Giao tiếp công sở chuyên sâu'
+FROM classes c
+JOIN students s ON s.id = 3
+WHERE c.code = 'CLS-ENG-PRO01'
+AND NOT EXISTS (SELECT 1 FROM enrollments WHERE class_id = c.id AND student_id = s.id);
 

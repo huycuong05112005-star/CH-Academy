@@ -39,6 +39,32 @@ CREATE TABLE IF NOT EXISTS ai_flows (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Đảm bảo các cột agent_code và graph tồn tại nếu ai_flows đã được tạo từ migration trước
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns 
+        WHERE table_name = 'ai_flows' AND column_name = 'agent_code'
+    ) THEN
+        ALTER TABLE ai_flows ADD COLUMN agent_code VARCHAR(100);
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns 
+        WHERE table_name = 'ai_flows' AND column_name = 'graph'
+    ) THEN
+        ALTER TABLE ai_flows ADD COLUMN graph JSONB DEFAULT '{"nodes":[],"edges":[]}';
+    END IF;
+
+    -- Bỏ ràng buộc NOT NULL trên cột cũ graph_json (nếu có từ V23)
+    IF EXISTS (
+        SELECT 1 FROM information_schema.columns 
+        WHERE table_name = 'ai_flows' AND column_name = 'graph_json' AND is_nullable = 'NO'
+    ) THEN
+        ALTER TABLE ai_flows ALTER COLUMN graph_json DROP NOT NULL;
+    END IF;
+END $$;
+
 CREATE INDEX IF NOT EXISTS idx_ai_flows_agent_code ON ai_flows(agent_code);
 
 -- 5. Kịch bản mẫu: Quy trình Tư vấn Tuyển sinh & Thu thập Lead tự động
