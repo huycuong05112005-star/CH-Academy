@@ -26,7 +26,7 @@ export default defineConfig({
     // Giúp tránh vấn đề CORS trong khi phát triển
     proxy: {
       '/api': {
-        target: process.env.VITE_API_BASE_URL?.replace('/api/v1', '') || 'http://localhost:8088',
+        target: process.env.VITE_API_BASE_URL?.replace('/api/v1', '') || 'http://127.0.0.1:8088',
         changeOrigin: true,
       },
     },

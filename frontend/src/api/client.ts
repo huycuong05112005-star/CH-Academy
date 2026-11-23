@@ -5,7 +5,7 @@
  * KHÔNG bao giờ hard-code URL API trực tiếp trong component.
  */
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8088/api/v1'
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8088/api/v1'
 
 const TOKEN_KEY = 'ch_academy_token'
 
