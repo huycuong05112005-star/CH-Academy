@@ -28,3 +28,9 @@ UPDATE students s
 SET user_id = u.id
 FROM users u
 WHERE s.student_code = 'HV20240002' AND u.username = 'thuylinh.nguyen@gmail.com';
+
+-- 4. Ensure verified password hash for teacher accounts (Password: Teacher@123456)
+UPDATE users 
+SET password_hash = '$2a$10$m/Y8/9AW.bxCUS.dj7gl5OuDWt3cSJqxVgQgNQF/0SVXx7y208zOi', status = 'ACTIVE'
+WHERE username IN ('gv.minhhanh', 'gv.hoangnam');
+
