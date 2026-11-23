@@ -8,6 +8,10 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null)
   const [token, setTokenState] = useState<string | null>(getAuthToken())
+  const tokenRef = React.useRef<string | null>(token)
+  useEffect(() => {
+    tokenRef.current = token
+  }, [token])
   const [isLoading, setIsLoading] = useState<boolean>(true)
 
   useEffect(() => {
@@ -61,7 +65,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (!newToken) {
           setTokenState(null)
           setUser(null)
-        } else if (newToken !== token) {
+        } else if (newToken !== tokenRef.current) {
           try {
             const res = await authApi.getMe()
             if (res.success && res.data) {

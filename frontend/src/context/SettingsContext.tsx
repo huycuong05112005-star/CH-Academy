@@ -87,8 +87,31 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   }, [applySettings])
 
   useEffect(() => {
-    refreshSettings()
-  }, [refreshSettings])
+    let isCurrent = true
+    const fetchInitialSettings = async () => {
+      try {
+        const res = await settingsApi.getPublicSettings()
+        if (isCurrent && res && res.success && res.data) {
+          const cleaned: Partial<SystemSettings> = {}
+          Object.entries(res.data).forEach(([k, v]) => {
+            if (v !== null && v !== undefined) {
+              (cleaned as Record<string, unknown>)[k] = v
+            }
+          })
+          applySettings(cleaned)
+        }
+      } catch (err: unknown) {
+        if (isCurrent) {
+          const msg = err instanceof Error ? err.message : 'Không thể tải cấu hình hệ thống'
+          setError(msg)
+        }
+      }
+    }
+    fetchInitialSettings()
+    return () => {
+      isCurrent = false
+    }
+  }, [applySettings])
 
   // Sync across tabs and internal sync events
   useEffect(() => {

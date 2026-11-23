@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react'
-import { apiClient, type ApiResponse } from '../api/client'
+import { apiClient } from '../api/client'
 
 export interface AcademicYearItem {
   id: number
@@ -91,18 +91,38 @@ export const AcademicYearProvider: React.FC<{ children: React.ReactNode }> = ({ 
     const handleSync = (e: Event) => {
       const customEvent = e as CustomEvent<{ year?: string }>
       const newYear = customEvent.detail?.year
-      if (newYear && newYear !== selectedAcademicYear) {
-        setSelectedYearState(newYear)
+      if (newYear) {
+        setSelectedYearState((prev) => (newYear !== prev ? newYear : prev))
       }
     }
 
     window.addEventListener(SYNC_EVENT, handleSync)
-    refreshYears()
+
+    let isCurrent = true
+    const initYears = async () => {
+      try {
+        const res = await apiClient.get<AcademicYearItem[]>('/academic-years')
+        if (isCurrent && res?.success && res.data && res.data.length > 0) {
+          setAcademicYears(res.data)
+          const codes = Array.from(new Set(res.data.map((y) => y.code))).sort().reverse()
+          setAvailableYears(codes)
+
+          const currentYear = res.data.find((y) => y.isCurrent)
+          if (currentYear && !localStorage.getItem(STORAGE_KEY)) {
+            setSelectedYearState(currentYear.code)
+          }
+        }
+      } catch (err) {
+        console.warn('Lỗi tải danh mục năm học từ server, dùng danh sách mặc định:', err)
+      }
+    }
+    initYears()
 
     return () => {
+      isCurrent = false
       window.removeEventListener(SYNC_EVENT, handleSync)
     }
-  }, [refreshYears])
+  }, [])
 
   return (
     <AcademicYearContext.Provider

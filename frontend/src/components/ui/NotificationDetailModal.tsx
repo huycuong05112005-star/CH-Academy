@@ -5,7 +5,6 @@ import {
   Bell,
   Clock,
   User,
-  AlertTriangle,
   CheckCircle2,
   Users,
   GraduationCap

@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react'
+import React, { useRef } from 'react'
 import { Send, Mic, MicOff, Loader2 } from 'lucide-react'
 
 interface MessageInputProps {
