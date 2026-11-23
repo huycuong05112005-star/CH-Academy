@@ -27,6 +27,7 @@ jobs:
         uses: gitleaks/gitleaks-action@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_CONFIG: .gitleaks.toml
         continue-on-error: false
 
   npm-audit-scan:
@@ -73,9 +74,10 @@ jobs:
           java-version: '21'
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
+        uses: github/codeql-action/init@v4
         with:
           languages: ${{ matrix.language }}
+          build-mode: ${{ matrix.language == 'java-kotlin' && 'manual' || 'none' }}
 
       - name: Build Java backend for CodeQL
         if: matrix.language == 'java-kotlin'
@@ -85,6 +87,6 @@ jobs:
           ./mvnw clean compile -DskipTests=true -B
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v3
+        uses: github/codeql-action/analyze@v4
         with:
           category: "/language:${{ matrix.language }}"

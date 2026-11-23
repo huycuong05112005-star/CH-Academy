@@ -1,0 +1,24 @@
+title = "CH Academy Gitleaks Security Policy"
+
+[allowlist]
+description = "Allowlist for development seed passwords, dev database config, test JWT tokens, and documentation"
+paths = [
+    '''backend/src/main/resources/db/migration/.*''',
+    '''backend/src/main/resources/application.*''',
+    '''backend/src/test/.*''',
+    '''frontend/src/test/.*''',
+    '''frontend/e2e/.*''',
+    '''docs/.*''',
+    '''start-database\.bat''',
+    '''docker-compose\.yml''',
+    '''\.env.*'''
+]
+regexes = [
+    '''chAcademySuperSecretKeyForJwtAuthenticationInDevModeOnlyMin256BitsLong2024''',
+    '''ch_academy_dev_2024''',
+    '''Admin@123456''',
+    '''Teacher@123456''',
+    '''Student@123456''',
+    '''\$2a\$10\$[A-Za-z0-9./]{53}''',
+    '''eyJhbGciOi[A-Za-z0-9_-]+'''
+]
