@@ -1,0 +1,4 @@
+# Gitleaks ignore list for historical sample credentials in documentation
+70ecee5fefb7fcc175ffbde38b4174beea6c92b8:docs/AUTHENTICATION_OAUTH_REPORT.md:generic-api-key:113
+70ecee5fefb7fcc175ffbde38b4174beea6c92b8:docs/DEPLOYMENT_CONFIGURATION.md:generic-api-key:42
+7c8146cd45d78b8d421e66f45e0ccecf0c4e0aef:docs/API.md:generic-api-key:60

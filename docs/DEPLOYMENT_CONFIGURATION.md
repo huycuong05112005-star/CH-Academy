@@ -39,7 +39,7 @@ SPRING_FLYWAY_ENABLED=true
 SPRING_FLYWAY_LOCATIONS=classpath:db/migration
 
 # Khóa bí mật JWT (Yêu cầu độ dài tối thiểu 256-bit Hex/Base64)
-JWT_SECRET=4c87b92f0e63459c87d4a23e59b20d3a7718e24fa8b301cd45ef76123490abcd
+JWT_SECRET=your-random-jwt-secret-key-min-256-bits
 JWT_EXPIRATION_HOURS=24
 
 # Cấu hình Google Cloud OAuth SSO (Dành cho Cổng Học viên)

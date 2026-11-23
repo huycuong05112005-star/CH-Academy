@@ -57,7 +57,7 @@ Tất cả các endpoint trong hệ thống đều tuân thủ cấu trúc phả
   "success": true,
   "message": "Đăng nhập thành công",
   "data": {
-    "token": "eyJhbGciOiJIUzI1NiJ9...",
+    "token": "<sample-jwt-access-token>",
     "user": {
       "id": 1,
       "username": "admin",

@@ -110,7 +110,7 @@ Response: 200 OK -> mustChangePassword: true
 
 # 3. Quản trị viên cấp mã khôi phục mật khẩu 24h
 POST http://localhost:8088/api/v1/admin/security/users/6/reset-password
-Response: 200 OK -> Token: 73655410501140b18924e8fc364b5433 (Hiệu lực: 24h)
+Response: 200 OK -> Token: <sample-reset-token-32-hex> (Hiệu lực: 24h)
 
 # 4. Giảng viên đổi mật khẩu thành công qua API
 POST http://localhost:8088/api/v1/auth/change-password
