@@ -43,7 +43,7 @@ jobs:
         run: ./mvnw clean compile -B
 
       - name: Execute Unit, Service & Controller Tests
-        run: ./mvnw test -B
+        run: ./mvnw test -Dtest="!*IntegrationTest" -B
         env:
           SPRING_PROFILES_ACTIVE: test
 

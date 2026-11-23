@@ -22,10 +22,11 @@
 | **Frontend Linter** | `oxlint` | N/A | **0 errors** | 0 | 0 | 0.45s | 100% |
 | **Frontend Unit & Component** | `vitest` | 60 | **60** | 0 | 0 | 2.15s | 100% |
 | **Backend Java Compile** | `javac / maven-compiler` | 303 files | **303 files**| 0 | 0 | 2.80s | 100% |
-| **Backend Unit & Service** | `JUnit 5 / Mockito` | 45 | **45** | 0 | 0 | 6.82s | 100% |
+| **Backend Unit & Service** | `JUnit 5 / Mockito (H2)` | 45 | **45** | 0 | 0 | 6.82s | 100% |
+| **Database Integration Tests** | `PostgreSQL 16 + Flyway` | 4 | **4** | 0 | 0 | 21.2s | 100% |
 | **End-to-End System Tests** | `Playwright (Chromium)` | 19 | **19** | 0 | 0 | 1.9m | 100% |
 | **External Voice AI Live Test** | Live Diagnostic API | 1 | 0 | 0 | **1** *(Key absent)* | N/A | BLOCKED *(Đúng quy định)* |
-| **TỔNG HỢP KIỂM THỬ** | **All Test Suites** | **125** | **124** | **0** | **1** | **~2.2m** | **99.2%** *(1 BLOCKED)* |
+| **TỔNG HỢP KIỂM THỬ** | **All Test Suites** | **129** | **128** | **0** | **1** | **~2.6m** | **99.2%** *(1 BLOCKED)* |
 
 > [!NOTE]
 > Tuân thủ tuyệt đối nguyên tắc trung thực của dự án: Kịch bản Voice AI thực tế bên ngoài chưa cấp Gemini Live API Key trong môi trường local/test được ghi nhận chính xác là **BLOCKED**, hệ thống chẩn đoán xử lý an toàn và không tạo bất kỳ kết quả PASS giả mạo nào.

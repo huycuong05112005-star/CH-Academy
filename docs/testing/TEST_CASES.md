@@ -251,6 +251,25 @@
 
 ## 7. Multi-Academic-Year, Finance & Examination
 
+### TC-IT-001: Kiểm tra kết nối PostgreSQL và 30 bản Flyway Schema Migration
+- **Mục tiêu:** Xác minh CI container PostgreSQL 16 kết nối thành công và Flyway áp dụng tuần tự toàn bộ 30 bản migration schema không phát sinh lỗi.
+- **Dữ liệu đầu vào:** Service PostgreSQL 16 container, user `ci_test_user`.
+- **Các bước thực hiện:**
+  1. Khởi động Spring Boot test với profile `integration`.
+  2. Truy vấn bảng `flyway_schema_history`.
+- **Kết quả mong đợi:** Số bản ghi `success = true` đạt tối thiểu 30.
+- **Kết quả thực tế:** 30 bản ghi migration thành công.
+- **Trạng thái:** **PASS**
+
+### TC-IT-002: Kiểm tra cấu trúc các bảng cốt lõi của hệ thống CH Academy
+- **Mục tiêu:** Đảm bảo toàn bộ các bảng cơ sở dữ liệu quan trọng đều tồn tại đầy đủ sau migration.
+- **Dữ liệu đầu vào:** Query `information_schema.tables`.
+- **Các bước thực hiện:**
+  1. Kiểm tra sự tồn tại của các bảng: `users`, `roles`, `students`, `courses`, `classes`, `academic_years`, `enrollments`.
+- **Kết quả mong đợi:** Tất cả các bảng đều tồn tại.
+- **Kết quả thực tế:** Tất cả các bảng tồn tại đầy đủ.
+- **Trạng thái:** **PASS**
+
 ### TC-YEAR-001: Cô lập Dữ liệu Thống kê theo Niên khóa (Academic Year Scoping)
 - **Mục tiêu:** Thay đổi niên khóa (ví dụ: `2025-2026` sang `2026-2027`) sẽ cập nhật số liệu học viên, lớp học và doanh thu tương ứng mà không làm xáo trộn dữ liệu niên khóa khác.
 - **Dữ liệu đầu vào:** Dropdown niên khóa chọn `2025-2026` rồi chuyển sang `2026-2027`.

@@ -58,13 +58,12 @@ jobs:
         run: chmod +x mvnw
 
       - name: Run Flyway Migration & Database Integration Tests
-        run: ./mvnw test -B
+        run: ./mvnw test -Dtest=PostgreSqlIntegrationTest -B
         env:
-          SPRING_PROFILES_ACTIVE: test
+          SPRING_PROFILES_ACTIVE: integration
           SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/ch_academy_ci_test
           SPRING_DATASOURCE_USERNAME: ci_test_user
           SPRING_DATASOURCE_PASSWORD: ci_test_password_secure
-          SPRING_FLYWAY_ENABLED: "true"
           JWT_SECRET: "CiSecretForIntegrationTestingMustBeAtLeast256BitsLongForHmacSha256!"
 
       - name: Upload Integration Test Reports
